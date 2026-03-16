@@ -682,6 +682,70 @@
       <data key="d3">1.0</data>
       <data key="d4">user_report</data>
     </node>
+    <node id="fw:stable_diffusion_cpp">
+      <data key="d0">stable-diffusion.cpp</data>
+      <data key="d1">framework</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="obs:sdcpp_build_success_gcc15">
+      <data key="d0">stable-diffusion.cpp builds successfully with GCC 15 via Nix</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">build_log</data>
+    </node>
+    <node id="env:nix_gcc15">
+      <data key="d0">Nix + GCC 15.2 Environment</data>
+      <data key="d1">environment</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">build_log</data>
+    </node>
+    <node id="compiler:gcc15.2">
+      <data key="d0">GCC 15.2</data>
+      <data key="d1">compiler</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">build_log</data>
+    </node>
+    <node id="backend:ggml_vulkan">
+      <data key="d0">ggml-vulkan compute backend</data>
+      <data key="d1">backend</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">build_log</data>
+    </node>
+    <node id="api:vulkan">
+      <data key="d0">Vulkan API</data>
+      <data key="d1">api</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">context</data>
+    </node>
+    <node id="obs:nix_vulkan_glibc_mismatch">
+      <data key="d0">Nix-built Vulkan binaries hit IncompatibleDriverError querying host radv drivers</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">experiment</data>
+    </node>
+    <node id="hyp:nixgl_is_required">
+      <data key="d0">nixGL or nix-ld is required to bridge Nix vulkan-loader and host /usr/lib/libvulkan_radeon.so</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">proposed</data>
+      <data key="d3">0.9</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="kernel:6.1">
+      <data key="d0">Linux Kernel 6.1</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="discussion:rocm_rx580_noise_issue" />
     <node id="kernel:6.8">
       <data key="d0">Linux Kernel 6.8</data>
       <data key="d1">kernel_version</data>
@@ -689,16 +753,8 @@
       <data key="d3">0.9</data>
       <data key="d4">miner</data>
     </node>
-    <node id="discussion:rocm_rx580_noise_issue" />
     <node id="kernel:6.6">
       <data key="d0">Linux Kernel 6.6</data>
-      <data key="d1">kernel_version</data>
-      <data key="d2">context</data>
-      <data key="d3">0.9</data>
-      <data key="d4">miner</data>
-    </node>
-    <node id="kernel:6.1">
-      <data key="d0">Linux Kernel 6.1</data>
       <data key="d1">kernel_version</data>
       <data key="d2">context</data>
       <data key="d3">0.9</data>
@@ -1368,6 +1424,12 @@
       <data key="d7">1.0</data>
       <data key="d8">user_report</data>
     </edge>
+    <edge source="runtime:nix" target="obs:nix_vulkan_glibc_mismatch" id="has_observation">
+      <data key="d5">has_observation</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">experiment</data>
+    </edge>
     <edge source="constraint:low_disk_space" target="branch:vulkan_comparison" id="affects">
       <data key="d5">affects</data>
       <data key="d6">known_known</data>
@@ -1386,6 +1448,54 @@
       <data key="d7">1.0</data>
       <data key="d8">user_report</data>
     </edge>
+    <edge source="fw:stable_diffusion_cpp" target="obs:sdcpp_build_success_gcc15" id="has_observation">
+      <data key="d5">has_observation</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">build_log</data>
+    </edge>
+    <edge source="fw:stable_diffusion_cpp" target="compiler:gcc15.2" id="builds_with">
+      <data key="d5">builds_with</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">build_log</data>
+    </edge>
+    <edge source="fw:stable_diffusion_cpp" target="env:nix_gcc15" id="builds_in">
+      <data key="d5">builds_in</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">build_log</data>
+    </edge>
+    <edge source="fw:stable_diffusion_cpp" target="backend:ggml_vulkan" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">build_log</data>
+    </edge>
+    <edge source="env:nix_gcc15" target="compiler:gcc15.2" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">build_log</data>
+    </edge>
+    <edge source="backend:ggml_vulkan" target="api:vulkan" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">build_log</data>
+    </edge>
+    <edge source="obs:nix_vulkan_glibc_mismatch" target="hyp:nixgl_is_required" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
     <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.8" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
@@ -1398,7 +1508,7 @@
       <data key="d7">1.0</data>
       <data key="d8">miner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.3" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>
@@ -1410,7 +1520,7 @@
       <data key="d7">1.0</data>
       <data key="d8">miner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.3" id="mentions">
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>
@@ -1423,12 +1533,6 @@
       <data key="d8">miner</data>
     </edge>
     <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.71" id="mentions">
-      <data key="d5">mentions</data>
-      <data key="d6">known_known</data>
-      <data key="d7">1.0</data>
-      <data key="d8">miner</data>
-    </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>

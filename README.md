@@ -39,6 +39,11 @@ For testers with limited disk space, we are exploring **Nix flakes** to provide 
 
 If you have Nix installed, check out the upcoming `flake.nix` in the comparison branch.
 
+> [!WARNING]
+> **NixGL / glibc Mismatch Issue:**
+> Compiling `sd.cpp` with Vulkan inside a pure `nix develop` shell on an Arch Linux host builds successfully, but executing the binary may throw `vk::createInstance: ErrorIncompatibleDriver`. This is because the Nix `vulkan-loader` fails to load the host's `/usr/lib/libvulkan_radeon.so` due to a glibc mismatch.
+> Testers using Nix on non-NixOS distributions (like Arch or Ubuntu) must use [nixGL](https://github.com/nix-community/nixGL) to bridge the host Graphics Drivers into the Nix shell, or compile it locally via their system `cmake` if not on a space-constrained machine.
+
 ## Quick start
 
 ```bash

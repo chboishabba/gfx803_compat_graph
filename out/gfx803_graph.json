@@ -773,8 +773,72 @@
       "source": "user_report"
     },
     {
-      "id": "kernel:6.8",
-      "label": "Linux Kernel 6.8",
+      "id": "fw:stable_diffusion_cpp",
+      "label": "stable-diffusion.cpp",
+      "kind": "framework",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "user_report"
+    },
+    {
+      "id": "obs:sdcpp_build_success_gcc15",
+      "label": "stable-diffusion.cpp builds successfully with GCC 15 via Nix",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "build_log"
+    },
+    {
+      "id": "env:nix_gcc15",
+      "label": "Nix + GCC 15.2 Environment",
+      "kind": "environment",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "build_log"
+    },
+    {
+      "id": "compiler:gcc15.2",
+      "label": "GCC 15.2",
+      "kind": "compiler",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "build_log"
+    },
+    {
+      "id": "backend:ggml_vulkan",
+      "label": "ggml-vulkan compute backend",
+      "kind": "backend",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "build_log"
+    },
+    {
+      "id": "api:vulkan",
+      "label": "Vulkan API",
+      "kind": "api",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "context"
+    },
+    {
+      "id": "obs:nix_vulkan_glibc_mismatch",
+      "label": "Nix-built Vulkan binaries hit IncompatibleDriverError querying host radv drivers",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "experiment"
+    },
+    {
+      "id": "hyp:nixgl_is_required",
+      "label": "nixGL or nix-ld is required to bridge Nix vulkan-loader and host /usr/lib/libvulkan_radeon.so",
+      "kind": "hypothesis",
+      "status": "proposed",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "id": "kernel:6.1",
+      "label": "Linux Kernel 6.1",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
@@ -784,16 +848,16 @@
       "id": "discussion:rocm_rx580_noise_issue"
     },
     {
-      "id": "kernel:6.6",
-      "label": "Linux Kernel 6.6",
+      "id": "kernel:6.8",
+      "label": "Linux Kernel 6.8",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
       "source": "miner"
     },
     {
-      "id": "kernel:6.1",
-      "label": "Linux Kernel 6.1",
+      "id": "kernel:6.6",
+      "label": "Linux Kernel 6.6",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
@@ -1788,6 +1852,15 @@
       "source": "user_report"
     },
     {
+      "src": "runtime:nix",
+      "dst": "obs:nix_vulkan_glibc_mismatch",
+      "key": "has_observation",
+      "relation": "has_observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "experiment"
+    },
+    {
       "src": "constraint:low_disk_space",
       "dst": "branch:vulkan_comparison",
       "key": "affects",
@@ -1815,6 +1888,78 @@
       "source": "user_report"
     },
     {
+      "src": "fw:stable_diffusion_cpp",
+      "dst": "obs:sdcpp_build_success_gcc15",
+      "key": "has_observation",
+      "relation": "has_observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "build_log"
+    },
+    {
+      "src": "fw:stable_diffusion_cpp",
+      "dst": "compiler:gcc15.2",
+      "key": "builds_with",
+      "relation": "builds_with",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "build_log"
+    },
+    {
+      "src": "fw:stable_diffusion_cpp",
+      "dst": "env:nix_gcc15",
+      "key": "builds_in",
+      "relation": "builds_in",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "build_log"
+    },
+    {
+      "src": "fw:stable_diffusion_cpp",
+      "dst": "backend:ggml_vulkan",
+      "key": "supports",
+      "relation": "supports",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "build_log"
+    },
+    {
+      "src": "env:nix_gcc15",
+      "dst": "compiler:gcc15.2",
+      "key": "uses",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "build_log"
+    },
+    {
+      "src": "backend:ggml_vulkan",
+      "dst": "api:vulkan",
+      "key": "uses",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "build_log"
+    },
+    {
+      "src": "obs:nix_vulkan_glibc_mismatch",
+      "dst": "hyp:nixgl_is_required",
+      "key": "suggests",
+      "relation": "suggests",
+      "status": "proposed",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "kernel:6.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
       "src": "discussion:rocm_rx580_noise_issue",
       "dst": "kernel:6.8",
       "key": "mentions",
@@ -1834,7 +1979,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.1",
+      "dst": "rocm:6.3",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -1852,7 +1997,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.3",
+      "dst": "rocm:6.4",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -1871,15 +2016,6 @@
     {
       "src": "discussion:rocm_rx580_noise_issue",
       "dst": "rocm:5.71",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.4",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",

@@ -1,5 +1,13 @@
 [
   {
+    "id": "api:vulkan",
+    "label": "Vulkan API",
+    "kind": "api",
+    "status": "known_known",
+    "confidence": 1.0,
+    "source": "context"
+  },
+  {
     "id": "arch:gfx803",
     "label": "gfx803",
     "kind": "architecture",
@@ -16,6 +24,14 @@
     "source": "conversation"
   },
   {
+    "id": "backend:ggml_vulkan",
+    "label": "ggml-vulkan compute backend",
+    "kind": "backend",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "build_log"
+  },
+  {
     "id": "flag:lowvram",
     "label": "--lowvram",
     "kind": "build_flag",
@@ -30,6 +46,14 @@
     "status": "known_known",
     "confidence": 0.88,
     "source": "web"
+  },
+  {
+    "id": "compiler:gcc15.2",
+    "label": "GCC 15.2",
+    "kind": "compiler",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "build_log"
   },
   {
     "id": "compiler:gcc_15",
@@ -56,6 +80,14 @@
     "source": "conversation"
   },
   {
+    "id": "env:nix_gcc15",
+    "label": "Nix + GCC 15.2 Environment",
+    "kind": "environment",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "build_log"
+  },
+  {
     "id": "fw:comfyui",
     "label": "ComfyUI",
     "kind": "framework",
@@ -70,6 +102,14 @@
     "status": "known_known",
     "confidence": 0.95,
     "source": "conversation"
+  },
+  {
+    "id": "fw:stable_diffusion_cpp",
+    "label": "stable-diffusion.cpp",
+    "kind": "framework",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "user_report"
   },
   {
     "id": "pytorch:2.6.0",
@@ -256,6 +296,14 @@
     "source": "conversation"
   },
   {
+    "id": "obs:nix_vulkan_glibc_mismatch",
+    "label": "Nix-built Vulkan binaries hit IncompatibleDriverError querying host radv drivers",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "experiment"
+  },
+  {
     "id": "obs:ollama_vram_7b",
     "label": "Ollama 7B models require 8GB VRAM",
     "kind": "observation",
@@ -294,6 +342,14 @@
     "status": "known_known",
     "confidence": 1.0,
     "source": "user_report"
+  },
+  {
+    "id": "obs:sdcpp_build_success_gcc15",
+    "label": "stable-diffusion.cpp builds successfully with GCC 15 via Nix",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "build_log"
   },
   {
     "id": "obs:tensile_assert_ai",
