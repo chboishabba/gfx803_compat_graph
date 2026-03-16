@@ -1,0 +1,241 @@
+{
+  "nodes": [
+    {
+      "node_id": "obs:basic_math_ok_noise_in_comfy",
+      "label": "Basic math (GroupNorm, SiLU, attention) works without NaN/Inf but ComfyUI still outputs noise",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1",
+      "attrs": {
+        "pytorch_tested": ["2.4", "2.10"],
+        "rocm_tested": ["5.7", "6.4"],
+        "note": "Independently confirms our probe_diffusion.py finding: individual ops pass but inference drifts"
+      }
+    },
+    {
+      "node_id": "obs:noise_same_across_pytorch_versions",
+      "label": "Noise on PyTorch 2.10/ROCm 5.7 is identical pattern to PyTorch 2.4/ROCm 6.4",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:miopen_perfdb_2_6_sit_unreproducible",
+      "label": "MIOPEN_FIND_ENFORCE=3 + DISABLE_FIND_DB=1 once gave 2.6s/it (from 4.5) but is unreproducible",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1",
+      "attrs": {
+        "speed_best": "2.6s/it",
+        "speed_normal": "4.5s/it",
+        "speed_worst": "7s/it",
+        "reproducible": false,
+        "flags": "MIOPEN_DEBUG_DISABLE_FIND_DB=1, MIOPEN_FIND_ENFORCE=3"
+      }
+    },
+    {
+      "node_id": "obs:miopen_perfdb_nondeterministic",
+      "label": "MIOpen perfdb is non-deterministic: same searches give different speeds across runs",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:comfyui_refactor_broke_old_gpus",
+      "label": "ComfyUI refactor around Wan2.1 changed default model loading and data types, may affect old archs",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "advanced_lvl_up_comment",
+      "attrs": {
+        "suspects": ["RMS_norm refactor", "default dtype changes", "model loading refactor"],
+        "worked_before": "pytorch==2.2.1"
+      }
+    },
+    {
+      "node_id": "obs:pytorch_221_worked_better",
+      "label": "ComfyUI worked much better for old GPU archs using pytorch==2.2.1",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.7,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "node_id": "obs:some_models_fine_others_not",
+      "label": "Some models (Wan Vace, Wan2.2 5B) work fine but others get non-optimal SNR after transformer passes",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.7,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "node_id": "obs:attention_benchmark_matrix",
+      "label": "Attention benchmark: pytorch(4.54s)>quad(5.23s)≥jab(5.47s)>split(5.38s) on gfx803 SDXL 1024x1024",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "attrs": {
+        "pytorch_attn": {"speed": "4.54s/it", "vram": "7.2GB", "needs_lowvram": true, "power": "high"},
+        "jab_attn": {"speed": "5.55s/it", "vram": "6.2GB", "needs_lowvram": false, "power": "lower"},
+        "split_attn": {"speed": "5.38s/it", "vram": "6.2GB"},
+        "quad_attn": {"speed": "5.36s/it", "vram": "6.2GB"},
+        "note": "JAB uses ~900MB less VRAM"
+      }
+    },
+    {
+      "node_id": "obs:no_memory_efficient_attention_compiled",
+      "label": "Warning: Torch was not compiled with memory efficient attention on gfx803 builds",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:nondeterministic_inference_confirmed",
+      "label": "CONFIRMED: Same model + same input produces different outputs across runs on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "probe_diffusion_and_community",
+      "attrs": {
+        "our_probe": "repeated_inference_drift FAIL_NONDETERMINISTIC on itir:latest",
+        "community": "tuleo1 confirms noise is inconsistent, MIOpen perfdb gives different results"
+      }
+    },
+    {
+      "node_id": "hyp:nondeterministic_kernel_selection",
+      "label": "Hypothesis: MIOpen selects different kernel implementations across runs, causing output variance",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.8,
+      "source": "analysis"
+    },
+    {
+      "node_id": "hyp:comfyui_dtype_regression",
+      "label": "Hypothesis: ComfyUI dtype/loading refactor post-Wan2.1 triggers precision issues on gfx803",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.5,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "node_id": "obs:zluda_same_speed_as_vulkan",
+      "label": "ZLUDA speed identical to Vulkan on gfx803, possible silent fallback despite HW monitoring showing CUDA",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "node_id": "obs:miopen_images_look_better_after_rebuild",
+      "label": "After MIOpen perfdb rebuild, images subjectively look better (more accurate math representation)",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.4,
+      "source": "community_tuleo1"
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:basic_math_ok_noise_in_comfy",
+      "dst": "obs:nondeterministic_inference_confirmed",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:basic_math_ok_noise_in_comfy",
+      "dst": "unk:first_bad_layer",
+      "relation": "narrows",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:noise_same_across_pytorch_versions",
+      "dst": "hyp:rocm64_noise_is_systematic",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:noise_same_across_pytorch_versions",
+      "dst": "hyp:comfyui_dtype_regression",
+      "relation": "contradicts",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:miopen_perfdb_2_6_sit_unreproducible",
+      "dst": "unk:miopen_perfdb_stability",
+      "relation": "narrows",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:miopen_perfdb_nondeterministic",
+      "dst": "hyp:nondeterministic_kernel_selection",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:miopen_perfdb_nondeterministic",
+      "dst": "unk:miopen_perfdb_stability",
+      "relation": "narrows",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:nondeterministic_inference_confirmed",
+      "dst": "hyp:nondeterministic_kernel_selection",
+      "relation": "supports",
+      "source": "probe_and_community"
+    },
+    {
+      "src": "obs:nondeterministic_inference_confirmed",
+      "dst": "unk:first_bad_layer",
+      "relation": "narrows",
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:nondeterministic_kernel_selection",
+      "dst": "unk:first_bad_layer",
+      "relation": "requires_test",
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:nondeterministic_kernel_selection",
+      "dst": "unk:miopen_perfdb_stability",
+      "relation": "requires_test",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:comfyui_refactor_broke_old_gpus",
+      "dst": "hyp:comfyui_dtype_regression",
+      "relation": "supports",
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "src": "obs:pytorch_221_worked_better",
+      "dst": "hyp:comfyui_dtype_regression",
+      "relation": "supports",
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "src": "obs:attention_benchmark_matrix",
+      "dst": "workload:diffusion",
+      "relation": "measures",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:no_memory_efficient_attention_compiled",
+      "dst": "obs:attention_benchmark_matrix",
+      "relation": "explains",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:some_models_fine_others_not",
+      "dst": "unk:precision_matrix",
+      "relation": "narrows",
+      "source": "analysis"
+    }
+  ]
+}
