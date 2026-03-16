@@ -15,11 +15,31 @@ def build_seed_graph(facts_path: str | Path = "seed_facts.json") -> nx.MultiDiGr
     data = json.loads(path.read_text())
     g = make_graph()
 
+    node_keys = {"node_id", "label", "kind", "status", "confidence", "source", "attrs"}
     for item in data["nodes"]:
-        add_node(g, NodeSpec(**item))
+        out = {}
+        if "id" in item and "node_id" not in item:
+            item["node_id"] = item["id"]
+        for k, v in item.items():
+            if k == "id": continue
+            if k in node_keys:
+                out[k] = v
+            else:
+                if "attrs" not in out: out["attrs"] = {}
+                out["attrs"][k] = v
+        add_node(g, NodeSpec(**out))
 
+    edge_keys = {"src", "dst", "relation", "status", "confidence", "source", "attrs"}
     for item in data["edges"]:
-        add_edge(g, EdgeSpec(**item))
+        out = {}
+        for k, v in item.items():
+            if k == "key": continue
+            if k in edge_keys:
+                out[k] = v
+            else:
+                if "attrs" not in out: out["attrs"] = {}
+                out["attrs"][k] = v
+        add_edge(g, EdgeSpec(**out))
 
     # Apply additional hardcoded knowledge/relations
     ingest_repo_cluster(g)
