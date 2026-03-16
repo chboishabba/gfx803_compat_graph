@@ -10,6 +10,9 @@ from graph_schema import add_node, add_edge, NodeSpec, EdgeSpec
 # Here, we will simulate the mining process or use the provided search tools 
 # if we needed live data. For now, we will implement the structure and 
 # seed it with the "mined" data from the CONTEXT.md and ROCm issue.
+import urllib.request
+import urllib.parse
+
 
 REPOS = [
     "robertrosenbusch/gfx803_rocm",
@@ -132,3 +135,54 @@ def run_miner(g: nx.MultiDiGraph):
         confidence=1.0,
         source="user_report"
     ))
+
+    # Real GitHub Mining
+    mine_github_issues(g)
+
+def mine_github_issues(g: nx.MultiDiGraph):
+    queries = [
+        "repo:pytorch/pytorch gfx803",
+        "repo:pytorch/pytorch Polaris",
+        "repo:ROCm/ROCm gfx803",
+        "repo:ROCm/ROCm Polaris"
+    ]
+    
+    for query in queries:
+        try:
+            url = f"https://api.github.com/search/issues?q={urllib.parse.quote(query)}&per_page=15"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 graph_miner'})
+            with urllib.request.urlopen(req) as res:
+                data = json.loads(res.read())
+                
+                for item in data.get('items', []):
+                    # extract repo name cleanly
+                    repo_url = item.get('repository_url', '')
+                    repo_name = "/".join(repo_url.split('/')[-2:]) if repo_url else "unknown/unknown"
+                    
+                    issue_id = f"issue:{repo_name}:{item['number']}".replace("/", ":")
+                    
+                    if issue_id not in g:
+                        add_node(g, NodeSpec(
+                            node_id=issue_id,
+                            label=f"{repo_name} #{item['number']}: {item['title']}",
+                            kind="issue",
+                            status="context",
+                            confidence=0.8,
+                            source="github_api",
+                            attrs={"url": item['html_url'], "state": item['state']}
+                        ))
+                    
+                    if "gfx803" in query or "Polaris" in query:
+                        add_edge(g, EdgeSpec(
+                            src=issue_id,
+                            dst="hw:rx580",
+                            relation="mentions",
+                            status="context",
+                            confidence=0.8,
+                            source="github_api"
+                        ))
+                        
+                    mine_local_content(g, item.get('body', '') or '', issue_id)
+        except Exception as e:
+            print(f"Error fetching {query} from GitHub API: {e}")
+

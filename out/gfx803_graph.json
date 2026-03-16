@@ -837,8 +837,8 @@
       "source": "analysis"
     },
     {
-      "id": "kernel:6.1",
-      "label": "Linux Kernel 6.1",
+      "id": "kernel:6.6",
+      "label": "Linux Kernel 6.6",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
@@ -856,9 +856,17 @@
       "source": "miner"
     },
     {
-      "id": "kernel:6.6",
-      "label": "Linux Kernel 6.6",
+      "id": "kernel:6.1",
+      "label": "Linux Kernel 6.1",
       "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "rocm:5.71",
+      "label": "ROCm 5.71",
+      "kind": "rocm_version",
       "status": "context",
       "confidence": 0.9,
       "source": "miner"
@@ -880,20 +888,540 @@
       "source": "miner"
     },
     {
-      "id": "rocm:5.71",
-      "label": "ROCm 5.71",
-      "kind": "rocm_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
       "id": "issue:rocm:4965",
       "label": "ROCm/ROCm Issue #4965: kernels > 6.13 crash driver",
       "kind": "issue",
       "status": "known_known",
       "confidence": 0.95,
       "source": "web"
+    },
+    {
+      "id": "issue:pytorch:pytorch:84044",
+      "label": "pytorch/pytorch #84044: hipErrorNoBinaryForGpu, but reversed",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/84044",
+      "state": "open"
+    },
+    {
+      "id": "rocm:5.1",
+      "label": "ROCm 5.1",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:pytorch:pytorch:63188",
+      "label": "pytorch/pytorch #63188: ROCm build documentation lacks needed dependencies",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/63188",
+      "state": "open"
+    },
+    {
+      "id": "issue:pytorch:pytorch:160230",
+      "label": "pytorch/pytorch #160230: Offer official Pytorch Vulkan backend on pytorch.org",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/160230",
+      "state": "open"
+    },
+    {
+      "id": "rocm:7.0",
+      "label": "ROCm 7.0",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:pytorch:pytorch:115869",
+      "label": "pytorch/pytorch #115869: Moving tensor to cuda freezes whole thread forever with 100% CPU usage (probably infinite loop)",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/115869",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:70036",
+      "label": "pytorch/pytorch #70036: ROCM device not found",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/70036",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:4.2",
+      "label": "ROCm 4.2",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:pytorch:pytorch:16661",
+      "label": "pytorch/pytorch #16661: ROCm 2.1: test_gamma_gpu_sample test fails",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/16661",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:2.1",
+      "label": "ROCm 2.1",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:pytorch:pytorch:113896",
+      "label": "pytorch/pytorch #113896: Segmentation fault when tensor operation on GPU on gfx803",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/113896",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:116722",
+      "label": "pytorch/pytorch #116722: Undefined reference to c10::cuda::CUDACachingAllocator::allocator",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/116722",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:54653",
+      "label": "pytorch/pytorch #54653: Pass PyTorch's architectures to the rest of ROCm",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/pull/54653",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:73177",
+      "label": "pytorch/pytorch #73177: Source build error: use of undeclared identifiers (`half2half2` and `h2div`)",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/73177",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:53738",
+      "label": "pytorch/pytorch #53738: hipErrorNoBinaryForGpu: Coudn't find binary for current devices!",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/53738",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:4.0",
+      "label": "ROCm 4.0",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:pytorch:pytorch:67576",
+      "label": "pytorch/pytorch #67576: Add support for distributed optimizer",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/pull/67576",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:49768",
+      "label": "pytorch/pytorch #49768: HIP_VERSION_PATCH is empty string in ROCm 4.0",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/49768",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:18041",
+      "label": "pytorch/pytorch #18041: Question: [rocm]: MIOpen(HIP): Warning [FindRecordUnsafe] File is unreadable: /opt/rocm/miopen/share/miopen/db/gfx803_32.cd.pdb.txt",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/18041",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:17367",
+      "label": "pytorch/pytorch #17367: [ROCm] Support all ROCm supported uarchs simultaneously: gfx803, gfx900, gfx906",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/pull/17367",
+      "state": "closed"
+    },
+    {
+      "id": "issue:pytorch:pytorch:76913",
+      "label": "pytorch/pytorch #76913: Pytorch return TCPStore( RuntimeError: Connection reset by peer) ",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/76913",
+      "state": "open"
+    },
+    {
+      "id": "issue:pytorch:pytorch:47702",
+      "label": "pytorch/pytorch #47702: GPU acceleration for Apple's M1 chip?",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/47702",
+      "state": "open"
+    },
+    {
+      "id": "issue:pytorch:pytorch:488",
+      "label": "pytorch/pytorch #488: OpenCL Support",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/pytorch/pytorch/issues/488",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:5942",
+      "label": "ROCm/ROCm #5942: [Feature]: rocminfo should give more warning info when a second incompatible GPU installed",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/5942",
+      "state": "open"
+    },
+    {
+      "id": "issue:ROCm:ROCm:5264",
+      "label": "ROCm/ROCm #5264: [Issue]: HIP error: invalid device function",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/5264",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:4121",
+      "label": "ROCm/ROCm #4121: [Documentation]: to __AMDGCN_WAVEFRONT_SIZE__ or not to __AMDGCN_WAVEFRONT_SIZE__",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/4121",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:4965",
+      "label": "ROCm/ROCm #4965: [Issue]: kernels > 6.13 crash driver due to scheduler comp_1.1.1 is not ready",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/4965",
+      "state": "closed"
+    },
+    {
+      "id": "kernel:6.16",
+      "label": "Linux Kernel 6.16",
+      "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:ROCm:ROCm:1659",
+      "label": "ROCm/ROCm #1659: RX 470,480,570,580 no longer supports OpenCL on ROCm 4.5",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/1659",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:4919",
+      "label": "ROCm/ROCm #4919: [Issue]: ROCm completely stopped working after version 6.14.0-202 on Linux.",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/4919",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:4189",
+      "label": "ROCm/ROCm #4189: [Issue]: using hipMemcpy leading to a SIGSEGV crash",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/4189",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:6.1",
+      "label": "ROCm 6.1",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:ROCm:ROCm:3692",
+      "label": "ROCm/ROCm #3692: [Issue]: rocm 6.1.3 gfx803 R9 Nano error: no matching function for call to 'hipHostAlloc'",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/3692",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:4.1",
+      "label": "ROCm 4.1",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:ROCm:ROCm:4190",
+      "label": "ROCm/ROCm #4190: [Issue]: Build instructions are wrong, don't work.",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/4190",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:3743",
+      "label": "ROCm/ROCm #3743: [Issue]:  brocken cp-command in half post-build script",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/3743",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:6.2",
+      "label": "ROCm 6.2",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:ROCm:ROCm:722",
+      "label": "ROCm/ROCm #722: PCI rejecting atomics on a Radeon RX580 supported chipset",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/722",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:3664",
+      "label": "ROCm/ROCm #3664: [Issue]: rocm-clinfo 6.2.0 segmentation fault",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/3664",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:3749",
+      "label": "ROCm/ROCm #3749: [Issue]: Trouble with pathlengths in amd-smi-lib post build while packing RPM",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/3749",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:3269",
+      "label": "ROCm/ROCm #3269: [Issue]: excessive use of chown",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/3269",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:1813",
+      "label": "ROCm/ROCm #1813: RDNA 3 support?",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/1813",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:1654",
+      "label": "ROCm/ROCm #1654: Darkable segfaults on specific images when using latest driver version (3354.7)",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/1654",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:666",
+      "label": "ROCm/ROCm #666: Would the ROCm support for windows?Or never?",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/666",
+      "state": "open"
+    },
+    {
+      "id": "issue:ROCm:ROCm:2021",
+      "label": "ROCm/ROCm #2021: pcie atomics for i7-8550U, RX550",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/2021",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:887",
+      "label": "ROCm/ROCm #887: Any update on 5700 Xt support?",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/887",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:132",
+      "label": "ROCm/ROCm #132: OpenCL \"slow\" performance on ethminer (ethereum)",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/132",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:2224",
+      "label": "ROCm/ROCm #2224: Reddit PCIe Atomic Question",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/2224",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:748",
+      "label": "ROCm/ROCm #748: \"Signal event wasn't created because limit was reached\" \u2013 One CPU Core per Card Spinning at 100%, Since ROCm 2.1",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/748",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:3062",
+      "label": "ROCm/ROCm #3062: add cu setting page",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/pull/3062",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:847",
+      "label": "ROCm/ROCm #847: Support for Polaris 12/gfx804/RX 550 missing in ROCm 2.6.22 OpenCL",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/847",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:1.8",
+      "label": "ROCm 1.8",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:ROCm:ROCm:925",
+      "label": "ROCm/ROCm #925: Supported GPU Typo RX 570 -> Rx 560",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/925",
+      "state": "closed"
+    },
+    {
+      "id": "issue:ROCm:ROCm:1006",
+      "label": "ROCm/ROCm #1006: Status of Hawaii support under ROCm 3.0?",
+      "kind": "issue",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api",
+      "url": "https://github.com/ROCm/ROCm/issues/1006",
+      "state": "closed"
+    },
+    {
+      "id": "rocm:3.0",
+      "label": "ROCm 3.0",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
     }
   ],
   "edges": [
@@ -1952,7 +2480,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.1",
+      "dst": "kernel:6.6",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -1970,7 +2498,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.6",
+      "dst": "kernel:6.1",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -1979,16 +2507,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.3",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:5.7",
+      "dst": "rocm:5.71",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -2006,6 +2525,15 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "rocm:6.3",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
       "dst": "rocm:7.2",
       "key": "mentions",
       "relation": "mentions",
@@ -2015,7 +2543,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:5.71",
+      "dst": "rocm:5.7",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -2029,6 +2557,582 @@
       "relation": "targets",
       "status": "known_known",
       "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:84044",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:84044",
+      "dst": "rocm:5.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:63188",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:160230",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:160230",
+      "dst": "rocm:7.0",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:115869",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:70036",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:70036",
+      "dst": "rocm:4.2",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:16661",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:16661",
+      "dst": "rocm:2.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:113896",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:116722",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:54653",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:73177",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:53738",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:53738",
+      "dst": "rocm:4.0",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:67576",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:49768",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:49768",
+      "dst": "rocm:4.0",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:pytorch:pytorch:18041",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:17367",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:76913",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:47702",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:pytorch:pytorch:488",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:5942",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:5942",
+      "dst": "rocm:7.2",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:5264",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4121",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4965",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4965",
+      "dst": "kernel:6.16",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4965",
+      "dst": "rocm:6.4",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4965",
+      "dst": "rocm:5.7",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:1659",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4919",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4189",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4189",
+      "dst": "rocm:6.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3692",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3692",
+      "dst": "rocm:4.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3692",
+      "dst": "rocm:6.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4190",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:4190",
+      "dst": "rocm:6.3",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3743",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3743",
+      "dst": "rocm:6.2",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:722",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3664",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3664",
+      "dst": "rocm:6.2",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3749",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3749",
+      "dst": "rocm:6.2",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3269",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3269",
+      "dst": "rocm:6.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:1813",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:1654",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:666",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:2021",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:887",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:132",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:2224",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:748",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:3062",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:847",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:847",
+      "dst": "rocm:1.8",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:ROCm:ROCm:925",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:1006",
+      "dst": "hw:rx580",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "context",
+      "confidence": 0.8,
+      "source": "github_api"
+    },
+    {
+      "src": "issue:ROCm:ROCm:1006",
+      "dst": "rocm:3.0",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
       "source": "miner"
     }
   ]
