@@ -32,6 +32,14 @@
     "source": "web"
   },
   {
+    "id": "compiler:gcc_15",
+    "label": "GCC 15.2.0",
+    "kind": "component",
+    "status": "known_known",
+    "confidence": 1.0,
+    "source": "user_report"
+  },
+  {
     "id": "discussion:lamikr261",
     "label": "lamikr/rocm_sdk_builder discussion #261",
     "kind": "discussion",
@@ -280,6 +288,14 @@
     "source": "web"
   },
   {
+    "id": "obs:sd_cpp_vulkan_builds_nix",
+    "label": "sd.cpp builds successfully with Vulkan backend using Nix (GCC 15)",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 1.0,
+    "source": "user_report"
+  },
+  {
     "id": "obs:tensile_assert_ai",
     "label": "AssertAIGreaterThanEqual in Tensile yaml can safely be removed/ignored if checking AI fails build",
     "kind": "observation",
@@ -390,6 +406,14 @@
     "status": "known_known",
     "confidence": 0.95,
     "source": "web"
+  },
+  {
+    "id": "repo:leejet_stable-diffusion.cpp",
+    "label": "leejet/stable-diffusion.cpp",
+    "kind": "repository",
+    "status": "known_known",
+    "confidence": 1.0,
+    "source": "user_report"
   },
   {
     "id": "repo:robertrosenbusch_gfx803_rocm",

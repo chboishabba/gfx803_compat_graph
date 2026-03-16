@@ -743,6 +743,30 @@
       "status": "proposed",
       "confidence": 1.0,
       "source": "analysis"
+    },
+    {
+      "node_id": "compiler:gcc_15",
+      "label": "GCC 15.2.0",
+      "kind": "component",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "repo:leejet_stable-diffusion.cpp",
+      "label": "leejet/stable-diffusion.cpp",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "obs:sd_cpp_vulkan_builds_nix",
+      "label": "sd.cpp builds successfully with Vulkan backend using Nix (GCC 15)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
     }
   ],
   "edges": [
@@ -1569,6 +1593,30 @@
       "status": "known_known",
       "confidence": 1.0,
       "source": "analysis"
+    },
+    {
+      "src": "runtime:nix",
+      "dst": "obs:sd_cpp_vulkan_builds_nix",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "src": "repo:leejet_stable-diffusion.cpp",
+      "dst": "obs:sd_cpp_vulkan_builds_nix",
+      "relation": "has_observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "src": "runtime:vulkan",
+      "dst": "obs:sd_cpp_vulkan_builds_nix",
+      "relation": "underlies",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
     }
   ]
 }

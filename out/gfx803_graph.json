@@ -749,15 +749,28 @@
       "source": "analysis"
     },
     {
-      "id": "kernel:6.1",
-      "label": "Linux Kernel 6.1",
-      "kind": "kernel_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
+      "id": "compiler:gcc_15",
+      "label": "GCC 15.2.0",
+      "kind": "component",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
     },
     {
-      "id": "discussion:rocm_rx580_noise_issue"
+      "id": "repo:leejet_stable-diffusion.cpp",
+      "label": "leejet/stable-diffusion.cpp",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "id": "obs:sd_cpp_vulkan_builds_nix",
+      "label": "sd.cpp builds successfully with Vulkan backend using Nix (GCC 15)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
     },
     {
       "id": "kernel:6.8",
@@ -768,9 +781,28 @@
       "source": "miner"
     },
     {
+      "id": "discussion:rocm_rx580_noise_issue"
+    },
+    {
       "id": "kernel:6.6",
       "label": "Linux Kernel 6.6",
       "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "kernel:6.1",
+      "label": "Linux Kernel 6.1",
+      "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "rocm:6.3",
+      "label": "ROCm 6.3",
+      "kind": "rocm_version",
       "status": "context",
       "confidence": 0.9,
       "source": "miner"
@@ -786,14 +818,6 @@
     {
       "id": "rocm:5.71",
       "label": "ROCm 5.71",
-      "kind": "rocm_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "rocm:6.3",
-      "label": "ROCm 6.3",
       "kind": "rocm_version",
       "status": "context",
       "confidence": 0.9,
@@ -1674,6 +1698,15 @@
       "source": "user_report"
     },
     {
+      "src": "runtime:vulkan",
+      "dst": "obs:sd_cpp_vulkan_builds_nix",
+      "key": "underlies",
+      "relation": "underlies",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
       "src": "obs:vulkan_functional_on_host",
       "dst": "hyp:vulkan_as_ground_truth",
       "key": "suggests",
@@ -1746,6 +1779,15 @@
       "source": "strategy"
     },
     {
+      "src": "runtime:nix",
+      "dst": "obs:sd_cpp_vulkan_builds_nix",
+      "key": "enables",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
       "src": "constraint:low_disk_space",
       "dst": "branch:vulkan_comparison",
       "key": "affects",
@@ -1764,13 +1806,13 @@
       "source": "local_ingest"
     },
     {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.1",
-      "key": "mentions",
-      "relation": "mentions",
+      "src": "repo:leejet_stable-diffusion.cpp",
+      "dst": "obs:sd_cpp_vulkan_builds_nix",
+      "key": "has_observation",
+      "relation": "has_observation",
       "status": "known_known",
       "confidence": 1.0,
-      "source": "miner"
+      "source": "user_report"
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
@@ -1792,6 +1834,15 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "kernel:6.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
       "dst": "rocm:5.7",
       "key": "mentions",
       "relation": "mentions",
@@ -1801,7 +1852,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.4",
+      "dst": "rocm:6.3",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -1828,7 +1879,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.3",
+      "dst": "rocm:6.4",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",

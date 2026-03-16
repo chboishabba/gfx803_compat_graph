@@ -661,14 +661,27 @@
       <data key="d3">1.0</data>
       <data key="d4">analysis</data>
     </node>
-    <node id="kernel:6.1">
-      <data key="d0">Linux Kernel 6.1</data>
-      <data key="d1">kernel_version</data>
-      <data key="d2">context</data>
-      <data key="d3">0.9</data>
-      <data key="d4">miner</data>
+    <node id="compiler:gcc_15">
+      <data key="d0">GCC 15.2.0</data>
+      <data key="d1">component</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
     </node>
-    <node id="discussion:rocm_rx580_noise_issue" />
+    <node id="repo:leejet_stable-diffusion.cpp">
+      <data key="d0">leejet/stable-diffusion.cpp</data>
+      <data key="d1">repository</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="obs:sd_cpp_vulkan_builds_nix">
+      <data key="d0">sd.cpp builds successfully with Vulkan backend using Nix (GCC 15)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
     <node id="kernel:6.8">
       <data key="d0">Linux Kernel 6.8</data>
       <data key="d1">kernel_version</data>
@@ -676,9 +689,24 @@
       <data key="d3">0.9</data>
       <data key="d4">miner</data>
     </node>
+    <node id="discussion:rocm_rx580_noise_issue" />
     <node id="kernel:6.6">
       <data key="d0">Linux Kernel 6.6</data>
       <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="kernel:6.1">
+      <data key="d0">Linux Kernel 6.1</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="rocm:6.3">
+      <data key="d0">ROCm 6.3</data>
+      <data key="d1">rocm_version</data>
       <data key="d2">context</data>
       <data key="d3">0.9</data>
       <data key="d4">miner</data>
@@ -692,13 +720,6 @@
     </node>
     <node id="rocm:5.71">
       <data key="d0">ROCm 5.71</data>
-      <data key="d1">rocm_version</data>
-      <data key="d2">context</data>
-      <data key="d3">0.9</data>
-      <data key="d4">miner</data>
-    </node>
-    <node id="rocm:6.3">
-      <data key="d0">ROCm 6.3</data>
       <data key="d1">rocm_version</data>
       <data key="d2">context</data>
       <data key="d3">0.9</data>
@@ -1287,6 +1308,12 @@
       <data key="d7">1.0</data>
       <data key="d8">user_report</data>
     </edge>
+    <edge source="runtime:vulkan" target="obs:sd_cpp_vulkan_builds_nix" id="underlies">
+      <data key="d5">underlies</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">user_report</data>
+    </edge>
     <edge source="obs:vulkan_functional_on_host" target="hyp:vulkan_as_ground_truth" id="suggests">
       <data key="d5">suggests</data>
       <data key="d6">hypothesis</data>
@@ -1335,6 +1362,12 @@
       <data key="d7">0.9</data>
       <data key="d8">strategy</data>
     </edge>
+    <edge source="runtime:nix" target="obs:sd_cpp_vulkan_builds_nix" id="enables">
+      <data key="d5">enables</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">user_report</data>
+    </edge>
     <edge source="constraint:low_disk_space" target="branch:vulkan_comparison" id="affects">
       <data key="d5">affects</data>
       <data key="d6">known_known</data>
@@ -1347,11 +1380,11 @@
       <data key="d7">0.9</data>
       <data key="d8">local_ingest</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
-      <data key="d5">mentions</data>
+    <edge source="repo:leejet_stable-diffusion.cpp" target="obs:sd_cpp_vulkan_builds_nix" id="has_observation">
+      <data key="d5">has_observation</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>
-      <data key="d8">miner</data>
+      <data key="d8">user_report</data>
     </edge>
     <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.8" id="mentions">
       <data key="d5">mentions</data>
@@ -1365,13 +1398,19 @@
       <data key="d7">1.0</data>
       <data key="d8">miner</data>
     </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
     <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.7" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>
       <data key="d8">miner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.3" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>
@@ -1389,7 +1428,7 @@
       <data key="d7">1.0</data>
       <data key="d8">miner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.3" id="mentions">
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
       <data key="d5">mentions</data>
       <data key="d6">known_known</data>
       <data key="d7">1.0</data>
