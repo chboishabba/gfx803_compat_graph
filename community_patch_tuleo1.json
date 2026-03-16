@@ -1,0 +1,348 @@
+{
+  "nodes": [
+    {
+      "node_id": "community:tuleo1",
+      "label": "Community tester tuleo1 (RX580, Arch Linux)",
+      "kind": "contributor",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "github_issue_advanced10"
+    },
+    {
+      "node_id": "obs:rocm64_always_noise",
+      "label": "ROCm 6.4 Docker ALWAYS produces noise on gfx803 regardless of flags or rocblas version",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:rocm57_stock_works",
+      "label": "ROCm 5.7 Docker with stock rocblas produces clean diffusion output on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:rocm57_custom_rocblas_maf",
+      "label": "Custom rocblas on ROCm 5.7 causes Memory Access Fault (MAF) on gfx803 regardless of flags",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "attrs": {
+        "error": "Memory access fault by GPU node-1 on address (nil). Reason: Page not present or supervisor privilege.",
+        "flags_tested": "--lowvram, --force-fp32, --force-fp16"
+      }
+    },
+    {
+      "node_id": "obs:tensile_type_matrix",
+      "label": "Tensile library type compatibility matrix on gfx803 Linux",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "attrs": {
+        "safe_types": "4xii8I, BB, BS, CC, DD (normal speed, but noise on 6.4)",
+        "fast_types": "HH, HS, I8I (6x speedup 1.7s/it -> 6it/s, reduced VRAM to 3GB, but noise)",
+        "neutral_types": "ZZ (no change)",
+        "crash_types": "SS (causes segfault/MAF on any .hsaco, .co, or .dat file)"
+      }
+    },
+    {
+      "node_id": "obs:tensile_SS_segfault",
+      "label": "Tensile SS-type libraries cause segfault on gfx803 Linux",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:tensile_HH_HS_I8I_speedup",
+      "label": "HH/HS/I8I Tensile types give 6x speedup but produce noise on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "attrs": { "speed_before": "1.7s/it", "speed_after": "6it/s", "vram_reduced_to": "3GB" }
+    },
+    {
+      "node_id": "obs:workgroup_mapping_A_speedup",
+      "label": "WorkGroupMappingType:A + WorkGroupMapping:0 yields ~1s/it improvement on Linux gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "community_tuleo1",
+      "attrs": { "speed_before": "7s/it", "speed_after": "6s/it", "workload": "SDXL 1024x1024" }
+    },
+    {
+      "node_id": "obs:assert_ai_removable",
+      "label": "AssertAIGreaterThanEqual in Tensile yaml can be safely commented out without affecting output",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "community_tuleo1_and_advanced"
+    },
+    {
+      "node_id": "obs:custom_rocblas_1s_speedup_on_64",
+      "label": "Custom rocblas on ROCm 6.4 gives ~1s/it speedup (6.5->5.5 SDXL) but still produces noise",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:kobold_rocm57_build_fixes",
+      "label": "KoboldCPP on ROCm 5.7 requires cudaStreamWaitEvent 3-arg fix and __hostdevice__ static fix",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "community_tuleo1",
+      "attrs": {
+        "fix1": "cudaStreamWaitEvent needs 3rd arg (0) in ggml-cuda.cu",
+        "fix2": "__hostdevice__ -> static __hostdevice__ in amd_hip_bf16.h",
+        "rocm": "5.7.0"
+      }
+    },
+    {
+      "node_id": "obs:token_processing_slow_rocm_vs_vulkan",
+      "label": "ROCm token processing 10x slower than Vulkan, GPU only draws 110W vs 170W on Vulkan",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:ui_freeze_during_rocm_processing",
+      "label": "Desktop UI freezes periodically during ROCm token processing on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.8,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:clip_text_length_affects_speed",
+      "label": "CLIP text length directly impacts it/s: 252 chars=1.5s/it, 24K chars=3.3s/it (512x512)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:iteration_speed_unstable",
+      "label": "Iteration speed is unstable: first step ~6s/it then second step instant, avg 5.35s/it SDXL",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "attrs": { "gpu_clock": "1430MHz core / 2000MHz mem", "workload": "SDXL 1024x1024 1 LoRA" }
+    },
+    {
+      "node_id": "obs:r9nano_folder_needed",
+      "label": "Including r9nano Tensile folder alongside Polaris folder may be required for full coverage",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "obs:polaris_case_sensitivity",
+      "label": "Polaris folder may need to be lowercase 'polaris' to match other Tensile convention",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.5,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "hyp:rocm64_noise_is_systematic",
+      "label": "Hypothesis: ROCm 6.4 noise on gfx803 is systematic (not fixable with flags or rocblas swap)",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.7,
+      "source": "community_tuleo1"
+    },
+    {
+      "node_id": "hyp:SS_type_asm_incompatible",
+      "label": "Hypothesis: SS-type Tensile kernels use ISA instructions incompatible with gfx803",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "analysis"
+    },
+    {
+      "node_id": "hyp:fallback_gemm_llm",
+      "label": "Hypothesis: LLM uses Cijk_Alik_Bljk_HB contraction which Tensile doesn't compile properly for gfx803",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.7,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "node_id": "rocm:5.7",
+      "label": "ROCm 5.7",
+      "kind": "rocm_version",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "rocm:6.4",
+      "relation": "observed_in",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "workload:diffusion",
+      "relation": "affects",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "unk:first_bad_layer",
+      "relation": "narrows",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_stock_works",
+      "dst": "rocm:5.7",
+      "relation": "observed_in",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_stock_works",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_stock_works",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "narrows",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_custom_rocblas_maf",
+      "dst": "rocm:5.7",
+      "relation": "observed_in",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_custom_rocblas_maf",
+      "dst": "lib:rocblas",
+      "relation": "affects",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:tensile_SS_segfault",
+      "dst": "lib:rocblas",
+      "relation": "narrows",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:tensile_SS_segfault",
+      "dst": "hyp:SS_type_asm_incompatible",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:tensile_HH_HS_I8I_speedup",
+      "dst": "unk:best_gemm_tiles",
+      "relation": "narrows",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:tensile_HH_HS_I8I_speedup",
+      "dst": "unk:precision_matrix",
+      "relation": "narrows",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:workgroup_mapping_A_speedup",
+      "dst": "unk:best_gemm_tiles",
+      "relation": "narrows",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:custom_rocblas_1s_speedup_on_64",
+      "dst": "rocm:6.4",
+      "relation": "observed_in",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:token_processing_slow_rocm_vs_vulkan",
+      "dst": "hyp:fallback_gemm_llm",
+      "relation": "supports",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:token_processing_slow_rocm_vs_vulkan",
+      "dst": "workload:llm",
+      "relation": "affects",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:ui_freeze_during_rocm_processing",
+      "dst": "driver:amdgpu_kfd",
+      "relation": "suggests",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:ui_freeze_during_rocm_processing",
+      "dst": "obs:kfd_reset_instability",
+      "relation": "correlates_with",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:clip_text_length_affects_speed",
+      "dst": "workload:diffusion",
+      "relation": "affects",
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:iteration_speed_unstable",
+      "dst": "unk:miopen_perfdb_stability",
+      "relation": "narrows",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:iteration_speed_unstable",
+      "dst": "component:perfdb",
+      "relation": "suggests",
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:rocm64_noise_is_systematic",
+      "dst": "obs:rocm64_always_noise",
+      "relation": "explains",
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:rocm64_noise_is_systematic",
+      "dst": "unk:first_bad_layer",
+      "relation": "requires_test",
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:SS_type_asm_incompatible",
+      "dst": "unk:best_gemm_tiles",
+      "relation": "requires_test",
+      "source": "analysis"
+    },
+    {
+      "src": "community:tuleo1",
+      "dst": "hw:rx580",
+      "relation": "tests_on",
+      "source": "github_issue"
+    }
+  ]
+}
