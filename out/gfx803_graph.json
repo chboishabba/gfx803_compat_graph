@@ -1408,17 +1408,29 @@
     },
     {
       "id": "fact:run:docker:itir_latest",
-      "label": "Probe Result on docker: success",
+      "label": "Probe on docker/itir:latest: success (8 tests, kernel 6.19.7-1-cachyos-bore)",
       "kind": "observation",
       "status": "known_known",
       "confidence": 1.0,
-      "source": "manual_seed",
+      "source": "verify_runner",
       "verdict": "success",
-      "env": "docker"
+      "env": "docker",
+      "kernel": "6.19.7-1-cachyos-bore",
+      "pytorch": "2.6.0+gitdae14f9",
+      "tests": {
+        "fp32_matmul": "pass",
+        "fp16_matmul": "pass",
+        "conv2d_fp32": "pass",
+        "conv2d_fp16": "pass",
+        "conv2d_determinism": "pass",
+        "unet_block_conv": "pass",
+        "groupnorm": "pass",
+        "attention_pattern": "pass"
+      }
     },
     {
-      "id": "kernel:6.8",
-      "label": "Linux Kernel 6.8",
+      "id": "kernel:6.6",
+      "label": "Linux Kernel 6.6",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
@@ -1436,8 +1448,8 @@
       "source": "miner"
     },
     {
-      "id": "kernel:6.6",
-      "label": "Linux Kernel 6.6",
+      "id": "kernel:6.8",
+      "label": "Linux Kernel 6.8",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
@@ -3128,7 +3140,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.8",
+      "dst": "kernel:6.6",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -3146,7 +3158,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.6",
+      "dst": "kernel:6.8",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -3164,7 +3176,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.3",
+      "dst": "rocm:5.7",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -3182,7 +3194,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:5.7",
+      "dst": "rocm:5.71",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -3191,7 +3203,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:5.71",
+      "dst": "rocm:6.3",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",

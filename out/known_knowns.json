@@ -225,13 +225,25 @@
   },
   {
     "id": "fact:run:docker:itir_latest",
-    "label": "Probe Result on docker: success",
+    "label": "Probe on docker/itir:latest: success (8 tests, kernel 6.19.7-1-cachyos-bore)",
     "kind": "observation",
     "status": "known_known",
     "confidence": 1.0,
-    "source": "manual_seed",
+    "source": "verify_runner",
     "verdict": "success",
-    "env": "docker"
+    "env": "docker",
+    "kernel": "6.19.7-1-cachyos-bore",
+    "pytorch": "2.6.0+gitdae14f9",
+    "tests": {
+      "fp32_matmul": "pass",
+      "fp16_matmul": "pass",
+      "conv2d_fp32": "pass",
+      "conv2d_fp16": "pass",
+      "conv2d_determinism": "pass",
+      "unet_block_conv": "pass",
+      "groupnorm": "pass",
+      "attention_pattern": "pass"
+    }
   },
   {
     "id": "fact:run:nix:.._rr_gfx803_rocm",

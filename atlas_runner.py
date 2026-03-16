@@ -311,34 +311,70 @@ def main():
                 print(f"{RED}STDERR output:{RESET}")
                 print(result.stderr)
             
-            # Simple Graph Patch auto-generation based on output!
+            # Parse structured output from the extended probe
             patch = {"nodes": [], "edges": []}
+            out_lines = result.stdout.strip().splitlines()
             out_lower = result.stdout.lower()
             
+            # Parse individual test results
+            test_results = {}
+            for line in out_lines:
+                if line.startswith("TEST:"):
+                    parts = line.split(":", 3)  # TEST:name:STATUS  detail
+                    if len(parts) >= 3:
+                        tname = parts[1]
+                        tstatus = parts[2].split()[0].lower()
+                        test_results[tname] = tstatus
+            
+            # Parse overall status
             status = "unknown"
             if "nan_inf_noise_detected" in out_lower:
                 status = "failed_noise"
             elif "success_basic_compat" in out_lower:
                 status = "success"
+            elif "partial_pass" in out_lower:
+                status = "partial"
             elif "segfault" in out_lower or result.returncode == 139:
                 status = "failed_segfault"
             elif "no_torch" in out_lower:
                 status = "missing_pytorch"
             elif "no_cuda_available" in out_lower:
                 status = "missing_cuda_backend"
+            
+            # Parse PROBE_JSON for metadata
+            probe_meta = {}
+            for line in out_lines:
+                if line.startswith("PROBE_JSON:"):
+                    try:
+                        probe_meta = json.loads(line[len("PROBE_JSON:"):])
+                    except Exception:
+                        pass
                 
             print(f"\n{BOLD}=> Verdict: {status.upper()}{RESET}")
+            if test_results:
+                for tname, tstatus in test_results.items():
+                    icon = f"{GREEN}✓{RESET}" if tstatus == "pass" else f"{RED}✗{RESET}"
+                    print(f"   {icon} {tname}: {tstatus}")
             
-            # Append this result dynamically to the graph (example of loop closing)
+            # Build graph patch — one node per run, edges to individual test observations
             target = env_path if env_path else "local_system"
+            kernel = probe_meta.get("kernel", platform.release())
             node_id = f"fact:run:{env}:{target.replace('/', '_').replace(':', '_')}"
             
             patch["nodes"].append({
                 "node_id": node_id,
-                "label": f"Probe Result on {env}: {status}",
+                "label": f"Probe on {env}/{target}: {status} ({len(test_results)} tests, kernel {kernel})",
                 "kind": "observation",
                 "status": "known_known",
-                "attrs": {"verdict": status, "env": env}
+                "confidence": 1.0,
+                "source": "verify_runner",
+                "attrs": {
+                    "verdict": status,
+                    "env": env,
+                    "kernel": kernel,
+                    "pytorch": probe_meta.get("pytorch", "unknown"),
+                    "tests": test_results,
+                }
             })
             patch["edges"].append({
                 "src": node_id,
@@ -346,6 +382,32 @@ def main():
                 "relation": "observed_on",
                 "source": "verify_runner"
             })
+            
+            # Create per-test nodes for failures so they link into the frontier
+            for tname, tstatus in test_results.items():
+                if tstatus != "pass":
+                    fail_id = f"obs:probe_fail:{tname}:{env}"
+                    patch["nodes"].append({
+                        "node_id": fail_id,
+                        "label": f"{tname} {tstatus} on {env}/{target}",
+                        "kind": "observation",
+                        "status": "known_known",
+                        "source": "verify_runner",
+                    })
+                    patch["edges"].append({
+                        "src": fail_id,
+                        "dst": node_id,
+                        "relation": "part_of",
+                        "source": "verify_runner"
+                    })
+                    # Link conv failures to the first_bad_layer unknown
+                    if "conv" in tname:
+                        patch["edges"].append({
+                            "src": fail_id,
+                            "dst": "unk:first_bad_layer",
+                            "relation": "narrows",
+                            "source": "verify_runner"
+                        })
             
             patch_file = f"probe_patch_{env}.json"
             Path(patch_file).write_text(json.dumps(patch, indent=2))
