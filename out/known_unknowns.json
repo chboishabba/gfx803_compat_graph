@@ -1,0 +1,42 @@
+[
+  {
+    "id": "unk:best_gemm_tiles",
+    "label": "Best raw HIP GEMM tile families for gfx803",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
+  },
+  {
+    "id": "unk:first_bad_layer",
+    "label": "First corrupted tensor/layer in diffusion path",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
+  },
+  {
+    "id": "unk:kernel_boundary_exact",
+    "label": "Exact stable/unstable Linux kernel boundary",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
+  },
+  {
+    "id": "unk:miopen_perfdb_stability",
+    "label": "Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
+  },
+  {
+    "id": "unk:precision_matrix",
+    "label": "Safe precision matrix by workload (fp32 / fp16 / mixed)",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
+  }
+]

@@ -1,7 +1,11 @@
 {
+  "graph": {
+    "name": "gfx803_compatibility_graph",
+    "version": "0.1.0"
+  },
   "nodes": [
     {
-      "node_id": "hw:rx580",
+      "id": "hw:rx580",
       "label": "AMD Radeon RX 580",
       "kind": "hardware",
       "status": "known_known",
@@ -9,7 +13,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "arch:gfx803",
+      "id": "arch:gfx803",
       "label": "gfx803",
       "kind": "architecture",
       "status": "known_known",
@@ -17,7 +21,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "arch:polaris",
+      "id": "arch:polaris",
       "label": "Polaris",
       "kind": "architecture",
       "status": "known_known",
@@ -25,7 +29,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "driver:amdgpu_kfd",
+      "id": "driver:amdgpu_kfd",
       "label": "amdgpu + amdkfd",
       "kind": "driver",
       "status": "known_known",
@@ -33,7 +37,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "runtime:hip",
+      "id": "runtime:hip",
       "label": "HIP runtime",
       "kind": "runtime",
       "status": "known_known",
@@ -41,7 +45,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "lib:rocblas",
+      "id": "lib:rocblas",
       "label": "rocBLAS",
       "kind": "library",
       "status": "known_known",
@@ -49,7 +53,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "lib:miopen",
+      "id": "lib:miopen",
       "label": "MIOpen",
       "kind": "library",
       "status": "known_known",
@@ -57,7 +61,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "fw:pytorch",
+      "id": "fw:pytorch",
       "label": "PyTorch",
       "kind": "framework",
       "status": "known_known",
@@ -65,7 +69,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "fw:comfyui",
+      "id": "fw:comfyui",
       "label": "ComfyUI",
       "kind": "framework",
       "status": "known_known",
@@ -73,7 +77,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "workload:diffusion",
+      "id": "workload:diffusion",
       "label": "Diffusion / image generation",
       "kind": "workload",
       "status": "known_known",
@@ -81,7 +85,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "workload:llm",
+      "id": "workload:llm",
       "label": "LLM inference / token generation",
       "kind": "workload",
       "status": "known_known",
@@ -89,7 +93,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "workload:whisper",
+      "id": "workload:whisper",
       "label": "Whisper / ASR",
       "kind": "workload",
       "status": "known_known",
@@ -97,7 +101,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:whisper_works",
+      "id": "obs:whisper_works",
       "label": "Whisper works on at least some ROCm 6.4 paths",
       "kind": "observation",
       "status": "known_known",
@@ -105,7 +109,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:hip_math_ok",
+      "id": "obs:hip_math_ok",
       "label": "General HIP / PyTorch math appears broadly functional",
       "kind": "observation",
       "status": "known_known",
@@ -113,7 +117,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:diffusion_noise",
+      "id": "obs:diffusion_noise",
       "label": "Diffusion outputs can become noise",
       "kind": "observation",
       "status": "known_known",
@@ -121,7 +125,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:llm_slow_tokens",
+      "id": "obs:llm_slow_tokens",
       "label": "LLM token processing can be very slow",
       "kind": "observation",
       "status": "known_known",
@@ -129,7 +133,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:cfg1_speedup",
+      "id": "obs:cfg1_speedup",
       "label": "CFG=1.0 materially improves diffusion throughput in at least one report",
       "kind": "observation",
       "status": "known_known",
@@ -137,7 +141,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:vulkan_competitive",
+      "id": "obs:vulkan_competitive",
       "label": "Vulkan can match or beat ROCm in some tested cases",
       "kind": "observation",
       "status": "known_known",
@@ -145,7 +149,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:containers_share_host_kernel",
+      "id": "obs:containers_share_host_kernel",
       "label": "ROCm containers share the host kernel/driver",
       "kind": "observation",
       "status": "known_known",
@@ -153,7 +157,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:kfd_reset_instability",
+      "id": "obs:kfd_reset_instability",
       "label": "KFD reset / doorbell instability has affected Polaris under compute load",
       "kind": "observation",
       "status": "known_known",
@@ -161,7 +165,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "hyp:miopen_conv_root_cause",
+      "id": "hyp:miopen_conv_root_cause",
       "label": "MIOpen convolution/kernel selection is primary suspect for diffusion noise",
       "kind": "hypothesis",
       "status": "hypothesis",
@@ -169,7 +173,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "hyp:fallback_gemm_llm",
+      "id": "hyp:fallback_gemm_llm",
       "label": "LLM slowness is likely fallback GEMM / poor occupancy / launch geometry",
       "kind": "hypothesis",
       "status": "hypothesis",
@@ -177,7 +181,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "hyp:kernel_version_boundary",
+      "id": "hyp:kernel_version_boundary",
       "label": "There is a kernel-version compatibility boundary for KFD stability",
       "kind": "hypothesis",
       "status": "hypothesis",
@@ -185,7 +189,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "unk:first_bad_layer",
+      "id": "unk:first_bad_layer",
       "label": "First corrupted tensor/layer in diffusion path",
       "kind": "unknown",
       "status": "known_unknown",
@@ -193,7 +197,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "unk:precision_matrix",
+      "id": "unk:precision_matrix",
       "label": "Safe precision matrix by workload (fp32 / fp16 / mixed)",
       "kind": "unknown",
       "status": "known_unknown",
@@ -201,7 +205,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "unk:kernel_boundary_exact",
+      "id": "unk:kernel_boundary_exact",
       "label": "Exact stable/unstable Linux kernel boundary",
       "kind": "unknown",
       "status": "known_unknown",
@@ -209,7 +213,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "unk:best_gemm_tiles",
+      "id": "unk:best_gemm_tiles",
       "label": "Best raw HIP GEMM tile families for gfx803",
       "kind": "unknown",
       "status": "known_unknown",
@@ -217,7 +221,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "unk:miopen_perfdb_stability",
+      "id": "unk:miopen_perfdb_stability",
       "label": "Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings",
       "kind": "unknown",
       "status": "known_unknown",
@@ -225,7 +229,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "exp:hip_probe_suite",
+      "id": "exp:hip_probe_suite",
       "label": "Minimal HIP probe suite",
       "kind": "experiment",
       "status": "proposed",
@@ -233,7 +237,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "exp:canonical_protocol",
+      "id": "exp:canonical_protocol",
       "label": "Canonical 12-test experiment protocol",
       "kind": "experiment",
       "status": "proposed",
@@ -241,7 +245,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "metric:correctness",
+      "id": "metric:correctness",
       "label": "Correctness / numerical agreement",
       "kind": "metric",
       "status": "context",
@@ -249,7 +253,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "metric:throughput",
+      "id": "metric:throughput",
       "label": "Throughput",
       "kind": "metric",
       "status": "context",
@@ -257,7 +261,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "metric:power",
+      "id": "metric:power",
       "label": "Power draw",
       "kind": "metric",
       "status": "context",
@@ -265,7 +269,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "metric:nan_inf",
+      "id": "metric:nan_inf",
       "label": "NaN / Inf incidence",
       "kind": "metric",
       "status": "context",
@@ -273,7 +277,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:lds",
+      "id": "component:lds",
       "label": "LDS / shared memory behavior",
       "kind": "component",
       "status": "context",
@@ -281,7 +285,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:wavefront_sched",
+      "id": "component:wavefront_sched",
       "label": "Wavefront scheduling / occupancy",
       "kind": "component",
       "status": "context",
@@ -289,7 +293,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:gemm_tiles",
+      "id": "component:gemm_tiles",
       "label": "GEMM tile geometry",
       "kind": "component",
       "status": "context",
@@ -297,7 +301,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:conv_path",
+      "id": "component:conv_path",
       "label": "Convolution path",
       "kind": "component",
       "status": "context",
@@ -305,7 +309,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:attention_path",
+      "id": "component:attention_path",
       "label": "Attention path",
       "kind": "component",
       "status": "context",
@@ -313,7 +317,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:vae_path",
+      "id": "component:vae_path",
       "label": "VAE decode path",
       "kind": "component",
       "status": "context",
@@ -321,7 +325,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:host_kernel",
+      "id": "component:host_kernel",
       "label": "Host Linux kernel",
       "kind": "component",
       "status": "context",
@@ -329,7 +333,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "component:perfdb",
+      "id": "component:perfdb",
       "label": "MIOpen performance DB / search",
       "kind": "component",
       "status": "context",
@@ -337,7 +341,7 @@
       "source": "analysis"
     },
     {
-      "node_id": "obs:workgroup_mapping_a",
+      "id": "obs:workgroup_mapping_a",
       "label": "WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux",
       "kind": "observation",
       "status": "known_known",
@@ -345,7 +349,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:miopen_find_enforce",
+      "id": "obs:miopen_find_enforce",
       "label": "MIOPEN_FIND_ENFORCE=3 and MIOPEN_DEBUG_DISABLE_FIND_DB=1 initially lowered diffusion config to 2.5s/it but was unstable later",
       "kind": "observation",
       "status": "known_known",
@@ -353,7 +357,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:tensile_assert_ai",
+      "id": "obs:tensile_assert_ai",
       "label": "AssertAIGreaterThanEqual in Tensile yaml can safely be removed/ignored if checking AI fails build",
       "kind": "observation",
       "status": "known_known",
@@ -361,7 +365,7 @@
       "source": "conversation"
     },
     {
-      "node_id": "obs:fp8_text_enc_vram",
+      "id": "obs:fp8_text_enc_vram",
       "label": "--fp8_e5m2-text-enc reduces ComfyUI VRAM usage on rx580, bypassing --lowvram need",
       "kind": "observation",
       "status": "known_known",
@@ -373,15 +377,8 @@
     {
       "src": "hw:rx580",
       "dst": "arch:gfx803",
+      "key": "has_architecture",
       "relation": "has_architecture",
-      "status": "known_known",
-      "confidence": 0.99,
-      "source": "conversation"
-    },
-    {
-      "src": "arch:gfx803",
-      "dst": "arch:polaris",
-      "relation": "belongs_to_family",
       "status": "known_known",
       "confidence": 0.99,
       "source": "conversation"
@@ -389,14 +386,25 @@
     {
       "src": "hw:rx580",
       "dst": "driver:amdgpu_kfd",
+      "key": "uses",
       "relation": "uses",
       "status": "known_known",
       "confidence": 0.9,
       "source": "conversation"
     },
     {
+      "src": "arch:gfx803",
+      "dst": "arch:polaris",
+      "key": "belongs_to_family",
+      "relation": "belongs_to_family",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "conversation"
+    },
+    {
       "src": "driver:amdgpu_kfd",
       "dst": "runtime:hip",
+      "key": "supports",
       "relation": "supports",
       "status": "known_known",
       "confidence": 0.88,
@@ -405,6 +413,7 @@
     {
       "src": "runtime:hip",
       "dst": "lib:rocblas",
+      "key": "underpins",
       "relation": "underpins",
       "status": "context",
       "confidence": 1.0,
@@ -413,6 +422,7 @@
     {
       "src": "runtime:hip",
       "dst": "lib:miopen",
+      "key": "underpins",
       "relation": "underpins",
       "status": "context",
       "confidence": 1.0,
@@ -421,6 +431,25 @@
     {
       "src": "lib:rocblas",
       "dst": "fw:pytorch",
+      "key": "used_by",
+      "relation": "used_by",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "lib:rocblas",
+      "dst": "component:gemm_tiles",
+      "key": "controls",
+      "relation": "controls",
+      "status": "context",
+      "confidence": 0.92,
+      "source": "analysis"
+    },
+    {
+      "src": "lib:miopen",
+      "dst": "fw:pytorch",
+      "key": "used_by",
       "relation": "used_by",
       "status": "context",
       "confidence": 0.9,
@@ -428,39 +457,26 @@
     },
     {
       "src": "lib:miopen",
-      "dst": "fw:pytorch",
-      "relation": "used_by",
+      "dst": "component:conv_path",
+      "key": "controls",
+      "relation": "controls",
       "status": "context",
-      "confidence": 0.9,
+      "confidence": 0.92,
       "source": "analysis"
     },
     {
       "src": "fw:pytorch",
       "dst": "fw:comfyui",
+      "key": "underlies",
       "relation": "underlies",
       "status": "context",
       "confidence": 0.9,
       "source": "analysis"
     },
     {
-      "src": "workload:whisper",
-      "dst": "obs:whisper_works",
-      "relation": "has_observation",
-      "status": "known_known",
-      "confidence": 0.8,
-      "source": "conversation"
-    },
-    {
-      "src": "obs:whisper_works",
-      "dst": "obs:hip_math_ok",
-      "relation": "suggests",
-      "status": "known_known",
-      "confidence": 0.76,
-      "source": "analysis"
-    },
-    {
       "src": "workload:diffusion",
       "dst": "obs:diffusion_noise",
+      "key": "has_observation",
       "relation": "has_observation",
       "status": "known_known",
       "confidence": 0.9,
@@ -469,14 +485,34 @@
     {
       "src": "workload:llm",
       "dst": "obs:llm_slow_tokens",
+      "key": "has_observation",
       "relation": "has_observation",
       "status": "known_known",
       "confidence": 0.9,
       "source": "conversation"
     },
     {
+      "src": "workload:whisper",
+      "dst": "obs:whisper_works",
+      "key": "has_observation",
+      "relation": "has_observation",
+      "status": "known_known",
+      "confidence": 0.8,
+      "source": "conversation"
+    },
+    {
+      "src": "obs:whisper_works",
+      "dst": "obs:hip_math_ok",
+      "key": "suggests",
+      "relation": "suggests",
+      "status": "known_known",
+      "confidence": 0.76,
+      "source": "analysis"
+    },
+    {
       "src": "obs:diffusion_noise",
       "dst": "hyp:miopen_conv_root_cause",
+      "key": "suggests",
       "relation": "suggests",
       "status": "hypothesis",
       "confidence": 0.74,
@@ -485,118 +521,52 @@
     {
       "src": "obs:llm_slow_tokens",
       "dst": "hyp:fallback_gemm_llm",
+      "key": "suggests",
       "relation": "suggests",
       "status": "hypothesis",
       "confidence": 0.73,
       "source": "analysis"
     },
     {
-      "src": "obs:kfd_reset_instability",
-      "dst": "hyp:kernel_version_boundary",
-      "relation": "suggests",
-      "status": "hypothesis",
-      "confidence": 0.72,
-      "source": "analysis"
-    },
-    {
-      "src": "lib:miopen",
-      "dst": "component:conv_path",
-      "relation": "controls",
-      "status": "context",
-      "confidence": 0.92,
-      "source": "analysis"
-    },
-    {
-      "src": "lib:rocblas",
-      "dst": "component:gemm_tiles",
-      "relation": "controls",
-      "status": "context",
-      "confidence": 0.92,
-      "source": "analysis"
-    },
-    {
-      "src": "component:conv_path",
-      "dst": "workload:diffusion",
-      "relation": "affects",
-      "status": "context",
-      "confidence": 0.95,
-      "source": "analysis"
-    },
-    {
-      "src": "component:attention_path",
-      "dst": "workload:diffusion",
-      "relation": "affects",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "analysis"
-    },
-    {
-      "src": "component:vae_path",
-      "dst": "workload:diffusion",
-      "relation": "affects",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "analysis"
-    },
-    {
-      "src": "component:gemm_tiles",
-      "dst": "workload:llm",
-      "relation": "affects",
-      "status": "context",
-      "confidence": 0.96,
-      "source": "analysis"
-    },
-    {
-      "src": "component:wavefront_sched",
-      "dst": "workload:llm",
-      "relation": "affects",
-      "status": "context",
-      "confidence": 0.92,
-      "source": "analysis"
-    },
-    {
-      "src": "component:host_kernel",
-      "dst": "obs:kfd_reset_instability",
-      "relation": "affects",
-      "status": "known_known",
-      "confidence": 0.82,
-      "source": "analysis"
-    },
-    {
-      "src": "component:perfdb",
-      "dst": "unk:miopen_perfdb_stability",
-      "relation": "maps_to",
-      "status": "known_unknown",
-      "confidence": 1.0,
-      "source": "analysis"
-    },
-    {
-      "src": "obs:containers_share_host_kernel",
-      "dst": "component:host_kernel",
-      "relation": "maps_to",
-      "status": "known_known",
-      "confidence": 0.95,
-      "source": "conversation"
-    },
-    {
-      "src": "obs:vulkan_competitive",
-      "dst": "component:gemm_tiles",
-      "relation": "suggests",
-      "status": "hypothesis",
-      "confidence": 0.65,
-      "source": "analysis"
-    },
-    {
       "src": "obs:cfg1_speedup",
       "dst": "workload:diffusion",
+      "key": "observed_in",
       "relation": "observed_in",
       "status": "known_known",
       "confidence": 0.78,
       "source": "conversation"
     },
     {
+      "src": "obs:vulkan_competitive",
+      "dst": "component:gemm_tiles",
+      "key": "suggests",
+      "relation": "suggests",
+      "status": "hypothesis",
+      "confidence": 0.65,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:containers_share_host_kernel",
+      "dst": "component:host_kernel",
+      "key": "maps_to",
+      "relation": "maps_to",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "conversation"
+    },
+    {
+      "src": "obs:kfd_reset_instability",
+      "dst": "hyp:kernel_version_boundary",
+      "key": "suggests",
+      "relation": "suggests",
+      "status": "hypothesis",
+      "confidence": 0.72,
+      "source": "analysis"
+    },
+    {
       "src": "hyp:miopen_conv_root_cause",
       "dst": "unk:first_bad_layer",
+      "key": "requires_test",
       "relation": "requires_test",
       "status": "known_unknown",
       "confidence": 0.95,
@@ -605,6 +575,7 @@
     {
       "src": "hyp:miopen_conv_root_cause",
       "dst": "unk:precision_matrix",
+      "key": "requires_test",
       "relation": "requires_test",
       "status": "known_unknown",
       "confidence": 0.82,
@@ -613,6 +584,7 @@
     {
       "src": "hyp:fallback_gemm_llm",
       "dst": "unk:best_gemm_tiles",
+      "key": "requires_test",
       "relation": "requires_test",
       "status": "known_unknown",
       "confidence": 0.95,
@@ -621,6 +593,7 @@
     {
       "src": "hyp:kernel_version_boundary",
       "dst": "unk:kernel_boundary_exact",
+      "key": "requires_test",
       "relation": "requires_test",
       "status": "known_unknown",
       "confidence": 0.96,
@@ -629,6 +602,7 @@
     {
       "src": "exp:hip_probe_suite",
       "dst": "component:lds",
+      "key": "tests",
       "relation": "tests",
       "status": "proposed",
       "confidence": 0.97,
@@ -637,6 +611,7 @@
     {
       "src": "exp:hip_probe_suite",
       "dst": "component:wavefront_sched",
+      "key": "tests",
       "relation": "tests",
       "status": "proposed",
       "confidence": 0.97,
@@ -645,6 +620,7 @@
     {
       "src": "exp:hip_probe_suite",
       "dst": "component:gemm_tiles",
+      "key": "tests",
       "relation": "tests",
       "status": "proposed",
       "confidence": 0.97,
@@ -653,6 +629,7 @@
     {
       "src": "exp:hip_probe_suite",
       "dst": "component:conv_path",
+      "key": "tests",
       "relation": "tests",
       "status": "proposed",
       "confidence": 0.9,
@@ -661,6 +638,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "metric:correctness",
+      "key": "measures",
       "relation": "measures",
       "status": "proposed",
       "confidence": 0.97,
@@ -669,6 +647,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "metric:throughput",
+      "key": "measures",
       "relation": "measures",
       "status": "proposed",
       "confidence": 0.97,
@@ -677,6 +656,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "metric:power",
+      "key": "measures",
       "relation": "measures",
       "status": "proposed",
       "confidence": 0.9,
@@ -685,6 +665,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "metric:nan_inf",
+      "key": "measures",
       "relation": "measures",
       "status": "proposed",
       "confidence": 0.97,
@@ -693,6 +674,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "unk:first_bad_layer",
+      "key": "targets",
       "relation": "targets",
       "status": "proposed",
       "confidence": 0.97,
@@ -701,6 +683,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "unk:precision_matrix",
+      "key": "targets",
       "relation": "targets",
       "status": "proposed",
       "confidence": 0.9,
@@ -709,6 +692,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "unk:kernel_boundary_exact",
+      "key": "targets",
       "relation": "targets",
       "status": "proposed",
       "confidence": 0.9,
@@ -717,6 +701,7 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "unk:best_gemm_tiles",
+      "key": "targets",
       "relation": "targets",
       "status": "proposed",
       "confidence": 0.92,
@@ -725,14 +710,79 @@
     {
       "src": "exp:canonical_protocol",
       "dst": "unk:miopen_perfdb_stability",
+      "key": "targets",
       "relation": "targets",
       "status": "proposed",
       "confidence": 0.92,
       "source": "analysis"
     },
     {
+      "src": "component:wavefront_sched",
+      "dst": "workload:llm",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 0.92,
+      "source": "analysis"
+    },
+    {
+      "src": "component:gemm_tiles",
+      "dst": "workload:llm",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 0.96,
+      "source": "analysis"
+    },
+    {
+      "src": "component:conv_path",
+      "dst": "workload:diffusion",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "src": "component:attention_path",
+      "dst": "workload:diffusion",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "component:vae_path",
+      "dst": "workload:diffusion",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "component:host_kernel",
+      "dst": "obs:kfd_reset_instability",
+      "key": "affects",
+      "relation": "affects",
+      "status": "known_known",
+      "confidence": 0.82,
+      "source": "analysis"
+    },
+    {
+      "src": "component:perfdb",
+      "dst": "unk:miopen_perfdb_stability",
+      "key": "maps_to",
+      "relation": "maps_to",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
       "src": "obs:workgroup_mapping_a",
       "dst": "component:gemm_tiles",
+      "key": "suggests",
       "relation": "suggests",
       "status": "hypothesis",
       "confidence": 0.85,
@@ -741,6 +791,7 @@
     {
       "src": "obs:miopen_find_enforce",
       "dst": "component:perfdb",
+      "key": "maps_to",
       "relation": "maps_to",
       "status": "known_known",
       "confidence": 0.8,
@@ -749,6 +800,7 @@
     {
       "src": "obs:tensile_assert_ai",
       "dst": "lib:rocblas",
+      "key": "maps_to",
       "relation": "maps_to",
       "status": "known_known",
       "confidence": 0.9,
@@ -757,6 +809,7 @@
     {
       "src": "obs:fp8_text_enc_vram",
       "dst": "workload:diffusion",
+      "key": "maps_to",
       "relation": "maps_to",
       "status": "known_known",
       "confidence": 0.95,

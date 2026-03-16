@@ -337,36 +337,212 @@
       "source": "analysis"
     },
     {
-      "node_id": "obs:workgroup_mapping_a",
-      "label": "WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux",
-      "kind": "observation",
+      "node_id": "repo:robertrosenbusch_gfx803_rocm",
+      "label": "robertrosenbusch/gfx803_rocm",
+      "kind": "repository",
       "status": "known_known",
-      "confidence": 0.85,
-      "source": "conversation"
+      "confidence": 0.98,
+      "source": "web"
     },
     {
-      "node_id": "obs:miopen_find_enforce",
-      "label": "MIOPEN_FIND_ENFORCE=3 and MIOPEN_DEBUG_DISABLE_FIND_DB=1 initially lowered diffusion config to 2.5s/it but was unstable later",
-      "kind": "observation",
+      "node_id": "repo:chboishabba_rr_gfx803_rocm",
+      "label": "chboishabba/rr_gfx803_rocm",
+      "kind": "repository",
       "status": "known_known",
-      "confidence": 0.75,
-      "source": "conversation"
+      "confidence": 0.98,
+      "source": "web"
     },
     {
-      "node_id": "obs:tensile_assert_ai",
-      "label": "AssertAIGreaterThanEqual in Tensile yaml can safely be removed/ignored if checking AI fails build",
-      "kind": "observation",
+      "node_id": "repo:chboishabba_gfx803_compat_graph",
+      "label": "chboishabba/gfx803_compat_graph",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "web"
+    },
+    {
+      "node_id": "repo:lamikr_rocm_sdk_builder",
+      "label": "lamikr/rocm_sdk_builder",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "repo:advanced_lvl_up_fix_amd_gpu",
+      "label": "advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "stack:rr_rocm64_base",
+      "label": "Rosenbusch ROCm 6.4 gfx803 base image",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "node_id": "stack:rr_recompiled_pytorch",
+      "label": "Recompiled PyTorch/TorchVision/TorchAudio for gfx803",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "node_id": "stack:rr_recompiled_rocblas",
+      "label": "Recompiled rocBLAS for gfx803 on ROCm 6.x",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.88,
+      "source": "web"
+    },
+    {
+      "node_id": "rocm:5.7",
+      "label": "ROCm 5.7",
+      "kind": "rocm_version",
       "status": "known_known",
       "confidence": 0.9,
       "source": "conversation"
     },
     {
-      "node_id": "obs:fp8_text_enc_vram",
-      "label": "--fp8_e5m2-text-enc reduces ComfyUI VRAM usage on rx580, bypassing --lowvram need",
-      "kind": "observation",
+      "node_id": "rocm:6.4",
+      "label": "ROCm 6.4.0",
+      "kind": "rocm_version",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "pytorch:2.6.0",
+      "label": "PyTorch 2.6.0",
+      "kind": "framework_version",
       "status": "known_known",
       "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "torchvision:0.21.0",
+      "label": "TorchVision 0.21.0",
+      "kind": "framework_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "torchaudio:2.6.0",
+      "label": "TorchAudio 2.6.0",
+      "kind": "framework_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "workload:ollama",
+      "label": "Ollama",
+      "kind": "workload",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "workload:comfyui",
+      "label": "ComfyUI",
+      "kind": "workload",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "workload:whisperx",
+      "label": "WhisperX",
+      "kind": "workload",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "flag:lowvram",
+      "label": "--lowvram",
+      "kind": "build_flag",
+      "status": "known_known",
+      "confidence": 0.88,
+      "source": "web"
+    },
+    {
+      "node_id": "flag:miopen_log_level_3",
+      "label": "MIOPEN_LOG_LEVEL=3",
+      "kind": "build_flag",
+      "status": "known_known",
+      "confidence": 0.88,
+      "source": "web"
+    },
+    {
+      "node_id": "flag:cfg_1_0",
+      "label": "CFG=1.0",
+      "kind": "runtime_flag",
+      "status": "known_known",
+      "confidence": 0.8,
       "source": "conversation"
+    },
+    {
+      "node_id": "issue:advanced10",
+      "label": "Issue #10 ROCm 6.4 and 5.7 issues on Linux",
+      "kind": "issue",
+      "status": "known_known",
+      "confidence": 0.97,
+      "source": "web"
+    },
+    {
+      "node_id": "discussion:lamikr261",
+      "label": "lamikr/rocm_sdk_builder discussion #261",
+      "kind": "discussion",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "obs:rr_repo_enables_apps",
+      "label": "Rosenbusch-style repo documents gfx803 Docker flows for Ollama, ComfyUI, WhisperX",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "node_id": "obs:recompile_pytorch_needed",
+      "label": "Official pip/ROCm Docker builds do not compile PyTorch stack for Polaris/gfx803; recompilation is needed",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "node_id": "obs:recompile_rocblas_needed_rocm6x",
+      "label": "On ROCm 6.x, Ollama path may require recompiling rocBLAS for gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.86,
+      "source": "web"
+    },
+    {
+      "node_id": "unk:which_stack_is_best_baseline",
+      "label": "Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)",
+      "kind": "unknown",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "node_id": "unk:which_build_flags_are_required_per_workload",
+      "label": "Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)",
+      "kind": "unknown",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
     }
   ],
   "edges": [
@@ -731,36 +907,260 @@
       "source": "analysis"
     },
     {
-      "src": "obs:workgroup_mapping_a",
-      "dst": "component:gemm_tiles",
-      "relation": "suggests",
-      "status": "hypothesis",
-      "confidence": 0.85,
-      "source": "conversation"
-    },
-    {
-      "src": "obs:miopen_find_enforce",
-      "dst": "component:perfdb",
-      "relation": "maps_to",
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "stack:rr_rocm64_base",
+      "relation": "provides",
       "status": "known_known",
-      "confidence": 0.8,
-      "source": "conversation"
+      "confidence": 0.92,
+      "source": "web"
     },
     {
-      "src": "obs:tensile_assert_ai",
-      "dst": "lib:rocblas",
-      "relation": "maps_to",
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "stack:rr_recompiled_pytorch",
+      "relation": "provides",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "stack:rr_recompiled_rocblas",
+      "relation": "provides",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_rr_gfx803_rocm",
+      "dst": "repo:robertrosenbusch_gfx803_rocm",
+      "relation": "derived_from",
       "status": "known_known",
       "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_gfx803_compat_graph",
+      "dst": "exp:canonical_protocol",
+      "relation": "contains",
+      "status": "known_known",
+      "confidence": 0.7,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_gfx803_compat_graph",
+      "dst": "exp:hip_probe_suite",
+      "relation": "targets",
+      "status": "context",
+      "confidence": 0.7,
+      "source": "analysis"
+    },
+    {
+      "src": "stack:rr_rocm64_base",
+      "dst": "rocm:6.4",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "pytorch:2.6.0",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "torchvision:0.21.0",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "torchaudio:2.6.0",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "workload:comfyui",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "workload:whisperx",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_rocblas",
+      "dst": "workload:ollama",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 0.84,
+      "source": "web"
+    },
+    {
+      "src": "repo:advanced_lvl_up_fix_amd_gpu",
+      "dst": "issue:advanced10",
+      "relation": "has_issue",
+      "status": "known_known",
+      "confidence": 0.97,
+      "source": "web"
+    },
+    {
+      "src": "issue:advanced10",
+      "dst": "repo:robertrosenbusch_gfx803_rocm",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "src": "issue:advanced10",
+      "dst": "rocm:5.7",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "issue:advanced10",
+      "dst": "rocm:6.4",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "src": "repo:lamikr_rocm_sdk_builder",
+      "dst": "discussion:lamikr261",
+      "relation": "has_discussion",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "obs:rr_repo_enables_apps",
+      "relation": "supports",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_rr_gfx803_rocm",
+      "dst": "obs:recompile_pytorch_needed",
+      "relation": "documents",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_rr_gfx803_rocm",
+      "dst": "obs:recompile_rocblas_needed_rocm6x",
+      "relation": "documents",
+      "status": "known_known",
+      "confidence": 0.86,
+      "source": "web"
+    },
+    {
+      "src": "obs:recompile_pytorch_needed",
+      "dst": "stack:rr_recompiled_pytorch",
+      "relation": "motivates",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "src": "obs:recompile_rocblas_needed_rocm6x",
+      "dst": "stack:rr_recompiled_rocblas",
+      "relation": "motivates",
+      "status": "known_known",
+      "confidence": 0.86,
+      "source": "web"
+    },
+    {
+      "src": "workload:comfyui",
+      "dst": "flag:lowvram",
+      "relation": "requires_flag",
+      "status": "known_known",
+      "confidence": 0.82,
+      "source": "web"
+    },
+    {
+      "src": "workload:comfyui",
+      "dst": "flag:miopen_log_level_3",
+      "relation": "requires_flag",
+      "status": "known_known",
+      "confidence": 0.8,
+      "source": "web"
+    },
+    {
+      "src": "workload:diffusion",
+      "dst": "flag:cfg_1_0",
+      "relation": "throughput_hack",
+      "status": "known_known",
+      "confidence": 0.78,
       "source": "conversation"
     },
     {
-      "src": "obs:fp8_text_enc_vram",
-      "dst": "workload:diffusion",
+      "src": "flag:lowvram",
+      "dst": "unk:which_build_flags_are_required_per_workload",
       "relation": "maps_to",
-      "status": "known_known",
-      "confidence": 0.95,
-      "source": "conversation"
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "flag:miopen_log_level_3",
+      "dst": "unk:which_build_flags_are_required_per_workload",
+      "relation": "maps_to",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "flag:cfg_1_0",
+      "dst": "unk:which_build_flags_are_required_per_workload",
+      "relation": "maps_to",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "stack:rr_rocm64_base",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "candidate_baseline",
+      "status": "known_unknown",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "rocm:5.7",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "candidate_baseline",
+      "status": "known_unknown",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "rocm:6.4",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "candidate_baseline",
+      "status": "known_unknown",
+      "confidence": 0.9,
+      "source": "analysis"
     }
   ]
 }

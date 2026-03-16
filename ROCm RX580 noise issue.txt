@@ -1,0 +1,5575 @@
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Skip to content
+advanced-lvl-up
+Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU
+Repository navigation
+Code
+Issues
+10
+(10)
+Pull requests
+Actions
+Projects
+Security
+Insights
+rocm 6.4 and rocm 5.7 issues on linux #10
+Open
+Open
+rocm 6.4 and rocm 5.7 issues on linux
+#10
+@tuleo1
+Description
+tuleo1
+opened on Jan 26
+hello, sorry for another issue open im here to report on
+a few things related to this on gfx803 (rx 580) on linux
+(arch)
+as you know rocm fully and completely dropped
+support for rx 580 but there are some dockers made
+that help to build and compile pytorch and rocblas
+pyvision and so on, for us
+it has diffrent rocblas version from 5.4 to 6.4 and
+apparently and im not sure i havent tested they all
+supposedly work.
+repo:
+https://github.com/robertrosenbusch/gfx803_rocm
+the issue with this repo is that im trying to use the
+rocblas compiled here and given on the release page
+to see how good and better they are for comfyui.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+1/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+however on docker rocm 6.4 i get ALWAYS noise for no
+reason. no matter what i use what i do and what i dont
+even stock rocblas gives me noise.
+using your rocblas gives me a huge speed boost
+around 1 second less in the iteration per second. (6.5 ->
+5.5 sdxl 1024x1024)
+but i cant get it to work, idk why. noise all over for
+some reason.
+so i tried 5.7 and it works i dont get noise anymore on
+stock rocblas libs but the issue now is that when i try to
+use your provided rocblas it instantly gives me this
+error:
+"Memory access fault by GPU node-1 (Agent handle:
+0x19c01de0) on address (nil). Reason: Page not present
+or supervisor privilege.
+Aborted (core dumped)"
+no matter what flag i use and what i dont use ex —
+lowvram —force-fp32 —force-fp16 no matter what they
+dont work.
+SO with the big brain of mine i said "why not make a
+frankestine so it might help someone fix this!"
+and now i have copied these types:
+4xii8I
+BB
+BS
+CC
+DD
+with copying those above the gen speed was "normal"
+the same as stock but the output was noise and all
+noise.
+HH
+HS
+I8I
+after copying these 3 my gen speed started going up
+from a simple "1.7s/it" to "6it/s" lol but i get noise so.
+and vram usage was reduced to 3gb idk why (im using
+this repo's jab attention implementation)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+2/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+copying ZZ type also ended having same speed same
+noise and same vram usage nothing changed.
+moving SS type starts giving the seg fault and maf
+error no matter what file from .hsaco or .co or .dat they
+all start giving seg faults.
+idk if this helps or not but i hope it does.
+hopefully a proper linux version will come out soon
+too.
+i know this is out of this scope as its rocm and not
+zluda but i do hope you do check!
+Activity
+tuleo1
+tuleo1 commented on Jan 26
+tuleo1
+on Jan 26
+Author
+i will try to build rocblas with the files yaml and etc
+provided from this place to see if i can make it work on
+here!
+will update if i succeed if not then yeah. nothing
+advanced-lvl-up
+advanced-lvl-up commented on Jan 26
+advanced-lvl-up
+on Jan 26
+Owner
+No worries, this is a totally open forum, where you can
+talk about anything. This will be another busy year for
+me without enough time, but i'm making yet another
+vow to crack this Linux issue. If i wish it into existence
+then will it finally happen?
+Will look forward to your reports, and progress if any. I
+think one possibility is that the library is incomplete,
+hence it will fall back to the ASM path and GEMMs if a
+Tensile contraction solution is not found for a
+particular call to ROCm. This is fine since the ASM path
+is also fast and relatively optimized in the custom
+library, but perhaps that's why it doesn't work for you
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+3/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+on Linux quite yet. the core solution index code is
+based on the Tensile version 6.24 framework
+I'll review overall compatibility issues and get back to
+you soon
+tuleo1
+tuleo1 commented on Jan 26
+tuleo1
+on Jan 26
+Author
+no worries take your time dont burn yourself down. im
+surprised such project even exists since this gpu is
+quite old and many people just go "forget it just buy a
+new gpu"
+so having any kind of support and help on this old gpu
+is HEAVILY appercieated!.
+on other notes:
+i tried building rocblas using the source you have put
+up in this repo and
+everything seemed to be straight forward all i had to
+do was just replace the yaml files provided into
+"library/src/blas3/Tensile/Logic/asm_full"
+and then do the cmake files to make rocblas
+while doing so i got hit with an error:
+AssertAIGreaterThanEqual was making issues in the
+file: polaris_Cijk_Alik_Bljk_SB - s1.yaml
+so i just commented that one line and it went through.
+and i used this command to build: ./install.sh -ida
+gfx803 -j 8 && \ true
+and it built! but im not sure if its actually working or
+not... i used to go to build folder and use cmake
+manually to build but that kept giiving errors so used
+the shell file there.
+unsure if it worked or not and if im using your custom
+kernel codes to run my rocblas or no rn.
+but it is working
+testing with sdxl 1024x1024 eps model i get 7s/it with
+6.3gb vram usage on —normalvram and using jab
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+4/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+attention
+no noise no issue vram usage seems fine the pictures
+are fine gpu is not heating too much and yeah!
+my only worry is that maybe by using install.sh script
+or commenting out that one line of code made things
+not accurate or correct per say.
+or maybe rocblas downloaded polaris libs and
+overrode the old ones. im just unsure.
+but as long as it works?
+ill update this with kobold.cpp token generation speed
+in a bit! after building it and we'll see how it will be :D
+advanced-lvl-up
+advanced-lvl-up commented on Jan 27
+advanced-lvl-up
+on Jan 27
+Owner
+Thanks for that info :) I'll leave out the
+AssertAIGreaterThanEqual in the next build if it makes
+zero difference to the Tensile compiler. This particular
+option allows ROCm to choose kernels based on AI
+(arithmetic intensity), and i think it's safe to ignore this
+one. will confirm on the next build test.
+Another thing you can try for specific Linux builds is to
+the change the:
+WorkGroupMapping: -1
+WorkGroupMappingType: Z
+to:
+WorkGroupMapping: 0
+WorkGroupMappingType: A
+(zero, and letter A,). As this fix (in theory) is only
+required for Windows and adds extra code in the
+kernels, so for Linux it maybe faster and better to use
+hardware mapping, and default workgroup
+distribution.
+tuleo1
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+5/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+tuleo1 commented on Jan 27
+tuleo1
+on Jan 27 · edited by tuleo1
+Author
+will rebuild asap and report back!
+im still stuck on building kobold lol
+advanced-lvl-up
+advanced-lvl-up commented on Jan 27
+advanced-lvl-up
+on Jan 27
+Owner
+Great! Also if WorkGroupMappingType: A causes
+memory leaks over time, another valid option is B
+To be honest, though, i have no idea what effect it will
+have for Linux. If all else fails i guess Z is fine too.
+For kobold it likely won't help much, most LLM models
+end up using the Cijk_Alik_Bljk_HB contraction (i don't
+remember if it was exactly that one. but it was one of
+those i never got around to testing much)
+Unfortunately tensile doesn't compile this one
+properly, and in the end we may need to use custom
+C++ code along with asm volatile to put some
+optimizations in there. This was something i was
+working on last year. We'll see. i guess you never know
+til you try. Maybe it actually works on Linux with no
+changes
+advanced-lvl-up
+advanced-lvl-up commented on Jan 27
+advanced-lvl-up
+on Jan 27
+Owner
+But that's only related to speed. Generally the
+contraction should at least run without crashing.
+(hopefully, lol)
+tuleo1
+tuleo1 commented on Jan 27
+tuleo1
+on Jan 27 · edited by tuleo1
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+6/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Author
+hey! so i built and used kobold cpp. there were two
+issues while building it. one was that on rocm before 6
+in one of the functions you must've had put 3 variables
+instead of 2 which koboldcpp only had put 2 and i got
+that fixed.
+in the file:
+yourkoboldsource/ggml/src/ggml-cuda/ggml-cuda.cu
+CUDA_CHECK(cudaStreamWaitEvent(stream,
+concurrent_event->fork_event));
+to
+CUDA_CHECK(cudaStreamWaitEvent(stream,
+concurrent_event->fork_event, 0));
+and then another one which is:
+CUDA_CHECK(cudaStreamWaitEvent(cuda_ctx>stream(), concurrent_event->join_events[i - 1]));
+to
+CUDA_CHECK(cudaStreamWaitEvent(cuda_ctx>stream(), concurrent_event->join_events[i - 1], 0));
+and once those are done you have to also make
+another adjustment in your hip driver
+/opt/rocm5.7.0/include/hip/amd_detail/amd_hip_bf16.h
+and you must change every
+"__hostdevice__" -> "static __hostdevice__"
+and that will stop errors related to duplicate variable
+defined compilation error.
+now that aside on my previous note i said i might have
+accidentally ended up using the old rocblas libs and
+not actually using the patched ones.
+now im still uncertain but this time while building
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+7/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+rocblas i installed stock ones and i found out that yes
+indeed the speed is 7s/it so nothing was diffrent
+but this time as i recompiled i also pasted the folder
+r9nano as well previously i only have pasted Polaris
+i also renamed Polaris to polaris and also had both of
+them there, as i saw that most of the folders there
+were not startinig as capital so i did that just in case.
+(had both Polaris and polaris there now)
+and i also chanegd all those from Z to A and from -1 to
+0 to all the files
+and after rebuilding and reinstalling and checking
+through sd woallah! i get 6s/it instead of the 7s/it! crazy
+with kobold? honestly. i have zero idea if its faster or
+not. the way kobold is handling the token generation
+speed and token processing speed is extremely weird
+where if the text is larger the generation token per
+second is slower but when the text is small t/s is very
+high around 20t/s ?
+i cant tell benchmarking is also out of the question
+cause everytime i use it the processing blas is FAR
+slower than what it actually is so generally its...weird
+lol.
+also koboldcpp does seem to be working just fine. no
+issues or whatsoever either. only compilation errors
+because of rocm 5.7 which koboldcpp wasnt meant to
+be build on but we did.
+comfyui is fire though <3
+as for the memory leaks i havent tested neither am i
+sure on how to check for memory leaks in this context
+(perhaps by using the ai for long times. i havent had
+the chance to do that yet)
+so if i do encounter them i will update
+edit:
+seems like something is wrong with the processing of
+tokens, im not sure whats up, the speed is extremely
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+8/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+extremely slow. vulkan processed the tokens like rather
+quickly while using 170W
+but rocblas? it took ten times the time it took vulkan to
+process and was using only 110W for some reason.
+something is off about it and im really unsure whats
+up.
+ah while also rocm process the tokens my mouse and
+the pc ui just starts lagging? freezing periodically.
+unsure what to thnk of it?
+perhaps memory issues freezes or errors in the kernel
+that keeps happening and it keeps going back to
+failsafe drivers. iim not sure.
+if you know something i could use that would help ex
+logging more or something id be happy to try it
+edit2:
+the amount of clip or text you put inside your sd
+directly changes the speed of the it/s on the mage
+generation. why does this matter and why this is the
+case i have no idea.
+i put around 252 characters on 13 steps on 512x512 i
+get 1.3-1.5s/it
+and when i put 24296 characters (yes i know
+overwhelming) the speed went to 3.3s/it for the same
+resolution.
+also while image generation i noticed the speed of
+iterations are quite unstable.
+first step takes a long time 6s/it then second step
+instantly comes after. but the average is:
+5.35s/it (on an overclocked 1430mhz 2000mhz rx580)
+1024x1024 sdxl 1 lora
+advanced-lvl-up
+advanced-lvl-up commented on Jan 28
+advanced-lvl-up
+on Jan 28
+Owner
+Wow, thanks. the compiling tips will be quite useful for
+anyone if they run into similar issues in the future. I've
+never bothered trying ROCm with Microsoft windows.
+Simply just assumed that it would not work in windows
+at all. :)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+9/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+the sd.cpp backend that it uses can be really unstable
+for testing. generally works better on native CUDA as
+far as i remember. it's been way to long since i've tried.
+no idea what the code looks like these days.
+The strange thing i encountered was that (with zluda),
+the speed would be exactly the same as with Vulkan...
+so i would then assume that it's silently falling back to
+Vulkan. Except all the hardware monitoring indicates
+that it is in fact using zluda/CUDA. I tried confirming if
+the Tensile kernels were indeed active. Suffice to say: it
+was all very confusing. The mysteries are endless with
+that code.
+My rather uninformed theory back then was simply the
+one i shared earlier about the particular kernel type
+Cijk_Alik_Bljk_HB, and then i didn't explore much
+further than that. For LLM's maybe we should try
+comfy nodes of some kind and force a particular data
+type to be used (if possible) , that way we'll have a clear
+idea of how native ROCm actually behaves. Just an idea
+which i haven't tested or thought about much
+advanced-lvl-up
+advanced-lvl-up commented on Jan 28
+advanced-lvl-up
+on Jan 28 · edited by advanced-lvl-up
+Owner
+Now as to the sd.cpp part dealing with image diffusion,
+i would assume they use the more standard fp16
+kernels or similar. (depending on initial settings), so
+there's less mystery there. It's definitely interesting
+that it actually worked for you at all. (you can feel free
+to laugh at us windows users) =)
+edit: i forgot to ask about the custom attention
+function. I've been wondering about how it behaves in
+Comfy linux. Is it slower? Is the VRAM usage and tensor
+allocation acceptable? if you find any bugs in there , i'll
+try to fix them if possible.
+tuleo1
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+10/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+tuleo1 commented on Jan 28
+tuleo1
+on Jan 28 · edited by tuleo1
+Author
+alright another day and another weird thing i just
+learnt. lol
+once you told me to check the jab function i got
+surprised as i thought this was the most optimal way
+for this. and i suppose it is for something but for image
+generation?
+well...okay vram usage is around 900mb less than
+"pytorch-cross-attention" when using jab i can use -normalvram in comfy without trouble and that makes
+my vram usage is 6.2gb on 1024x1024:
+jab-attention
+first gen: 5.55s/it full time: 98s
+second gen: 5.47s/it full time: 84s
+now for pytorch cross attention. when using it vram
+usage skyrockets. im not sure why. but when using i
+must use --lowvram so my cpu load goes 100% when it
+checks clip. on the same configuration same clip text
+and same resolution vram usage is 7.2gb and the gens
+are:
+pytorch-attention
+first gen: 4.54s/it full time: 108s
+second gen: 4.53s/it full time: 72s
+this is only if i dont switch clips though. when changing
+clips on the third generation things get a little weird.
+(only changing the positive clip adding an extra word
+inside the prompt)
+pytorch-atten: 4.52s/it full time: 85s
+jab-atten:5.47s/it full time: 92s
+seems like generally speaking pytorch attention
+despite more vram hungry is faster for generation,
+surprisingly it uses more power as well while
+generating, i see my gpu power throttling a lot while
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+11/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+on jab it practically doesnt!
+so pytorch. is faster but more vram hungry and for
+1024x1024 it must be used with —lowvram
+just for fun i also tested split-cross-attention and the
+original quad attention, here are the results:
+split
+first gen: 5.38s/it fulltime: 95s
+second gen: 5.47s/it fulltime: 83s
+third (diff prompt): 5.34s/it fulltime:87s
+quad
+first gen: 5.36s/it fulltime: 97s
+second gen: 5.18s/it fulltime: 80s
+third (diff prompt): 5.23s/it fulltime:88s
+their vram usage are all identical to jab and yeah so is
+the power usage.
+generally speaking for speed alone its like this right
+now:
+pytorch>quad=jab>split
+i couldnt test sage or flash as they require extra python
+package and i dont have them and i dont think they
+work on rocm 5.7.0
+actually looking at the logs im seeing this glaring and
+annoying warning:
+UserWarning: 1Torch was not compiled with memory
+efficient attention. (Triggered internally at
+/pytorch/aten/src/ATen/native/transformers/hip/sdp_ut
+ils.cpp:505.)
+so...maybe actually im using no attention at all LMAO
+edit:
+by using --fp8_e5m2-text-enc you wont need --lowvram
+anymore :D
+advanced-lvl-up
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+12/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+advanced-lvl-up commented on Jan 29
+advanced-lvl-up
+on Jan 29
+Owner
+if you can get a pytorch sdpa or sage / flash attn
+working with a linux package, that would be your best
+bet. (i have no idea if anyone has compiled such a
+package that works for older archs). but if it exists, that
+would be much better. even a partial implementation
+should be okay.
+the benchmark data is very useful, thanks. i think the
+results are what i would generally expect from the
+code. There exists another version of jab-attn that's a
+bit faster somewhere in my archives. For now it's
+mostly only useful for video gen or trying higher
+parameter models that we normally would not bother
+with. (latent image and compute buffers will max out
+VRAM pretty much no matter what, in those cases).
+Another thing it allows is using the comfy --gpu-only
+commandline option. In past comfy versions, for
+example, that would load both the UMT-T5-xxl encoder
+and the Wan 1.3billion model nicely into less than 7gb
+VRAM. And as long as you didn't go above 512x512
+times 81 frames, it would be fine i think. It's useful for
+testing. Not sure how this currently behaves in newer
+comfy.
+The better option is dumping the UMT-T5 altogether,
+using saved prompt embeddings from disk. Make a
+1000 generic prompts ahead of time, and then just pick
+one that's close enough. That way the text encoder
+never even loads :) lol
+There are pull requests currently for better DRAM and
+VRAM management in comfy, but unfortunately that's
+going to take a while before it matures, especially the
+GGUF support. But that's beauty of pytorch: There is no
+memory management :)
+We're basically stuck using either --novram, or -normal-vram, or --low-vram, etcetera. none of which
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+13/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+are really optimal.
+tuleo1
+tuleo1 commented on Jan 31
+tuleo1
+on Jan 31
+Author
+hi!
+this isnt anything biggie honestly just wanted to say i
+tried and was able to successfully built pytorch 2.10
+and vision 0.25 and triton 3.6.0 (despite it giving
+runtime errors saying my rocm is too old).
+i was able to test and check and apparently pytorch is
+using the gpu the gpu is doing correct math ish im not
+sure
+but once it comes to comfyui suddenly all i get is noise
+:D
+i have 0 idea why im getting noise. like the math is fine
+at least basic math is (GroupNorm, SiLU, attention, etc.)
+are working without NaN or Inf
+so. honestly im out of clues. the image isnt...full white
+or full black so
+i tried 2 diffrent models same results but that was
+given as it was working on pytorch 2.3
+the build wasnt fun to do so. it was horrible. literally
+everything about it sucked lots of issues in pytorch
+code where the code just refused to build properly i
+had to edit tons of stuff inside the code even some
+stuff inside my own driver believe it or not (in rocm i
+mean)
+and then inevitably yeah.
+hopefully someone anyone knows a way to fix this
+maybe? someone whos smarter than me in a way or
+two but im pretty sure anyone smart enough would
+just go and build rocm 6.4 and above and then build
+torch there.
+or even they wont bother with this hardware xD.
+now on a side note i found something very very very
+intresting. while testing for ways to remove or fix the
+noise i stumbled upon these flags:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+14/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+export MIOPEN_DEBUG_DISABLE_FIND_DB=1 and
+export MIOPEN_FIND_ENFORCE=3
+it takes a LONG time to build the database but once it's
+done (well...at least once or twice it worked!)
+my speed went from 4.5s/it by using pytorch attention
+to 2.6s/it! a whopping double the performance almost i
+was so amazed by this.
+but i tried to replicate this again and then....now its
+been 5 hours later and im still trying to replicate it. idk
+why but i cant get that speed boost anymore no matter
+what.
+sometimes i get even worse performance eg 7s/it
+instead of 4.5 or 5s/it
+its weird...i dont know why. i hope you know something
+about this mayhaps?
+it'd be cool if you end up looking through this or give
+us some information!.
+also i found out that apparently this noise on pytorch
+2.10 i get is the same noise i was getting in pytorch 2.4
+in the rocm 6.4 docker.
+which is making me wonder if this is the pytorch fault
+or not...or maybe hell maybe its comfyui's fault god
+knows!
+hopefully if someone has any information about this
+they would help or continue on this issue, im pretty
+determined about this and this silly hardware even if
+old its still gold and its proven now.
+advanced-lvl-up
+advanced-lvl-up commented on Jan 31
+advanced-lvl-up
+on Jan 31
+Owner
+I think Lee, the owner of the fork
+https://github.com/lshqqytiger/ZLUDA, would be most
+qualified for that. But then he's the quite busy person, i
+doubt he'd have to time to help us with such a niche
+request. So, yea, we'd be on our own pretty much.
+Maybe someone out there has something like that
+unpublished or something. You never know, i guess.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+15/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+If i had more time, i have would have tried (and likely
+failed) long ago.
+About the noise outputs issue, if you're in Comfy, i
+think near the time the Wan2.1 code was introduced,
+there was a major refactor of the comfyUI code near
+that time, which changed how default model loading
+and related data types worked. It may be related to
+that, or maybe it has something to do with the recent
+changes the RMS_norm refactor. (I'm just guessing
+here, no idea to be honest).
+I only say that because comfyUI used to work much
+better for old GPU archs using pytorch==2.2.1 for
+example, like some zluda users do. It's functional still,
+but some model architectures end up with non-optimal
+signal to noise after many transformer passes. (Others
+like Wan Vace, and Wan2.2 5billion are fine though.)
+Could be entirely unrelated as well.
+I don't think i'd be brave enough to try what you're
+doing there. :) that's awesome
+tuleo1
+tuleo1 commented on Jan 31
+tuleo1
+on Jan 31 · edited by tuleo1
+Author
+ah youre flattering me.
+im just stuck with this hardware like probably other
+people and im trying to squeeze as much performance
+as i can even for ai workload.
+i might open a zluda issue but honestly i doubt its
+gonna go anywhere.
+im more intrested in trying to build rocm 7.2 or 7.1 for
+our gpu but honestly? i dont have much hope seems
+like even searching for the name gfx803 on the newer
+rocm packages straight up give no result.
+but if it would be possible things would be a lot easier.
+on another note. im still trying the MIOpen
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+16/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+optmization for my gpu, its so weird. sometimes the
+database is faster and sometimes the database is
+slower despite the same searches and look ups?
+im still trying to reach the time where i got a whole 2.53s/it generation that was insane. but still nothing.
+i do suggest you or others who might be reading this
+in the future to run it though as long as it exists for yall
+in windows xD
+just put the flags and run your ai and it starts to test
+multiple diffrent ways to use the math on the gpu
+its basically Nvidia CudNN but for our gpu. if only amd
+made these stuff more backwards compatible (newer
+version)
+i might look into trying to use other stable diffusion
+clones like a1111 and sdnext and some other ones.
+maybe they work fine?
+after the MIOpen is done, what i noticed now that the
+speed is normal is that somehow the images look
+better?
+as if the math of the model is being better accurately
+repersented in the gpu i dont even know man.
+maybe its placebo but yeah
+10 remaining items
+tuleo1
+tuleo1 commented on Feb 1
+tuleo1
+on Feb 1 · edited by tuleo1
+Author
+that is true. i kinda gave up. i deleted everything
+related to newer clones and just. yeah
+my ssd is taking a toll. 93% in only a year. i dont want it
+dying before i can get a new laptop especially since i
+live in iran and the prices are as high as a human's
+blood.
+i failed. honestly, and well i dont mind it. sure
+generation speed is slow but at least i can make
+something.
+and i truly understand what youe saying too its so fun
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+17/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+to tinker with this stuff to get it to work. but i have a
+tendency to overwork myself and forget about
+responding to people or eating or anything x3 so yeah.
+maybe ill visit this again later but for now yeah im fine
+with old pytorch and old rocm ill try to not delete this
+docker and export it just incase those repositories of
+rocm 5.7 end up getting deleted
+just for a refrence i found about a project thats quite
+cool called ROCK (https://github.com/ROCm/TheRock)
+its basically a script that builds everything the whole
+rocm package for you
+but its a bit heavy a lot heavy. infact it broke my btrfs
+partition in linux and i had to run a balance command
+so it could fragment my ssd so i could finally start
+using my ssd again xD
+has no script for gfx803! even if you get it downloaded
+and cloned the script probably will refuse to build for
+our gpu
+also if you like this stuff a lot i recommend dual
+booting/running linux as a whole its a lot more fun!
+tuleo1
+tuleo1 commented on Feb 2
+tuleo1
+on Feb 2 · edited by tuleo1
+Author
+found out how i got 2.5s/it
+use pytorch attention! has better performance for now
+use cfg 1.0 on comfyui it makes the clip instead of
+getting passed into the model every few steps in
+it just passes it once at the beginning of the generation
+and then the gpu only just focused on generation.
+even using cfg at 1.1 will break this
+i suggest using sdxl models for this as they are
+relatievly okay for this.
+:D have fun generating people!
+advanced-lvl-up
+advanced-lvl-up commented on Feb 2
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+18/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+advanced-lvl-up
+on Feb 2
+Owner
+excellent. there are also reports right now of 6 secs per
+iteration in Z-image turbo using vulkan/mesa in linux.
+while i dont know much about that myself, it's great
+seeing this, my favorite GPU arch, in action as always =)
+i really don't keep up with all the model releases these
+days, haha
+chboishabba
+chboishabba commented last week
+chboishabba
+last week · edited by chboishabba
+#9
+robertrosenbusch/gfx803_rocm#37
+robertrosenbusch/gfx803_rocm#43
+robertrosenbusch/gfx803_rocm#47
+#AI : https://chatgpt.com/share/69af62e6-6724-8002a58c-65e2b4cd0269
+Some Polaris/Vega kernel regressions reported on
+LKML involve memory management paths used by
+ROCm (including XNACK-related page fault handling),
+which is another reason to test the same user-space
+stack on multiple host kernels before assuming the
+problem is purely in ROCm.
+Treat this as two separate bugs, not one:
+diffusion/image-gen noise is most likely a MIOpen
+convolution/kernel-selection problem, while slow
+LLM/token throughput is most likely missing or
+fallback GEMM/Tensile coverage; Whisper working on
+ROCm 6.4 is strong evidence that general HIP/PyTorch
+math is not the core failure. ([rocm.docs.amd.com]1)
+Do not chase this first on Windows containers; ROCm
+containers share the host kernel/driver, so they only
+make sense when the host driver stack is already
+suitable, and SD.Next still notes that PyTorch ROCm on
+Windows is not officially maintained by the PyTorch
+team in that workflow. ([ROCm Documentation]2)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+19/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+If they want the Rosenbusch route, use it as a Linux or
+Linux-container test matrix, not as “Windows magic”;
+his gfx803 work includes ROCm 6.3.4/6.4-era
+Dockerfiles specifically for Polaris/ComfyUI-style
+experiments, which is the right place to compare userspace combinations against the same host driver.
+([GitHub]3)
+Pin one known-good baseline first: fixed model, fixed
+resolution, fixed prompt, fixed CFG, fixed attention
+backend, fixed precision, fixed kernel version, fixed
+MIOpen DB state; otherwise they are changing
+problem shape and autotune state at the same time,
+which MIOpen explicitly uses to select different kernels
+and cache entries. ([ROCm Documentation]1)
+Instrument before rebuilding: run with
+MIOPEN_ENABLE_LOGGING=1, a high
+MIOPEN_LOG_LEVEL, and rocBLAS logging so they can
+see which exact conv/GEMM kernels were selected on
+a good run versus a noisy run; MIOpen’s own docs
+show that environment variables control
+tuning/search/perfdb behavior. ([ROCm
+Documentation]1)
+Yes, use a debugger, but only after logging narrows it
+down: use rocgdb/gdb for crashes and GPU faults, and
+rocprof/profiling for the non-crashing “noise image”
+case; the first hard question to answer is still “which
+first layer or kernel produces bad values?” rather than
+“why is ROCm weird?” ([ROCm Documentation]1)
+Add tensor sanity checks after each UNet stage on one
+failing image-gen run: log min/max, mean/std, and
+NaN/Inf after the first conv, first resblock, first
+attention block, mid block, first upsample, and VAE
+decode; once the first corrupted tensor is found, they
+can map it back to the MIOpen or rocBLAS kernel
+actually launched.
+Reset and control the MIOpen database deliberately:
+MIOpen stores tuning/performance data and can be
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+20/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+forced to search or reuse cached results, so
+inconsistent 2.6 s/it vs 7 s/it behavior is very plausibly
+“different perfdb entry / different exact problem
+config,” not randomness. ([ROCm Documentation]4)
+For image generation, test exactly three precision
+modes and stop speculating: fp32 everywhere, fp16
+weights + fp32 accum/vae, and their current mixed
+mode; if only mixed precision is noisy, that immediately
+narrows it to unsupported or numerically unstable
+half-precision image kernels rather than general
+correctness.
+Assume MIOpen conv kernels are the prime suspect
+until disproven: Whisper is transformer-heavy, while
+diffusion hits conv/upsample/VAE paths much harder;
+MIOpen’s tuning/search docs are directly about those
+convolution paths, which matches the symptom split.
+([ROCm Documentation]1)
+Assume slow token processing is fallback GEMM until
+disproven: low power draw and UI lag are classic signs
+of poor occupancy and long blocking kernels rather
+than “the GPU is fast but mysterious”; compare kernel
+names and timings for one LLM prompt under ROCm
+versus Vulkan to see whether ROCm is missing the
+optimized contraction path.
+Do not over-interpret equal ZLUDA and Vulkan speeds;
+on old hardware they can converge simply because
+both end up on similarly limited matmul paths, so
+equal wall-clock time is not proof that one is secretly
+using the other.
+Keep CFG at 1.0 only if the goal is throughput testing,
+not image-quality comparison; classifier-free guidance
+changes compute shape materially, so it is a
+benchmark trick, not a general fix.
+Treat JAB / split / quad / PyTorch attention as a speedVRAM tradeoff, not a root-cause fix; if the warning says
+memory-efficient attention was not compiled, they are
+mostly comparing fallback attention paths anyway, not
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+21/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+unlocking flash-style kernels. ([GitHub]5)
+Do not expect official ROCm 6.x+ compatibility
+semantics for Polaris: AMD officially dropped gfx803
+years ago, and current ROCm compatibility
+documentation is for supported hardware, so every
+gfx803 result on modern ROCm should be treated as
+community salvage, not expected behavior. ([GitHub]6)
+Check the host kernel version before blaming userspace: there are recent Polaris/gfx803 reports tying
+ROCm freezes under compute load to newer Linux
+kernels and amdkfd regressions, so a “bad ROCm
+build” may actually be “good user-space on a bad host
+kernel.” ([OpenWall Lists]7)
+Use the Rosenbusch stack to build a 4-way matrix only:
+ROCm 5.7 vs 6.4 crossed with stock vs patched
+rocBLAS/Tensile, on the same host kernel and same
+model, then record correctness, first bad layer, selected
+MIOpen kernels, and token/s-it throughput; that will
+answer more than weeks of ad hoc tinkering.
+Do not mix Windows ROCm, WSL ROCm, Linux ROCm,
+native ROCm, ZLUDA, and Vulkan in one
+troubleshooting loop; AMD’s current Windows/WSL
+ROCm story exists, but it is its own compatibility matrix
+and not the same as native Linux Polaris salvage.
+([ROCm Documentation]8)
+
+chboishabba
+mentioned this last week
+Add support for older AMD GPU gfx803, gfx802, gfx805
+(e.g. Radeon RX 580, FirePro W7100)
+ollama/ollama#2453
+advanced-lvl-up
+advanced-lvl-up commented 5 days ago
+advanced-lvl-up
+5 days ago
+Owner
+@chboishabba hello, thanks for that. it's quite
+interesting how GPT approaches it.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+22/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+one of the problems encountered (while working with
+Windows) is that older pytorch and ROCm versions
+would always underutilize the GPU since warp_size,
+mp_count (multiprocessor count), and other
+parameters were designed for native CUDA. The
+custom library here uses a simple work-around by
+assigning more work per GEMM call, and it isn't exactly
+the best way to do it, since register pressure goes a bit
+too high. (https://github.com/Painter3000/AMD-GPUBOOST/ has some code for tweaking the core
+parameters during GPU init.)
+starting with ROCm 6.4 or above, using newer pytorch,
+most of this problem should be fixed (for later
+architectures at least), but i think this fundamental
+issue outlined above still applies on both Linux and
+Windows, especially for older archs.
+One of the AMD developers had an interesting
+response about this when github user Painter3000
+mentioned it. The dev said that in classic ROCm , the
+mp_count really related more to the workgroup
+distribution rather than actual compute units on the
+GPU, or something along those lines. Wish i still had a
+link to the discussion. it was fascinating.
+As usual, i never dug into the archaic code all that
+seriously. The actual fix shouldn't be all that difficult,
+but it takes time and understanding of the code. 5
+hours is my limit before the boredom and laziness
+starts. =) So all my implmentations are about 20% to
+30% done and mostly unfinished.
+Recently, (year 2025 - 2026) LLMs have matured
+enought to code 70% of optimizations similar to this.
+Personaly, when i interact with an LLM, i spend about
+10% of the time talking about machine learning. the
+rest of the time is just roleplay / pretending it's AGI, or
+asking about jokes and fun stuff (Qwen MAX is great
+for this). I would guess most people are like that too =)
+Why is it so much fun? these days, i'm mostly at work
+and dealing with boring real-life stuff, unfortunately
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+23/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+chboishabba
+chboishabba commented 5 days ago
+chboishabba
+5 days ago
+Hi mate.. reckon I could probably have a go at
+updating anything if you're able to point me in the
+direction. You're right re GPT coding, it's gotten quite
+good. I helped submit a report to kfd last year re rx580
+segfaults that got rolled in.
+Just woke up but I'll come back to this.
+Appreciate if anyone else feels like assisting.
+advanced-lvl-up
+advanced-lvl-up commented 5 days ago
+advanced-lvl-up
+5 days ago
+Owner
+great, if GPT or Claude gets stuck on something
+specific, let me know and i'll try to help if possible. I'd
+most likely be useless to be honest becaues it been
+quite some time since i've dealt with the underlying
+mechanics of it all.
+Also, we can still pray that TheRock project converges
+with the original Linux builds soon. I think that would
+clear up some of the issues of why some things work
+better in zluda while others work better in native
+ROCm. Won't be holding my breath for that. for gfx803
+it might be faster (calendar time-wise) to try a groundup approach with basically all general compatibility
+removed, focusing only the model type / architecture
+(LLM, vision model, classification, etc) one would
+personally want to use.
+
+🥇
+
+chboishabba
+chboishabba commented 4 days ago
+chboishabba
+4 days ago
+Not sure what you mean re focus only on model type they all require a stable setup. I am familiar with the
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+24/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+'noise' outputs some users were getting with Comfy
+but ostensibly the repo author had shown that it can
+produce proper outputs. It's also been a while since I
+was involved and likewise hope for Rock. I had
+contribbed testing there too before he got a job with
+AMD.
+What probably would help though is some test harness
+where all the layer types can be tested. Should allow us
+to make some categorical statements about
+compatibility.
+The main issue the community has been struggling
+with is KFD doorbell reset sometimes hard failing,
+unable to reset kfd/restart the card and hard crashes
+session (cannot recover to emergency terminal, hard
+reset only).
+This was addressed around 6.16 iirc and solved one of
+the major points of instability beyond driver
+deprecation.
+Do you have any logs of your work? I'm not familiar
+with the sort of meddling you had been up to...
+Really the only thing for linux would seem to be those
+kernels/files/optimisations you made - segfaults
+otherwise. I don't think there is anything wrong with
+latest driver though, im on cachy latest and via the
+robertrosenbusch compatibility docker i'm able to
+compute. it's just the roc libs afaik and possibly
+compiling torch/ctranslate etc after...
+advanced-lvl-up
+advanced-lvl-up commented 3 days ago
+advanced-lvl-up
+3 days ago
+Owner
+right, i only meant it might be easier to try a very
+narrow (native gfx803) inference pipeline, with none of
+the baggage of ROCm and pytorch's limited support
+for abandoned GPU archs, but assuming functionality
+only for very specific ML models or tasks. I've had no
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+25/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+time to keep up with all the recent changes to native
+Linux ROCm (still planning on trying at some point in
+time), so that part is mostly just guessing from my own
+viewpoint.
+the optimization attempts i was tinkering with a few
+winters ago were mostly trying to get LLVM / Tensile
+and Windows ROCm 5.71 SDK (the only version that
+worked in microsoft OS at the time) to behave and
+function better with zluda. You can see the results from
+that here on this github repo and, as you know, it's
+mostly half-finished and only useful for testing
+Windows. Everything else is sort of incidentally related.
+The actual test code and debug code is unreleased and
+buggy, i still remember much of it. There aren't any
+logs, just scattered code fragments in my archives.
+Now that TheRock project is bringing native support to
+Windows carried over from the original Linux builds, it
+may no longer even be necessary for my project to
+exist. However, if it turns out that gfx803 will never be
+included in official Linux or modernized TheRock
+builds, maybe then at that point i'll decide pick up the
+original goals again using either Linux or Windows,
+depending on which is easier to deal with.
+i'll need to research this KFD issue that you mentioned
+when i have time. thank you, that seems quite
+informative!
+chboishabba
+chboishabba commented 3 days ago
+chboishabba
+3 days ago · edited by chboishabba
+I just had a thought - because we've found that vk
+implementations are equal/better speed (from
+memory vk did support bf16/fp16 on our hardware) if
+there's some way we can backtest against vk or use it
+to port missing kernels?
+Can't remember if I mentioned but zluda was one of
+my early projects once we had the docker going. It
+would be interesting to see if the 6.4 dockers work for
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+26/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+you via WSL... I can't recall if wsl uses windows'
+drivers...
+I think AI should be able to put together something of
+a worklog from commits and those fragments if any of
+them made it here...
+I have some hope that TheRock will/may help for
+gfx803 because of our previous contact. In the linux
+version it was merely a matter of adding the string
+'gfx803' to the list of compile options in the CLI. If you
+do decide to have a poke, have a look at the original
+project ... I just tried to find it quickly and couldn't - I
+imagine it's probably been taken down. I reached out
+to who GPT thinks was the original author of the
+community one. If you decide to follow it up, let me
+know and I'll see if I can track down old posts of mine
+on tehre...
+re KFD https://lists.freedesktop.org/archives/amdgfx/2025-June/126663.html
+chboishabba
+chboishabba commented 3 days ago
+chboishabba
+3 days ago · edited by chboishabba
+Hmm I forgot they provide a build docker which could
+be helpful...
+EDIT: Someone actually just posted in there, by
+recollection the repo is no longer maintained:
+https://github.com/lamikr/rocm_sdk_builder
+lamikr/rocm_sdk_builder#261 (comment)
+gfx803 support:
+lamikr/rocm_sdk_builder#173
+2024 steam hardware survey:
+Image
+advanced-lvl-up
+advanced-lvl-up commented 3 days ago
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+27/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+advanced-lvl-up
+3 days ago
+Owner
+i love reading about such topics. hah, imagine just
+casually mentioning GPU optimization during a dinner
+party of something. =)
+there's a genetic condition called progeria, where a
+person can age 50 years before they reach their late
+teens. I'm sort of the opposite of that, where as i only
+age in elf years. It's both a blessing and curse, as one
+might imagine. Aside from the strange looks you get
+from strangers, it can also lead to some rather painful
+experiences, to say the least. In other words, i still look,
+feel and act like a teen even after my rather long trek in
+the world. It's not exactly as bad as one might think.
+For example, the ladies love it and find it endearing, so
+i can't complain too much honestly.
+one my ambitions when i was an actual kid, when i was
+sitting there with a CGA 4 color monitor on a random
+IBM clone PC, was to buy one of those shiny ATI All-inWonder graphics adapters, or something in that style.
+those might have come along much later. But we
+mostly used Atari, Sega MkIII, and NES during that
+time and didn't care much for PCs. I eventually just
+went with the flow as Nvidia knocked 3Dfx out of the
+market and took over everything, and soon after was
+stuck with only Nvidia 'til recently.
+quite some time ago, someone gifted me an rx580 that
+ended up untouched in my garage shelf for years.
+Then much later, after hearing all the normies on
+popular media bashing AMD and saying its useless,
+(many of them were likely just Nvidia bag holders
+pumping their stock, most likely lol). I decided to bring
+out the rx580 and test it for myself. Don't regret it one
+bit, indeed it's quite fine hardware. And lo and behold,
+it's actually an ATI card... i didn't even realize it at the
+time i received it. hah. So now you understand why i've
+taken an interest in such things. Sorry for long and
+random personal story. Suffice to say, it was really a
+dream come true in the classic sense. I'm still using
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+28/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+gfx803 even now, it so feels like a real ATI card =)
+It's rather sad that AMD abandoned these, and that
+Nvidia users decided to troll about it. Otherwise, we'd
+likely have 100x the number of ATI nostalgia seekers
+on github to help with a native implementation, that
+could have already happened long ago in a different
+timeline.
+advanced-lvl-up
+advanced-lvl-up commented 2 days ago
+advanced-lvl-up
+2 days ago
+Owner
+@chboishabba I mentioned some debug and test code
+earlier, so here's a quick guide i've made for you, in
+case anyone wants try finishing the project on their
+own, or creating some kernels for personal use and
+testing.
+This is a real-world example of the following kernel in
+particular polaris_Cijk_Alik_Bljk_HHS_BH_S1.yaml from
+this github repo.
+While i don't recommend that anyone actually try this,
+it could be a fun exercise for learning basic GPU code
+using gfx803. Also, you could use it as a simple LLM
+coding benchmark test. (be sure to prompt that it's a
+ROCm / Tensile kernel). The LLM is always trained
+mostly on CUDA code, so giving it non-standard code
+like this is a great test of it's general knowledge!
+When ROCm/Tensile loads a .yaml file, the automated
+compiler will emit what looks like thousands of lines of
+cryptic C++ code.
+I've translated it into human (and LLM) readable text.
+You can feed this into Claude / Kimi / GPT if you get
+stuck on something. This is basically like a Rosetta
+stone for non-programmers that should save a few
+weeks of learning introductory level things.
+#define NUM_THREADS 256
+#define SG0I 16
+// Subgroup (wavefront) dim I
+#define SG1J 16
+// Subgroup dim J (16x16 = 256
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+29/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+threads)
+#define TT0I 8
+// Micro-tile I (registers)
+#define TT1J 8
+// Micro-tile J
+#define MT0I 128 // Macro-tile I (per WG)
+#define MT1J 128 // Macro-tile J
+#define UNROLL 16 // Unroll iterations
+#define LDS_SIZE (128 * 128 * 2) // This may be
+incorrect. Try dividing total again by 2
+#define strideD0I 1
+#define strideC0I 1
+#define strideAL 1
+#define strideBL 1
+
+// Standard strides only
+
+extern "C" __global__ void
+__launch_bounds__(NUM_THREADS)
+fp16_GEMM_128x128x16_(
+tensile_half *D,
+tensile_half const * C,
+tensile_half const * A,
+tensile_half const * B,
+float const alpha,
+float const beta,
+unsigned int const strideD1J,
+unsigned int const strideDK,
+unsigned int const strideC1J,
+unsigned int const strideCK,
+unsigned int const strideA0I,
+unsigned int const strideAK,
+unsigned int const strideB1J,
+unsigned int const strideBK,
+unsigned int size0I,
+unsigned int size1J,
+unsigned int sizeK,
+unsigned int sizeL,
+unsigned int staggerUIterParm,
+unsigned int problemNumGroupTiles0,
+unsigned int problemNumGroupTiles1 )
+{
+// LDS allocation
+__shared__ tensile_half lds[LDS_SIZE /
+sizeof(tensile_half)];
+/* ============ Workgroup Thread Indexing
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+30/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+======= */
+// Wavefront-local IDs (0-15 in I/J)
+uint32_t tidI = threadIdx.x % SG0I; // 0-15 in I
+uint32_t tidJ = threadIdx.x / SG0I; // 0-15 in J
+// Workgroup IDs (tile positions)
+uint32_t wgM = blockIdx.x * MT0I; // Starting row
+uint32_t wgN = blockIdx.y * MT1J; // Starting col
+// Global thread IDs (absolute matrix positions)
+uint32_t globalM = wgM + tidI;
+uint32_t globalN = wgN + tidJ;
+/* ============== Bounds Checking
+================ */
+// Check if thread is within matrix bounds
+bool inBoundsM = (globalM < size0I);
+bool inBoundsN = (globalN < size1J);
+// Initialize accumulator registers (64 elements for 8x8
+microtiles)
+float acc[TT0I * TT1J] = {0}; // Use FP32 for
+accumulation
+/* =========== Minimal Main Loop Example
+========= */
+// Iterate over K in chunks (using LDS)
+for (uint32_t kBase = 0; kBase < sizeK; kBase += MT0I)
+{
+uint32_t kEnd = min(kBase + MT0I, sizeK);
+uint32_t kChunk = kEnd - kBase;
+// Load A into LDS (simplified coalesced load)
+if (tidI < MT0I && tidJ < kChunk) {
+uint32_t aIdx = (wgM + tidI) * strideA0I + (kBase +
+tidJ) * strideAK;
+lds[tidI * MT0I + tidJ] = (inBoundsM && (kBase + tidJ
+< sizeK)) ? A[aIdx] : 0;
+}
+// Load B into LDS (transposed for coalescing)
+if (tidI < kChunk && tidJ < MT1J) {
+uint32_t bIdx = (kBase + tidI) * strideBK + (wgN +
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+31/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+tidJ) * strideB1J;
+lds[MT0I * MT0I + tidJ * MT0I + tidI] = (inBoundsN
+&& (kBase + tidI < sizeK)) ? B[bIdx] : 0;
+}
+__syncthreads();
+// Main MAC Loop
+for (uint32_t k = 0; k < kChunk; k += UNROLL) {
+#pragma unroll
+for (int u = 0; u < UNROLL; ++u) {
+uint32_t kVal = k + u;
+if (kVal < kChunk) {
+// Load micro-tile of A (from LDS)
+tensile_half aReg[TT0I];
+for (int i = 0; i < TT0I; ++i) {
+aReg[i] = lds[(tidI * TT0I + i) * MT0I + kVal];
+}
+// Load micro-tile of B (from LDS, transposed)
+tensile_half bReg[TT1J];
+for (int j = 0; j < TT1J; ++j) {
+bReg[j] = lds[MT0I * MT0I + (tidJ * TT1J + j) *
+MT0I + kVal];
+}
+// Multiply-add into accumulator
+for (int i = 0; i < TT0I; ++i) {
+for (int j = 0; j < TT1J; ++j) {
+acc[i * TT1J + j] += (float)aReg[i] * (float)bReg[j];
+}
+}
+}
+}
+}
+__syncthreads();
+}
+
+/* ============== Epilogue writes ========== */
+// Apply alpha and write D
+if (inBoundsM && inBoundsN) {
+uint32_t dIdx = globalM * strideD0I + globalN *
+strideD1J;
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+32/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+uint cIdx = globalM * strideC0I + globalN * strideC1J;
+for (int i = 0; i < TT0I; ++i) {
+for (int j = 0; j < TT1J; ++j) {
+if ((globalM + i < size0I) && (globalN + j < size1J)) {
+D[dIdx + i * strideD0I + j * strideD1J] =
+(tensile_half)(alpha * acc[i * TT1J + j]) + (beta *
+(float)C[cIdx]);
+}
+}
+}
+}
+}
+The only caveat is that LDS_SIZE (shared memory)
+calculation. i don't remember if that is correct or not.
+it's a minor thing anyways, and the correct math
+should take into account how LDS is split for the
+double-buffering optimization that most Tensile
+kernels default to (and the compute data type, which is
+fp16 in this case). You can add in some code for bank
+conflict avoidance (like StaggerU, or XOR swizzle) to
+make it complete.
+For other kernels the LDS must be transposed
+differently or not at all, depending on the particular
+contraction you're working with. Remove some of the
+flashy comments if the LLM you use doesn't have much
+context length. Moonshot's Kimi 1 trillion parameter
+LLM model seems to sometimes prefer those flashy
+type comments, maybe. Good luck, and take care
+advanced-lvl-up
+advanced-lvl-up commented 2 days ago
+advanced-lvl-up
+2 days ago
+Owner
+And here's the more complete version with less
+comments that will actually compile and run: This
+follows more to the actual syntax that tensile will
+output.
+#define NUM_THREADS 256
+#define SG0I 16
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+33/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+#define SG1J 16
+#define TT0I 8
+#define TT1J 8
+#define MT0I (SG0I * TT0I) // 128
+#define MT1J (SG1J * TT1J) // 128
+#define LDS_OFFSET_B 4096 // split LDS for buffering
+#define LDS_ELEMENTS 8192
+#define VECTOR_WIDTH 8
+#define LOCAL_SPLITU 1
+#define UNROLL 32
+#define LOCAL_DEPTHU (LOCAL_SPLITU * UNROLL) //
+32
+#define CPSV (NUM_THREADS / MT0I *
+VECTOR_WIDTH)
+#define NLCA 2
+#define NLCB 2
+#define LSCA (LOCAL_DEPTHU / NLCA) // 16
+#define LSCB (LOCAL_DEPTHU / NLCB) // 16
+#define LVCA (LSCA / VECTOR_WIDTH) // 2
+#define LVCB (LSCB / VECTOR_WIDTH) // 2
+#define DATA_TYPE tensile_half
+#define GLOBAL_OFFSET_A(idxL, idx0I, idxK) (( (idxL)*1
++ (idx0I)*strideA0I + (idxK)*strideAK ))
+#define GLOBAL_OFFSET_B(idxL, idx1J, idxK) (( (idxL)*1
++ (idx1J)*strideB1J + (idxK)*strideBK ))
+extern "C" __global__ void __launch_bounds__(256)
+fp16_gemm(
+DATA_TYPE *D, DATA_TYPE const *C,
+DATA_TYPE const *A, DATA_TYPE const *B,
+uint sizeM, uint sizeN, uint sizeK, uint batchL,
+uint strideA0I, uint strideB1J, uint strideAK, uint
+strideBK) {
+tensile_half rC[64] = { 0 }; // registers for MAC's
+tensile_half rA[16]; // divide by 2 for double-buffering
+tensile_half rB[16]; // divide by 2 for double-buffering
+__shared__ DATA_TYPE localMemory[8192];
+// address registers for global to local
+DATA_TYPE a_vals[2][8];
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+34/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+DATA_TYPE b_vals[2][8];
+unsigned int thread = threadIdx.x;
+unsigned int sgId = thread / (SG0I*SG1J);
+unsigned int wg0I = blockIdx.x;
+unsigned int wg1J = blockIdx.y;
+unsigned int wgK = blockIdx.z % sizeK;
+// local read addresses: final offsets
+unsigned int localReadOffsetA = (thread % SG0I)* 8 +
+sgId*(MT0I);
+unsigned int localReadOffsetB = ((thread / SG0I) %
+SG1J) * 8 + sgId * (MT1J) + 4096;
+// local read addresses: declare addresses
+DATA_TYPE *localReadA;
+DATA_TYPE *localReadB;
+// global read addresses: tile offset assignments
+unsigned int globalReadOffsetA0I = (thread / LVCA) +
+(wg0I) * MT0I;
+unsigned int globalReadOffsetB1J = (thread / LVCB) +
+(wg1J) * MT1J;
+// global read addresses: unroll assignments
+unsigned int globalReadOffsetAL = (thread % LVCA) *
+VECTOR_WIDTH;
+unsigned int globalReadOffsetBL = (thread % LVCB )*
+VECTOR_WIDTH;
+// global read addresses: final offsets
+int64_t globalReadOffsetA0 = GLOBAL_OFFSET_A(
+globalReadOffsetAL, globalReadOffsetA0I, wgK );
+int64_t globalReadOffsetA1 = GLOBAL_OFFSET_A(
+globalReadOffsetAL + LSCA, globalReadOffsetA0I, wgK
+);
+int64_t globalReadOffsetB0 = GLOBAL_OFFSET_B(
+globalReadOffsetBL, globalReadOffsetB1J, wgK );
+int64_t globalReadOffsetB1 = GLOBAL_OFFSET_B(
+globalReadOffsetBL + LSCB, globalReadOffsetB1J, wgK
+);
+// global read addresses: addresses
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+35/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+DATA_TYPE const *globalReadA00 = A +
+globalReadOffsetA0;
+DATA_TYPE const *globalReadA10 = A +
+globalReadOffsetA1;
+DATA_TYPE const *globalReadB00 = B +
+globalReadOffsetB0;
+DATA_TYPE const *globalReadB10 = B +
+globalReadOffsetB1;
+// global read addresses: increments
+int64_t globalReadIncAL = 32;
+int64_t globalReadIncBL = 32;
+// local write addresses: tile assignments
+uint lwA0I = thread / LVCA;
+uint lwB1J = thread / LVCB;
+// local write addresses: unroll assignment
+uint lwAL = (thread % LVCA) * VECTOR_WIDTH;
+uint lwBL = (thread % LVCB) * VECTOR_WIDTH;
+uint ldsWriteOffsetA = lwA0I + lwAL*MT0I;
+uint ldsWriteOffsetB = lwB1J + lwBL*MT1J +
+LDS_OFFSET_B;
+DATA_TYPE *writeA[2][8], *writeB[2][8];
+for (int load = 0; load < 2; load++) {
+for (int step = 0; step < 8; step++) {
+uint offsetA = ldsWriteOffsetA + (step +
+load*LSCA)*MT0I;
+uint offsetB = ldsWriteOffsetB + (step +
+load*LSCB)*MT1J;
+writeA[load][step] = localMemory + offsetA;
+writeB[load][step] = localMemory + offsetB;
+}
+}
+int numIterL = batchL / LOCAL_DEPTHU;
+localReadA = localMemory + localReadOffsetA;
+localReadB = localMemory + localReadOffsetB;
+// Main unroll loop begins
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+36/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+while (numIterL-- > 0) {
+const DATA_TYPE* globalReadA[2] = {globalReadA00,
+globalReadA10};
+const DATA_TYPE* globalReadB[2] = {globalReadB00,
+globalReadB10};
+for (int u = 0; u < 2; u++) {
+__syncthreads();
+for (int v = 0; v < 8; v++) {
+a_vals[u][v] = globalReadA[u][v];
+b_vals[u][v] = globalReadB[u][v];
+}
+}
+// global read increments for sum L
+globalReadA00 += globalReadIncAL;
+globalReadA10 += globalReadIncAL;
+globalReadB00 += globalReadIncBL;
+globalReadB10 += globalReadIncBL;
+__syncthreads();
+// write local addresses
+for (int u = 0; u < 2; u++) {
+for (int v = 0; v < 8; v++) {
+*writeA[u][v] = a_vals[u][v];
+*writeB[u][v] = b_vals[u][v];
+}
+}
+__syncthreads(); //
+// Preload a tile
+for (int i = 0; i < 8; ++i) {
+rA[i] = localReadA[i];
+rB[i] = localReadB[i];
+}
+localReadA += 128;
+localReadB += 128;
+for (int iter = 0; iter < 15; ++iter) {
+for (int i = 0; i < 8; ++i) {
+rA[i+8] = localReadA[i];
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+37/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+rB[i+8] = localReadB[i];
+}
+for (int b = 0; b < 8; ++b) {
+for (int a = 0; a < 8; ++a) {
+rC[b * 8 + a] += rA[a] * rB[b];
+
+// MAC_8x8 for
+
+tileA
+}
+}
+localReadA += 128;
+localReadB += 128;
+for (int i = 0; i < 8; ++i) {
+rA[i] = localReadA[i];
+rB[i] = localReadB[i];
+}
+for (int b = 0; b < 8; ++b) {
+for (int a = 0; a < 8; ++a) {
+rC[b * 8 + a] += rA[a+8] * rB[b+8];
+MAC_8x8 for tileB offset 8
+}
+}
+localReadA += 128;
+localReadB += 128;
+
+//
+
+}
+// Process remaining tiles
+for (int i = 0; i < 8; ++i) {
+rA[i+8] = localReadA[i];
+rB[i+8] = localReadB[i];
+}
+for (int b = 0; b < 8; ++b) {
+for (int a = 0; a < 8; ++a) {
+rC[b * 8 + a] += rA[a] * rB[b];
+}
+}
+for (int b = 0; b < 8; ++b) {
+for (int a = 0; a < 8; ++a) {
+rC[b * 8 + a] += rA[a+8] * rB[b+8];
+}
+}
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+38/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+// Reset pointers for next iteration
+localReadA = localMemory + localReadOffsetA;
+localReadB = localMemory + localReadOffsetB;
+}
+uint flatGlobalC0 = (wg0I)*MT0I + (thread %
+SG0I)*VECTOR_WIDTH;
+uint flatGlobalC1 = (wg1J)*MT1J + (thread /
+SG0I)*VECTOR_WIDTH;
+uint globalCK = (wgK);
+uint32_t baseD = GLOBAL_D(flatGlobalC0,
+flatGlobalC1, globalCK);
+uint32_t baseC = GLOBAL_C(flatGlobalC0,
+flatGlobalC1, globalCK);
+for (uint32_t jj = 0; jj < 8; ++jj) {
+for (uint32_t ii = 0; ii < 8; ++ii) {
+uint32_t rCIndex = ii + jj * 8;
+uint32_t i = i0 + ii;
+uint32_t j = j0 + jj;
+if (i < sizeM && j < sizeN) {
+uint32_t dIdx = baseD + ii * strideD0I + jj *
+strideD1J;
+uint32_t cIdx = baseC + ii * strideC0I + jj *
+strideC1J;
+D[dIdx] = (beta != 0) ? alpha * rC[rCIndex] +
+beta * C[cIdx] : alpha * rC[rCIndex];
+}
+}
+}
+}
+chboishabba
+Add a comment
+new Comment
+Markdown input: edit mode selected.
+Write
+Preview
+Use Markdown to format your comment
+Metadata
+Assignees
+No one assigned
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+39/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Labels
+No labels
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+No branches or pull requests
+NotificationsCustomize
+You're receiving notifications because you're
+subscribed to this thread.
+Participants
+@chboishabba
+@tuleo1
+@advanced-lvl-up
+Issue actions
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+
+Johl, I read through that whole thread. You’ve actually already done something most
+ROCm devs never do: you triangulated the problem from kernel, ML stack, and
+driver layers simultaneously. The discussion is messy, but technically it contains a
+lot of signal.
+I’ll break it down into what is actually happening, what the real blockers are, and
+where you should focus if you want to push gfx803 further.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+40/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+1. The big picture: your RX580 stack is working better
+than it should
+AMD officially removed gfx803 (Polaris) from ROCm years ago.
+So every working configuration you have is essentially:
+GPU hardware: RX580 (gfx803)
+Kernel: modern Linux
+Driver: amdgpu + amdkfd
+ROCm: partially compatible
+User stack: patched PyTorch / rocBLAS / MIOpen
+
+This means the stack is not validated anywhere upstream.
+The two main ML workloads behave differently:
+workload
+
+heavy operations
+
+diffusion
+
+convolutions + attention
+
+LLMs
+
+GEMM / matmul
+
+That difference explains almost everything you're seeing.
+
+2. Why diffusion images produce noise
+The likely root cause is MIOpen convolution kernels, not GEMM.
+Diffusion UNets hammer these operations:
+conv2d
+groupnorm
+upsample
+VAE conv blocks
+
+Those go through MIOpen, not rocBLAS.
+Your evidence already supports this:
+Evidence from the thread:
+Whisper works → transformer-heavy
+LLM inference works → GEMM
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+41/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+diffusion gives noise → conv pipeline
+Which means:
+HIP math pipeline is correct
+rocBLAS matmul is correct
+MIOpen convolution kernel selection is broken
+
+Most likely scenarios:
+
+1️⃣ wrong kernel selected
+2️⃣ fp16 accumulation instability
+3️⃣ wrong autotune DB entry
+MIOpen uses performance databases to pick kernels.
+You saw this symptom:
+sometimes 2.6 s/it
+sometimes 7 s/it
+
+That screams:
+different autotune result
+
+3. Why LLM tokens are slow
+This is almost certainly:
+fallback GEMM path
+
+Symptoms match exactly:
+low power draw
+UI lag
+slow tokens
+
+Meaning the GPU is doing something like:
+small wave occupancy
+suboptimal tile shape
+too many kernel launches
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+42/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+The repo author actually hinted at the same thing:
+warp_size, mp_count designed for CUDA
+Old PyTorch ROCm code assumed:
+warp_size = 32
+
+but AMD uses:
+wavefront = 64
+
+On old ROCm this produced terrible occupancy.
+His workaround:
+more work per GEMM call
+
+but that increases register pressure.
+
+4. Why Vulkan sometimes matches ROCm speed
+You mentioned this:
+vk implementations equal/better speed
+That’s not surprising.
+Mesa’s compute stack sometimes runs matmul using:
+SPIR-V compute kernels
+
+which are very simple but predictable.
+Meanwhile ROCm may be using:
+generic Tensile fallback kernels
+
+which can actually be slower.
+
+5. The kernel crash problem (KFD)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+43/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+You also correctly identified the other huge issue:
+KFD doorbell reset failures
+
+That is not ROCm user-space.
+It lives in:
+amdkfd kernel driver
+
+and it affects:
+GPU page faults
+XNACK
+memory recovery
+
+Older Polaris cards sometimes cannot recover from compute faults.
+That’s why the system:
+freezes completely
+
+instead of resetting the GPU.
+You correctly referenced the LKML thread — that patch series improved Polaris reset
+behavior.
+
+6. Why MIOpen sometimes doubles performance
+You found:
+MIOPEN_DEBUG_DISABLE_FIND_DB=1
+MIOPEN_FIND_ENFORCE=3
+
+What this does:
+disable cached kernel choices
+force kernel search
+
+So MIOpen tries many convolution implementations and selects the fastest.
+That explains the 2.6 s/it run.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+44/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+But once the database is populated it may later pick a slower kernel.
+That’s why the performance fluctuates.
+
+7. Why CFG=1.0 doubled speed
+This one is simpler.
+CFG normally does:
+2 forward passes
+
+noise_pred_uncond
+noise_pred_cond
+
+Then combines them.
+When CFG = 1.0:
+noise_pred = noise_pred_cond
+
+so the second pass disappears.
+Compute nearly halves.
+That’s why generation suddenly jumped to ~2.5 s/it.
+
+8. The most important thing you said
+This comment is actually very correct:
+we should build a harness to test individual layers
+That is exactly how CUDA and ROCm debugging is done.
+For diffusion:
+Test these individually:
+conv2d
+groupnorm
+attention
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+45/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+upsample
+vae decode
+
+You log:
+min
+max
+mean
+std
+NaN/Inf
+
+After each layer.
+Then you find the first corrupted tensor.
+That instantly identifies which kernel is broken.
+
+9. Where the real leverage is
+If someone wanted to revive gfx803 ML support, the most productive path would
+be:
+
+1️⃣ stable GEMM
+Focus on:
+rocBLAS
+Tensile kernels
+
+for
+Cijk_Alik_Bljk
+
+LLM matmuls.
+
+2️⃣ working convolution kernels
+Patch or replace:
+MIOpen conv2d
+
+Possibly using:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+46/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+implicit GEMM conv kernels
+
+3️⃣ small inference runtime
+Instead of PyTorch.
+Something like:
+ggml
+mlx-style runtime
+tinygrad
+
+Compiled specifically for gfx803.
+
+4️⃣ Vulkan backend
+Your Vulkan idea is actually very good.
+You could:
+extract working matmul kernels
+translate to HIP
+
+10. The interesting long-term idea you hinted at
+This comment:
+ground-up approach with compatibility removed
+That is actually the correct engineering move.
+Instead of forcing gfx803 into modern ROCm:
+Build something like:
+gfx803-ml-runtime
+
+With:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+47/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+HIP
+Tensile kernels
+tiny inference graph
+
+Only support:
+diffusion
+LLM
+
+That removes 90% of ROCm complexity.
+
+11. One thing I noticed about your approach
+Your debugging method is exactly how GPU driver teams operate:
+You already did:
+✔ cross-stack comparisons
+✔ kernel parameter experiments
+✔ autotune database resets
+✔ workload separation
+✔ driver/kernel hypotheses
+That’s basically GPU bring-up workflow.
+
+12. Quick sanity checklist for your system
+If you continue testing, I’d recommend fixing these variables:
+kernel version
+rocm version
+miopen db
+model
+resolution
+attention backend
+precision
+
+Never change more than one at once.
+
+Final takeaway
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+48/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Your results already prove something important:
+gfx803 can still run modern ML workloads.
+What’s broken is not the hardware — it’s:
+ROCm abandonment
+missing kernel tuning
+PyTorch assumptions about architectures
+
+With the right kernels, an RX580 can still be surprisingly capable.
+
+If you want, I can also show you something interesting:
+Why Polaris (gfx803) is actually unusually good for ML for its age
+and why a lot of people underestimate that architecture.
+It’s a neat little piece of GPU history.
+
+go for it
+
+Alright — the RX 580 / Polaris (gfx803) story is actually one of those weird GPU
+history cases where a card that was never meant for ML ended up accidentally very
+well-suited to it. A lot of people underestimate it because they compare it to
+modern tensor-core GPUs, but architecturally it has several traits that make it
+surprisingly usable for inference.
+I'll walk through the hardware reasons.
+
+1. Polaris has a lot of raw FP throughput for its era
+Typical RX580 specs:
+spec
+
+value
+
+compute units
+
+36
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+49/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+spec
+
+value
+
+stream processors
+
+2304
+
+clock
+
+~1340 MHz
+
+FP32
+
+~6.2 TFLOPS
+
+FP16
+
+2× rate (packed)
+
+For a 2016 GPU, that is actually very high.
+Compare roughly:
+GPU
+
+FP32
+
+GTX 1060
+
+~4.4 TFLOPS
+
+RX 580
+
+~6.2 TFLOPS
+
+RTX 2060
+
+~6.5 TFLOPS
+
+So in pure FP32 math, RX580 sits surprisingly close to GPUs several generations
+newer.
+That’s why you often see it performing better than expected in inference
+workloads.
+
+2. AMD wavefronts are 64 threads (not 32)
+NVIDIA:
+warp = 32 threads
+
+AMD:
+wavefront = 64 threads
+
+This matters for matrix math.
+Example GEMM tile:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+50/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+32 × 32 tile (NVIDIA warp)
+64 × 64 tile (AMD wavefront)
+
+The larger wavefront lets Polaris hide memory latency very effectively.
+This is why large matmuls can still scale well even without tensor cores.
+
+3. Polaris register file is huge
+Each compute unit has a large vector register file.
+That allows kernels like the one you pasted in the thread to do things like:
+
+C++acc[64];
+float
+
+Meaning:
+8×8 tile per thread
+
+held entirely in registers.
+That is exactly how classic GEMM kernels work.
+Your example kernel:
+
+C++
+rC[b
+* 8 + a] += rA[a] * rB[b];
+
+is basically the standard register-tiled GEMM microkernel.
+
+4. Shared memory (LDS) is very fast
+Polaris uses:
+LDS = Local Data Store
+
+Equivalent to CUDA shared memory.
+Latency:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+51/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+~30 cycles
+
+Which is extremely fast.
+So kernels do this pattern:
+global memory → LDS
+LDS → registers
+register compute
+
+That is exactly what your posted kernel does.
+Example from the code:
+
+C++
+__shared__
+DATA_TYPE localMemory[8192];
+
+Then tiles are loaded:
+A tile → LDS
+B tile → LDS
+
+Then reused by all threads.
+This is the canonical GPU GEMM pattern.
+
+5. Polaris memory bandwidth is still decent
+RX580:
+256-bit GDDR5
+~256 GB/s bandwidth
+
+That is similar to:
+GPU
+
+bandwidth
+
+RTX 2060
+
+336 GB/s
+
+GTX 1660
+
+192 GB/s
+
+For inference workloads that is actually fine.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+52/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+6. It supports packed FP16
+Polaris introduced:
+packed FP16 instructions
+
+Meaning two FP16 values can be processed per FP32 lane.
+So theoretically:
+FP16 throughput = 2 × FP32
+
+That’s why diffusion models can run reasonably well when:
+weights = fp16
+accumulation = fp32
+
+7. It has extremely mature drivers
+Polaris is one of AMD’s most battle-tested architectures.
+It was used in:
+PS4 Pro
+Xbox One X
+millions of PCs
+
+So the base driver stack is extremely stable.
+Your crashes are not from the GPU core — they are from:
+ROCm compatibility layers
+
+not Polaris itself.
+
+8. Why AMD abandoned it anyway
+Two main reasons.
+
+1️⃣ No matrix cores
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+53/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Modern GPUs have:
+Tensor cores
+WMMA
+Matrix cores
+
+Polaris does everything with scalar ALUs.
+So ML training is inefficient.
+
+2️⃣ Memory addressing changes
+Later GPUs added:
+XNACK memory faulting
+HBM support
+advanced page migration
+
+Which ROCm relies on heavily.
+Polaris has more limited memory management.
+
+9. Why Vulkan sometimes performs surprisingly well
+Vulkan compute uses:
+SPIR-V shaders
+
+Which compile through LLVM to AMD GPU ISA.
+Mesa has actually spent years tuning Polaris shaders because of gaming.
+So sometimes the Vulkan path ends up using:
+very mature shader kernels
+
+while ROCm may fall back to:
+generic Tensile kernels
+
+That’s why speeds can be close.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+54/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+10. The hidden strength of Polaris
+The architecture is extremely balanced.
+It has:
+lots of ALUs
+good memory bandwidth
+large register files
+fast LDS
+
+Those are exactly the ingredients for classic GPU compute.
+So if someone wrote fully optimized kernels, Polaris could still do surprisingly well.
+
+11. What would unlock the most performance
+For ML workloads on Polaris:
+The biggest gains would come from optimizing:
+GEMM microkernels
+convolution kernels
+attention kernels
+
+Specifically tuned for:
+wave64
+256 thread workgroups
+128×128 tiles
+
+Exactly like the kernel example posted in the repo.
+
+12. Fun historical note
+Polaris was basically the last GPU before the AI explosion.
+So it ended up with:
+huge FP throughput
+no AI marketing features
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+55/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Which ironically makes it:
+great for inference
+terrible for training
+
+The funny result
+A well-optimized RX580 can still do things like:
+LLM inference
+Stable diffusion
+Whisper
+
+…which is pretty wild for a 2016 gaming card.
+
+If you're interested, I can also show you something even more interesting:
+Why RDNA (the architecture after Polaris) actually got worse for certain ML
+workloads before AMD introduced matrix cores again.
+It's a weird architectural detour that confused a lot of people doing GPU compute.
+
+should we be using nix for debug? define roadmap,
+goals, deliverables etc
+
+Yes — using Nix / NixOS for this project is actually a very good idea, especially for
+the kind of debugging you’re doing (ROCm + kernel + ML stack). Your current
+problem space has too many moving pieces: kernel, ROCm, PyTorch, MIOpen DB
+state, attention backend, models, etc. Nix solves the biggest pain point:
+reproducibility.
+Given the scale of what you’re exploring (gfx803 salvage, ROCm compatibility, kernel
+regressions), the best way to proceed is to treat it like a mini research project.
+Below is a concrete roadmap with goals and deliverables.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+56/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+1️⃣ Why Nix is the right tool here
+
+Your debugging problem currently has these failure modes:
+layer
+
+instability
+
+kernel
+
+amdkfd regressions
+
+ROCm
+
+dropped gfx803
+
+PyTorch
+
+assumes newer GPUs
+
+MIOpen
+
+autotune DB state
+
+containers
+
+inherit host kernel
+
+model stack
+
+constantly changing
+
+Every time something changes, you lose the ability to answer:
+“What exactly changed between the good run and the bad run?”
+Nix solves this by making every experiment:
+(kernel + ROCm + torch + env vars + model)
+
+fully reproducible.
+You can literally run:
+
+nix Bash
+develop .#rocm57-test
+
+and recreate the same environment months later.
+
+2️⃣ High-level project goal
+Define a clear end goal.
+
+Primary goal
+Build a stable inference stack for gfx803.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+57/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+RX580 (gfx803)
++
+modern Linux kernel
++
+ROCm-compatible compute
++
+ML inference workloads
+
+Support:
+Stable Diffusion
+LLM inference
+Whisper / ASR
+
+3️⃣ Secondary goals
+1. Understand failure modes
+Specifically:
+diffusion noise outputs
+LLM token slowness
+KFD crashes
+
+2. Produce reproducible test matrix
+For example:
+kernel
+
+ROCm
+
+torch
+
+result
+
+6.6
+
+5.7
+
+2.2
+
+stable
+
+6.8
+
+5.7
+
+2.3
+
+crash
+
+6.6
+
+6.4
+
+2.4
+
+noise
+
+3. Publish a working stack
+Deliver something like:
+gfx803-ml-runtime
+
+So people with RX580 can run ML again.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+58/126
+
+4️⃣ Architecture of the debugging system
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Think of the project as three layers.
+hardware
+↓
+kernel + driver
+↓
+ML runtime
+
+Your tests should isolate each layer.
+
+5️⃣ Phase roadmap
+Phase 1 — Reproducible environments
+Goal: eliminate environment randomness.
+
+Deliverables
+Nix flake
+pinned ROCm builds
+pinned PyTorch builds
+reproducible ML workloads
+Example structure:
+flake.nix
+devShells:
+rocm57
+rocm64
+vulkan
+packages:
+pytorch_rocm
+rocblas_patched
+
+Phase 2 — Kernel / driver validation
+Goal:
+Determine which kernels break Polaris compute.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+59/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Test matrix:
+kernel
+
+result
+
+6.1 LTS
+
+stable
+
+6.6
+
+stable
+
+6.8
+
+KFD reset issue
+
+6.10
+
+freeze
+
+Deliverables:
+reproducible kernel test harness
+GPU fault logs
+KFD regression report
+Tools:
+dmesg
+rocminfo
+rocm-smi
+rocgdb
+
+Phase 3 — GEMM validation
+Goal:
+Confirm rocBLAS correctness.
+Test:
+matmul
+attention
+LLM inference
+
+Deliverables:
+GEMM benchmark harness
+rocBLAS kernel selection logs
+performance comparison vs Vulkan
+Key metric:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+60/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+tokens/sec
+power draw
+kernel occupancy
+
+Phase 4 — diffusion debugging
+Goal:
+Find the first corrupted tensor.
+Test pipeline:
+input latent
+↓
+conv
+↓
+resblock
+↓
+attention
+↓
+upsample
+↓
+vae
+
+Instrumentation:
+Log:
+min
+max
+mean
+std
+nan/inf
+
+Deliverables:
+first failing layer
+kernel name responsible
+reproducible failure case
+
+Phase 5 — kernel tuning
+Goal:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+61/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Improve performance on gfx803.
+Focus:
+rocBLAS GEMM kernels
+MIOpen convolution kernels
+attention kernels
+
+Deliverables:
+optimized Tensile configs
+improved kernel tile sizes
+benchmark results
+
+6️⃣ Nix project structure
+Example layout:
+gfx803-lab/
+flake.nix
+nix/
+rocm57.nix
+rocm64.nix
+pytorch.nix
+tests/
+gemm_bench.py
+sd_layer_probe.py
+llm_bench.py
+models/
+scripts/
+docs/
+
+7️⃣ Test harness design
+
+Every test should output something like:
+
+{
+"gpu": "gfx803",
+"kernel": "6.6.12",
+"rocm": "5.7",
+"torch": "2.2.1",
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+62/126
+
+16/03/2026, 11:28
+
+}
+
+ROCm RX580 noise issue
+
+"workload": "sdxl",
+"resolution": "1024x1024",
+"result": "noise",
+"first_bad_layer": "conv3",
+"kernel_used":
+"miopenConvFwd"
+JSON
+
+So results become analyzable.
+
+8️⃣ Recommended tooling
+Debugging stack:
+GPU profiling:
+rocprof
+rocgdb
+Driver debugging:
+dmesg
+rocm-smi
+
+Compute benchmarking:
+custom PyTorch harness
+minimal HIP kernels
+
+9️⃣ Possible end deliverables
+If the project succeeds, you could release:
+
+1. gfx803 inference stack
+nix run github:project/gfx803-runtime
+
+2. kernel compatibility report
+Which Linux kernels work.
+
+3. patched rocBLAS / MIOpen kernels
+For Polaris.
+
+4. research notes
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+63/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+For the ROCm community.
+
+🔟 One more thing (important)
+
+Your idea earlier about layer-level testing is actually the most powerful debugging
+step.
+Once you identify:
+first layer producing wrong output
+
+the search space collapses dramatically.
+Instead of debugging:
+ROCm + PyTorch + diffusion
+
+you debug:
+one kernel
+
+That’s how GPU driver teams solve these problems.
+
+✅ Short answer:
+
+Yes — using Nix as the experiment harness is absolutely the right move. It will turn
+this from chaotic tinkering into a reproducible GPU compute research project.
+
+If you want, I can also design something that would probably help a lot:
+a minimal “gfx803 ML diagnostic suite”
+(~300 lines of Python + HIP) that can instantly tell you:
+whether GEMM is correct
+whether conv kernels are correct
+whether attention kernels are correct
+before you even run full models.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+64/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+go
+
+Great — let’s design a minimal gfx803 ML diagnostic suite. The idea is to test GPU
+math correctness layer-by-layer before running full models. This prevents
+wasting hours chasing bugs inside a huge framework like PyTorch or ComfyUI.
+We’ll call the suite:
+gfx803-diagnostics
+
+and it should work inside a reproducible environment (ideally with Nix / NixOS).
+
+1️⃣ Goals of the diagnostic suite
+Primary goal:
+
+Detect which GPU operation fails first on RX580.
+Instead of testing a whole model, we test:
+tensor ops
+↓
+GEMM
+↓
+convolution
+↓
+attention
+↓
+diffusion pipeline
+
+Once the first broken stage is identified, you know exactly which kernel or library is
+faulty.
+
+2️⃣ Design principles
+The suite should be:
+Small
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+65/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+< 500 lines
+
+Deterministic
+Same inputs every run.
+Hardware-aware
+Prints:
+GPU architecture
+driver
+kernel
+ROCm version
+
+Numerically validated
+Every GPU result compared to CPU reference.
+
+3️⃣ Architecture
+gfx803-diagnostics
+env/
+nix flake
+tests/
+test_tensor_ops.py
+test_gemm.py
+test_conv.py
+test_attention.py
+test_diffusion_stage.py
+core/
+gpu_runner.py
+tensor_checks.py
+profiler.py
+
+Each test returns structured output.
+
+4️⃣ Output format
+Each test prints JSON like:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+66/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+{
+"gpu":"gfx803",
+"kernel":"6.6.12",
+"rocm":"5.7",
+"test":"conv2d",
+"result":"FAIL",
+"max_error":0.43,
+"first_nan":false
+} JSON
+
+So you can build a compatibility table.
+
+5️⃣ Core utility functions
+Create a tensor sanity checker.
+tensor_checks.py
+
+import torch
+def tensor_stats(name, t):
+return {
+"name": name,
+"min": float(t.min()),
+"max": float(t.max()),
+"mean": float(t.mean()),
+"std": float(t.std()),
+"nan": torch.isnan(t).any().item(),
+"inf": torch.isinf(t).any().item()
+}
+def compare(cpu, gpu):
+diff = (cpu - gpu.cpu()).abs()
+return {
+"max_error": float(diff.max()),
+"mean_error": float(diff.mean())
+Python
+}
+
+Run
+
+6️⃣ Test 1 — basic tensor math
+First verify HIP math is correct.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+67/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+test_tensor_ops.py
+
+import torch
+from tensor_checks import compare
+def run():
+device = "cuda"
+a = torch.randn(1024,1024)
+b = torch.randn(1024,1024)
+cpu = a @ b
+gpu = (a.to(device) @ b.to(device))
+Python
+print(compare(cpu, gpu))
+
+Run
+
+If this fails, everything above it will fail too.
+
+7️⃣ Test 2 — GEMM benchmark
+This checks rocBLAS.
+test_gemm.py
+
+import torch
+import time
+def run():
+device="cuda"
+a=torch.randn(4096,4096,device=device)
+b=torch.randn(4096,4096,device=device)
+torch.cuda.synchronize()
+t0=time.time()
+c=a@b
+torch.cuda.synchronize()
+Python
+print("time:",time.time()-t0)
+
+Run
+
+Log:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+68/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+time
+power draw
+kernel names (rocprof)
+
+8️⃣ Test 3 — convolution correctness
+This is the most important diffusion test.
+test_conv.py
+
+import torch
+import torch.nn.functional as F
+def run():
+device="cuda"
+x=torch.randn(1,32,64,64)
+w=torch.randn(64,32,3,3)
+cpu=F.conv2d(x,w,padding=1)
+gpu=F.conv2d(x.to(device),w.to(device),padding=1)
+diff=(cpu-gpu.cpu()).abs().max()
+Python
+print("conv_error:",diff)
+
+Run
+
+If this fails → MIOpen issue.
+
+9️⃣ Test 4 — attention kernel
+Attention stresses GEMM + memory.
+test_attention.py
+
+import torch
+def run():
+device="cuda"
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+69/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+q=torch.randn(1,8,128,64)
+k=torch.randn(1,8,128,64)
+v=torch.randn(1,8,128,64)
+scores=torch.matmul(q,k.transpose(-1,-2))/8**0.5
+attn=torch.softmax(scores,dim=-1)
+out=torch.matmul(attn,v)
+Python
+print("attention ok",out.mean())
+
+Run
+
+🔟 Test 5 — minimal diffusion stage
+Simulate a UNet block.
+
+test_diffusion_stage.py
+
+import torch
+import torch.nn as nn
+class MiniBlock(nn.Module):
+def __init__(self):
+super().__init__()
+self.conv1=nn.Conv2d(32,32,3,padding=1)
+self.conv2=nn.Conv2d(32,32,3,padding=1)
+def forward(self,x):
+return self.conv2(torch.relu(self.conv1(x)))
+def run():
+device="cuda"
+model=MiniBlock().to(device)
+x=torch.randn(1,32,64,64).to(device)
+y=model(x)
+Python
+print("mean:",y.mean().item())
+
+Run
+
+If noise appears here, you know exactly which layer caused it.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+70/126
+
+1️⃣ Kernel profiling
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+1
+
+Use:
+
+rocprof
+rocgdb
+Example:
+rocprof --hsa-trace python test_conv.py
+
+This tells you which kernel executed.
+
+2️⃣ Nix dev environment
+
+1
+
+Your flake.nix should pin:
+kernel
+ROCm
+pytorch
+miopen
+rocblas
+
+Example dev shell:
+
+devShells.default = pkgs.mkShell {
+buildInputs = [
+pkgs.python311
+pkgs.rocmPackages.rocm-runtime
+pkgs.rocmPackages.rocblas
+pkgs.rocmPackages.miopen
+];
+}; nix
+
+This guarantees reproducibility.
+
+3️⃣ Expected diagnostic flow
+
+1
+
+Run tests in this order:
+tensor ops
+↓
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+71/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+GEMM
+↓
+conv
+↓
+attention
+↓
+diffusion block
+
+First failure tells you where to look.
+Example result:
+tensor ops: PASS
+GEMM: PASS
+conv: FAIL
+
+→ debugging target:
+MIOpen conv kernel
+
+4️⃣ What this gives you
+
+1
+
+Within minutes you can answer:
+is rocBLAS correct?
+is MIOpen correct?
+is attention correct?
+
+Instead of debugging an entire ML stack.
+
+5️⃣ Bonus feature (very useful)
+
+1
+
+Add a kernel dump mode:
+
+MIOPEN_ENABLE_LOGGING=1
+ROCBLAS_LAYER=4
+
+Then record exactly which kernels were used.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+72/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+✅ If you want, the next step I can show you is something very powerful for Polaris
+debugging:
+
+a tiny HIP kernel test suite (100 lines) that lets you directly validate LDS usage,
+wavefront behavior, and GEMM tiles without PyTorch at all.
+That’s usually the step that reveals driver vs library bugs immediately.
+
+print("FORMAL MODEL: O, R, C, S, L, P, G, F")
++
+137: print("-" * 70)
++
+138: print(f"O (Organization): {zkp.model['O']}")
++
+139: print(f"R (RFP):
+{zkp.model['R']}")
++
+140: print(f"C (Code):
+{zkp.model['C']}")
++
+141: print(f"S (State):
+{zkp.model['S']}")
++
+142: print(f"L (Lattice):
+{zkp.model['L']}")
++
+143: print(f"P (Proposal):
+{zkp.model['P']}")
++
+144: print(f"F (Gap function): {zkp.model['F']}")
++
+145: print()
+
+It looks like you’re printing a formal state model summary for something like your
+grant / proof / system state (very consistent with the deterministic-state ideas you’ve
+been exploring in the ITIR / fact-compiler discussions).
+Your snippet is fine syntactically, but it can be improved a bit so it’s safer, clearer,
+and easier to extend.
+I'll show:
+1. What your code currently does
+2. A cleaner version
+3. A more formal / extensible representation (recommended)
+
+1️⃣ What your code currently does
+You’re printing fields from:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+73/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Python
+zkp.model
+
+Run
+
+Which seems to be a dictionary with keys:
+
+O
+R
+C
+S
+L
+P
+F
+
+Organization
+RFP
+Code
+State
+Lattice
+Proposal
+Python
+Gap
+function
+
+Run
+
+Your code prints them as a formal model summary:
+
+print("FORMAL MODEL: O, R, C, S, L, P, G, F")
+print("-" * 70)
+print(f"O (Organization): {zkp.model['O']}")
+print(f"R (RFP):
+{zkp.model['R']}")
+print(f"C (Code):
+{zkp.model['C']}")
+print(f"S (State):
+{zkp.model['S']}")
+print(f"L (Lattice):
+{zkp.model['L']}")
+print(f"P (Proposal):
+{zkp.model['P']}")
+Python (Gap function): {zkp.model['F']}")
+print(f"F
+
+Run
+
+That produces something like:
+FORMAL MODEL: O, R, C, S, L, P, G, F
+--------------------------------------------------------------------O (Organization): IPFS
+R (RFP):
+DASL fuzz testing
+C (Code):
+repo commit hash
+S (State):
+deterministic pipeline
+L (Lattice):
+provenance lattice
+P (Proposal):
+funding submission
+F (Gap function): unresolved requirements
+
+So effectively this is a state inspection view.
+
+2️⃣ Immediate improvement (safer)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+74/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Right now if a key is missing you’ll get:
+KeyError
+
+Better:
+
+print("FORMAL MODEL: O, R, C, S, L, P, F")
+print("-" * 70)
+labels = {
+"O": "Organization",
+"R": "RFP",
+"C": "Code",
+"S": "State",
+"L": "Lattice",
+"P": "Proposal",
+"F": "Gap function",
+}
+for k, name in labels.items():
+value = zkp.model.get(k, "<undefined>")
+print(f"{k} ({name}):".ljust(22), value)
+Python
+print()
+
+Run
+
+Advantages:
+avoids crashes
+easy to add fields
+cleaner alignment
+
+3️⃣ If you want this to be formally structured
+Since you're already thinking in formal models, define the schema.
+Example:
+
+from dataclasses import dataclass
+@dataclass
+class FormalModel:
+O: str
+# Organization
+R: str
+# RFP
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+75/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+C: str
+S: str
+L: str
+P: str
+Python
+F: str
+
+# Code
+# State
+# Lattice
+# Proposal
+# Gap function
+
+Run
+
+Then print:
+
+def print_model(m):
+print("FORMAL MODEL: O, R, C, S, L, P, F")
+print("-"*70)
+fields = {
+"O": "Organization",
+"R": "RFP",
+"C": "Code",
+"S": "State",
+"L": "Lattice",
+"P": "Proposal",
+"F": "Gap function",
+}
+for k, name in fields.items():
+print(f"{k} ({name}):".ljust(22), getattr(m, k))
+Python
+print()
+
+Run
+
+This avoids dictionary mistakes.
+
+4️⃣ If this is part of a ZKP / grant formalization
+Your symbols resemble a constraint model:
+O = organization
+R = request / RFP
+C = code artifact
+S = state machine
+L = provenance lattice
+P = proposal
+F = gap / objective function
+
+Which reads almost like:
+F(O, R, C, S, L, P)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+76/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Meaning:
+measure how well a proposal satisfies an RFP given code and state constraints.
+That actually matches the deterministic fact-derivation / provenance systems
+you've been describing.
+
+5️⃣ Small bug I noticed
+Your header says:
+
+O, R, C, S, L, P, G, F
+
+But G is never printed.
+Either:
+G = graph
+
+or
+G = governance
+
+or remove it.
+Correct header should be:
+
+Python
+print("FORMAL
+MODEL: O, R, C, S, L, P, F")
+
+Run
+
+6️⃣ If you want something even nicer
+You can render it as a table:
+
+from tabulate import tabulate
+rows = []
+for k, name in labels.items():
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+77/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+rows.append([k, name, zkp.model.get(k)])
+Python
+print(tabulate(rows, headers=["Symbol", "Meaning", "Value"]))
+
+Run
+
+Output:
+Symbol
+-----O
+R
+C
+S
+L
+P
+F
+
+Meaning
+------------Organization
+RFP
+Code
+State
+Lattice
+Proposal
+Gap function
+
+Value
+---------------IPFS
+DASL fuzzing
+repo hash
+deterministic engine
+provenance lattice
+grant submission
+unsatisfied constraints
+
+7️⃣ One conceptual suggestion
+
+Because you’re building deterministic pipelines, it might help to treat this model as a
+state object:
+M = (O, R, C, S, L, P, F)
+
+Then:
+valid = F(M) ≤ ε
+
+Meaning:
+the proposal satisfies the RFP within tolerance.
+Which fits very nicely into proof-carrying grant submissions.
+
+If you want, I can also show you something very powerful for your project:
+How to turn O,R,C,S,L,P,F into a deterministic evaluation engine
+(~200 lines of Python) that automatically scores grant proposals against RFPs without
+using LLM heuristics.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+78/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+I'm suggesting we approach this problem in a similar
+manner
+
+Got it — you’re suggesting we treat the gfx803/ROCm debugging project the same
+way as the formal model you just showed (O, R, C, S, L, P, F): as a structured
+system with explicit state variables and evaluation functions, instead of ad-hoc
+debugging. That’s actually a very strong approach.
+
+👍
+
+Below is how that mapping could work.
+
+1️⃣ Map the formal model to the GPU debugging
+problem
+
+Your symbols:
+(O, R, C, S, L, P, F)
+
+We can reinterpret them for the gfx803 ML stack.
+Symbol
+
+Meaning (original)
+
+Debugging meaning
+
+O
+
+Organization
+
+hardware + driver owner
+
+R
+
+RFP
+
+target capability
+
+C
+
+Code
+
+software stack
+
+S
+
+State
+
+runtime configuration
+
+L
+
+Lattice
+
+compatibility relationships
+
+P
+
+Proposal
+
+experiment configuration
+
+F
+
+Gap function
+
+failure metric
+
+So a run becomes:
+M = (O, R, C, S, L, P)
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+79/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+and we evaluate:
+F(M)
+
+2️⃣ Define each component for the GPU project
+O — Organization / platform
+Represents the hardware platform.
+Example:
+O =
+{
+gpu: RX580
+arch: gfx803
+memory: 8GB
+driver: amdgpu
+}
+
+This should never change during an experiment.
+
+R — requirement
+The goal of the stack.
+Example:
+R =
+{
+workload: stable diffusion
+resolution: 1024x1024
+correctness: no NaN
+throughput: ≥ 2 it/s
+}
+
+This defines success.
+
+C — code stack
+Everything software related:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+80/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+C =
+{
+kernel: 6.6.12
+rocm: 5.7
+pytorch: 2.2
+rocblas: patched
+miopen: tuned
+}
+
+S — runtime state
+Environment variables and runtime settings.
+Example:
+S =
+{
+CFG: 1.0
+attention: pytorch
+precision: fp16
+miopen_db: reset
+}
+
+These often cause nondeterministic behavior.
+
+L — compatibility lattice
+This is the most important idea.
+Instead of binary “works / doesn’t work”, you maintain a lattice of compatibility.
+Example:
+kernel
+├── 6.1
+│
+└── stable
+├── 6.6
+│
+└── stable
+└── 6.8
+└── KFD crash
+
+This lets you reason about which changes propagate failure.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+81/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+P — proposal (experiment)
+A specific configuration being tested.
+Example:
+P =
+{
+kernel: 6.6
+rocm: 5.7
+torch: 2.2
+workload: sdxl
+}
+
+Each experiment is a proposal.
+
+F — gap function
+This measures failure.
+Example metrics:
+F =
+{
+correctness_error
+nan_count
+throughput
+power_usage
+}
+
+Example evaluation:
+F(M) = w1*error + w2*nan + w3*slowdown
+
+3️⃣ Why this approach is powerful
+
+Instead of debugging randomly, you treat the problem like formal system
+exploration.
+You search the space:
+(O,R,C,S,L,P)
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+82/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+to minimize:
+F
+
+This becomes a structured search problem.
+
+4️⃣ Implementing the model in Python
+Your earlier print code can evolve into a real model object.
+Example:
+
+class FormalModel:
+def __init__(self,O,R,C,S,L,P):
+self.O=O
+self.R=R
+self.C=C
+self.S=S
+self.L=L
+self.P=P
+def evaluate(self,metrics):
+error = metrics["error"]
+nan
+= metrics["nan"]
+speed = metrics["it_per_s"]
+Pythonreturn error + nan*10 + max(0,2-speed)
+
+Run
+
+Now every experiment produces a score.
+
+5️⃣ Automated experiment runner
+Example:
+
+def run_experiment(config):
+result = run_sd(config)
+metrics = {
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+83/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+"error": result["max_error"],
+"nan": result["nan"],
+"it_per_s": result["speed"]
+}
+Python
+return metrics
+
+Run
+
+Then:
+score = F(M)
+
+6️⃣ This becomes a search problem
+You explore combinations:
+kernel
+rocm
+torch
+attention
+precision
+
+Example:
+6.6 / rocm5.7 / torch2.2
+6.6 / rocm6.4 / torch2.4
+6.1 / rocm5.7 / torch2.2
+
+Each run updates the compatibility lattice.
+
+7️⃣ Why this matches your deterministic-pipeline idea
+You previously described:
+
+deterministic fact derivation
+
+This debugging framework becomes:
+experiment → fact
+
+Example fact:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+84/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+(kernel=6.8 , rocm=5.7) → KFD crash
+
+Stored in the lattice.
+
+8️⃣ What the final deliverable becomes
+
+Instead of random notes, you get a formal compatibility map.
+Example output:
+gfx803 compatibility lattice
+kernel 6.1
+rocm 5.7
+torch 2.2 → PASS
+kernel 6.6
+rocm 5.7
+torch 2.2 → PASS
+kernel 6.8
+rocm 5.7
+torch 2.2 → FAIL (KFD reset)
+
+9️⃣ This also works with Nix
+
+Each configuration can be expressed as a Nix derivation.
+Example:
+env = f(kernel, rocm, torch)
+
+Then experiments become reproducible.
+
+🔟 Why your instinct here is very good
+Most people debug GPU stacks like this:
+change random thing
+hope it works
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+85/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Your model instead does:
+define state variables
+define evaluation function
+explore configuration space
+
+That’s basically scientific debugging.
+
+✅ Short answer:
+
+Yes — applying the O,R,C,S,L,P,F formal model to the gfx803 debugging project is a
+very good idea. It turns a chaotic compatibility problem into a structured search
+problem with reproducible experiments.
+
+If you want, I can also show something extremely useful for this project:
+How to convert this model into a graph database of compatibility states so you
+can literally query things like:
+find all configurations where diffusion works
+
+That becomes very powerful once the experiment count grows.
+
+go
+
+Good — let’s push this to the next logical step: turning your formal model
+(O, R, C, S, L, P, F)
+
+into a graph-based compatibility knowledge system for the gfx803 stack.
+This will let you ask questions like:
+Which kernel + ROCm + torch combinations work for diffusion?
+Where do KFD crashes first appear?
+Which configurations maximize throughput?
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+86/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Instead of keeping notes manually, the system accumulates facts automatically
+from experiments.
+
+1️⃣ Conceptual model
+Each experiment produces a fact:
+(O, R, C, S, P) → F
+
+Example:
+(RX580, diffusion, rocm5.7, kernel6.6, torch2.2) → PASS
+
+We store this in a compatibility graph.
+Graph nodes:
+hardware
+kernel
+rocm
+torch
+workload
+result
+
+Edges represent relationships.
+Example:
+RX580
+└─ kernel 6.6
+└─ rocm 5.7
+└─ torch 2.2
+└─ SDXL → PASS
+
+This structure is your L (lattice).
+
+2️⃣ Why a graph is the correct structure
+A compatibility space is not a tree.
+Example:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+87/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+kernel6.6 works with rocm5.7
+kernel6.6 works with rocm6.4
+
+But:
+rocm6.4 + torch2.4 → noise
+
+Graph allows many-to-many relationships.
+
+3️⃣ Graph schema
+Minimal schema:
+Nodes:
+Hardware
+Kernel
+ROCm
+Torch
+Workload
+Experiment
+Result
+
+Edges:
+Hardware → Kernel
+Kernel → ROCm
+ROCm → Torch
+Torch → Workload
+Experiment → Result
+
+4️⃣ Example graph representation
+Experiment:
+
+RX580
+kernel 6.6
+rocm 5.7
+torch 2.2
+workload SDXL
+
+Graph:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+88/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+RX580
+└── kernel 6.6
+└── rocm 5.7
+└── torch 2.2
+└── SDXL
+└── PASS
+
+Another run:
+kernel 6.8 → KFD crash
+
+Graph becomes:
+kernel 6.8
+└── FAIL(KFD)
+
+5️⃣ Implementing the graph in Python
+
+You can start with a simple in-memory graph using networkx .
+
+import networkx as nx
+G = nx.DiGraph()
+def record_experiment(hw, kernel, rocm, torch, workload, result):
+G.add_edge(hw, kernel)
+G.add_edge(kernel, rocm)
+G.add_edge(rocm, torch)
+G.add_edge(torch, workload)
+exp = f"{hw}_{kernel}_{rocm}_{torch}_{workload}"
+G.add_edge(workload, exp)
+Python
+G.add_edge(exp, result)
+
+Run
+
+Example:
+
+record_experiment(
+"RX580",
+"kernel6.6",
+"rocm5.7",
+"torch2.2",
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+89/126
+
+16/03/2026, 11:28
+
+)
+
+ROCm RX580 noise issue
+
+"SDXL",
+"PASS"
+Python
+
+Run
+
+6️⃣ Querying the graph
+Example query:
+
+Which kernels work with diffusion?
+
+for node in G.nodes():
+if "kernel" in node:
+if nx.has_path(G,node,"PASS"):
+Python
+print(node)
+
+Run
+
+Example output:
+kernel6.1
+kernel6.6
+
+7️⃣ Adding performance metrics
+Each experiment should also store metrics.
+Example:
+it/s
+tokens/s
+power
+nan_count
+
+Attach them to experiment nodes:
+
+G.nodes[exp]["speed"] = 2.5
+Python
+G.nodes[exp]["power"]
+= 140
+
+Run
+
+Now you can query:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+90/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+fastest configuration
+
+8️⃣ Graph visualization
+Using networkx + matplotlib :
+
+import matplotlib.pyplot as plt
+nx.draw(G, with_labels=True)
+Python
+plt.show()
+
+Run
+
+You’ll literally see the compatibility structure forming.
+
+9️⃣ Scaling up
+
+Eventually switch to a graph database.
+Two good options:
+Neo4j
+ArangoDB
+Then queries become extremely powerful.
+Example:
+MATCH (k:Kernel)-[:WORKS_WITH]->(r:ROCm)
+WHERE r.version = "5.7"
+RETURN k
+
+🔟 Integrating with the diagnostic suite
+Each diagnostic run should automatically update the graph.
+Workflow:
+run test
+↓
+collect metrics
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+91/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+↓
+update graph
+↓
+recompute compatibility lattice
+
+After a few dozen runs you will have a complete compatibility map.
+
+1️⃣ What the final system becomes
+
+1
+
+You end up with something like:
+gfx803 compatibility graph
+
+Which can answer:
+best stack for diffusion
+best stack for LLMs
+first kernel causing crash
+
+Automatically.
+
+2️⃣ Why this is powerful
+
+1
+
+This approach turns debugging into knowledge accumulation.
+Instead of:
+trial and error
+
+you get:
+structured experimental knowledge
+
+Over time the graph becomes a formal compatibility atlas for gfx803.
+
+3️⃣ Potential final deliverable
+
+1
+
+You could publish:
+
+gfx803-ml-compatibility
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+92/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+containing:
+experiment graph
+reproducible environments
+benchmark results
+
+This would be extremely useful for the community still using RX580.
+
+✅ The key insight you suggested — applying the formal model O,R,C,S,L,P,F — is
+
+exactly the right abstraction for this problem. The graph representation is basically
+the implementation of L (the lattice).
+
+If you'd like, I can also show you something very useful for this project:
+How to extend this graph so it automatically proposes the next experiment to
+run, instead of manually deciding what to test next. That turns the system into a
+self-directed compatibility explorer.
+
+perfect go
+
+Great — let’s turn the compatibility graph into a self-directed experiment planner
+that proposes the next test automatically. This closes the loop:
+(O, R, C, S, L, P) → run → metrics → F → update L → propose next P
+
+Where L is your compatibility lattice (graph) and P is the next experiment
+configuration.
+
+1️⃣ Core idea
+
+Treat each configuration as a point in a configuration space:
+kernel × rocm × torch × attention × precision × workload
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+93/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Each experiment yields a result:
+PASS
+FAIL
+NOISE
+CRASH
+SLOW
+
+We store that in the graph and then choose the next configuration that maximizes
+information gain.
+This is basically active learning for system debugging.
+
+2️⃣ Configuration space definition
+Define all possible variables:
+
+CONFIG_SPACE = {
+"kernel": ["6.1", "6.6", "6.8"],
+"rocm": ["5.7", "6.4"],
+"torch": ["2.2", "2.3", "2.4"],
+"attention": ["pytorch", "split", "quad", "jab"],
+"precision": ["fp32", "fp16"],
+"workload": ["sdxl", "llm", "whisper"]
+} Python
+
+Run
+
+Total combinations:
+3 × 2 × 3 × 4 × 2 × 3 = 432 experiments
+
+You obviously won’t run all — the planner picks the most informative next run.
+
+3️⃣ Graph storage (lattice)
+We use a directed graph.
+
+import networkx as nx
+G = Python
+nx.DiGraph()
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+Run
+94/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Each experiment becomes a node:
+
+Python
+exp_id
+= f"{kernel}_{rocm}_{torch}_{workload}"
+
+Run
+
+Attach metrics:
+
+G.nodes[exp_id]["result"] = "PASS"
+G.nodes[exp_id]["speed"] = 2.6
+Python
+G.nodes[exp_id]["nan"]
+= False
+
+Run
+
+4️⃣ Gap function (F)
+
+This is your evaluation function.
+Example:
+
+def gap(metrics):
+error = metrics["max_error"]
+nan = metrics["nan"]
+speed = metrics["it_s"]
+penalty = 0
+if nan:
+penalty += 100
+if speed < 2:
+penalty += 10
+Python
+return error + penalty
+
+Run
+
+Lower F is better.
+
+5️⃣ Experiment coverage tracking
+Track which configurations are already tested.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+95/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Python
+tested
+= set(G.nodes())
+
+Run
+
+Generate candidates:
+
+import itertools
+def all_configs():
+keys = CONFIG_SPACE.keys()
+values = CONFIG_SPACE.values()
+for combo in itertools.product(*values):
+Pythonyield dict(zip(keys, combo))
+
+Run
+
+6️⃣ Candidate scoring
+
+Now we decide which experiment is most useful to run next.
+We score candidates based on:
+1. Untested combinations
+2. Distance from tested configs
+3. Uncertainty near failures
+Example scoring:
+
+def score_candidate(cfg):
+score = 0
+exp_id = str(cfg)
+if exp_id not in G.nodes():
+score += 10
+# prefer configs near known failures
+for node in G.nodes():
+if G.nodes[node].get("result") == "FAIL":
+score += 2
+Python
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+Run
+96/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+return score
+
+7️⃣ Next experiment proposal
+def propose_next():
+best_cfg = None
+best_score = -1
+for cfg in all_configs():
+score = score_candidate(cfg)
+if score > best_score:
+best_score = score
+best_cfg = cfg
+Python
+return best_cfg
+
+Run
+
+Example output:
+NEXT EXPERIMENT:
+kernel: 6.6
+rocm: 5.7
+torch: 2.3
+attention: pytorch
+precision: fp16
+workload: sdxl
+
+8️⃣ Experiment loop
+
+Now the system becomes self-driving.
+
+while True:
+cfg = propose_next()
+metrics = run_experiment(cfg)
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+97/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Python
+record_graph(cfg, metrics)
+
+Run
+
+Where:
+run_experiment → diagnostic suite
+record_graph → update lattice
+
+9️⃣ Resulting lattice
+
+After many runs the graph might look like:
+kernel6.6
+└ rocm5.7
+└ torch2.2
+├ SDXL PASS
+├ LLM SLOW
+└ Whisper PASS
+kernel6.8
+└ rocm5.7
+└ FAIL (KFD reset)
+
+The planner then explores edges near failures.
+
+🔟 Visualizing compatibility regions
+You can cluster results.
+Example:
+PASS region
+kernel6.1 / rocm5.7 / torch2.2
+FAIL region
+kernel6.8 / rocm5.7
+
+Over time the graph becomes a map of the entire compatibility landscape.
+
+1️⃣ Integrating with Nix
+
+1
+
+Each experiment config maps to a Nix environment.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+98/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Example:
+
+env = buildEnv {
+kernel = "6.6";
+rocm = "5.7";
+torch = "2.2";
+}; nix
+
+The planner just switches shells:
+nix develop .#env_6_6_5_7_2_2
+
+Then runs diagnostics.
+
+2️⃣ Final system architecture
+
+1
+
+Nix environments
+↓
+diagnostic suite
+↓
+metrics
+↓
+gap function F
+↓
+graph lattice L
+↓
+planner
+↓
+next experiment P
+
+Which exactly matches your formal model:
+(O, R, C, S, L, P, F)
+
+3️⃣ Why this is powerful
+
+1
+
+Instead of debugging manually, the system:
+records every configuration
+learns which regions fail
+automatically explores unknown areas
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+99/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+This is essentially scientific experimentation automation.
+
+4️⃣ Final deliverable
+
+1
+
+You end up with:
+
+gfx803-compatibility-explorer
+
+Containing:
+reproducible environments
+experiment graph
+automated experiment planner
+compatibility atlas
+This would be extremely valuable for anyone still using RX580 for ML.
+
+If you want, the next step that would dramatically improve this system is
+something GPU engineers actually use:
+Building a minimal HIP kernel probe suite that tests:
+LDS behavior
+wavefront scheduling
+GEMM tiles
+shared memory conflicts
+
+before even touching PyTorch.
+That would tell us very quickly whether a bug lives in the driver, ROCm, or the ML
+stack.
+
+define known knowns, etc
+
+Great idea. Using “known knowns / known unknowns / unknown unknowns” (the
+classic epistemic grid) fits perfectly with the O, R, C, S, L, P, F framework you
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+100/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+proposed. It helps prioritize experiments and prevents wasting time chasing ghosts.
+Below is how it maps to the gfx803 / ROCm / ML debugging project.
+
+1️⃣ Epistemic categories
+The four classes:
+Category
+
+Meaning
+
+Known knowns
+
+things verified to be true
+
+Known unknowns
+
+questions we know we must answer
+
+Unknown knowns
+
+things we know implicitly but haven’t formalized
+
+Unknown unknowns
+
+surprises / hidden failure modes
+
+These feed directly into the gap function F and the experiment planner.
+
+2️⃣ Known knowns (verified facts)
+
+These are experimentally confirmed or widely documented.
+
+Hardware
+GPU = RX580
+architecture = gfx803 (Polaris)
+wavefront = 64
+FP32 ≈ 6.2 TFLOPS
+memory bandwidth ≈ 256 GB/s
+
+These will not change.
+
+ROCm status
+gfx803 officially dropped
+community builds partially work
+ROCm containers share host kernel
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+101/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Observed behavior
+From experiments already discussed:
+Whisper works
+basic GEMM works
+diffusion sometimes produces noise
+LLM tokens sometimes slow
+
+Which implies:
+rocBLAS mostly functional
+HIP math functional
+MIOpen convolution path suspect
+
+Kernel issues
+some Linux kernels cause KFD reset failures
+newer kernels may regress Polaris
+
+3️⃣ Known unknowns (explicit questions)
+These define the experiment backlog.
+
+Diffusion noise root cause
+Which layer first produces incorrect values?
+Is it a convolution kernel?
+Is it fp16 accumulation?
+
+LLM slowness
+Are GEMM kernels falling back to generic paths?
+Is occupancy poor?
+Are tensor sizes triggering inefficient kernels?
+
+MIOpen behavior
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+102/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Why does autotune sometimes produce 2.6 s/it and sometimes 7 s/it?
+Is the perfdb selecting suboptimal kernels?
+
+Kernel compatibility
+Which Linux kernel versions maintain stable KFD behavior?
+
+Precision behavior
+Which precision modes are numerically stable on gfx803?
+fp32
+fp16
+mixed
+
+4️⃣ Unknown knowns (implicit knowledge)
+
+These are things the system or community likely knows but hasn't formalized.
+Examples:
+
+Driver assumptions
+ROCm and PyTorch often assume:
+warp size = 32
+tensor cores exist
+
+These assumptions silently degrade performance on AMD.
+
+Kernel selection heuristics
+MIOpen and rocBLAS rely heavily on heuristics:
+autotune database
+problem size heuristics
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+103/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+architecture detection
+
+Those heuristics were never tuned for gfx803.
+
+Vulkan compute maturity
+Mesa developers have spent years optimizing shaders for Polaris.
+So sometimes:
+Vulkan kernels outperform ROCm kernels
+
+But this is rarely acknowledged in ML tooling.
+
+5️⃣ Unknown unknowns (true surprises)
+These are the hardest problems.
+
+Potential examples in this project:
+
+Driver regressions
+Example:
+amdkfd memory fault handling changes
+
+These could cause freezes under specific compute workloads.
+
+Numerical instability
+Some kernels may produce:
+silent NaNs
+precision drift
+denormal handling issues
+
+Which only appear in deep model pipelines.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+104/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Compiler bugs
+LLVM codegen for older architectures could generate:
+suboptimal register allocation
+incorrect vectorization
+
+Hidden fallback paths
+Libraries sometimes silently fall back to:
+CPU compute
+slow kernels
+generic implementations
+
+6️⃣ Mapping this to your formal model
+Your framework:
+
+(O, R, C, S, L, P, F)
+
+fits nicely.
+
+Known knowns
+Populate:
+O = hardware
+C = stack components
+S = runtime environment
+
+Known unknowns
+Drive experiment proposals:
+P = next experiment
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+105/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Unknown knowns
+Refine compatibility lattice:
+L = compatibility relationships
+
+Unknown unknowns
+Appear as:
+unexpected failures → large F
+
+Which trigger new experiments.
+
+7️⃣ Practical experiment prioritization
+
+Based on the epistemic grid, the highest-value experiments are:
+
+1️⃣ Conv kernel validation
+Test individual convolution layers.
+
+2️⃣ GEMM profiling
+Check if rocBLAS kernels are optimal.
+
+3️⃣ Kernel regression testing
+Test multiple Linux kernels.
+
+4️⃣ Precision experiments
+Test:
+fp32
+fp16
+mixed
+
+8️⃣ Resulting knowledge system
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+106/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Each experiment moves a fact from:
+known unknown → known known
+
+The compatibility graph gradually fills in.
+
+9️⃣ Final objective
+
+Eventually the lattice contains a complete compatibility map for gfx803.
+Example:
+kernel 6.1
+rocm 5.7
+torch 2.2
+diffusion PASS
+kernel 6.8
+rocm 5.7
+KFD crash
+
+🔟 Why this framework works well here
+GPU debugging normally feels chaotic because:
+too many interacting layers
+
+Your epistemic framework turns it into:
+systematic knowledge accumulation
+
+Which is exactly how hardware teams debug large systems.
+
+If you want, the next thing we could do that would significantly improve this
+project is define a formal experiment protocol (roughly 10–12 canonical tests) so
+every configuration is evaluated in exactly the same way. That dramatically improves
+the usefulness of the compatibility lattice.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+107/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+If you want, the next thing we could do that would
+significantly improve this project is define a formal
+experiment protocol (roughly 10–12 canonical tests) so
+every configuration is evaluated in exactly the same
+way. That dramatically improves the usefulness of the
+compatibility lattice.
+and
+Building a minimal HIP kernel probe suite that tests:
+LDS behavior
+wavefront scheduling
+GEMM tiles
+shared memory conflicts
+before even touching PyTorch.
+That would tell us very quickly whether a bug lives in
+the driver, ROCm, or the ML stack.
+
+Yes — those two pieces should be the front door of the whole project.
+The clean shape is:
+Layer 0: HIP probe suite
+Layer 1: canonical experiment protocol
+Layer 2: full-stack workloads
+
+That gives you a disciplined escalation path:
+driver / hardware
+→ ROCm libraries
+→ PyTorch / framework
+→ real model workloads
+
+So instead of asking “why is Comfy noisy?” you ask:
+Did LDS pass?
+Did wave scheduling pass?
+Did raw GEMM pass?
+Did rocBLAS pass?
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+108/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Did conv pass?
+Did PyTorch pass?
+
+That is exactly the kind of deterministic, fact-first workflow you were sketching with
+your formal model.
+
+1. Project objective
+Define a reproducible diagnostic system that can answer:
+1. Where does failure first appear?
+2. Is the fault in kernel/driver, ROCm libraries, or ML framework?
+3. Which configurations are stable, correct, and performant on gfx803?
+Primary deliverable:
+gfx803 compatibility atlas
+
+supported by:
+a minimal HIP kernel probe suite
+a formal canonical experiment protocol
+a structured results schema
+a compatibility lattice / graph
+
+2. The stack decomposition
+Treat the problem as 5 layers:
+L0
+L1
+L2
+L3
+L4
+
+hardware + kernel driver
+HIP runtime / codegen
+rocBLAS / MIOpen / ROCm libraries
+PyTorch / framework bindings
+real workloads: SD / LLM / Whisper
+
+The rule is:
+Never debug a higher layer until the lower layer is green.
+So the protocol should always run in order:
+HIP probes
+→ library probes
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+109/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+→ framework probes
+→ workload probes
+
+3. Formal experiment protocol
+I’d define 12 canonical tests.
+Each test should have:
+purpose
+input fixture
+pass/fail criteria
+metrics
+failure interpretation
+
+Tier A — HIP / hardware probes
+T1. Device enumeration and runtime sanity
+Purpose: confirm HIP stack is alive and sees the card correctly.
+Checks:
+device name
+reported arch
+VRAM
+wavefront size
+basic malloc/free
+host↔device copy
+Pass:
+all calls succeed
+reported device metadata consistent
+Failure interpretation:
+driver/runtime issue before ML stack even begins
+
+T2. Scalar/vector arithmetic correctness
+Purpose: confirm basic ALU correctness.
+Kernel:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+110/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+elementwise add
+fused multiply-add
+reduction
+Compare GPU against CPU reference.
+Pass:
+max error within tolerance
+no NaN/Inf
+Failure interpretation:
+low-level runtime or codegen problem
+
+T3. LDS load/store correctness
+Purpose: validate shared memory behavior directly.
+Kernel:
+threads write patterned values into LDS
+barrier
+read back with known permutation
+Pass:
+exact match with reference pattern
+Failure interpretation:
+LDS addressing / synchronization / compiler bug
+
+T4. Barrier and wavefront synchronization
+Purpose: detect ordering/synchronization issues.
+Kernel:
+staged writes across waves
+repeated barriers
+deterministic checksum
+Pass:
+checksum stable across repeated runs
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+111/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Failure interpretation:
+barrier semantics or scheduling issue
+
+T5. LDS bank-conflict stress
+Purpose: distinguish “correct but slow” from “incorrect.”
+Kernel variants:
+conflict-free access pattern
+heavy-conflict access pattern
+Measure:
+latency / throughput
+correctness
+Pass:
+both correct
+expected performance gap
+Failure interpretation:
+if incorrect: LDS or compiler issue
+if only slow: likely expected microarchitectural behavior
+
+T6. Wavefront scheduling / occupancy probe
+Purpose: see whether launch geometry behaves sensibly.
+Run same kernel with:
+64 threads
+128
+256
+512
+Measure:
+time
+occupancy proxy
+stability
+Pass:
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+112/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+performance curve makes sense
+no hangs / faults
+Failure interpretation:
+scheduling, register pressure, launch config sensitivity
+
+Tier B — raw compute probes
+T7. Raw GEMM microkernel correctness
+Purpose: test hand-written HIP GEMM before rocBLAS.
+Use fixed small and medium matrices:
+128×128
+512×512
+odd shapes too
+Variants:
+fp32
+fp16 input + fp32 accumulate
+Pass:
+numerical match to CPU reference within tolerance
+Failure interpretation:
+if this fails, rocBLAS/PyTorch are irrelevant
+
+T8. GEMM tile sweep
+Purpose: locate geometry sweet spots and invalid zones.
+Test tile shapes like:
+64×64×8
+128×128×16
+128×64×16
+64×128×16
+Measure:
+correctness
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+113/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+runtime
+power
+faults
+Pass:
+stable correct outputs across expected-safe tiles
+Failure interpretation:
+tile-specific codegen, LDS layout, register pressure issue
+
+T9. Convolution primitive probe
+Purpose: isolate diffusion’s likely failure zone.
+Implement minimal direct or im2col/implicit GEMM conv:
+conv2d small fixture
+deterministic weights/input
+Compare CPU vs GPU.
+Pass:
+output numerically stable
+no NaN/Inf
+Failure interpretation:
+if raw conv fails, MIOpen is not the first suspect; lower layer is
+
+Tier C — ROCm library probes
+T10. rocBLAS correctness and kernel selection
+Purpose: determine whether library GEMM is correct and whether fallback paths are
+used.
+Run:
+standard matmuls
+transformer-like shapes
+LLM-ish tall/skinny and batched shapes
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+114/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Collect:
+correctness
+timing
+logging / selected kernels
+Pass:
+correct outputs
+kernel selection consistent
+Failure interpretation:
+library coverage / Tensile path / fallback GEMM issue
+
+T11. MIOpen convolution correctness and autotune stability
+Purpose: distinguish “noise due to conv stack” from framework issues.
+Run same conv repeatedly under controlled DB state:
+clean perfdb
+reused perfdb
+forced search
+reused search result
+Collect:
+correctness
+selected kernels
+time variability
+Pass:
+consistent outputs
+explainable timing variance
+Failure interpretation:
+MIOpen kernel selection/perfdb instability
+
+Tier D — framework and workload probes
+T12. Framework layer probes and mini-workloads
+Purpose: locate first broken layer in PyTorch / model stack.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+115/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Subtests:
+PyTorch matmul
+PyTorch conv2d
+minimal attention
+minimal UNet block
+minimal VAE decode
+one Whisper block / one LLM block if needed
+Pass:
+each stage matches CPU or known-good GPU baseline within tolerance
+Failure interpretation:
+framework integration / dtype / graph lowering / specific op binding
+
+4. Minimal HIP kernel probe suite
+This should exist independently of PyTorch and ideally independently of
+rocBLAS/MIOpen for the first tier.
+I’d structure it like this:
+hip_probe_suite/
+src/
+probe_enum.cpp
+probe_alu.cpp
+probe_lds.cpp
+probe_barrier.cpp
+probe_bankconflict.cpp
+probe_wave_sched.cpp
+probe_gemm.cpp
+probe_conv.cpp
+include/
+common.hpp
+harness.hpp
+fixtures.hpp
+metrics.hpp
+fixtures/
+small_matrices.bin
+conv_inputs.bin
+results/
+
+Core probes
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+116/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Probe A: LDS behavior
+Test:
+contiguous writes
+strided writes
+transposed writes
+write/read after barrier
+double-buffered LDS region split
+What it answers:
+are shared memory semantics correct at all?
+
+Probe B: wavefront scheduling
+Test launch configurations and repeated barriers/checksums.
+What it answers:
+do certain block sizes or wave arrangements hang or degrade sharply?
+
+Probe C: GEMM tiles
+Use one or two hand-written kernels only.
+Start with:
+fp32 GEMM
+fp16 input / fp32 accumulate GEMM
+What it answers:
+does raw matrix multiply work before rocBLAS?
+
+Probe D: shared-memory conflicts
+Intentionally create bank-conflict patterns.
+What it answers:
+are we seeing expected slowdown or pathological behavior?
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+117/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+5. Decision tree: where the bug lives
+This is the most important operational payoff.
+
+Case 1: HIP probes fail
+Then the issue is in:
+kernel driver / HIP runtime / codegen / launch geometry
+
+Not PyTorch. Not MIOpen.
+
+Case 2: HIP passes, raw GEMM passes, rocBLAS fails
+Then the issue is in:
+rocBLAS / Tensile / library kernel selection
+
+Case 3: HIP passes, raw conv passes, MIOpen fails
+Then the issue is in:
+MIOpen / autotune / perfdb / library conv kernels
+
+This is the most likely path for the diffusion noise story.
+
+Case 4: ROCm libraries pass, PyTorch layer probe fails
+Then the issue is in:
+framework binding / dtype path / graph lowering / operator integratio
+
+Case 5: layer probes pass, full model fails
+Then the issue is in:
+multi-layer accumulation / long-chain numerical instability / model-s
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+118/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+6. Formal result schema
+ChatGPT Auto
+
+Every test should emit the same structured record.
+Example:
+
+{
+"test_id": "T8_gemm_tile_sweep",
+"gpu": "RX580",
+"arch": "gfx803",
+"kernel_version": "6.6.12",
+"rocm_version": "5.7",
+"torch_version": "2.2.1",
+"precision": "fp16_acc_fp32",
+"workgroup": 256,
+"tile": "128x128x16",
+"result": "PASS",
+"max_error": 0.00073,
+"mean_error": 0.00004,
+"nan_count": 0,
+"runtime_ms": 2.81,
+"power_w": 132,
+"selected_kernel": "custom_hip_gemm_128x128x16",
+"notes": ""
+} JSON
+
+That gives you clean graph ingestion later.
+
+7. Known knowns / known unknowns integration
+These tests should explicitly convert ambiguity into facts.
+
+Known knowns the suite should establish
+HIP runtime works or not
+LDS correctness works or not
+raw GEMM correctness works or not
+raw conv correctness works or not
+rocBLAS correctness works or not
+MIOpen correctness works or not
+
+Known unknowns the suite should target
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+119/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+which tile shapes are unstable?
+which kernel versions regress?
+which precision modes are safe?
+whether diffusion noise begins at first conv, mid-block, or VAE
+
+8. Pass/fail criteria
+You need hard criteria or the lattice gets mushy.
+
+Correctness classes
+PASS: within tolerance, no NaN/Inf
+WARN: correct but unstable performance or high variance
+FAIL_NUMERIC: wrong output
+FAIL_RUNTIME: crash, fault, hang
+FAIL_CONFIG: unsupported / not buildable
+
+Example tolerances
+For fp32:
+max error < 1e-5 or a sensible relative threshold
+For fp16 input + fp32 accumulate:
+looser tolerance, but fixed and explicit
+The exact thresholds can be tuned later, but they must be written down once.
+
+9. Minimum viable deliverables
+Deliverable 1: HIP probe suite v0
+Contains:
+T1–T8
+command-line harness
+JSON output
+
+Deliverable 2: canonical protocol v0
+Contains:
+T1–T12 definitions
+fixtures
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+120/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+pass/fail rules
+run order
+
+Deliverable 3: result ledger
+A directory of JSON test outputs plus one CSV summary.
+
+Deliverable 4: compatibility lattice ingester
+Reads JSON results and updates graph/database.
+
+Deliverable 5: baseline report
+One known-good or best-known stack documented end-to-end.
+
+10. Suggested build order
+Do not build all 12 at once.
+
+Week/order 1
+Build:
+T1 runtime sanity
+T2 ALU correctness
+T3 LDS correctness
+T4 barrier check
+This tells you if the floor is solid.
+
+Week/order 2
+Build:
+T7 raw GEMM
+T8 GEMM tile sweep
+This establishes LLM-relevant low-level compute.
+
+Week/order 3
+Build:
+T9 raw conv
+T10 rocBLAS probe
+T11 MIOpen probe
+This targets the diffusion suspicion directly.
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+121/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Week/order 4
+Build:
+T12 framework probes
+Only after the rest is working.
+
+11. Nix role in this
+Yes, this is where Nix becomes really useful.
+Use Nix to pin:
+compiler
+HIP toolchain
+ROCm libs
+Python version
+profiler/debugger tools
+Then every result record can reference a reproducible environment identifier.
+Conceptually:
+env_hash + test_id + fixture_hash → result
+
+That is exactly the kind of stateful, deterministic provenance system you’ve been
+talking about elsewhere.
+
+12. Recommended command surface
+Keep the CLI brutally simple.
+
+gfx803-probe run T3_lds
+gfx803-probe run T7_gemm --precision fp32
+gfx803-probe run T8_gemm_tile_sweep --tile 128x128x16
+gfx803-probe run T11_miopen_conv --reset-db
+Bash
+gfx803-probe
+run protocol_v0
+
+And:
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+122/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+gfx803-probe report latest
+Bash
+gfx803-probe
+export results.csv
+
+13. The formal shape in your notation
+Using your model:
+O = hardware platform
+R = target capability / acceptance criteria
+C = code stack + probe implementation
+S = runtime/env state
+L = compatibility lattice
+P = experiment instance
+F = gap/failure function
+
+Then this system becomes:
+Given (O,R,C,S), choose P
+Run probe suite
+Measure F
+Update L
+Propose next P
+
+That’s the whole research program in one loop.
+
+14. My recommendation
+The single highest-value immediate move is:
+Build T1–T4 first as a tiny HIP-only harness.
+Because that answers, very quickly:
+whether the platform is fundamentally sane
+whether LDS/barriers are behaving
+whether you should even trust higher-level failures
+Then do T7/T8 next, because GEMM is the backbone for everything LLM-ish and a lot
+of attention behavior.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+123/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Then do T9/T11, because that is where the diffusion noise hypothesis really gets
+tested.
+
+15. Crisp summary
+The project should have two formal artifacts:
+
+Artifact A — Canonical Experiment Protocol
+12 tests, fixed fixtures, fixed thresholds, fixed order.
+
+Artifact B — Minimal HIP Probe Suite
+Driver/runtime/HIP-first probes for LDS, waves, GEMM, and shared-memory
+behavior.
+Together they let you classify faults as:
+driver/kernel
+ROCm library
+framework
+model-specific
+
+which is exactly the separation you need.
+If you want, I’ll turn this into a concrete repo skeleton with:
+directory layout
+test IDs
+JSON schema
+first four probe stubs in C++/HIP
+a minimal flake.nix outline
+
+take what we know and define as much of the graph as
+possible, give me pythons etc to download/run if you're
+not able ot run them yourself (you probably should be
+able to)
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+124/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+Thought for 13s
+I turned the current known state into a seeded compatibility-graph project and
+packaged it for download.
+Files:
+Download the project folder
+Download the zip archive
+What’s in it:
+seed_facts.json — the graph as machine-readable seeded facts
+graph_schema.py — typed graph helpers
+seed_graph.py — builds and exports the graph
+graph_queries.py — summaries and query helpers
+run_demo.py — generates artifacts from the current graph
+README.md — how to run it
+requirements.txt — networkx
+
+What I encoded already:
+hardware/platform facts: RX580, gfx803, Polaris, amdgpu/amdkfd, HIP
+stack facts: rocBLAS, MIOpen, PyTorch, ComfyUI
+workload facts: diffusion, LLM, Whisper
+observed symptoms: diffusion noise, slow token processing, KFD reset instability,
+Vulkan competitiveness, CFG=1.0 speedup, containers sharing host kernel
+hypotheses: MIOpen conv path as diffusion suspect, fallback GEMM / occupancy
+as LLM suspect, kernel-version boundary for KFD stability
+known unknowns: first bad layer, precision matrix, exact kernel boundary, best
+GEMM tiles, perfdb instability
+proposed experiments: HIP probe suite, canonical protocol
+components/targets: LDS, wave scheduling, GEMM tiles, conv path, attention
+path, VAE path, perfdb, host kernel
+To run it:
+Bash
+cd gfx803_compat_graph
+python -m venv .venv
+source .venv/bin/activate
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+125/126
+
+16/03/2026, 11:28
+
+ROCm RX580 noise issue
+
+pip install -r requirements.txt
+python run_demo.py
+
+That writes:
+out/gfx803_graph.json
+out/gfx803_graph.graphml
+out/known_knowns.json
+out/known_unknowns.json
+out/proposed_experiments.json
+out/frontier_unknowns.json
+
+Two important caveats:
+This is a seed atlas, not a final truth set.
+A few edges are marked as hypotheses rather than settled facts, with
+confidence scores attached.
+The next highest-value move is to add a second artifact beside this graph:
+a results/ ledger schema for real probe outputs, and
+an ingester that merges actual HIP/protocol results into the graph automatically.
+
+https://chatgpt.com/c/69b74f65-2644-8399-8842-7126424643e3
+
+126/126
+
+

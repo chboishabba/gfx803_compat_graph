@@ -1,0 +1,194 @@
+[
+  {
+    "id": "arch:gfx803",
+    "label": "gfx803",
+    "kind": "architecture",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "conversation"
+  },
+  {
+    "id": "arch:polaris",
+    "label": "Polaris",
+    "kind": "architecture",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "conversation"
+  },
+  {
+    "id": "driver:amdgpu_kfd",
+    "label": "amdgpu + amdkfd",
+    "kind": "driver",
+    "status": "known_known",
+    "confidence": 0.9,
+    "source": "conversation"
+  },
+  {
+    "id": "fw:comfyui",
+    "label": "ComfyUI",
+    "kind": "framework",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "fw:pytorch",
+    "label": "PyTorch",
+    "kind": "framework",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "hw:rx580",
+    "label": "AMD Radeon RX 580",
+    "kind": "hardware",
+    "status": "known_known",
+    "confidence": 0.99,
+    "source": "conversation"
+  },
+  {
+    "id": "lib:miopen",
+    "label": "MIOpen",
+    "kind": "library",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "lib:rocblas",
+    "label": "rocBLAS",
+    "kind": "library",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:cfg1_speedup",
+    "label": "CFG=1.0 materially improves diffusion throughput in at least one report",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.78,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:containers_share_host_kernel",
+    "label": "ROCm containers share the host kernel/driver",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:diffusion_noise",
+    "label": "Diffusion outputs can become noise",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.9,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:fp8_text_enc_vram",
+    "label": "--fp8_e5m2-text-enc reduces ComfyUI VRAM usage on rx580, bypassing --lowvram need",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:hip_math_ok",
+    "label": "General HIP / PyTorch math appears broadly functional",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.76,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:kfd_reset_instability",
+    "label": "KFD reset / doorbell instability has affected Polaris under compute load",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.83,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:llm_slow_tokens",
+    "label": "LLM token processing can be very slow",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.9,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:miopen_find_enforce",
+    "label": "MIOPEN_FIND_ENFORCE=3 and MIOPEN_DEBUG_DISABLE_FIND_DB=1 initially lowered diffusion config to 2.5s/it but was unstable later",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.75,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:tensile_assert_ai",
+    "label": "AssertAIGreaterThanEqual in Tensile yaml can safely be removed/ignored if checking AI fails build",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.9,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:vulkan_competitive",
+    "label": "Vulkan can match or beat ROCm in some tested cases",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.78,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:whisper_works",
+    "label": "Whisper works on at least some ROCm 6.4 paths",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.8,
+    "source": "conversation"
+  },
+  {
+    "id": "obs:workgroup_mapping_a",
+    "label": "WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.85,
+    "source": "conversation"
+  },
+  {
+    "id": "runtime:hip",
+    "label": "HIP runtime",
+    "kind": "runtime",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "conversation"
+  },
+  {
+    "id": "workload:diffusion",
+    "label": "Diffusion / image generation",
+    "kind": "workload",
+    "status": "known_known",
+    "confidence": 0.97,
+    "source": "conversation"
+  },
+  {
+    "id": "workload:llm",
+    "label": "LLM inference / token generation",
+    "kind": "workload",
+    "status": "known_known",
+    "confidence": 0.97,
+    "source": "conversation"
+  },
+  {
+    "id": "workload:whisper",
+    "label": "Whisper / ASR",
+    "kind": "workload",
+    "status": "known_known",
+    "confidence": 0.97,
+    "source": "conversation"
+  }
+]

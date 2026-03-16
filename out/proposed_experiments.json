@@ -1,0 +1,34 @@
+[
+  {
+    "id": "exp:canonical_protocol",
+    "label": "Canonical 12-test experiment protocol",
+    "status": "proposed",
+    "tests": [],
+    "targets": [
+      "unk:best_gemm_tiles",
+      "unk:first_bad_layer",
+      "unk:kernel_boundary_exact",
+      "unk:miopen_perfdb_stability",
+      "unk:precision_matrix"
+    ],
+    "measures": [
+      "metric:correctness",
+      "metric:nan_inf",
+      "metric:power",
+      "metric:throughput"
+    ]
+  },
+  {
+    "id": "exp:hip_probe_suite",
+    "label": "Minimal HIP probe suite",
+    "status": "proposed",
+    "tests": [
+      "component:conv_path",
+      "component:gemm_tiles",
+      "component:lds",
+      "component:wavefront_sched"
+    ],
+    "targets": [],
+    "measures": []
+  }
+]

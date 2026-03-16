@@ -1,0 +1,630 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d8" for="edge" attr.name="source" attr.type="string" />
+  <key id="d7" for="edge" attr.name="confidence" attr.type="double" />
+  <key id="d6" for="edge" attr.name="status" attr.type="string" />
+  <key id="d5" for="edge" attr.name="relation" attr.type="string" />
+  <key id="d4" for="node" attr.name="source" attr.type="string" />
+  <key id="d3" for="node" attr.name="confidence" attr.type="double" />
+  <key id="d2" for="node" attr.name="status" attr.type="string" />
+  <key id="d1" for="node" attr.name="kind" attr.type="string" />
+  <key id="d0" for="node" attr.name="label" attr.type="string" />
+  <graph edgedefault="directed">
+    <node id="hw:rx580">
+      <data key="d0">AMD Radeon RX 580</data>
+      <data key="d1">hardware</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="arch:gfx803">
+      <data key="d0">gfx803</data>
+      <data key="d1">architecture</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="arch:polaris">
+      <data key="d0">Polaris</data>
+      <data key="d1">architecture</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="driver:amdgpu_kfd">
+      <data key="d0">amdgpu + amdkfd</data>
+      <data key="d1">driver</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="runtime:hip">
+      <data key="d0">HIP runtime</data>
+      <data key="d1">runtime</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="lib:rocblas">
+      <data key="d0">rocBLAS</data>
+      <data key="d1">library</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="lib:miopen">
+      <data key="d0">MIOpen</data>
+      <data key="d1">library</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="fw:pytorch">
+      <data key="d0">PyTorch</data>
+      <data key="d1">framework</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="fw:comfyui">
+      <data key="d0">ComfyUI</data>
+      <data key="d1">framework</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="workload:diffusion">
+      <data key="d0">Diffusion / image generation</data>
+      <data key="d1">workload</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.97</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="workload:llm">
+      <data key="d0">LLM inference / token generation</data>
+      <data key="d1">workload</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.97</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="workload:whisper">
+      <data key="d0">Whisper / ASR</data>
+      <data key="d1">workload</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.97</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:whisper_works">
+      <data key="d0">Whisper works on at least some ROCm 6.4 paths</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.8</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:hip_math_ok">
+      <data key="d0">General HIP / PyTorch math appears broadly functional</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.76</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:diffusion_noise">
+      <data key="d0">Diffusion outputs can become noise</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:llm_slow_tokens">
+      <data key="d0">LLM token processing can be very slow</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:cfg1_speedup">
+      <data key="d0">CFG=1.0 materially improves diffusion throughput in at least one report</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.78</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:vulkan_competitive">
+      <data key="d0">Vulkan can match or beat ROCm in some tested cases</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.78</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:containers_share_host_kernel">
+      <data key="d0">ROCm containers share the host kernel/driver</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:kfd_reset_instability">
+      <data key="d0">KFD reset / doorbell instability has affected Polaris under compute load</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.83</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="hyp:miopen_conv_root_cause">
+      <data key="d0">MIOpen convolution/kernel selection is primary suspect for diffusion noise</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.74</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="hyp:fallback_gemm_llm">
+      <data key="d0">LLM slowness is likely fallback GEMM / poor occupancy / launch geometry</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.73</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="hyp:kernel_version_boundary">
+      <data key="d0">There is a kernel-version compatibility boundary for KFD stability</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.72</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="unk:first_bad_layer">
+      <data key="d0">First corrupted tensor/layer in diffusion path</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="unk:precision_matrix">
+      <data key="d0">Safe precision matrix by workload (fp32 / fp16 / mixed)</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="unk:kernel_boundary_exact">
+      <data key="d0">Exact stable/unstable Linux kernel boundary</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="unk:best_gemm_tiles">
+      <data key="d0">Best raw HIP GEMM tile families for gfx803</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="unk:miopen_perfdb_stability">
+      <data key="d0">Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="exp:hip_probe_suite">
+      <data key="d0">Minimal HIP probe suite</data>
+      <data key="d1">experiment</data>
+      <data key="d2">proposed</data>
+      <data key="d3">0.97</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="exp:canonical_protocol">
+      <data key="d0">Canonical 12-test experiment protocol</data>
+      <data key="d1">experiment</data>
+      <data key="d2">proposed</data>
+      <data key="d3">0.97</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="metric:correctness">
+      <data key="d0">Correctness / numerical agreement</data>
+      <data key="d1">metric</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="metric:throughput">
+      <data key="d0">Throughput</data>
+      <data key="d1">metric</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="metric:power">
+      <data key="d0">Power draw</data>
+      <data key="d1">metric</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="metric:nan_inf">
+      <data key="d0">NaN / Inf incidence</data>
+      <data key="d1">metric</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:lds">
+      <data key="d0">LDS / shared memory behavior</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:wavefront_sched">
+      <data key="d0">Wavefront scheduling / occupancy</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:gemm_tiles">
+      <data key="d0">GEMM tile geometry</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:conv_path">
+      <data key="d0">Convolution path</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:attention_path">
+      <data key="d0">Attention path</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:vae_path">
+      <data key="d0">VAE decode path</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:host_kernel">
+      <data key="d0">Host Linux kernel</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="component:perfdb">
+      <data key="d0">MIOpen performance DB / search</data>
+      <data key="d1">component</data>
+      <data key="d2">context</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="obs:workgroup_mapping_a">
+      <data key="d0">WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.85</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:miopen_find_enforce">
+      <data key="d0">MIOPEN_FIND_ENFORCE=3 and MIOPEN_DEBUG_DISABLE_FIND_DB=1 initially lowered diffusion config to 2.5s/it but was unstable later</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.75</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:tensile_assert_ai">
+      <data key="d0">AssertAIGreaterThanEqual in Tensile yaml can safely be removed/ignored if checking AI fails build</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="obs:fp8_text_enc_vram">
+      <data key="d0">--fp8_e5m2-text-enc reduces ComfyUI VRAM usage on rx580, bypassing --lowvram need</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">conversation</data>
+    </node>
+    <edge source="hw:rx580" target="arch:gfx803" id="has_architecture">
+      <data key="d5">has_architecture</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.99</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="hw:rx580" target="driver:amdgpu_kfd" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="arch:gfx803" target="arch:polaris" id="belongs_to_family">
+      <data key="d5">belongs_to_family</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.99</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="driver:amdgpu_kfd" target="runtime:hip" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.88</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="runtime:hip" target="lib:rocblas" id="underpins">
+      <data key="d5">underpins</data>
+      <data key="d6">context</data>
+      <data key="d7">1.0</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="runtime:hip" target="lib:miopen" id="underpins">
+      <data key="d5">underpins</data>
+      <data key="d6">context</data>
+      <data key="d7">1.0</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="lib:rocblas" target="fw:pytorch" id="used_by">
+      <data key="d5">used_by</data>
+      <data key="d6">context</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="lib:rocblas" target="component:gemm_tiles" id="controls">
+      <data key="d5">controls</data>
+      <data key="d6">context</data>
+      <data key="d7">0.92</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="lib:miopen" target="fw:pytorch" id="used_by">
+      <data key="d5">used_by</data>
+      <data key="d6">context</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="lib:miopen" target="component:conv_path" id="controls">
+      <data key="d5">controls</data>
+      <data key="d6">context</data>
+      <data key="d7">0.92</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="fw:pytorch" target="fw:comfyui" id="underlies">
+      <data key="d5">underlies</data>
+      <data key="d6">context</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="workload:diffusion" target="obs:diffusion_noise" id="has_observation">
+      <data key="d5">has_observation</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="workload:llm" target="obs:llm_slow_tokens" id="has_observation">
+      <data key="d5">has_observation</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="workload:whisper" target="obs:whisper_works" id="has_observation">
+      <data key="d5">has_observation</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.8</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="obs:whisper_works" target="obs:hip_math_ok" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.76</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="obs:diffusion_noise" target="hyp:miopen_conv_root_cause" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.74</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="obs:llm_slow_tokens" target="hyp:fallback_gemm_llm" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.73</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="obs:cfg1_speedup" target="workload:diffusion" id="observed_in">
+      <data key="d5">observed_in</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.78</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="obs:vulkan_competitive" target="component:gemm_tiles" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.65</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="obs:containers_share_host_kernel" target="component:host_kernel" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="obs:kfd_reset_instability" target="hyp:kernel_version_boundary" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.72</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="hyp:miopen_conv_root_cause" target="unk:first_bad_layer" id="requires_test">
+      <data key="d5">requires_test</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="hyp:miopen_conv_root_cause" target="unk:precision_matrix" id="requires_test">
+      <data key="d5">requires_test</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.82</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="hyp:fallback_gemm_llm" target="unk:best_gemm_tiles" id="requires_test">
+      <data key="d5">requires_test</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="hyp:kernel_version_boundary" target="unk:kernel_boundary_exact" id="requires_test">
+      <data key="d5">requires_test</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.96</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:hip_probe_suite" target="component:lds" id="tests">
+      <data key="d5">tests</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:hip_probe_suite" target="component:wavefront_sched" id="tests">
+      <data key="d5">tests</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:hip_probe_suite" target="component:gemm_tiles" id="tests">
+      <data key="d5">tests</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:hip_probe_suite" target="component:conv_path" id="tests">
+      <data key="d5">tests</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="metric:correctness" id="measures">
+      <data key="d5">measures</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="metric:throughput" id="measures">
+      <data key="d5">measures</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="metric:power" id="measures">
+      <data key="d5">measures</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="metric:nan_inf" id="measures">
+      <data key="d5">measures</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="unk:first_bad_layer" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.97</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="unk:precision_matrix" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="unk:kernel_boundary_exact" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="unk:best_gemm_tiles" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.92</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:canonical_protocol" target="unk:miopen_perfdb_stability" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.92</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:wavefront_sched" target="workload:llm" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">context</data>
+      <data key="d7">0.92</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:gemm_tiles" target="workload:llm" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">context</data>
+      <data key="d7">0.96</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:conv_path" target="workload:diffusion" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">context</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:attention_path" target="workload:diffusion" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">context</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:vae_path" target="workload:diffusion" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">context</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:host_kernel" target="obs:kfd_reset_instability" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.82</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="component:perfdb" target="unk:miopen_perfdb_stability" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">1.0</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="obs:workgroup_mapping_a" target="component:gemm_tiles" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.85</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="obs:miopen_find_enforce" target="component:perfdb" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.8</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="obs:tensile_assert_ai" target="lib:rocblas" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="obs:fp8_text_enc_vram" target="workload:diffusion" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">conversation</data>
+    </edge>
+  </graph>
+</graphml>
