@@ -1,0 +1,31 @@
+{
+  "nodes": [
+    {
+      "node_id": "obs:vulkan_works_on_host_radv",
+      "label": "Vulkan (RADV) functional on host Arch Linux (Mesa 26.0.2)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "manual_test",
+      "attrs": {
+        "driver": "radv",
+        "mesa_version": "26.0.2",
+        "hw": "rx580"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:vulkan_works_on_host_radv",
+      "dst": "runtime:vulkan",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:vulkan_works_on_host_radv",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "analysis"
+    }
+  ]
+}

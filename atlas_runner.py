@@ -143,11 +143,25 @@ def main():
     verify_parser = subparsers.add_parser("verify", help="Run basic PyTorch compatibility probe")
     verify_parser.add_argument("--env", type=str, choices=["docker", "nix", "local"], default="local", help="Execution environment")
     verify_parser.add_argument("--env-path", type=str, help="Docker image name (e.g., 'rocm/pytorch:rocm5.7_ubuntu22.04_py3.10_pytorch_2.0.1') or Nix flake path (e.g. '../rr_gfx803_rocm')")
+    verify_parser.add_argument("--miopen-bypass", action="store_true", help="Set MIOPEN_FIND_ENFORCE=3 + MIOPEN_DEBUG_DISABLE_FIND_DB=1 to bypass perfdb")
+    verify_parser.add_argument("--deterministic", action="store_true", help="Set CUBLAS_WORKSPACE_CONFIG and torch deterministic mode env var")
+    verify_parser.add_argument("--stable", action="store_true", help="Apply known mitigations (disable Winograd & FFT) to prevent GPU hangs")
 
     # Command: verify-deep (diffusion simulation)
     vdeep_parser = subparsers.add_parser("verify-deep", help="Run diffusion simulation probe (multi-step UNet loop)")
     vdeep_parser.add_argument("--env", type=str, choices=["docker", "nix", "local"], default="local", help="Execution environment")
     vdeep_parser.add_argument("--env-path", type=str, help="Docker image or Nix flake path")
+    vdeep_parser.add_argument("--miopen-bypass", action="store_true", help="Set MIOPEN_FIND_ENFORCE=3 + MIOPEN_DEBUG_DISABLE_FIND_DB=1 to bypass perfdb")
+    vdeep_parser.add_argument("--deterministic", action="store_true", help="Set CUBLAS_WORKSPACE_CONFIG and torch deterministic mode env var")
+    vdeep_parser.add_argument("--stable", action="store_true", help="Apply known mitigations (disable Winograd & FFT) to prevent GPU hangs")
+
+    # Command: verify-winograd
+    vwin_parser = subparsers.add_parser("verify-winograd", help="Run targeted Winograd/FFT non-determinism and stability probe")
+    vwin_parser.add_argument("--env", type=str, choices=["docker", "nix", "local"], default="local", help="Execution environment")
+    vwin_parser.add_argument("--env-path", type=str, help="Docker image or Nix flake path")
+    vwin_parser.add_argument("--stable", action="store_true", help="Apply known mitigations (disable Winograd & FFT) to prevent GPU hangs")
+    vwin_parser.add_argument("--miopen-bypass", action="store_true", help="Set MIOPEN_FIND_ENFORCE=3 + MIOPEN_DEBUG_DISABLE_FIND_DB=1 to bypass perfdb")
+    vwin_parser.add_argument("--deterministic", action="store_true", help="Set CUBLAS_WORKSPACE_CONFIG and torch deterministic mode env var")
 
     # Command: artifacts
     subparsers.add_parser("artifacts", help="List generated artifacts and images")
@@ -280,13 +294,16 @@ def main():
         else:
             print(f"\n{YELLOW}* TIP: Run 'python atlas_runner.py update' to generate a ranked research plan for your system.{RESET}")
 
-    elif args.command in ("verify", "verify-deep"):
+    elif args.command in ("verify", "verify-deep", "verify-winograd"):
         env = args.env
         env_path = args.env_path
         
         if args.command == "verify-deep":
             probe_script = "probe_diffusion.py"
             print(f"{BLUE}{BOLD}GFX803 DIFFUSION STRESS PROBE{RESET}")
+        elif args.command == "verify-winograd":
+            probe_script = "probe_winograd_verify.py"
+            print(f"{BLUE}{BOLD}GFX803 WINOGRAD/FFT STABILITY PROBE{RESET}")
         else:
             probe_script = "probe.py"
             print(f"{BLUE}{BOLD}GFX803 PROBE VERIFICATION{RESET}")
@@ -295,21 +312,42 @@ def main():
             print(f"{RED}Error: {probe_script} not found in current directory.{RESET}")
             return
             
+        # Default ROCm env vars for gfx803
+        env_vars = "HSA_OVERRIDE_GFX_VERSION=8.0.3 "
+        if args.miopen_bypass:
+            env_vars += "MIOPEN_FIND_ENFORCE=3 MIOPEN_DEBUG_DISABLE_FIND_DB=1 "
+        if args.deterministic:
+            env_vars += "MIOPEN_DEBUG_CONV_DET=1 CUBLAS_WORKSPACE_CONFIG=:4096:8 "
+        if getattr(args, 'stable', False):
+            print(f"{YELLOW}Applying STABLE mitigations: MIOPEN_DEBUG_CONV_WINOGRAD=0 MIOPEN_DEBUG_CONV_FFT=0{RESET}")
+            env_vars += "MIOPEN_DEBUG_CONV_WINOGRAD=0 MIOPEN_DEBUG_CONV_FFT=0 "
+
         cmd = ""
         if env == "local":
-            cmd = f"python {probe_script}"
+            cmd = f"{env_vars}python {probe_script}"
         elif env == "docker":
             if not env_path:
                 print(f"{RED}Please specify a Docker image via --env-path (e.g., my_rocm_docker_image){RESET}")
                 return
             print(f"{YELLOW}Preparing Docker container from image '{env_path}'...{RESET}")
-            cmd = f"docker run --rm --entrypoint '' -v $(pwd):/app -w /app --device=/dev/kfd --device=/dev/dri --group-add=video --ipc=host {env_path} python3 {probe_script}"
+            # Inject env vars via docker run -e
+            d_env = "-e HSA_OVERRIDE_GFX_VERSION=8.0.3 "
+            if args.miopen_bypass:
+                d_env += "-e MIOPEN_FIND_ENFORCE=3 -e MIOPEN_DEBUG_DISABLE_FIND_DB=1 "
+            if args.deterministic:
+                d_env += "-e MIOPEN_DEBUG_CONV_DET=1 -e CUBLAS_WORKSPACE_CONFIG=:4096:8 "
+            if getattr(args, 'stable', False):
+                d_env += "-e MIOPEN_DEBUG_CONV_WINOGRAD=0 -e MIOPEN_DEBUG_CONV_FFT=0 "
+            
+            # Note: We don't prepend 'sudo' automatically to avoid permission issues if not needed,
+            # but we allow the user to see exactly what is being run.
+            cmd = f"docker run --rm {d_env} --entrypoint '' -v $(pwd):/app -w /app --device=/dev/kfd --device=/dev/dri --group-add=video --ipc=host {env_path} python3 {probe_script}"
         elif env == "nix":
             if not env_path:
                 print(f"{RED}Please specify a path to the Nix flake via --env-path (e.g., '../rr_gfx803_rocm'){RESET}")
                 return
             print(f"{YELLOW}Spawning into Nix environment '{env_path}'...{RESET}")
-            cmd = f"nix develop {env_path}#default --command python {probe_script}"
+            cmd = f"nix develop {env_path}#default --command env {env_vars}python {probe_script}"
             
         print(f"\n{GREEN}Executing Test:{RESET}")
         print(f"  {cmd}\n")
@@ -356,7 +394,11 @@ def main():
             for line in out_lines:
                 if line.startswith("PROBE_JSON:"):
                     try:
-                        probe_meta = json.loads(line[len("PROBE_JSON:"):])
+                        loaded = json.loads(line[len("PROBE_JSON:"):])
+                        if isinstance(loaded, dict):
+                            probe_meta = loaded
+                        elif isinstance(loaded, list):
+                            probe_meta = {"tests_list": loaded}
                     except Exception:
                         pass
                 

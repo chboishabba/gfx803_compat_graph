@@ -1,0 +1,54 @@
+{
+  "nodes": [
+    {
+      "node_id": "fact:run:docker:itir_latest_stable",
+      "label": "itir:latest (Stable Mode): Partial Pass (Non-deterministic)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_diffusion",
+      "attrs": {
+        "verdict": "partial_pass",
+        "env": "docker",
+        "image": "itir:latest",
+        "kernel": "6.19.7-1-cachyos-bore",
+        "mitigations": ["MIOPEN_DEBUG_CONV_WINOGRAD=0", "MIOPEN_DEBUG_CONV_FFT=0"],
+        "findings": "Diffusion loop is stable but output drift (0.001410) detected across repeated runs.",
+        "tests": {
+          "diffusion_fp32": "pass",
+          "diffusion_fp16": "pass",
+          "timing_stability": "pass (warmup 0.9x)",
+          "determinism": "fail (diff 0.001410)"
+        }
+      }
+    },
+    {
+      "node_id": "hyp:residual_nondeterminism_polaris",
+      "label": "Hypothesis: Residual non-determinism on gfx803 exists even with Winograd/FFT disabled",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.85,
+      "source": "analysis"
+    }
+  ],
+  "edges": [
+    {
+      "src": "fact:run:docker:itir_latest_stable",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "analysis"
+    },
+    {
+      "src": "fact:run:docker:itir_latest_stable",
+      "dst": "unk:first_bad_layer",
+      "relation": "narrows",
+      "source": "analysis"
+    },
+    {
+      "src": "fact:run:docker:itir_latest_stable",
+      "dst": "hyp:residual_nondeterministic_polaris",
+      "relation": "supports",
+      "source": "analysis"
+    }
+  ]
+}

@@ -1,33 +1,8 @@
 [
   {
-    "id": "probe:T13_vulkan_comparison",
-    "label": "Vulkan vs (Future) ROCm tensor parity comparison",
-    "score": 24.5,
-    "cost": 3,
-    "targets": [
-      "runtime:vulkan",
-      "workload:diffusion",
-      "metric:correctness"
-    ],
-    "resolves": [
-      "unk:first_bad_layer",
-      "unk:precision_matrix"
-    ],
-    "reasons": [
-      {
-        "unknown": "unk:first_bad_layer",
-        "pressure": 4
-      },
-      {
-        "unknown": "unk:precision_matrix",
-        "pressure": 2
-      }
-    ]
-  },
-  {
     "id": "probe:T11_miopen_conv",
     "label": "T11 MIOpen conv + perfdb stability",
-    "score": 24.5,
+    "score": 33.5,
     "cost": 5,
     "targets": [
       "lib:miopen",
@@ -42,11 +17,36 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 4
+        "pressure": 6
       },
       {
         "unknown": "unk:miopen_perfdb_stability",
+        "pressure": 3
+      },
+      {
+        "unknown": "unk:precision_matrix",
         "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T13_vulkan_comparison",
+    "label": "Vulkan vs (Future) ROCm tensor parity comparison",
+    "score": 30.5,
+    "cost": 3,
+    "targets": [
+      "runtime:vulkan",
+      "workload:diffusion",
+      "metric:correctness"
+    ],
+    "resolves": [
+      "unk:first_bad_layer",
+      "unk:precision_matrix"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:first_bad_layer",
+        "pressure": 6
       },
       {
         "unknown": "unk:precision_matrix",
@@ -57,7 +57,7 @@
   {
     "id": "probe:T12_framework_layers",
     "label": "T12 framework layer probes",
-    "score": 18.5,
+    "score": 24.5,
     "cost": 5,
     "targets": [
       "fw:pytorch",
@@ -71,7 +71,7 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 4
+        "pressure": 6
       },
       {
         "unknown": "unk:precision_matrix",
@@ -82,7 +82,7 @@
   {
     "id": "probe:T9_raw_conv",
     "label": "T9 raw HIP conv",
-    "score": 17.0,
+    "score": 23.0,
     "cost": 4,
     "targets": [
       "component:conv_path"
@@ -94,7 +94,7 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 4
+        "pressure": 6
       },
       {
         "unknown": "unk:precision_matrix",
@@ -145,7 +145,7 @@
   {
     "id": "probe:T10_rocblas_shapes",
     "label": "T10 rocBLAS shape probe",
-    "score": 6.5,
+    "score": 9.5,
     "cost": 3,
     "targets": [
       "lib:rocblas",
@@ -157,14 +157,14 @@
     "reasons": [
       {
         "unknown": "unk:best_gemm_tiles",
-        "pressure": 2
+        "pressure": 3
       }
     ]
   },
   {
     "id": "probe:T7_raw_gemm_correctness",
     "label": "T7 raw GEMM correctness",
-    "score": 6.5,
+    "score": 9.5,
     "cost": 3,
     "targets": [
       "component:gemm_tiles",
@@ -176,14 +176,14 @@
     "reasons": [
       {
         "unknown": "unk:best_gemm_tiles",
-        "pressure": 2
+        "pressure": 3
       }
     ]
   },
   {
     "id": "probe:T6_wave_sched",
     "label": "T6 wavefront scheduling / occupancy",
-    "score": 6.0,
+    "score": 9.0,
     "cost": 2,
     "targets": [
       "component:wavefront_sched"
@@ -194,7 +194,25 @@
     "reasons": [
       {
         "unknown": "unk:best_gemm_tiles",
-        "pressure": 2
+        "pressure": 3
+      }
+    ]
+  },
+  {
+    "id": "probe:T8_gemm_tile_sweep",
+    "label": "T8 GEMM tile sweep",
+    "score": 8.0,
+    "cost": 4,
+    "targets": [
+      "component:gemm_tiles"
+    ],
+    "resolves": [
+      "unk:best_gemm_tiles"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:best_gemm_tiles",
+        "pressure": 3
       }
     ]
   },
@@ -213,24 +231,6 @@
     "reasons": [
       {
         "unknown": "unk:kernel_boundary_exact",
-        "pressure": 2
-      }
-    ]
-  },
-  {
-    "id": "probe:T8_gemm_tile_sweep",
-    "label": "T8 GEMM tile sweep",
-    "score": 5.0,
-    "cost": 4,
-    "targets": [
-      "component:gemm_tiles"
-    ],
-    "resolves": [
-      "unk:best_gemm_tiles"
-    ],
-    "reasons": [
-      {
-        "unknown": "unk:best_gemm_tiles",
         "pressure": 2
       }
     ]

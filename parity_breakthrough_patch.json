@@ -1,0 +1,40 @@
+{
+  "nodes": [
+    {
+      "node_id": "obs:gpu_can_be_correct_but_flaky",
+      "label": "GPU output matches CPU ground truth (diff 3e-6) in some runs, but fluctuates by 0.03 in others",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_parity",
+      "attrs": {
+        "stock_parity_success": true,
+        "det_parity_failure": true,
+        "divergence": 0.039,
+        "layer": "Conv2d(64,128,3,s=2)"
+      }
+    },
+    {
+      "node_id": "hyp:det_kernels_are_bugged",
+      "label": "MIOpen 'Deterministic' kernels (likely using atomics) are broken on gfx803; heuristic search occasionally picks stable ones",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.9,
+      "source": "analysis"
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:gpu_can_be_correct_but_flaky",
+      "dst": "hyp:det_kernels_are_bugged",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:gpu_can_be_correct_but_flaky",
+      "dst": "unk:first_bad_layer",
+      "relation": "resolves",
+      "source": "analysis"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
   {
     "id": "unk:first_bad_layer",
     "label": "First corrupted tensor/layer in diffusion path",
-    "score": 4,
+    "score": 6,
     "reasons": [
       {
         "src": "hyp:miopen_conv_root_cause",
@@ -19,6 +19,52 @@
       {
         "src": "exp:native_vulkan_ground_truth",
         "relation": "targets"
+      },
+      {
+        "src": "hyp:rocm64_noise_is_systematic",
+        "relation": "requires_test"
+      },
+      {
+        "src": "hyp:nondeterministic_kernel_selection",
+        "relation": "requires_test"
+      }
+    ]
+  },
+  {
+    "id": "unk:best_gemm_tiles",
+    "label": "Best raw HIP GEMM tile families for gfx803",
+    "score": 3,
+    "reasons": [
+      {
+        "src": "hyp:fallback_gemm_llm",
+        "relation": "requires_test"
+      },
+      {
+        "src": "exp:canonical_protocol",
+        "relation": "targets"
+      },
+      {
+        "src": "hyp:SS_type_asm_incompatible",
+        "relation": "requires_test"
+      }
+    ]
+  },
+  {
+    "id": "unk:miopen_perfdb_stability",
+    "label": "Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings",
+    "score": 3,
+    "reasons": [
+      {
+        "src": "component:perfdb",
+        "relation": "maps_to"
+      },
+      {
+        "src": "exp:canonical_protocol",
+        "relation": "targets"
+      },
+      {
+        "src": "hyp:nondeterministic_kernel_selection",
+        "relation": "requires_test"
       }
     ]
   },
@@ -42,21 +88,6 @@
     ]
   },
   {
-    "id": "unk:best_gemm_tiles",
-    "label": "Best raw HIP GEMM tile families for gfx803",
-    "score": 2,
-    "reasons": [
-      {
-        "src": "hyp:fallback_gemm_llm",
-        "relation": "requires_test"
-      },
-      {
-        "src": "exp:canonical_protocol",
-        "relation": "targets"
-      }
-    ]
-  },
-  {
     "id": "unk:kernel_boundary_exact",
     "label": "Exact stable/unstable Linux kernel boundary",
     "score": 2,
@@ -64,21 +95,6 @@
       {
         "src": "hyp:kernel_version_boundary",
         "relation": "requires_test"
-      },
-      {
-        "src": "exp:canonical_protocol",
-        "relation": "targets"
-      }
-    ]
-  },
-  {
-    "id": "unk:miopen_perfdb_stability",
-    "label": "Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings",
-    "score": 2,
-    "reasons": [
-      {
-        "src": "component:perfdb",
-        "relation": "maps_to"
       },
       {
         "src": "exp:canonical_protocol",
@@ -100,6 +116,66 @@
         "relation": "targets"
       }
     ]
+  },
+  {
+    "id": "hyp:SS_type_asm_incompatible",
+    "label": "Hypothesis: SS-type Tensile kernels use ISA instructions incompatible with gfx803",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "hyp:comfyui_dtype_regression",
+    "label": "Hypothesis: ComfyUI dtype/loading refactor post-Wan2.1 triggers precision issues on gfx803",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "hyp:fallback_gemm_llm",
+    "label": "Hypothesis: LLM uses Cijk_Alik_Bljk_HB contraction which Tensile doesn't compile properly for gfx803",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "hyp:nondeterministic_kernel_selection",
+    "label": "Hypothesis: MIOpen selects different kernel implementations across runs, causing output variance",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "hyp:rocm64_noise_is_systematic",
+    "label": "Hypothesis: ROCm 6.4 noise on gfx803 is systematic (not fixable with flags or rocblas swap)",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "obs:comfyui_refactor_broke_old_gpus",
+    "label": "ComfyUI refactor around Wan2.1 changed default model loading and data types, may affect old archs",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "obs:miopen_images_look_better_after_rebuild",
+    "label": "After MIOpen perfdb rebuild, images subjectively look better (more accurate math representation)",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "obs:polaris_case_sensitivity",
+    "label": "Polaris folder may need to be lowercase 'polaris' to match other Tensile convention",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "obs:r9nano_folder_needed",
+    "label": "Including r9nano Tensile folder alongside Polaris folder may be required for full coverage",
+    "score": 0,
+    "reasons": []
+  },
+  {
+    "id": "obs:zluda_same_speed_as_vulkan",
+    "label": "ZLUDA speed identical to Vulkan on gfx803, possible silent fallback despite HW monitoring showing CUDA",
+    "score": 0,
+    "reasons": []
   },
   {
     "id": "unk:which_stack_is_best_baseline",

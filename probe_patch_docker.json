@@ -2,33 +2,18 @@
   "nodes": [
     {
       "node_id": "fact:run:docker:itir_latest",
-      "label": "Probe on docker/itir:latest: partial (7 tests, kernel 6.19.7-1-cachyos-bore)",
+      "label": "Probe on docker/itir:latest: unknown (0 tests, kernel 6.19.7-1-cachyos-bore)",
       "kind": "observation",
       "status": "known_known",
       "confidence": 1.0,
       "source": "verify_runner",
       "attrs": {
-        "verdict": "partial",
+        "verdict": "unknown",
         "env": "docker",
         "kernel": "6.19.7-1-cachyos-bore",
-        "pytorch": "2.6.0+gitdae14f9",
-        "tests": {
-          "diffusion_fp32_20step": "pass",
-          "diffusion_fp16_20step": "pass",
-          "diffusion_mixed_20step": "pass",
-          "diffusion_fp32_50step": "pass",
-          "timing_stability": "pass",
-          "repeated_inference_drift": "fail_nondeterministic",
-          "large_channel_conv": "pass"
-        }
+        "pytorch": "unknown",
+        "tests": {}
       }
-    },
-    {
-      "node_id": "obs:probe_fail:repeated_inference_drift:docker",
-      "label": "repeated_inference_drift fail_nondeterministic on docker/itir:latest",
-      "kind": "observation",
-      "status": "known_known",
-      "source": "verify_runner"
     }
   ],
   "edges": [
@@ -36,12 +21,6 @@
       "src": "fact:run:docker:itir_latest",
       "dst": "hw:rx580",
       "relation": "observed_on",
-      "source": "verify_runner"
-    },
-    {
-      "src": "obs:probe_fail:repeated_inference_drift:docker",
-      "dst": "fact:run:docker:itir_latest",
-      "relation": "part_of",
       "source": "verify_runner"
     }
   ]

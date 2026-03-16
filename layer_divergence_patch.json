@@ -1,0 +1,46 @@
+{
+  "nodes": [
+    {
+      "node_id": "obs:divergence_at_strided_conv",
+      "label": "Non-determinism pinpointed to down1.down (Conv2d 64->128, stride 2)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_layers",
+      "attrs": {
+        "layer": "down1.down",
+        "op": "Conv2d(64, 128, 3, stride=2, padding=1)",
+        "diff": 0.0376,
+        "miopen_warning": "GemmFwdRest workspace fallback"
+      }
+    },
+    {
+      "node_id": "hyp:strided_conv_hip_bug",
+      "label": "HIP kernel for strided convolutions on gfx803 is non-deterministic (atomic race or faulty logic)",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.8,
+      "source": "analysis"
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:divergence_at_strided_conv",
+      "dst": "unk:first_bad_layer",
+      "relation": "resolves",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:divergence_at_strided_conv",
+      "dst": "hyp:strided_conv_hip_bug",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:divergence_at_strided_conv",
+      "dst": "fact:run:docker:itir_latest",
+      "relation": "part_of",
+      "source": "analysis"
+    }
+  ]
+}

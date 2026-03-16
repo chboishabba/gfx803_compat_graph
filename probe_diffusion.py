@@ -177,6 +177,7 @@ def test_diffusion_fp32():
             x = euler_step(model, x, t, steps)
             torch.cuda.synchronize()
             dt = time.time() - t0
+            print(f"  ... step {t}/{steps} ({dt:.3f}s)")
 
             has_nan = torch.isnan(x).any().item()
             has_inf = torch.isinf(x).any().item()
@@ -346,7 +347,14 @@ def main():
     print(f"PyTorch version : {torch.__version__}")
     print(f"Kernel          : {platform.release()}")
     print(f"Device          : {torch.cuda.get_device_name(0)}")
-    for var in ["HSA_OVERRIDE_GFX_VERSION", "MIOPEN_LOG_LEVEL", "ROC_ENABLE_PRE_VEGA"]:
+    if os.environ.get("CUBLAS_WORKSPACE_CONFIG") or os.environ.get("MIOPEN_DEBUG_CONV_DET"):
+        print("  Enabling torch.use_deterministic_algorithms(True)")
+        try:
+            torch.use_deterministic_algorithms(True)
+        except Exception as e:
+            print(f"  Warning: Could not enable deterministic mode: {e}")
+
+    for var in ["HSA_OVERRIDE_GFX_VERSION", "MIOPEN_LOG_LEVEL", "ROC_ENABLE_PRE_VEGA", "CUBLAS_WORKSPACE_CONFIG"]:
         val = os.environ.get(var)
         if val:
             print(f"  {var}={val}")

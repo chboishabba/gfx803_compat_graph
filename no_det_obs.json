@@ -1,0 +1,44 @@
+{
+  "nodes": [
+    {
+      "node_id": "obs:no_det_possible_on_polaris",
+      "label": "Traditional MIOpen determinism flags fail to stabilize strided convolutions on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_conv_det",
+      "attrs": {
+        "tested_flags": [
+          "MIOPEN_DEBUG_CONV_DET",
+          "MIOPEN_FIND_ENFORCE=3",
+          "MIOPEN_DEBUG_CONV_GEMM=0",
+          "MIOPEN_DEBUG_CONV_DIRECT=0"
+        ],
+        "layer": "Conv2d(64, 128, 3, stride=2, padding=1)",
+        "divergence": "0.03-0.04"
+      }
+    },
+    {
+      "node_id": "hyp:polaris_atomic_race",
+      "label": "Hypothesis: Non-determinism on Polaris is caused by race conditions in atomic reduction kernels (e.g. GemmFwdRest)",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.85,
+      "source": "analysis"
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:no_det_possible_on_polaris",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:no_det_possible_on_polaris",
+      "dst": "hyp:polaris_atomic_race",
+      "relation": "supports",
+      "source": "analysis"
+    }
+  ]
+}

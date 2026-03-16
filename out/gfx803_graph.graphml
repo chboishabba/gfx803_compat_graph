@@ -1,9 +1,58 @@
 <?xml version='1.0' encoding='utf-8'?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
-  <key id="d15" for="edge" attr.name="source" attr.type="string" />
-  <key id="d14" for="edge" attr.name="confidence" attr.type="double" />
-  <key id="d13" for="edge" attr.name="status" attr.type="string" />
-  <key id="d12" for="edge" attr.name="relation" attr.type="string" />
+  <key id="d64" for="edge" attr.name="source" attr.type="string" />
+  <key id="d63" for="edge" attr.name="confidence" attr.type="double" />
+  <key id="d62" for="edge" attr.name="status" attr.type="string" />
+  <key id="d61" for="edge" attr.name="relation" attr.type="string" />
+  <key id="d60" for="node" attr.name="findings" attr.type="string" />
+  <key id="d59" for="node" attr.name="mitigations" attr.type="string" />
+  <key id="d58" for="node" attr.name="image" attr.type="string" />
+  <key id="d57" for="node" attr.name="reproducibility" attr.type="string" />
+  <key id="d56" for="node" attr.name="force_winograd_status" attr.type="string" />
+  <key id="d55" for="node" attr.name="no_winograd_status" attr.type="string" />
+  <key id="d54" for="node" attr.name="stock_status" attr.type="string" />
+  <key id="d53" for="node" attr.name="divergence" attr.type="double" />
+  <key id="d52" for="node" attr.name="det_parity_failure" attr.type="boolean" />
+  <key id="d51" for="node" attr.name="stock_parity_success" attr.type="boolean" />
+  <key id="d50" for="node" attr.name="divergence" attr.type="string" />
+  <key id="d49" for="node" attr.name="tested_flags" attr.type="string" />
+  <key id="d48" for="node" attr.name="hw" attr.type="string" />
+  <key id="d47" for="node" attr.name="mesa_version" attr.type="string" />
+  <key id="d46" for="node" attr.name="driver" attr.type="string" />
+  <key id="d45" for="node" attr.name="miopen_warning" attr.type="string" />
+  <key id="d44" for="node" attr.name="diff" attr.type="double" />
+  <key id="d43" for="node" attr.name="op" attr.type="string" />
+  <key id="d42" for="node" attr.name="layer" attr.type="string" />
+  <key id="d41" for="node" attr.name="community" attr.type="string" />
+  <key id="d40" for="node" attr.name="our_probe" attr.type="string" />
+  <key id="d39" for="node" attr.name="quad_attn" attr.type="string" />
+  <key id="d38" for="node" attr.name="split_attn" attr.type="string" />
+  <key id="d37" for="node" attr.name="jab_attn" attr.type="string" />
+  <key id="d36" for="node" attr.name="pytorch_attn" attr.type="string" />
+  <key id="d35" for="node" attr.name="worked_before" attr.type="string" />
+  <key id="d34" for="node" attr.name="suspects" attr.type="string" />
+  <key id="d33" for="node" attr.name="flags" attr.type="string" />
+  <key id="d32" for="node" attr.name="reproducible" attr.type="boolean" />
+  <key id="d31" for="node" attr.name="speed_worst" attr.type="string" />
+  <key id="d30" for="node" attr.name="speed_normal" attr.type="string" />
+  <key id="d29" for="node" attr.name="speed_best" attr.type="string" />
+  <key id="d28" for="node" attr.name="note" attr.type="string" />
+  <key id="d27" for="node" attr.name="rocm_tested" attr.type="string" />
+  <key id="d26" for="node" attr.name="pytorch_tested" attr.type="string" />
+  <key id="d25" for="node" attr.name="gpu_clock" attr.type="string" />
+  <key id="d24" for="node" attr.name="rocm" attr.type="string" />
+  <key id="d23" for="node" attr.name="fix2" attr.type="string" />
+  <key id="d22" for="node" attr.name="fix1" attr.type="string" />
+  <key id="d21" for="node" attr.name="workload" attr.type="string" />
+  <key id="d20" for="node" attr.name="vram_reduced_to" attr.type="string" />
+  <key id="d19" for="node" attr.name="speed_after" attr.type="string" />
+  <key id="d18" for="node" attr.name="speed_before" attr.type="string" />
+  <key id="d17" for="node" attr.name="crash_types" attr.type="string" />
+  <key id="d16" for="node" attr.name="neutral_types" attr.type="string" />
+  <key id="d15" for="node" attr.name="fast_types" attr.type="string" />
+  <key id="d14" for="node" attr.name="safe_types" attr.type="string" />
+  <key id="d13" for="node" attr.name="flags_tested" attr.type="string" />
+  <key id="d12" for="node" attr.name="error" attr.type="string" />
   <key id="d11" for="node" attr.name="tests" attr.type="string" />
   <key id="d10" for="node" attr.name="pytorch" attr.type="string" />
   <key id="d9" for="node" attr.name="kernel" attr.type="string" />
@@ -165,11 +214,11 @@
       <data key="d4">analysis</data>
     </node>
     <node id="hyp:fallback_gemm_llm">
-      <data key="d0">LLM slowness is likely fallback GEMM / poor occupancy / launch geometry</data>
+      <data key="d0">Hypothesis: LLM uses Cijk_Alik_Bljk_HB contraction which Tensile doesn't compile properly for gfx803</data>
       <data key="d1">hypothesis</data>
-      <data key="d2">hypothesis</data>
-      <data key="d3">0.73</data>
-      <data key="d4">analysis</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.7</data>
+      <data key="d4">advanced_lvl_up_comment</data>
     </node>
     <node id="hyp:kernel_version_boundary">
       <data key="d0">There is a kernel-version compatibility boundary for KFD stability</data>
@@ -370,9 +419,9 @@
     <node id="rocm:5.7">
       <data key="d0">ROCm 5.7</data>
       <data key="d1">rocm_version</data>
-      <data key="d2">context</data>
-      <data key="d3">0.9</data>
-      <data key="d4">miner</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">community_tuleo1</data>
     </node>
     <node id="rocm:6.4">
       <data key="d0">ROCm 6.4</data>
@@ -1247,26 +1296,443 @@
       <data key="d4">miner</data>
     </node>
     <node id="fact:run:nix:.._rr_gfx803_rocm">
-      <data key="d0">Probe Result on nix: unknown</data>
-      <data key="d1">observation</data>
-      <data key="d2">known_known</data>
-      <data key="d3">1.0</data>
-      <data key="d4">manual_seed</data>
-      <data key="d7">unknown</data>
-      <data key="d8">nix</data>
-    </node>
-    <node id="fact:run:docker:itir_latest">
-      <data key="d0">Probe on docker/itir:latest: success (8 tests, kernel 6.19.7-1-cachyos-bore)</data>
+      <data key="d0">Probe on nix/../rr_gfx803_rocm: unknown (0 tests, kernel 6.19.7-1-cachyos-bore)</data>
       <data key="d1">observation</data>
       <data key="d2">known_known</data>
       <data key="d3">1.0</data>
       <data key="d4">verify_runner</data>
-      <data key="d7">success</data>
+      <data key="d7">unknown</data>
+      <data key="d8">nix</data>
+      <data key="d9">6.19.7-1-cachyos-bore</data>
+      <data key="d10">unknown</data>
+      <data key="d11">{}</data>
+    </node>
+    <node id="fact:run:docker:itir_latest">
+      <data key="d0">Probe on docker/itir:latest: unknown (0 tests, kernel 6.19.7-1-cachyos-bore)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">verify_runner</data>
+      <data key="d7">unknown</data>
       <data key="d8">docker</data>
       <data key="d9">6.19.7-1-cachyos-bore</data>
-      <data key="d10">2.6.0+gitdae14f9</data>
-      <data key="d11">{'fp32_matmul': 'pass', 'fp16_matmul': 'pass', 'conv2d_fp32': 'pass', 'conv2d_fp16': 'pass', 'conv2d_determinism': 'pass', 'unet_block_conv': 'pass', 'groupnorm': 'pass', 'attention_pattern': 'pass'}</data>
+      <data key="d10">unknown</data>
+      <data key="d11">{}</data>
     </node>
+    <node id="community:tuleo1">
+      <data key="d0">Community tester tuleo1 (RX580, Arch Linux)</data>
+      <data key="d1">contributor</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">github_issue_advanced10</data>
+    </node>
+    <node id="obs:rocm64_always_noise">
+      <data key="d0">ROCm 6.4 Docker ALWAYS produces noise on gfx803 regardless of flags or rocblas version</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:rocm57_stock_works">
+      <data key="d0">ROCm 5.7 Docker with stock rocblas produces clean diffusion output on gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:rocm57_custom_rocblas_maf">
+      <data key="d0">Custom rocblas on ROCm 5.7 causes Memory Access Fault (MAF) on gfx803 regardless of flags</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d12">Memory access fault by GPU node-1 on address (nil). Reason: Page not present or supervisor privilege.</data>
+      <data key="d13">--lowvram, --force-fp32, --force-fp16</data>
+    </node>
+    <node id="obs:tensile_type_matrix">
+      <data key="d0">Tensile library type compatibility matrix on gfx803 Linux</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d14">4xii8I, BB, BS, CC, DD (normal speed, but noise on 6.4)</data>
+      <data key="d15">HH, HS, I8I (6x speedup 1.7s/it -&gt; 6it/s, reduced VRAM to 3GB, but noise)</data>
+      <data key="d16">ZZ (no change)</data>
+      <data key="d17">SS (causes segfault/MAF on any .hsaco, .co, or .dat file)</data>
+    </node>
+    <node id="obs:tensile_SS_segfault">
+      <data key="d0">Tensile SS-type libraries cause segfault on gfx803 Linux</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:tensile_HH_HS_I8I_speedup">
+      <data key="d0">HH/HS/I8I Tensile types give 6x speedup but produce noise on gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d18">1.7s/it</data>
+      <data key="d19">6it/s</data>
+      <data key="d20">3GB</data>
+    </node>
+    <node id="obs:workgroup_mapping_A_speedup">
+      <data key="d0">WorkGroupMappingType:A + WorkGroupMapping:0 yields ~1s/it improvement on Linux gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.85</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d18">7s/it</data>
+      <data key="d19">6s/it</data>
+      <data key="d21">SDXL 1024x1024</data>
+    </node>
+    <node id="obs:assert_ai_removable">
+      <data key="d0">AssertAIGreaterThanEqual in Tensile yaml can be safely commented out without affecting output</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.85</data>
+      <data key="d4">community_tuleo1_and_advanced</data>
+    </node>
+    <node id="obs:custom_rocblas_1s_speedup_on_64">
+      <data key="d0">Custom rocblas on ROCm 6.4 gives ~1s/it speedup (6.5-&gt;5.5 SDXL) but still produces noise</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:kobold_rocm57_build_fixes">
+      <data key="d0">KoboldCPP on ROCm 5.7 requires cudaStreamWaitEvent 3-arg fix and __hostdevice__ static fix</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d22">cudaStreamWaitEvent needs 3rd arg (0) in ggml-cuda.cu</data>
+      <data key="d23">__hostdevice__ -&gt; static __hostdevice__ in amd_hip_bf16.h</data>
+      <data key="d24">5.7.0</data>
+    </node>
+    <node id="obs:token_processing_slow_rocm_vs_vulkan">
+      <data key="d0">ROCm token processing 10x slower than Vulkan, GPU only draws 110W vs 170W on Vulkan</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.85</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:ui_freeze_during_rocm_processing">
+      <data key="d0">Desktop UI freezes periodically during ROCm token processing on gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.8</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:clip_text_length_affects_speed">
+      <data key="d0">CLIP text length directly impacts it/s: 252 chars=1.5s/it, 24K chars=3.3s/it (512x512)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:iteration_speed_unstable">
+      <data key="d0">Iteration speed is unstable: first step ~6s/it then second step instant, avg 5.35s/it SDXL</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d25">1430MHz core / 2000MHz mem</data>
+      <data key="d21">SDXL 1024x1024 1 LoRA</data>
+    </node>
+    <node id="obs:r9nano_folder_needed">
+      <data key="d0">Including r9nano Tensile folder alongside Polaris folder may be required for full coverage</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.6</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:polaris_case_sensitivity">
+      <data key="d0">Polaris folder may need to be lowercase 'polaris' to match other Tensile convention</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.5</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="hyp:rocm64_noise_is_systematic">
+      <data key="d0">Hypothesis: ROCm 6.4 noise on gfx803 is systematic (not fixable with flags or rocblas swap)</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.7</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="hyp:SS_type_asm_incompatible">
+      <data key="d0">Hypothesis: SS-type Tensile kernels use ISA instructions incompatible with gfx803</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.6</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="obs:probe_fail:repeated_inference_drift:docker">
+      <data key="d0">repeated_inference_drift fail_nondeterministic on docker/itir:latest</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">verify_runner</data>
+    </node>
+    <node id="obs:basic_math_ok_noise_in_comfy">
+      <data key="d0">Basic math (GroupNorm, SiLU, attention) works without NaN/Inf but ComfyUI still outputs noise</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d26">['2.4', '2.10']</data>
+      <data key="d27">['5.7', '6.4']</data>
+      <data key="d28">Independently confirms our probe_diffusion.py finding: individual ops pass but inference drifts</data>
+    </node>
+    <node id="obs:noise_same_across_pytorch_versions">
+      <data key="d0">Noise on PyTorch 2.10/ROCm 5.7 is identical pattern to PyTorch 2.4/ROCm 6.4</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:miopen_perfdb_2_6_sit_unreproducible">
+      <data key="d0">MIOPEN_FIND_ENFORCE=3 + DISABLE_FIND_DB=1 once gave 2.6s/it (from 4.5) but is unreproducible</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d29">2.6s/it</data>
+      <data key="d30">4.5s/it</data>
+      <data key="d31">7s/it</data>
+      <data key="d32">False</data>
+      <data key="d33">MIOPEN_DEBUG_DISABLE_FIND_DB=1, MIOPEN_FIND_ENFORCE=3</data>
+    </node>
+    <node id="obs:miopen_perfdb_nondeterministic">
+      <data key="d0">MIOpen perfdb is non-deterministic: same searches give different speeds across runs</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:comfyui_refactor_broke_old_gpus">
+      <data key="d0">ComfyUI refactor around Wan2.1 changed default model loading and data types, may affect old archs</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.6</data>
+      <data key="d4">advanced_lvl_up_comment</data>
+      <data key="d34">['RMS_norm refactor', 'default dtype changes', 'model loading refactor']</data>
+      <data key="d35">pytorch==2.2.1</data>
+    </node>
+    <node id="obs:pytorch_221_worked_better">
+      <data key="d0">ComfyUI worked much better for old GPU archs using pytorch==2.2.1</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.7</data>
+      <data key="d4">advanced_lvl_up_comment</data>
+    </node>
+    <node id="obs:some_models_fine_others_not">
+      <data key="d0">Some models (Wan Vace, Wan2.2 5B) work fine but others get non-optimal SNR after transformer passes</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.7</data>
+      <data key="d4">advanced_lvl_up_comment</data>
+    </node>
+    <node id="obs:attention_benchmark_matrix">
+      <data key="d0">Attention benchmark: pytorch(4.54s)&gt;quad(5.23s)≥jab(5.47s)&gt;split(5.38s) on gfx803 SDXL 1024x1024</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">community_tuleo1</data>
+      <data key="d36">{'speed': '4.54s/it', 'vram': '7.2GB', 'needs_lowvram': True, 'power': 'high'}</data>
+      <data key="d37">{'speed': '5.55s/it', 'vram': '6.2GB', 'needs_lowvram': False, 'power': 'lower'}</data>
+      <data key="d38">{'speed': '5.38s/it', 'vram': '6.2GB'}</data>
+      <data key="d39">{'speed': '5.36s/it', 'vram': '6.2GB'}</data>
+      <data key="d28">JAB uses ~900MB less VRAM</data>
+    </node>
+    <node id="obs:no_memory_efficient_attention_compiled">
+      <data key="d0">Warning: Torch was not compiled with memory efficient attention on gfx803 builds</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:nondeterministic_inference_confirmed">
+      <data key="d0">CONFIRMED: Same model + same input produces different outputs across runs on gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">probe_diffusion_and_community</data>
+      <data key="d40">repeated_inference_drift FAIL_NONDETERMINISTIC on itir:latest</data>
+      <data key="d41">tuleo1 confirms noise is inconsistent, MIOpen perfdb gives different results</data>
+    </node>
+    <node id="hyp:nondeterministic_kernel_selection">
+      <data key="d0">Hypothesis: MIOpen selects different kernel implementations across runs, causing output variance</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.8</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="hyp:comfyui_dtype_regression">
+      <data key="d0">Hypothesis: ComfyUI dtype/loading refactor post-Wan2.1 triggers precision issues on gfx803</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.5</data>
+      <data key="d4">advanced_lvl_up_comment</data>
+    </node>
+    <node id="obs:zluda_same_speed_as_vulkan">
+      <data key="d0">ZLUDA speed identical to Vulkan on gfx803, possible silent fallback despite HW monitoring showing CUDA</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.6</data>
+      <data key="d4">advanced_lvl_up_comment</data>
+    </node>
+    <node id="obs:miopen_images_look_better_after_rebuild">
+      <data key="d0">After MIOpen perfdb rebuild, images subjectively look better (more accurate math representation)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">0.4</data>
+      <data key="d4">community_tuleo1</data>
+    </node>
+    <node id="obs:divergence_at_strided_conv">
+      <data key="d0">Non-determinism pinpointed to down1.down (Conv2d 64-&gt;128, stride 2)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">probe_layers</data>
+      <data key="d42">down1.down</data>
+      <data key="d43">Conv2d(64, 128, 3, stride=2, padding=1)</data>
+      <data key="d44">0.0376</data>
+      <data key="d45">GemmFwdRest workspace fallback</data>
+    </node>
+    <node id="hyp:strided_conv_hip_bug">
+      <data key="d0">HIP kernel for strided convolutions on gfx803 is non-deterministic (atomic race or faulty logic)</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.8</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="obs:vulkan_works_on_host_radv">
+      <data key="d0">Vulkan (RADV) functional on host Arch Linux (Mesa 26.0.2)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">manual_test</data>
+      <data key="d46">radv</data>
+      <data key="d47">26.0.2</data>
+      <data key="d48">rx580</data>
+    </node>
+    <node id="obs:no_det_possible_on_polaris">
+      <data key="d0">Traditional MIOpen determinism flags fail to stabilize strided convolutions on gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">probe_conv_det</data>
+      <data key="d49">['MIOPEN_DEBUG_CONV_DET', 'MIOPEN_FIND_ENFORCE=3', 'MIOPEN_DEBUG_CONV_GEMM=0', 'MIOPEN_DEBUG_CONV_DIRECT=0']</data>
+      <data key="d42">Conv2d(64, 128, 3, stride=2, padding=1)</data>
+      <data key="d50">0.03-0.04</data>
+    </node>
+    <node id="hyp:polaris_atomic_race">
+      <data key="d0">Hypothesis: Non-determinism on Polaris is caused by race conditions in atomic reduction kernels (e.g. GemmFwdRest)</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.85</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="obs:gpu_can_be_correct_but_flaky">
+      <data key="d0">GPU output matches CPU ground truth (diff 3e-6) in some runs, but fluctuates by 0.03 in others</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">probe_parity</data>
+      <data key="d51">True</data>
+      <data key="d52">True</data>
+      <data key="d53">0.039</data>
+      <data key="d42">Conv2d(64,128,3,s=2)</data>
+    </node>
+    <node id="hyp:det_kernels_are_bugged">
+      <data key="d0">MIOpen 'Deterministic' kernels (likely using atomics) are broken on gfx803; heuristic search occasionally picks stable ones</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.9</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="obs:winograd_nondeterministic_gfx803">
+      <data key="d0">MIOpen Winograd convolution kernels are confirmed non-deterministic on gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">probe_winograd_verify</data>
+      <data key="d54">fail (0.037)</data>
+      <data key="d55">pass (0.0)</data>
+      <data key="d56">fail (0.030)</data>
+      <data key="d57">100%</data>
+    </node>
+    <node id="rec:disable_winograd_fft">
+      <data key="d0">Action: Set MIOPEN_DEBUG_CONV_WINOGRAD=0 and MIOPEN_DEBUG_CONV_FFT=0 for gfx803</data>
+      <data key="d1">recommendation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="fact:run:local:local_system">
+      <data key="d0">Probe on local/local_system: partial (7 tests, kernel 6.19.7-1-cachyos-bore)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">verify_runner</data>
+      <data key="d7">partial</data>
+      <data key="d8">local</data>
+      <data key="d9">6.19.7-1-cachyos-bore</data>
+      <data key="d10">2.6.0+gitdae14f9</data>
+      <data key="d11">{'diffusion_fp32_20step': 'pass', 'diffusion_fp16_20step': 'pass', 'diffusion_mixed_20step': 'pass', 'diffusion_fp32_50step': 'pass', 'timing_stability': 'pass', 'repeated_inference_drift': 'fail_nondeterministic', 'large_channel_conv': 'pass'}</data>
+    </node>
+    <node id="fact:run:docker:rocm6_gfx803_pytorch_arch_rmake_opt">
+      <data key="d0">Probe on docker/rocm6_gfx803_pytorch_arch:rmake_opt: missing_pytorch (0 tests, kernel 6.19.7-1-cachyos-bore)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">verify_runner</data>
+      <data key="d7">missing_pytorch</data>
+      <data key="d8">docker</data>
+      <data key="d9">6.19.7-1-cachyos-bore</data>
+      <data key="d10">unknown</data>
+      <data key="d11">{}</data>
+    </node>
+    <node id="fact:run:docker:itir_latest_stable">
+      <data key="d0">itir:latest (Stable Mode): Partial Pass (Non-deterministic)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">probe_diffusion</data>
+      <data key="d7">partial_pass</data>
+      <data key="d8">docker</data>
+      <data key="d58">itir:latest</data>
+      <data key="d9">6.19.7-1-cachyos-bore</data>
+      <data key="d59">['MIOPEN_DEBUG_CONV_WINOGRAD=0', 'MIOPEN_DEBUG_CONV_FFT=0']</data>
+      <data key="d60">Diffusion loop is stable but output drift (0.001410) detected across repeated runs.</data>
+      <data key="d11">{'diffusion_fp32': 'pass', 'diffusion_fp16': 'pass', 'timing_stability': 'pass (warmup 0.9x)', 'determinism': 'fail (diff 0.001410)'}</data>
+    </node>
+    <node id="hyp:residual_nondeterminism_polaris">
+      <data key="d0">Hypothesis: Residual non-determinism on gfx803 exists even with Winograd/FFT disabled</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.85</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="obs:probe_fail:repeated_inference_drift:local">
+      <data key="d0">repeated_inference_drift fail_nondeterministic on local/local_system</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">verify_runner</data>
+    </node>
+    <node id="hyp:residual_nondeterministic_polaris" />
+    <node id="kernel:6.8">
+      <data key="d0">Linux Kernel 6.8</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="discussion:rocm_rx580_noise_issue" />
     <node id="kernel:6.6">
       <data key="d0">Linux Kernel 6.6</data>
       <data key="d1">kernel_version</data>
@@ -1274,16 +1740,8 @@
       <data key="d3">0.9</data>
       <data key="d4">miner</data>
     </node>
-    <node id="discussion:rocm_rx580_noise_issue" />
     <node id="kernel:6.1">
       <data key="d0">Linux Kernel 6.1</data>
-      <data key="d1">kernel_version</data>
-      <data key="d2">context</data>
-      <data key="d3">0.9</data>
-      <data key="d4">miner</data>
-    </node>
-    <node id="kernel:6.8">
-      <data key="d0">Linux Kernel 6.8</data>
       <data key="d1">kernel_version</data>
       <data key="d2">context</data>
       <data key="d3">0.9</data>
@@ -1304,1168 +1762,1534 @@
       <data key="d4">web</data>
     </node>
     <edge source="hw:rx580" target="arch:gfx803" id="has_architecture">
-      <data key="d12">has_architecture</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.99</data>
-      <data key="d15">conversation</data>
+      <data key="d61">has_architecture</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.99</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="hw:rx580" target="driver:amdgpu_kfd" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">conversation</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="hw:rx580" target="runtime:vulkan" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">user_report</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">user_report</data>
     </edge>
     <edge source="arch:gfx803" target="arch:polaris" id="belongs_to_family">
-      <data key="d12">belongs_to_family</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.99</data>
-      <data key="d15">conversation</data>
+      <data key="d61">belongs_to_family</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.99</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="driver:amdgpu_kfd" target="runtime:hip" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.88</data>
-      <data key="d15">conversation</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.88</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="runtime:hip" target="lib:rocblas" id="underpins">
-      <data key="d12">underpins</data>
-      <data key="d13">context</data>
-      <data key="d14">1.0</data>
-      <data key="d15">analysis</data>
+      <data key="d61">underpins</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="runtime:hip" target="lib:miopen" id="underpins">
-      <data key="d12">underpins</data>
-      <data key="d13">context</data>
-      <data key="d14">1.0</data>
-      <data key="d15">analysis</data>
+      <data key="d61">underpins</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="lib:rocblas" target="fw:pytorch" id="used_by">
-      <data key="d12">used_by</data>
-      <data key="d13">context</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">used_by</data>
+      <data key="d62">context</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="lib:rocblas" target="component:gemm_tiles" id="controls">
-      <data key="d12">controls</data>
-      <data key="d13">context</data>
-      <data key="d14">0.92</data>
-      <data key="d15">analysis</data>
+      <data key="d61">controls</data>
+      <data key="d62">context</data>
+      <data key="d63">0.92</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="lib:miopen" target="fw:pytorch" id="used_by">
-      <data key="d12">used_by</data>
-      <data key="d13">context</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">used_by</data>
+      <data key="d62">context</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="lib:miopen" target="component:conv_path" id="controls">
-      <data key="d12">controls</data>
-      <data key="d13">context</data>
-      <data key="d14">0.92</data>
-      <data key="d15">analysis</data>
+      <data key="d61">controls</data>
+      <data key="d62">context</data>
+      <data key="d63">0.92</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="fw:pytorch" target="fw:comfyui" id="underlies">
-      <data key="d12">underlies</data>
-      <data key="d13">context</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">underlies</data>
+      <data key="d62">context</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="workload:diffusion" target="obs:diffusion_noise" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">conversation</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="workload:diffusion" target="flag:cfg_1_0" id="throughput_hack">
-      <data key="d12">throughput_hack</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.78</data>
-      <data key="d15">conversation</data>
+      <data key="d61">throughput_hack</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.78</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="workload:llm" target="obs:llm_slow_tokens" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">conversation</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="workload:whisper" target="obs:whisper_works" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.8</data>
-      <data key="d15">conversation</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.8</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="obs:whisper_works" target="obs:hip_math_ok" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.76</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.76</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="obs:diffusion_noise" target="hyp:miopen_conv_root_cause" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.74</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.74</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="obs:llm_slow_tokens" target="hyp:fallback_gemm_llm" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.73</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.73</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="obs:cfg1_speedup" target="workload:diffusion" id="observed_in">
-      <data key="d12">observed_in</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.78</data>
-      <data key="d15">conversation</data>
+      <data key="d61">observed_in</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.78</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="obs:vulkan_competitive" target="component:gemm_tiles" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.65</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.65</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="obs:containers_share_host_kernel" target="component:host_kernel" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">conversation</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="obs:kfd_reset_instability" target="hyp:kernel_version_boundary" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.72</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.72</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="hyp:miopen_conv_root_cause" target="unk:first_bad_layer" id="requires_test">
-      <data key="d12">requires_test</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">requires_test</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="hyp:miopen_conv_root_cause" target="unk:precision_matrix" id="requires_test">
-      <data key="d12">requires_test</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.82</data>
-      <data key="d15">analysis</data>
+      <data key="d61">requires_test</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.82</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="hyp:fallback_gemm_llm" target="unk:best_gemm_tiles" id="requires_test">
-      <data key="d12">requires_test</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">requires_test</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="hyp:kernel_version_boundary" target="unk:kernel_boundary_exact" id="requires_test">
-      <data key="d12">requires_test</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.96</data>
-      <data key="d15">analysis</data>
+      <data key="d61">requires_test</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.96</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:hip_probe_suite" target="component:lds" id="tests">
-      <data key="d12">tests</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">tests</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:hip_probe_suite" target="component:wavefront_sched" id="tests">
-      <data key="d12">tests</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">tests</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:hip_probe_suite" target="component:gemm_tiles" id="tests">
-      <data key="d12">tests</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">tests</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:hip_probe_suite" target="component:conv_path" id="tests">
-      <data key="d12">tests</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">tests</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="metric:correctness" id="measures">
-      <data key="d12">measures</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">measures</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="metric:throughput" id="measures">
-      <data key="d12">measures</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">measures</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="metric:power" id="measures">
-      <data key="d12">measures</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">measures</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="metric:nan_inf" id="measures">
-      <data key="d12">measures</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">measures</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="unk:first_bad_layer" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.97</data>
-      <data key="d15">analysis</data>
+      <data key="d61">targets</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.97</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="unk:precision_matrix" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">targets</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="unk:kernel_boundary_exact" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">targets</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="unk:best_gemm_tiles" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.92</data>
-      <data key="d15">analysis</data>
+      <data key="d61">targets</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.92</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:canonical_protocol" target="unk:miopen_perfdb_stability" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.92</data>
-      <data key="d15">analysis</data>
+      <data key="d61">targets</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.92</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:wavefront_sched" target="workload:llm" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">context</data>
-      <data key="d14">0.92</data>
-      <data key="d15">analysis</data>
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">0.92</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:gemm_tiles" target="workload:llm" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">context</data>
-      <data key="d14">0.96</data>
-      <data key="d15">analysis</data>
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">0.96</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:conv_path" target="workload:diffusion" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">context</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:attention_path" target="workload:diffusion" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">context</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:vae_path" target="workload:diffusion" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">context</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:host_kernel" target="obs:kfd_reset_instability" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.82</data>
-      <data key="d15">analysis</data>
+      <data key="d61">affects</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.82</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="component:perfdb" target="unk:miopen_perfdb_stability" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">1.0</data>
-      <data key="d15">analysis</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="stack:rr_rocm64_base" id="provides">
-      <data key="d12">provides</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.92</data>
-      <data key="d15">web</data>
+      <data key="d61">provides</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.92</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="stack:rr_recompiled_pytorch" id="provides">
-      <data key="d12">provides</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.92</data>
-      <data key="d15">web</data>
+      <data key="d61">provides</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.92</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="stack:rr_recompiled_rocblas" id="provides">
-      <data key="d12">provides</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.85</data>
-      <data key="d15">web</data>
+      <data key="d61">provides</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.85</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="obs:rr_repo_enables_apps" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.94</data>
-      <data key="d15">web</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.94</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="workload:comfyui" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="workload:whisperx" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:robertrosenbusch_gfx803_rocm" target="workload:ollama" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:chboishabba_rr_gfx803_rocm" target="repo:robertrosenbusch_gfx803_rocm" id="derived_from">
-      <data key="d12">derived_from</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">derived_from</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:chboishabba_rr_gfx803_rocm" target="obs:recompile_pytorch_needed" id="documents">
-      <data key="d12">documents</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.94</data>
-      <data key="d15">web</data>
+      <data key="d61">documents</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.94</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:chboishabba_rr_gfx803_rocm" target="obs:recompile_rocblas_needed_rocm6x" id="documents">
-      <data key="d12">documents</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.86</data>
-      <data key="d15">web</data>
+      <data key="d61">documents</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.86</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:chboishabba_gfx803_compat_graph" target="exp:canonical_protocol" id="contains">
-      <data key="d12">contains</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">contains</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:chboishabba_gfx803_compat_graph" target="exp:hip_probe_suite" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">targets</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:lamikr_rocm_sdk_builder" target="discussion:lamikr261" id="has_discussion">
-      <data key="d12">has_discussion</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">web</data>
+      <data key="d61">has_discussion</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="repo:advanced_lvl_up_fix_amd_gpu" target="issue:advanced10" id="has_issue">
-      <data key="d12">has_issue</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.97</data>
-      <data key="d15">web</data>
+      <data key="d61">has_issue</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.97</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_rocm64_base" target="rocm:6.4" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.96</data>
-      <data key="d15">web</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.96</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_rocm64_base" target="unk:which_stack_is_best_baseline" id="candidate_baseline">
-      <data key="d12">candidate_baseline</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">candidate_baseline</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="stack:rr_recompiled_pytorch" target="pytorch:2.6.0" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">web</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_recompiled_pytorch" target="torchvision:0.21.0" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">web</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_recompiled_pytorch" target="torchaudio:2.6.0" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">web</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_recompiled_pytorch" target="workload:comfyui" id="enables">
-      <data key="d12">enables</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">web</data>
+      <data key="d61">enables</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_recompiled_pytorch" target="workload:whisperx" id="enables">
-      <data key="d12">enables</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">web</data>
+      <data key="d61">enables</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="stack:rr_recompiled_rocblas" target="workload:ollama" id="enables">
-      <data key="d12">enables</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.84</data>
-      <data key="d15">web</data>
+      <data key="d61">enables</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.84</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="rocm:5.7" target="unk:which_stack_is_best_baseline" id="candidate_baseline">
-      <data key="d12">candidate_baseline</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">candidate_baseline</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="rocm:6.4" target="unk:which_stack_is_best_baseline" id="candidate_baseline">
-      <data key="d12">candidate_baseline</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">candidate_baseline</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="workload:ollama" target="obs:ollama_vram_7b" id="vram_requirement">
-      <data key="d12">vram_requirement</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">vram_requirement</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="workload:comfyui" target="flag:lowvram" id="requires_flag">
-      <data key="d12">requires_flag</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.82</data>
-      <data key="d15">web</data>
+      <data key="d61">requires_flag</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.82</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="workload:comfyui" target="flag:lowvram" id="requires_for_correct_results">
-      <data key="d12">requires_for_correct_results</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">requires_for_correct_results</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="workload:comfyui" target="flag:miopen_log_level_3" id="requires_flag">
-      <data key="d12">requires_flag</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.8</data>
-      <data key="d15">web</data>
+      <data key="d61">requires_flag</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.8</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="workload:whisperx" target="flag:whisperx_joblib_0" id="requires_flag">
-      <data key="d12">requires_flag</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">requires_flag</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="flag:lowvram" target="unk:which_build_flags_are_required_per_workload" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">1.0</data>
-      <data key="d15">analysis</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="flag:miopen_log_level_3" target="unk:which_build_flags_are_required_per_workload" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">1.0</data>
-      <data key="d15">analysis</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="flag:cfg_1_0" target="unk:which_build_flags_are_required_per_workload" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_unknown</data>
-      <data key="d14">1.0</data>
-      <data key="d15">analysis</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_unknown</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="issue:advanced10" target="repo:robertrosenbusch_gfx803_rocm" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.96</data>
-      <data key="d15">web</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.96</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="issue:advanced10" target="rocm:5.7" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">web</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="issue:advanced10" target="rocm:6.4" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.96</data>
-      <data key="d15">web</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.96</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="obs:recompile_pytorch_needed" target="stack:rr_recompiled_pytorch" id="motivates">
-      <data key="d12">motivates</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.94</data>
-      <data key="d15">web</data>
+      <data key="d61">motivates</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.94</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="obs:recompile_rocblas_needed_rocm6x" target="stack:rr_recompiled_rocblas" id="motivates">
-      <data key="d12">motivates</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.86</data>
-      <data key="d15">web</data>
+      <data key="d61">motivates</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.86</data>
+      <data key="d64">web</data>
     </edge>
     <edge source="obs:workgroup_mapping_a" target="component:gemm_tiles" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.85</data>
-      <data key="d15">conversation</data>
+      <data key="d61">suggests</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.85</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="obs:miopen_find_enforce" target="component:perfdb" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.8</data>
-      <data key="d15">conversation</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.8</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="obs:tensile_assert_ai" target="lib:rocblas" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">conversation</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="obs:fp8_text_enc_vram" target="workload:diffusion" id="maps_to">
-      <data key="d12">maps_to</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">conversation</data>
+      <data key="d61">maps_to</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">conversation</data>
     </edge>
     <edge source="kernel:6.13" target="obs:kfd_segfault_6.13_6.14" id="causes">
-      <data key="d12">causes</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">causes</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="kernel:6.13" target="unk:kernel_boundary_exact" id="helps_resolve">
-      <data key="d12">helps_resolve</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">helps_resolve</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="kernel:6.14" target="obs:kfd_segfault_6.13_6.14" id="causes">
-      <data key="d12">causes</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">causes</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="kernel:6.14" target="unk:kernel_boundary_exact" id="helps_resolve">
-      <data key="d12">helps_resolve</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">helps_resolve</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="kernel:6.12.21" target="unk:kernel_boundary_exact" id="helps_resolve">
-      <data key="d12">helps_resolve</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">helps_resolve</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="os:fedora_41" target="kernel:6.14" id="uses_by_default">
-      <data key="d12">uses_by_default</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.85</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">uses_by_default</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.85</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="obs:kfd_segfault_6.13_6.14" target="obs:kfd_reset_instability" id="correlates_with">
-      <data key="d12">correlates_with</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">correlates_with</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="runtime:vulkan" target="obs:vulkan_functional_on_host" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">user_report</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">user_report</data>
     </edge>
     <edge source="runtime:vulkan" target="obs:sd_cpp_vulkan_builds_nix" id="underlies">
-      <data key="d12">underlies</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">user_report</data>
+      <data key="d61">underlies</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">user_report</data>
     </edge>
     <edge source="obs:vulkan_functional_on_host" target="hyp:vulkan_as_ground_truth" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="hyp:vulkan_as_ground_truth" target="exp:vulkan_parity_check" id="motivates">
-      <data key="d12">motivates</data>
-      <data key="d13">hypothesis</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">motivates</data>
+      <data key="d62">hypothesis</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:vulkan_parity_check" target="unk:first_bad_layer" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">targets</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="stack:rosenbusch_rocm64_base" target="os:ubuntu_24.04" id="uses_os">
-      <data key="d12">uses_os</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.99</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">uses_os</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.99</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="stack:rosenbusch_rocm64_base" target="rocm:6.4" id="uses_rocm">
-      <data key="d12">uses_rocm</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.99</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">uses_rocm</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.99</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="stack:rosenbusch_rocm64_base" target="lang:python_3.12" id="uses_python">
-      <data key="d12">uses_python</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.99</data>
-      <data key="d15">rosenbusch_repo</data>
+      <data key="d61">uses_python</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.99</data>
+      <data key="d64">rosenbusch_repo</data>
     </edge>
     <edge source="os:arch_linux" target="runtime:nix" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="runtime:nix" target="constraint:low_disk_space" id="motivates">
-      <data key="d12">motivates</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">strategy</data>
+      <data key="d61">motivates</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">strategy</data>
     </edge>
     <edge source="runtime:nix" target="obs:sd_cpp_vulkan_builds_nix" id="enables">
-      <data key="d12">enables</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">user_report</data>
+      <data key="d61">enables</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">user_report</data>
     </edge>
     <edge source="runtime:nix" target="obs:nix_vulkan_glibc_mismatch" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">experiment</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">experiment</data>
     </edge>
     <edge source="constraint:low_disk_space" target="branch:vulkan_comparison" id="affects">
-      <data key="d12">affects</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">strategy</data>
+      <data key="d61">affects</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">strategy</data>
     </edge>
     <edge source="branch:vulkan_comparison" target="exp:vulkan_parity_check" id="contains">
-      <data key="d12">contains</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">local_ingest</data>
+      <data key="d61">contains</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">local_ingest</data>
     </edge>
     <edge source="repo:leejet_stable-diffusion.cpp" target="obs:sd_cpp_vulkan_builds_nix" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">user_report</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">user_report</data>
     </edge>
     <edge source="fw:stable_diffusion_cpp" target="obs:sdcpp_build_success_gcc15" id="has_observation">
-      <data key="d12">has_observation</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">build_log</data>
+      <data key="d61">has_observation</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">build_log</data>
     </edge>
     <edge source="fw:stable_diffusion_cpp" target="compiler:gcc15.2" id="builds_with">
-      <data key="d12">builds_with</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">build_log</data>
+      <data key="d61">builds_with</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">build_log</data>
     </edge>
     <edge source="fw:stable_diffusion_cpp" target="env:nix_gcc15" id="builds_in">
-      <data key="d12">builds_in</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">build_log</data>
+      <data key="d61">builds_in</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">build_log</data>
     </edge>
     <edge source="fw:stable_diffusion_cpp" target="backend:ggml_vulkan" id="supports">
-      <data key="d12">supports</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">build_log</data>
+      <data key="d61">supports</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">build_log</data>
     </edge>
     <edge source="env:nix_gcc15" target="compiler:gcc15.2" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">build_log</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">build_log</data>
     </edge>
     <edge source="backend:ggml_vulkan" target="api:vulkan" id="uses">
-      <data key="d12">uses</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.95</data>
-      <data key="d15">build_log</data>
+      <data key="d61">uses</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.95</data>
+      <data key="d64">build_log</data>
     </edge>
     <edge source="obs:nix_vulkan_glibc_mismatch" target="hyp:nixgl_is_required" id="suggests">
-      <data key="d12">suggests</data>
-      <data key="d13">proposed</data>
-      <data key="d14">0.95</data>
-      <data key="d15">analysis</data>
+      <data key="d61">suggests</data>
+      <data key="d62">proposed</data>
+      <data key="d63">0.95</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="obs:nix_vulkan_glibc_mismatch" target="obs:nix_sudo_ld_scrubbing" id="exacerbated_by">
-      <data key="d12">exacerbated_by</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">analysis</data>
+      <data key="d61">exacerbated_by</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">analysis</data>
     </edge>
     <edge source="exp:native_vulkan_ground_truth" target="unk:first_bad_layer" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">manual_seed</data>
+      <data key="d61">targets</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">manual_seed</data>
     </edge>
     <edge source="issue:pytorch:pytorch:84044" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:84044" target="rocm:5.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:pytorch:pytorch:63188" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:160230" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:160230" target="rocm:7.0" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:pytorch:pytorch:115869" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:70036" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:70036" target="rocm:4.2" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:pytorch:pytorch:16661" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:16661" target="rocm:2.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:pytorch:pytorch:113896" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:116722" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:54653" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:73177" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:53738" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:53738" target="rocm:4.0" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:pytorch:pytorch:67576" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:49768" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:49768" target="rocm:4.0" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:pytorch:pytorch:18041" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:17367" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:76913" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:47702" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:pytorch:pytorch:488" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:5942" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:5942" target="rocm:7.2" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:5264" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4121" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4965" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4965" target="kernel:6.16" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4965" target="rocm:6.4" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4965" target="rocm:5.7" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:1659" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4919" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4189" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4189" target="rocm:6.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3692" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3692" target="rocm:4.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3692" target="rocm:6.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4190" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:4190" target="rocm:6.3" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3743" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3743" target="rocm:6.2" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:722" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3664" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3664" target="rocm:6.2" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3749" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3749" target="rocm:6.2" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3269" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3269" target="rocm:6.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:1813" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:1654" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:666" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:2021" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:887" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:132" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:2224" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:748" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:3062" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:847" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:847" target="rocm:1.8" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:ROCm:ROCm:925" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:1006" target="hw:rx580" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">context</data>
-      <data key="d14">0.8</data>
-      <data key="d15">github_api</data>
+      <data key="d61">mentions</data>
+      <data key="d62">context</data>
+      <data key="d63">0.8</data>
+      <data key="d64">github_api</data>
     </edge>
     <edge source="issue:ROCm:ROCm:1006" target="rocm:3.0" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="fact:run:nix:.._rr_gfx803_rocm" target="hw:rx580" id="observed_on">
-      <data key="d12">observed_on</data>
-      <data key="d13">context</data>
-      <data key="d14">1.0</data>
-      <data key="d15">verify_runner</data>
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">verify_runner</data>
     </edge>
     <edge source="fact:run:docker:itir_latest" target="hw:rx580" id="observed_on">
-      <data key="d12">observed_on</data>
-      <data key="d13">context</data>
-      <data key="d14">1.0</data>
-      <data key="d15">verify_runner</data>
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">verify_runner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.6" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+    <edge source="community:tuleo1" target="hw:rx580" id="tests_on">
+      <data key="d61">tests_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">github_issue</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+    <edge source="obs:rocm64_always_noise" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm64_always_noise" target="rocm:6.4" id="observed_in">
+      <data key="d61">observed_in</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm64_always_noise" target="workload:diffusion" id="affects">
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm64_always_noise" target="unk:first_bad_layer" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm57_stock_works" target="rocm:5.7" id="observed_in">
+      <data key="d61">observed_in</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm57_stock_works" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm57_stock_works" target="unk:which_stack_is_best_baseline" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm57_custom_rocblas_maf" target="rocm:5.7" id="observed_in">
+      <data key="d61">observed_in</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:rocm57_custom_rocblas_maf" target="lib:rocblas" id="affects">
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:tensile_SS_segfault" target="lib:rocblas" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:tensile_SS_segfault" target="hyp:SS_type_asm_incompatible" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:tensile_HH_HS_I8I_speedup" target="unk:best_gemm_tiles" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:tensile_HH_HS_I8I_speedup" target="unk:precision_matrix" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:workgroup_mapping_A_speedup" target="unk:best_gemm_tiles" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:custom_rocblas_1s_speedup_on_64" target="rocm:6.4" id="observed_in">
+      <data key="d61">observed_in</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:token_processing_slow_rocm_vs_vulkan" target="hyp:fallback_gemm_llm" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:token_processing_slow_rocm_vs_vulkan" target="workload:llm" id="affects">
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:ui_freeze_during_rocm_processing" target="driver:amdgpu_kfd" id="suggests">
+      <data key="d61">suggests</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:ui_freeze_during_rocm_processing" target="obs:kfd_reset_instability" id="correlates_with">
+      <data key="d61">correlates_with</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:clip_text_length_affects_speed" target="workload:diffusion" id="affects">
+      <data key="d61">affects</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:iteration_speed_unstable" target="unk:miopen_perfdb_stability" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:iteration_speed_unstable" target="component:perfdb" id="suggests">
+      <data key="d61">suggests</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="hyp:rocm64_noise_is_systematic" target="obs:rocm64_always_noise" id="explains">
+      <data key="d61">explains</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="hyp:rocm64_noise_is_systematic" target="unk:first_bad_layer" id="requires_test">
+      <data key="d61">requires_test</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="hyp:SS_type_asm_incompatible" target="unk:best_gemm_tiles" id="requires_test">
+      <data key="d61">requires_test</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:probe_fail:repeated_inference_drift:docker" target="fact:run:docker:itir_latest" id="part_of">
+      <data key="d61">part_of</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">verify_runner</data>
+    </edge>
+    <edge source="obs:basic_math_ok_noise_in_comfy" target="obs:nondeterministic_inference_confirmed" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:basic_math_ok_noise_in_comfy" target="unk:first_bad_layer" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:noise_same_across_pytorch_versions" target="hyp:rocm64_noise_is_systematic" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:noise_same_across_pytorch_versions" target="hyp:comfyui_dtype_regression" id="contradicts">
+      <data key="d61">contradicts</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:miopen_perfdb_2_6_sit_unreproducible" target="unk:miopen_perfdb_stability" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:miopen_perfdb_nondeterministic" target="hyp:nondeterministic_kernel_selection" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:miopen_perfdb_nondeterministic" target="unk:miopen_perfdb_stability" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:comfyui_refactor_broke_old_gpus" target="hyp:comfyui_dtype_regression" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">advanced_lvl_up_comment</data>
+    </edge>
+    <edge source="obs:pytorch_221_worked_better" target="hyp:comfyui_dtype_regression" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">advanced_lvl_up_comment</data>
+    </edge>
+    <edge source="obs:some_models_fine_others_not" target="unk:precision_matrix" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:attention_benchmark_matrix" target="workload:diffusion" id="measures">
+      <data key="d61">measures</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">community_tuleo1</data>
+    </edge>
+    <edge source="obs:no_memory_efficient_attention_compiled" target="obs:attention_benchmark_matrix" id="explains">
+      <data key="d61">explains</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:nondeterministic_inference_confirmed" target="hyp:nondeterministic_kernel_selection" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">probe_and_community</data>
+    </edge>
+    <edge source="obs:nondeterministic_inference_confirmed" target="unk:first_bad_layer" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="hyp:nondeterministic_kernel_selection" target="unk:first_bad_layer" id="requires_test">
+      <data key="d61">requires_test</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="hyp:nondeterministic_kernel_selection" target="unk:miopen_perfdb_stability" id="requires_test">
+      <data key="d61">requires_test</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:divergence_at_strided_conv" target="unk:first_bad_layer" id="resolves">
+      <data key="d61">resolves</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:divergence_at_strided_conv" target="hyp:strided_conv_hip_bug" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:divergence_at_strided_conv" target="fact:run:docker:itir_latest" id="part_of">
+      <data key="d61">part_of</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:vulkan_works_on_host_radv" target="runtime:vulkan" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:vulkan_works_on_host_radv" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:no_det_possible_on_polaris" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:no_det_possible_on_polaris" target="hyp:polaris_atomic_race" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:gpu_can_be_correct_but_flaky" target="hyp:det_kernels_are_bugged" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:gpu_can_be_correct_but_flaky" target="unk:first_bad_layer" id="resolves">
+      <data key="d61">resolves</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:winograd_nondeterministic_gfx803" target="hyp:miopen_conv_root_cause" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:winograd_nondeterministic_gfx803" target="unk:first_bad_layer" id="resolves">
+      <data key="d61">resolves</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="rec:disable_winograd_fft" target="obs:winograd_nondeterministic_gfx803" id="mitigates">
+      <data key="d61">mitigates</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="fact:run:local:local_system" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">verify_runner</data>
+    </edge>
+    <edge source="fact:run:docker:rocm6_gfx803_pytorch_arch_rmake_opt" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">verify_runner</data>
+    </edge>
+    <edge source="fact:run:docker:itir_latest_stable" target="hw:rx580" id="observed_on">
+      <data key="d61">observed_on</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="fact:run:docker:itir_latest_stable" target="unk:first_bad_layer" id="narrows">
+      <data key="d61">narrows</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="fact:run:docker:itir_latest_stable" target="hyp:residual_nondeterministic_polaris" id="supports">
+      <data key="d61">supports</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">analysis</data>
+    </edge>
+    <edge source="obs:probe_fail:repeated_inference_drift:local" target="fact:run:local:local_system" id="part_of">
+      <data key="d61">part_of</data>
+      <data key="d62">context</data>
+      <data key="d63">1.0</data>
+      <data key="d64">verify_runner</data>
     </edge>
     <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.8" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.6" id="mentions">
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.7" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
-    </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:7.2" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
-    </edge>
-    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.71" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.3" id="mentions">
-      <data key="d12">mentions</data>
-      <data key="d13">known_known</data>
-      <data key="d14">1.0</data>
-      <data key="d15">miner</data>
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.7" id="mentions">
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.71" id="mentions">
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:7.2" id="mentions">
+      <data key="d61">mentions</data>
+      <data key="d62">known_known</data>
+      <data key="d63">1.0</data>
+      <data key="d64">miner</data>
     </edge>
     <edge source="issue:rocm:4965" target="obs:kfd_reset_instability" id="targets">
-      <data key="d12">targets</data>
-      <data key="d13">known_known</data>
-      <data key="d14">0.9</data>
-      <data key="d15">miner</data>
+      <data key="d61">targets</data>
+      <data key="d62">known_known</data>
+      <data key="d63">0.9</data>
+      <data key="d64">miner</data>
     </edge>
   </graph>
 </graphml>

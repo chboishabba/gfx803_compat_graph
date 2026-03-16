@@ -1,0 +1,249 @@
+Merged 1 nodes and 1 edges into seed_facts.json
+GRAPH SUMMARY
+----------------------------------------------------------------------
+Nodes: 170
+Edges: 193
+
+By kind:
+  api                1
+  architecture       2
+  backend            1
+  build_flag         2
+  compiler           1
+  component          9
+  discussion         1
+  driver             1
+  environment        1
+  experiment         5
+  framework          3
+  framework_version  3
+  hardware           1
+  hypothesis         5
+  issue              46
+  kernel_version     8
+  language           1
+  library            2
+  metric             5
+  observation        23
+  operating_system   1
+  os                 4
+  repository         6
+  rocm_version       15
+  runtime            3
+  runtime_flag       2
+  stack              4
+  unknown            8
+  workload           6
+
+Relations:
+  affects            7
+  belongs_to_family  1
+  builds_in          1
+  builds_with        1
+  candidate_baseline 3
+  causes             2
+  contains           2
+  controls           2
+  correlates_with    1
+  derived_from       1
+  documents          2
+  enables            4
+  exacerbated_by     1
+  has_architecture   1
+  has_discussion     1
+  has_issue          1
+  has_observation    7
+  helps_resolve      3
+  maps_to            8
+  measures           4
+  mentions           75
+  motivates          4
+  observed_in        1
+  observed_on        1
+  provides           3
+  requires_flag      3
+  requires_for_correct_results 1
+  requires_test      4
+  suggests           8
+  supports           8
+  targets            9
+  tests              4
+  throughput_hack    1
+  underlies          2
+  underpins          2
+  used_by            2
+  uses               7
+  uses_by_default    1
+  uses_os            1
+  uses_python        1
+  uses_rocm          1
+  vram_requirement   1
+
+RANKED EXPERIMENT PLAN (from current frontier)
+----------------------------------------------------------------------
+probe:T13_vulkan_comparison: score=24.5 :: Vulkan vs (Future) ROCm tensor parity comparison
+  resolves: unk:first_bad_layer, unk:precision_matrix
+probe:T11_miopen_conv: score=24.5 :: T11 MIOpen conv + perfdb stability
+  resolves: unk:first_bad_layer, unk:miopen_perfdb_stability, unk:precision_matrix
+probe:T12_framework_layers: score=18.5 :: T12 framework layer probes
+  resolves: unk:first_bad_layer, unk:precision_matrix
+probe:T9_raw_conv: score=17.0 :: T9 raw HIP conv
+  resolves: unk:first_bad_layer, unk:precision_matrix
+sweep:flags_matrix: score=11.0 :: Flag/settings matrix (--lowvram, MIOPEN_LOG_LEVEL, CFG hacks)
+  resolves: unk:which_build_flags_are_required_per_workload
+
+KNOWN KNOWNS
+----------------------------------------------------------------------
+api:vulkan                       Vulkan API
+arch:gfx803                      gfx803
+arch:polaris                     Polaris
+backend:ggml_vulkan              ggml-vulkan compute backend
+flag:lowvram                     --lowvram
+flag:miopen_log_level_3          MIOPEN_LOG_LEVEL=3
+compiler:gcc15.2                 GCC 15.2
+compiler:gcc_15                  GCC 15.2.0
+discussion:lamikr261             lamikr/rocm_sdk_builder discussion #261
+driver:amdgpu_kfd                amdgpu + amdkfd
+env:nix_gcc15                    Nix + GCC 15.2 Environment
+fw:comfyui                       ComfyUI
+fw:pytorch                       PyTorch
+fw:stable_diffusion_cpp          stable-diffusion.cpp
+pytorch:2.6.0                    PyTorch 2.6.0
+torchaudio:2.6.0                 TorchAudio 2.6.0
+torchvision:0.21.0               TorchVision 0.21.0
+hw:rx580                         AMD Radeon RX 580
+issue:advanced10                 Issue #10 ROCm 6.4 and 5.7 issues on Linux
+issue:rocm:4965                  ROCm/ROCm Issue #4965: kernels > 6.13 crash driver
+kernel:6.12.21                   Linux Kernel 6.12.21 (stable)
+kernel:6.13                      Linux Kernel 6.13
+kernel:6.14                      Linux Kernel 6.14
+kernel:6.15.8                    Linux Kernel 6.15.8 (stable)
+lang:python_3.12                 Python 3.12
+lib:miopen                       MIOpen
+lib:rocblas                      rocBLAS
+constraint:low_disk_space        Limited Disk Space (Strategic isolation required)
+fact:run:nix:.._rr_gfx803_rocm   Probe Result on nix: unknown
+obs:cfg1_speedup                 CFG=1.0 materially improves diffusion throughput in at least one report
+obs:containers_share_host_kernel ROCm containers share the host kernel/driver
+obs:diffusion_noise              Diffusion outputs can become noise
+obs:fp8_text_enc_vram            --fp8_e5m2-text-enc reduces ComfyUI VRAM usage on rx580, bypassing --lowvram need
+obs:hip_math_ok                  General HIP / PyTorch math appears broadly functional
+obs:kfd_reset_instability        KFD reset / doorbell instability has affected Polaris under compute load
+obs:kfd_segfault_6.13_6.14       /dev/kfd and /dev/dri SegFaults on kernels 6.13/6.14
+obs:llm_slow_tokens              LLM token processing can be very slow
+obs:miopen_find_enforce          MIOPEN_FIND_ENFORCE=3 and MIOPEN_DEBUG_DISABLE_FIND_DB=1 initially lowered diffusion config to 2.5s/it but was unstable later
+obs:nix_sudo_ld_scrubbing        sudo nix run scrubs LD_LIBRARY_PATH, preventing nixGL from bridging host drivers
+obs:nix_vulkan_glibc_mismatch    Nix-built Vulkan binaries hit IncompatibleDriverError querying host radv drivers
+obs:ollama_vram_7b               Ollama 7B models require 8GB VRAM
+obs:recompile_pytorch_needed     Official pip/ROCm Docker builds do not compile PyTorch stack for Polaris/gfx803; recompilation is needed
+obs:recompile_rocblas_needed_rocm6x On ROCm 6.x, Ollama path may require recompiling rocBLAS for gfx803
+obs:rr_repo_enables_apps         Rosenbusch-style repo documents gfx803 Docker flows for Ollama, ComfyUI, WhisperX
+obs:sd_cpp_vulkan_builds_nix     sd.cpp builds successfully with Vulkan backend using Nix (GCC 15)
+obs:sdcpp_build_success_gcc15    stable-diffusion.cpp builds successfully with GCC 15 via Nix
+obs:tensile_assert_ai            AssertAIGreaterThanEqual in Tensile yaml can safely be removed/ignored if checking AI fails build
+obs:vulkan_competitive           Vulkan can match or beat ROCm in some tested cases
+obs:vulkan_functional_on_host    Vulkan is tested and working on the current host (kernel 6.19)
+obs:whisper_works                Whisper works on at least some ROCm 6.4 paths
+obs:workgroup_mapping_a          WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux
+os:arch_linux                    Arch Linux (Host)
+os:arch                          Arch Linux
+os:debian_13                     Debian 13 (Trixie)
+os:fedora_41                     Fedora 41
+os:ubuntu_24.04                  Ubuntu 24.04 (Noble)
+repo:advanced_lvl_up_fix_amd_gpu advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU
+repo:chboishabba_gfx803_compat_graph chboishabba/gfx803_compat_graph
+repo:chboishabba_rr_gfx803_rocm  chboishabba/rr_gfx803_rocm
+repo:lamikr_rocm_sdk_builder     lamikr/rocm_sdk_builder
+repo:leejet_stable-diffusion.cpp leejet/stable-diffusion.cpp
+repo:robertrosenbusch_gfx803_rocm robertrosenbusch/gfx803_rocm
+runtime:hip                      HIP runtime
+runtime:nix                      Nix / NixOS Package Manager
+runtime:vulkan                   Vulkan Runtime
+flag:cfg_1_0                     CFG=1.0
+flag:whisperx_joblib_0           JOBLIB_MULTIPROCESSING=0
+stack:rosenbusch_rocm64_base     Rosenbusch ROCm 6.4.0 Baseimage
+stack:rr_recompiled_pytorch      Recompiled PyTorch/TorchVision/TorchAudio for gfx803
+stack:rr_recompiled_rocblas      Recompiled rocBLAS for gfx803 on ROCm 6.x
+stack:rr_rocm64_base             Rosenbusch ROCm 6.4 gfx803 base image
+workload:comfyui                 ComfyUI
+workload:diffusion               Diffusion / image generation
+workload:llm                     LLM inference / token generation
+workload:ollama                  Ollama
+workload:whisper                 Whisper / ASR
+workload:whisperx                WhisperX
+
+KNOWN UNKNOWNS
+----------------------------------------------------------------------
+unk:best_gemm_tiles              Best raw HIP GEMM tile families for gfx803
+unk:first_bad_layer              First corrupted tensor/layer in diffusion path
+unk:kernel_boundary_exact        Exact stable/unstable Linux kernel boundary
+unk:miopen_perfdb_stability      Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings
+unk:precision_matrix             Safe precision matrix by workload (fp32 / fp16 / mixed)
+unk:which_build_flags_are_required_per_workload Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)
+unk:which_stack_is_best_baseline Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)
+
+PROPOSED EXPERIMENTS
+----------------------------------------------------------------------
+branch:vulkan_comparison: Vulkan Comparison Branch (Active Call for Testers)
+exp:canonical_protocol: Canonical 12-test experiment protocol
+  targets : unk:best_gemm_tiles, unk:first_bad_layer, unk:kernel_boundary_exact, unk:miopen_perfdb_stability, unk:precision_matrix
+  measures: metric:correctness, metric:nan_inf, metric:power, metric:throughput
+exp:hip_probe_suite: Minimal HIP probe suite
+  tests   : component:conv_path, component:gemm_tiles, component:lds, component:wavefront_sched
+exp:native_vulkan_ground_truth: Native Arch Linux Vulkan Build (Bypass Nix isolation)
+  targets : unk:first_bad_layer
+exp:vulkan_parity_check: Direct tensor parity comparison: Vulkan vs ROCm/Docker
+  targets : unk:first_bad_layer
+
+FRONTIER UNKNOWNS
+----------------------------------------------------------------------
+unk:first_bad_layer: score=4 :: First corrupted tensor/layer in diffusion path
+  <- hyp:miopen_conv_root_cause [requires_test]
+  <- exp:canonical_protocol [targets]
+  <- exp:vulkan_parity_check [targets]
+  <- exp:native_vulkan_ground_truth [targets]
+unk:which_build_flags_are_required_per_workload: score=3 :: Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)
+  <- flag:lowvram [maps_to]
+  <- flag:miopen_log_level_3 [maps_to]
+  <- flag:cfg_1_0 [maps_to]
+unk:best_gemm_tiles: score=2 :: Best raw HIP GEMM tile families for gfx803
+  <- hyp:fallback_gemm_llm [requires_test]
+  <- exp:canonical_protocol [targets]
+unk:kernel_boundary_exact: score=2 :: Exact stable/unstable Linux kernel boundary
+  <- hyp:kernel_version_boundary [requires_test]
+  <- exp:canonical_protocol [targets]
+unk:miopen_perfdb_stability: score=2 :: Why MIOpen perfdb/search gives 2.6 s/it vs 7 s/it swings
+  <- component:perfdb [maps_to]
+  <- exp:canonical_protocol [targets]
+unk:precision_matrix: score=2 :: Safe precision matrix by workload (fp32 / fp16 / mixed)
+  <- hyp:miopen_conv_root_cause [requires_test]
+  <- exp:canonical_protocol [targets]
+unk:which_stack_is_best_baseline: score=0 :: Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)
+
+Wrote artifacts to: /home/c/Documents/code/__OTHER/gfx803_compat_graph/out
+Created portable visualizer at: /home/c/Documents/code/__OTHER/gfx803_compat_graph/out/visualizer_portable.html
+[94m[1mGFX803 PROBE VERIFICATION[0m
+[93mSpawning into Nix environment '../rr_gfx803_rocm'...[0m
+
+[92mExecuting Test:[0m
+  nix develop ../rr_gfx803_rocm#default --command python probe.py
+
+==========================================================
+❄️  Nix Environment Active: ROCm gfx803 Base Compilation
+==========================================================
+Hardware Target : RX570/RX580/RX590 (Polaris)
+Variables Set   : HSA_OVERRIDE_GFX_VERSION=8.0.3, ROC_ENABLE_PRE_VEGA=1
+
+You can now run your PyTorch / rocBLAS recompilation scripts.
+==========================================================
+RESULT: NO_TORCH
+
+[91mSTDERR output:[0m
+warning: Git tree '/home/c/Documents/code/__OTHER/rr_gfx803_rocm' is dirty
+
+
+[1m=> Verdict: UNKNOWN[0m
+[92mAuto-generated patch `probe_patch_nix.json`. Automatically calling `python merge.py` to ingest...[0m
+[93m>>> Merging probe facts and recalculating graph...[0m
+[92mDone.[0m
+

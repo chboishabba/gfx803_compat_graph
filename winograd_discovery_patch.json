@@ -1,0 +1,46 @@
+{
+  "nodes": [
+    {
+      "node_id": "obs:winograd_nondeterministic_gfx803",
+      "label": "MIOpen Winograd convolution kernels are confirmed non-deterministic on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_winograd_verify",
+      "attrs": {
+        "stock_status": "fail (0.037)",
+        "no_winograd_status": "pass (0.0)",
+        "force_winograd_status": "fail (0.030)",
+        "reproducibility": "100%"
+      }
+    },
+    {
+      "node_id": "rec:disable_winograd_fft",
+      "label": "Action: Set MIOPEN_DEBUG_CONV_WINOGRAD=0 and MIOPEN_DEBUG_CONV_FFT=0 for gfx803",
+      "kind": "recommendation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "analysis"
+    }
+  ],
+  "edges": [
+    {
+      "src": "obs:winograd_nondeterministic_gfx803",
+      "dst": "hyp:miopen_conv_root_cause",
+      "relation": "supports",
+      "source": "analysis"
+    },
+    {
+      "src": "obs:winograd_nondeterministic_gfx803",
+      "dst": "unk:first_bad_layer",
+      "relation": "resolves",
+      "source": "analysis"
+    },
+    {
+      "src": "rec:disable_winograd_fft",
+      "dst": "obs:winograd_nondeterministic_gfx803",
+      "relation": "mitigates",
+      "source": "analysis"
+    }
+  ]
+}

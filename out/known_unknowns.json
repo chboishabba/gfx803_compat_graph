@@ -1,5 +1,91 @@
 [
   {
+    "id": "hyp:SS_type_asm_incompatible",
+    "label": "Hypothesis: SS-type Tensile kernels use ISA instructions incompatible with gfx803",
+    "kind": "hypothesis",
+    "status": "known_unknown",
+    "confidence": 0.6,
+    "source": "analysis"
+  },
+  {
+    "id": "hyp:comfyui_dtype_regression",
+    "label": "Hypothesis: ComfyUI dtype/loading refactor post-Wan2.1 triggers precision issues on gfx803",
+    "kind": "hypothesis",
+    "status": "known_unknown",
+    "confidence": 0.5,
+    "source": "advanced_lvl_up_comment"
+  },
+  {
+    "id": "hyp:fallback_gemm_llm",
+    "label": "Hypothesis: LLM uses Cijk_Alik_Bljk_HB contraction which Tensile doesn't compile properly for gfx803",
+    "kind": "hypothesis",
+    "status": "known_unknown",
+    "confidence": 0.7,
+    "source": "advanced_lvl_up_comment"
+  },
+  {
+    "id": "hyp:nondeterministic_kernel_selection",
+    "label": "Hypothesis: MIOpen selects different kernel implementations across runs, causing output variance",
+    "kind": "hypothesis",
+    "status": "known_unknown",
+    "confidence": 0.8,
+    "source": "analysis"
+  },
+  {
+    "id": "hyp:rocm64_noise_is_systematic",
+    "label": "Hypothesis: ROCm 6.4 noise on gfx803 is systematic (not fixable with flags or rocblas swap)",
+    "kind": "hypothesis",
+    "status": "known_unknown",
+    "confidence": 0.7,
+    "source": "community_tuleo1"
+  },
+  {
+    "id": "obs:comfyui_refactor_broke_old_gpus",
+    "label": "ComfyUI refactor around Wan2.1 changed default model loading and data types, may affect old archs",
+    "kind": "observation",
+    "status": "known_unknown",
+    "confidence": 0.6,
+    "source": "advanced_lvl_up_comment",
+    "suspects": [
+      "RMS_norm refactor",
+      "default dtype changes",
+      "model loading refactor"
+    ],
+    "worked_before": "pytorch==2.2.1"
+  },
+  {
+    "id": "obs:miopen_images_look_better_after_rebuild",
+    "label": "After MIOpen perfdb rebuild, images subjectively look better (more accurate math representation)",
+    "kind": "observation",
+    "status": "known_unknown",
+    "confidence": 0.4,
+    "source": "community_tuleo1"
+  },
+  {
+    "id": "obs:polaris_case_sensitivity",
+    "label": "Polaris folder may need to be lowercase 'polaris' to match other Tensile convention",
+    "kind": "observation",
+    "status": "known_unknown",
+    "confidence": 0.5,
+    "source": "community_tuleo1"
+  },
+  {
+    "id": "obs:r9nano_folder_needed",
+    "label": "Including r9nano Tensile folder alongside Polaris folder may be required for full coverage",
+    "kind": "observation",
+    "status": "known_unknown",
+    "confidence": 0.6,
+    "source": "community_tuleo1"
+  },
+  {
+    "id": "obs:zluda_same_speed_as_vulkan",
+    "label": "ZLUDA speed identical to Vulkan on gfx803, possible silent fallback despite HW monitoring showing CUDA",
+    "kind": "observation",
+    "status": "known_unknown",
+    "confidence": 0.6,
+    "source": "advanced_lvl_up_comment"
+  },
+  {
     "id": "unk:best_gemm_tiles",
     "label": "Best raw HIP GEMM tile families for gfx803",
     "kind": "unknown",

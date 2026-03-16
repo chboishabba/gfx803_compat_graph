@@ -2,12 +2,17 @@
   "nodes": [
     {
       "node_id": "fact:run:nix:.._rr_gfx803_rocm",
-      "label": "Probe Result on nix: unknown",
+      "label": "Probe on nix/../rr_gfx803_rocm: unknown (0 tests, kernel 6.19.7-1-cachyos-bore)",
       "kind": "observation",
       "status": "known_known",
+      "confidence": 1.0,
+      "source": "verify_runner",
       "attrs": {
         "verdict": "unknown",
-        "env": "nix"
+        "env": "nix",
+        "kernel": "6.19.7-1-cachyos-bore",
+        "pytorch": "unknown",
+        "tests": {}
       }
     }
   ],

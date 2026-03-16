@@ -174,11 +174,11 @@
     },
     {
       "id": "hyp:fallback_gemm_llm",
-      "label": "LLM slowness is likely fallback GEMM / poor occupancy / launch geometry",
+      "label": "Hypothesis: LLM uses Cijk_Alik_Bljk_HB contraction which Tensile doesn't compile properly for gfx803",
       "kind": "hypothesis",
-      "status": "hypothesis",
-      "confidence": 0.73,
-      "source": "analysis"
+      "status": "known_unknown",
+      "confidence": 0.7,
+      "source": "advanced_lvl_up_comment"
     },
     {
       "id": "hyp:kernel_version_boundary",
@@ -408,9 +408,9 @@
       "id": "rocm:5.7",
       "label": "ROCm 5.7",
       "kind": "rocm_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
     },
     {
       "id": "rocm:6.4",
@@ -1398,35 +1398,543 @@
     },
     {
       "id": "fact:run:nix:.._rr_gfx803_rocm",
-      "label": "Probe Result on nix: unknown",
-      "kind": "observation",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "manual_seed",
-      "verdict": "unknown",
-      "env": "nix"
-    },
-    {
-      "id": "fact:run:docker:itir_latest",
-      "label": "Probe on docker/itir:latest: success (8 tests, kernel 6.19.7-1-cachyos-bore)",
+      "label": "Probe on nix/../rr_gfx803_rocm: unknown (0 tests, kernel 6.19.7-1-cachyos-bore)",
       "kind": "observation",
       "status": "known_known",
       "confidence": 1.0,
       "source": "verify_runner",
-      "verdict": "success",
+      "verdict": "unknown",
+      "env": "nix",
+      "kernel": "6.19.7-1-cachyos-bore",
+      "pytorch": "unknown",
+      "tests": {}
+    },
+    {
+      "id": "fact:run:docker:itir_latest",
+      "label": "Probe on docker/itir:latest: unknown (0 tests, kernel 6.19.7-1-cachyos-bore)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "verify_runner",
+      "verdict": "unknown",
       "env": "docker",
+      "kernel": "6.19.7-1-cachyos-bore",
+      "pytorch": "unknown",
+      "tests": {}
+    },
+    {
+      "id": "community:tuleo1",
+      "label": "Community tester tuleo1 (RX580, Arch Linux)",
+      "kind": "contributor",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "github_issue_advanced10"
+    },
+    {
+      "id": "obs:rocm64_always_noise",
+      "label": "ROCm 6.4 Docker ALWAYS produces noise on gfx803 regardless of flags or rocblas version",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:rocm57_stock_works",
+      "label": "ROCm 5.7 Docker with stock rocblas produces clean diffusion output on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:rocm57_custom_rocblas_maf",
+      "label": "Custom rocblas on ROCm 5.7 causes Memory Access Fault (MAF) on gfx803 regardless of flags",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "error": "Memory access fault by GPU node-1 on address (nil). Reason: Page not present or supervisor privilege.",
+      "flags_tested": "--lowvram, --force-fp32, --force-fp16"
+    },
+    {
+      "id": "obs:tensile_type_matrix",
+      "label": "Tensile library type compatibility matrix on gfx803 Linux",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "safe_types": "4xii8I, BB, BS, CC, DD (normal speed, but noise on 6.4)",
+      "fast_types": "HH, HS, I8I (6x speedup 1.7s/it -> 6it/s, reduced VRAM to 3GB, but noise)",
+      "neutral_types": "ZZ (no change)",
+      "crash_types": "SS (causes segfault/MAF on any .hsaco, .co, or .dat file)"
+    },
+    {
+      "id": "obs:tensile_SS_segfault",
+      "label": "Tensile SS-type libraries cause segfault on gfx803 Linux",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:tensile_HH_HS_I8I_speedup",
+      "label": "HH/HS/I8I Tensile types give 6x speedup but produce noise on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "speed_before": "1.7s/it",
+      "speed_after": "6it/s",
+      "vram_reduced_to": "3GB"
+    },
+    {
+      "id": "obs:workgroup_mapping_A_speedup",
+      "label": "WorkGroupMappingType:A + WorkGroupMapping:0 yields ~1s/it improvement on Linux gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "community_tuleo1",
+      "speed_before": "7s/it",
+      "speed_after": "6s/it",
+      "workload": "SDXL 1024x1024"
+    },
+    {
+      "id": "obs:assert_ai_removable",
+      "label": "AssertAIGreaterThanEqual in Tensile yaml can be safely commented out without affecting output",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "community_tuleo1_and_advanced"
+    },
+    {
+      "id": "obs:custom_rocblas_1s_speedup_on_64",
+      "label": "Custom rocblas on ROCm 6.4 gives ~1s/it speedup (6.5->5.5 SDXL) but still produces noise",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:kobold_rocm57_build_fixes",
+      "label": "KoboldCPP on ROCm 5.7 requires cudaStreamWaitEvent 3-arg fix and __hostdevice__ static fix",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "community_tuleo1",
+      "fix1": "cudaStreamWaitEvent needs 3rd arg (0) in ggml-cuda.cu",
+      "fix2": "__hostdevice__ -> static __hostdevice__ in amd_hip_bf16.h",
+      "rocm": "5.7.0"
+    },
+    {
+      "id": "obs:token_processing_slow_rocm_vs_vulkan",
+      "label": "ROCm token processing 10x slower than Vulkan, GPU only draws 110W vs 170W on Vulkan",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:ui_freeze_during_rocm_processing",
+      "label": "Desktop UI freezes periodically during ROCm token processing on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.8,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:clip_text_length_affects_speed",
+      "label": "CLIP text length directly impacts it/s: 252 chars=1.5s/it, 24K chars=3.3s/it (512x512)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:iteration_speed_unstable",
+      "label": "Iteration speed is unstable: first step ~6s/it then second step instant, avg 5.35s/it SDXL",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "gpu_clock": "1430MHz core / 2000MHz mem",
+      "workload": "SDXL 1024x1024 1 LoRA"
+    },
+    {
+      "id": "obs:r9nano_folder_needed",
+      "label": "Including r9nano Tensile folder alongside Polaris folder may be required for full coverage",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:polaris_case_sensitivity",
+      "label": "Polaris folder may need to be lowercase 'polaris' to match other Tensile convention",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.5,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "hyp:rocm64_noise_is_systematic",
+      "label": "Hypothesis: ROCm 6.4 noise on gfx803 is systematic (not fixable with flags or rocblas swap)",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.7,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "hyp:SS_type_asm_incompatible",
+      "label": "Hypothesis: SS-type Tensile kernels use ISA instructions incompatible with gfx803",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "analysis"
+    },
+    {
+      "id": "obs:probe_fail:repeated_inference_drift:docker",
+      "label": "repeated_inference_drift fail_nondeterministic on docker/itir:latest",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "id": "obs:basic_math_ok_noise_in_comfy",
+      "label": "Basic math (GroupNorm, SiLU, attention) works without NaN/Inf but ComfyUI still outputs noise",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1",
+      "pytorch_tested": [
+        "2.4",
+        "2.10"
+      ],
+      "rocm_tested": [
+        "5.7",
+        "6.4"
+      ],
+      "note": "Independently confirms our probe_diffusion.py finding: individual ops pass but inference drifts"
+    },
+    {
+      "id": "obs:noise_same_across_pytorch_versions",
+      "label": "Noise on PyTorch 2.10/ROCm 5.7 is identical pattern to PyTorch 2.4/ROCm 6.4",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:miopen_perfdb_2_6_sit_unreproducible",
+      "label": "MIOPEN_FIND_ENFORCE=3 + DISABLE_FIND_DB=1 once gave 2.6s/it (from 4.5) but is unreproducible",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "community_tuleo1",
+      "speed_best": "2.6s/it",
+      "speed_normal": "4.5s/it",
+      "speed_worst": "7s/it",
+      "reproducible": false,
+      "flags": "MIOPEN_DEBUG_DISABLE_FIND_DB=1, MIOPEN_FIND_ENFORCE=3"
+    },
+    {
+      "id": "obs:miopen_perfdb_nondeterministic",
+      "label": "MIOpen perfdb is non-deterministic: same searches give different speeds across runs",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:comfyui_refactor_broke_old_gpus",
+      "label": "ComfyUI refactor around Wan2.1 changed default model loading and data types, may affect old archs",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "advanced_lvl_up_comment",
+      "suspects": [
+        "RMS_norm refactor",
+        "default dtype changes",
+        "model loading refactor"
+      ],
+      "worked_before": "pytorch==2.2.1"
+    },
+    {
+      "id": "obs:pytorch_221_worked_better",
+      "label": "ComfyUI worked much better for old GPU archs using pytorch==2.2.1",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.7,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "id": "obs:some_models_fine_others_not",
+      "label": "Some models (Wan Vace, Wan2.2 5B) work fine but others get non-optimal SNR after transformer passes",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.7,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "id": "obs:attention_benchmark_matrix",
+      "label": "Attention benchmark: pytorch(4.54s)>quad(5.23s)\u2265jab(5.47s)>split(5.38s) on gfx803 SDXL 1024x1024",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "community_tuleo1",
+      "pytorch_attn": {
+        "speed": "4.54s/it",
+        "vram": "7.2GB",
+        "needs_lowvram": true,
+        "power": "high"
+      },
+      "jab_attn": {
+        "speed": "5.55s/it",
+        "vram": "6.2GB",
+        "needs_lowvram": false,
+        "power": "lower"
+      },
+      "split_attn": {
+        "speed": "5.38s/it",
+        "vram": "6.2GB"
+      },
+      "quad_attn": {
+        "speed": "5.36s/it",
+        "vram": "6.2GB"
+      },
+      "note": "JAB uses ~900MB less VRAM"
+    },
+    {
+      "id": "obs:no_memory_efficient_attention_compiled",
+      "label": "Warning: Torch was not compiled with memory efficient attention on gfx803 builds",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:nondeterministic_inference_confirmed",
+      "label": "CONFIRMED: Same model + same input produces different outputs across runs on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "probe_diffusion_and_community",
+      "our_probe": "repeated_inference_drift FAIL_NONDETERMINISTIC on itir:latest",
+      "community": "tuleo1 confirms noise is inconsistent, MIOpen perfdb gives different results"
+    },
+    {
+      "id": "hyp:nondeterministic_kernel_selection",
+      "label": "Hypothesis: MIOpen selects different kernel implementations across runs, causing output variance",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.8,
+      "source": "analysis"
+    },
+    {
+      "id": "hyp:comfyui_dtype_regression",
+      "label": "Hypothesis: ComfyUI dtype/loading refactor post-Wan2.1 triggers precision issues on gfx803",
+      "kind": "hypothesis",
+      "status": "known_unknown",
+      "confidence": 0.5,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "id": "obs:zluda_same_speed_as_vulkan",
+      "label": "ZLUDA speed identical to Vulkan on gfx803, possible silent fallback despite HW monitoring showing CUDA",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.6,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "id": "obs:miopen_images_look_better_after_rebuild",
+      "label": "After MIOpen perfdb rebuild, images subjectively look better (more accurate math representation)",
+      "kind": "observation",
+      "status": "known_unknown",
+      "confidence": 0.4,
+      "source": "community_tuleo1"
+    },
+    {
+      "id": "obs:divergence_at_strided_conv",
+      "label": "Non-determinism pinpointed to down1.down (Conv2d 64->128, stride 2)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_layers",
+      "layer": "down1.down",
+      "op": "Conv2d(64, 128, 3, stride=2, padding=1)",
+      "diff": 0.0376,
+      "miopen_warning": "GemmFwdRest workspace fallback"
+    },
+    {
+      "id": "hyp:strided_conv_hip_bug",
+      "label": "HIP kernel for strided convolutions on gfx803 is non-deterministic (atomic race or faulty logic)",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.8,
+      "source": "analysis"
+    },
+    {
+      "id": "obs:vulkan_works_on_host_radv",
+      "label": "Vulkan (RADV) functional on host Arch Linux (Mesa 26.0.2)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "manual_test",
+      "driver": "radv",
+      "mesa_version": "26.0.2",
+      "hw": "rx580"
+    },
+    {
+      "id": "obs:no_det_possible_on_polaris",
+      "label": "Traditional MIOpen determinism flags fail to stabilize strided convolutions on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_conv_det",
+      "tested_flags": [
+        "MIOPEN_DEBUG_CONV_DET",
+        "MIOPEN_FIND_ENFORCE=3",
+        "MIOPEN_DEBUG_CONV_GEMM=0",
+        "MIOPEN_DEBUG_CONV_DIRECT=0"
+      ],
+      "layer": "Conv2d(64, 128, 3, stride=2, padding=1)",
+      "divergence": "0.03-0.04"
+    },
+    {
+      "id": "hyp:polaris_atomic_race",
+      "label": "Hypothesis: Non-determinism on Polaris is caused by race conditions in atomic reduction kernels (e.g. GemmFwdRest)",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.85,
+      "source": "analysis"
+    },
+    {
+      "id": "obs:gpu_can_be_correct_but_flaky",
+      "label": "GPU output matches CPU ground truth (diff 3e-6) in some runs, but fluctuates by 0.03 in others",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_parity",
+      "stock_parity_success": true,
+      "det_parity_failure": true,
+      "divergence": 0.039,
+      "layer": "Conv2d(64,128,3,s=2)"
+    },
+    {
+      "id": "hyp:det_kernels_are_bugged",
+      "label": "MIOpen 'Deterministic' kernels (likely using atomics) are broken on gfx803; heuristic search occasionally picks stable ones",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "id": "obs:winograd_nondeterministic_gfx803",
+      "label": "MIOpen Winograd convolution kernels are confirmed non-deterministic on gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_winograd_verify",
+      "stock_status": "fail (0.037)",
+      "no_winograd_status": "pass (0.0)",
+      "force_winograd_status": "fail (0.030)",
+      "reproducibility": "100%"
+    },
+    {
+      "id": "rec:disable_winograd_fft",
+      "label": "Action: Set MIOPEN_DEBUG_CONV_WINOGRAD=0 and MIOPEN_DEBUG_CONV_FFT=0 for gfx803",
+      "kind": "recommendation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "id": "fact:run:local:local_system",
+      "label": "Probe on local/local_system: partial (7 tests, kernel 6.19.7-1-cachyos-bore)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "verify_runner",
+      "verdict": "partial",
+      "env": "local",
       "kernel": "6.19.7-1-cachyos-bore",
       "pytorch": "2.6.0+gitdae14f9",
       "tests": {
-        "fp32_matmul": "pass",
-        "fp16_matmul": "pass",
-        "conv2d_fp32": "pass",
-        "conv2d_fp16": "pass",
-        "conv2d_determinism": "pass",
-        "unet_block_conv": "pass",
-        "groupnorm": "pass",
-        "attention_pattern": "pass"
+        "diffusion_fp32_20step": "pass",
+        "diffusion_fp16_20step": "pass",
+        "diffusion_mixed_20step": "pass",
+        "diffusion_fp32_50step": "pass",
+        "timing_stability": "pass",
+        "repeated_inference_drift": "fail_nondeterministic",
+        "large_channel_conv": "pass"
       }
+    },
+    {
+      "id": "fact:run:docker:rocm6_gfx803_pytorch_arch_rmake_opt",
+      "label": "Probe on docker/rocm6_gfx803_pytorch_arch:rmake_opt: missing_pytorch (0 tests, kernel 6.19.7-1-cachyos-bore)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "verify_runner",
+      "verdict": "missing_pytorch",
+      "env": "docker",
+      "kernel": "6.19.7-1-cachyos-bore",
+      "pytorch": "unknown",
+      "tests": {}
+    },
+    {
+      "id": "fact:run:docker:itir_latest_stable",
+      "label": "itir:latest (Stable Mode): Partial Pass (Non-deterministic)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "probe_diffusion",
+      "verdict": "partial_pass",
+      "env": "docker",
+      "image": "itir:latest",
+      "kernel": "6.19.7-1-cachyos-bore",
+      "mitigations": [
+        "MIOPEN_DEBUG_CONV_WINOGRAD=0",
+        "MIOPEN_DEBUG_CONV_FFT=0"
+      ],
+      "findings": "Diffusion loop is stable but output drift (0.001410) detected across repeated runs.",
+      "tests": {
+        "diffusion_fp32": "pass",
+        "diffusion_fp16": "pass",
+        "timing_stability": "pass (warmup 0.9x)",
+        "determinism": "fail (diff 0.001410)"
+      }
+    },
+    {
+      "id": "hyp:residual_nondeterminism_polaris",
+      "label": "Hypothesis: Residual non-determinism on gfx803 exists even with Winograd/FFT disabled",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.85,
+      "source": "analysis"
+    },
+    {
+      "id": "obs:probe_fail:repeated_inference_drift:local",
+      "label": "repeated_inference_drift fail_nondeterministic on local/local_system",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "id": "hyp:residual_nondeterministic_polaris"
+    },
+    {
+      "id": "kernel:6.8",
+      "label": "Linux Kernel 6.8",
+      "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "discussion:rocm_rx580_noise_issue"
     },
     {
       "id": "kernel:6.6",
@@ -1437,19 +1945,8 @@
       "source": "miner"
     },
     {
-      "id": "discussion:rocm_rx580_noise_issue"
-    },
-    {
       "id": "kernel:6.1",
       "label": "Linux Kernel 6.1",
-      "kind": "kernel_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "kernel:6.8",
-      "label": "Linux Kernel 6.8",
       "kind": "kernel_version",
       "status": "context",
       "confidence": 0.9,
@@ -3139,6 +3636,564 @@
       "source": "verify_runner"
     },
     {
+      "src": "community:tuleo1",
+      "dst": "hw:rx580",
+      "key": "tests_on",
+      "relation": "tests_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "github_issue"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "rocm:6.4",
+      "key": "observed_in",
+      "relation": "observed_in",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "workload:diffusion",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm64_always_noise",
+      "dst": "unk:first_bad_layer",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_stock_works",
+      "dst": "rocm:5.7",
+      "key": "observed_in",
+      "relation": "observed_in",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_stock_works",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_stock_works",
+      "dst": "unk:which_stack_is_best_baseline",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_custom_rocblas_maf",
+      "dst": "rocm:5.7",
+      "key": "observed_in",
+      "relation": "observed_in",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:rocm57_custom_rocblas_maf",
+      "dst": "lib:rocblas",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:tensile_SS_segfault",
+      "dst": "lib:rocblas",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:tensile_SS_segfault",
+      "dst": "hyp:SS_type_asm_incompatible",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:tensile_HH_HS_I8I_speedup",
+      "dst": "unk:best_gemm_tiles",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:tensile_HH_HS_I8I_speedup",
+      "dst": "unk:precision_matrix",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:workgroup_mapping_A_speedup",
+      "dst": "unk:best_gemm_tiles",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:custom_rocblas_1s_speedup_on_64",
+      "dst": "rocm:6.4",
+      "key": "observed_in",
+      "relation": "observed_in",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:token_processing_slow_rocm_vs_vulkan",
+      "dst": "hyp:fallback_gemm_llm",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:token_processing_slow_rocm_vs_vulkan",
+      "dst": "workload:llm",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:ui_freeze_during_rocm_processing",
+      "dst": "driver:amdgpu_kfd",
+      "key": "suggests",
+      "relation": "suggests",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:ui_freeze_during_rocm_processing",
+      "dst": "obs:kfd_reset_instability",
+      "key": "correlates_with",
+      "relation": "correlates_with",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:clip_text_length_affects_speed",
+      "dst": "workload:diffusion",
+      "key": "affects",
+      "relation": "affects",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:iteration_speed_unstable",
+      "dst": "unk:miopen_perfdb_stability",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:iteration_speed_unstable",
+      "dst": "component:perfdb",
+      "key": "suggests",
+      "relation": "suggests",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:rocm64_noise_is_systematic",
+      "dst": "obs:rocm64_always_noise",
+      "key": "explains",
+      "relation": "explains",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:rocm64_noise_is_systematic",
+      "dst": "unk:first_bad_layer",
+      "key": "requires_test",
+      "relation": "requires_test",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:SS_type_asm_incompatible",
+      "dst": "unk:best_gemm_tiles",
+      "key": "requires_test",
+      "relation": "requires_test",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:probe_fail:repeated_inference_drift:docker",
+      "dst": "fact:run:docker:itir_latest",
+      "key": "part_of",
+      "relation": "part_of",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "src": "obs:basic_math_ok_noise_in_comfy",
+      "dst": "obs:nondeterministic_inference_confirmed",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:basic_math_ok_noise_in_comfy",
+      "dst": "unk:first_bad_layer",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:noise_same_across_pytorch_versions",
+      "dst": "hyp:rocm64_noise_is_systematic",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:noise_same_across_pytorch_versions",
+      "dst": "hyp:comfyui_dtype_regression",
+      "key": "contradicts",
+      "relation": "contradicts",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:miopen_perfdb_2_6_sit_unreproducible",
+      "dst": "unk:miopen_perfdb_stability",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:miopen_perfdb_nondeterministic",
+      "dst": "hyp:nondeterministic_kernel_selection",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:miopen_perfdb_nondeterministic",
+      "dst": "unk:miopen_perfdb_stability",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:comfyui_refactor_broke_old_gpus",
+      "dst": "hyp:comfyui_dtype_regression",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "src": "obs:pytorch_221_worked_better",
+      "dst": "hyp:comfyui_dtype_regression",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "advanced_lvl_up_comment"
+    },
+    {
+      "src": "obs:some_models_fine_others_not",
+      "dst": "unk:precision_matrix",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:attention_benchmark_matrix",
+      "dst": "workload:diffusion",
+      "key": "measures",
+      "relation": "measures",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "community_tuleo1"
+    },
+    {
+      "src": "obs:no_memory_efficient_attention_compiled",
+      "dst": "obs:attention_benchmark_matrix",
+      "key": "explains",
+      "relation": "explains",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:nondeterministic_inference_confirmed",
+      "dst": "hyp:nondeterministic_kernel_selection",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "probe_and_community"
+    },
+    {
+      "src": "obs:nondeterministic_inference_confirmed",
+      "dst": "unk:first_bad_layer",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:nondeterministic_kernel_selection",
+      "dst": "unk:first_bad_layer",
+      "key": "requires_test",
+      "relation": "requires_test",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:nondeterministic_kernel_selection",
+      "dst": "unk:miopen_perfdb_stability",
+      "key": "requires_test",
+      "relation": "requires_test",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:divergence_at_strided_conv",
+      "dst": "unk:first_bad_layer",
+      "key": "resolves",
+      "relation": "resolves",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:divergence_at_strided_conv",
+      "dst": "hyp:strided_conv_hip_bug",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:divergence_at_strided_conv",
+      "dst": "fact:run:docker:itir_latest",
+      "key": "part_of",
+      "relation": "part_of",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:vulkan_works_on_host_radv",
+      "dst": "runtime:vulkan",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:vulkan_works_on_host_radv",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:no_det_possible_on_polaris",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:no_det_possible_on_polaris",
+      "dst": "hyp:polaris_atomic_race",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:gpu_can_be_correct_but_flaky",
+      "dst": "hyp:det_kernels_are_bugged",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:gpu_can_be_correct_but_flaky",
+      "dst": "unk:first_bad_layer",
+      "key": "resolves",
+      "relation": "resolves",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:winograd_nondeterministic_gfx803",
+      "dst": "hyp:miopen_conv_root_cause",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:winograd_nondeterministic_gfx803",
+      "dst": "unk:first_bad_layer",
+      "key": "resolves",
+      "relation": "resolves",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "rec:disable_winograd_fft",
+      "dst": "obs:winograd_nondeterministic_gfx803",
+      "key": "mitigates",
+      "relation": "mitigates",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "fact:run:local:local_system",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "src": "fact:run:docker:rocm6_gfx803_pytorch_arch_rmake_opt",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "src": "fact:run:docker:itir_latest_stable",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "fact:run:docker:itir_latest_stable",
+      "dst": "unk:first_bad_layer",
+      "key": "narrows",
+      "relation": "narrows",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "fact:run:docker:itir_latest_stable",
+      "dst": "hyp:residual_nondeterministic_polaris",
+      "key": "supports",
+      "relation": "supports",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "obs:probe_fail:repeated_inference_drift:local",
+      "dst": "fact:run:local:local_system",
+      "key": "part_of",
+      "relation": "part_of",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "kernel:6.8",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
       "src": "discussion:rocm_rx580_noise_issue",
       "dst": "kernel:6.6",
       "key": "mentions",
@@ -3158,7 +4213,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.8",
+      "dst": "rocm:6.3",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
@@ -3185,15 +4240,6 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:7.2",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
       "dst": "rocm:5.71",
       "key": "mentions",
       "relation": "mentions",
@@ -3203,7 +4249,7 @@
     },
     {
       "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.3",
+      "dst": "rocm:7.2",
       "key": "mentions",
       "relation": "mentions",
       "status": "known_known",
