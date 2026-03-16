@@ -81,6 +81,12 @@ DEFAULT_EXPERIMENTS = {
         "resolves": ["unk:which_build_flags_are_required_per_workload"],
         "cost": 2,
     },
+    "probe:T13_vulkan_comparison": {
+        "label": "Vulkan vs (Future) ROCm tensor parity comparison",
+        "targets": ["runtime:vulkan", "workload:diffusion", "metric:correctness"],
+        "resolves": ["unk:first_bad_layer", "unk:precision_matrix"],
+        "cost": 3,
+    },
 }
 
 
@@ -111,6 +117,8 @@ def rank_experiments(g: nx.MultiDiGraph) -> List[Dict[str, Any]]:
         for tgt in spec["targets"]:
             if tgt in g:
                 target_bonus += 1
+            if "vulkan" in tgt: # Special bonus for working Vulkan path
+                target_bonus += 5
 
         score = resolve_score + target_bonus - spec["cost"] * 0.5
 

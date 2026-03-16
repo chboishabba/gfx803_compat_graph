@@ -1,5 +1,13 @@
 [
   {
+    "id": "branch:vulkan_comparison",
+    "label": "Vulkan Comparison Branch (Active Call for Testers)",
+    "status": "proposed",
+    "tests": [],
+    "targets": [],
+    "measures": []
+  },
+  {
     "id": "exp:canonical_protocol",
     "label": "Canonical 12-test experiment protocol",
     "status": "proposed",
@@ -29,6 +37,16 @@
       "component:wavefront_sched"
     ],
     "targets": [],
+    "measures": []
+  },
+  {
+    "id": "exp:vulkan_parity_check",
+    "label": "Direct tensor parity comparison: Vulkan vs ROCm/Docker",
+    "status": "proposed",
+    "tests": [],
+    "targets": [
+      "unk:first_bad_layer"
+    ],
     "measures": []
   }
 ]

@@ -304,6 +304,188 @@
       <data key="d3">1.0</data>
       <data key="d4">analysis</data>
     </node>
+    <node id="repo:robertrosenbusch_gfx803_rocm">
+      <data key="d0">robertrosenbusch/gfx803_rocm</data>
+      <data key="d1">repository</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.98</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="repo:chboishabba_rr_gfx803_rocm">
+      <data key="d0">chboishabba/rr_gfx803_rocm</data>
+      <data key="d1">repository</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.98</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="repo:chboishabba_gfx803_compat_graph">
+      <data key="d0">chboishabba/gfx803_compat_graph</data>
+      <data key="d1">repository</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="repo:lamikr_rocm_sdk_builder">
+      <data key="d0">lamikr/rocm_sdk_builder</data>
+      <data key="d1">repository</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="repo:advanced_lvl_up_fix_amd_gpu">
+      <data key="d0">advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU</data>
+      <data key="d1">repository</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.96</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="stack:rr_rocm64_base">
+      <data key="d0">Rosenbusch ROCm 6.4 gfx803 base image</data>
+      <data key="d1">stack</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.92</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="stack:rr_recompiled_pytorch">
+      <data key="d0">Recompiled PyTorch/TorchVision/TorchAudio for gfx803</data>
+      <data key="d1">stack</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.92</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="stack:rr_recompiled_rocblas">
+      <data key="d0">Recompiled rocBLAS for gfx803 on ROCm 6.x</data>
+      <data key="d1">stack</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.88</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="rocm:5.7">
+      <data key="d0">ROCm 5.7</data>
+      <data key="d1">rocm_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="rocm:6.4">
+      <data key="d0">ROCm 6.4.0</data>
+      <data key="d1">rocm_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.96</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="pytorch:2.6.0">
+      <data key="d0">PyTorch 2.6.0</data>
+      <data key="d1">framework_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="torchvision:0.21.0">
+      <data key="d0">TorchVision 0.21.0</data>
+      <data key="d1">framework_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="torchaudio:2.6.0">
+      <data key="d0">TorchAudio 2.6.0</data>
+      <data key="d1">framework_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="workload:ollama">
+      <data key="d0">Ollama</data>
+      <data key="d1">workload</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.96</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="workload:comfyui">
+      <data key="d0">ComfyUI</data>
+      <data key="d1">workload</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.96</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="workload:whisperx">
+      <data key="d0">WhisperX</data>
+      <data key="d1">workload</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.96</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="flag:lowvram">
+      <data key="d0">--lowvram</data>
+      <data key="d1">build_flag</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.88</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="flag:miopen_log_level_3">
+      <data key="d0">MIOPEN_LOG_LEVEL=3</data>
+      <data key="d1">build_flag</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.88</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="flag:cfg_1_0">
+      <data key="d0">CFG=1.0</data>
+      <data key="d1">runtime_flag</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.8</data>
+      <data key="d4">conversation</data>
+    </node>
+    <node id="issue:advanced10">
+      <data key="d0">Issue #10 ROCm 6.4 and 5.7 issues on Linux</data>
+      <data key="d1">issue</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.97</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="discussion:lamikr261">
+      <data key="d0">lamikr/rocm_sdk_builder discussion #261</data>
+      <data key="d1">discussion</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="obs:rr_repo_enables_apps">
+      <data key="d0">Rosenbusch-style repo documents gfx803 Docker flows for Ollama, ComfyUI, WhisperX</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.94</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="obs:recompile_pytorch_needed">
+      <data key="d0">Official pip/ROCm Docker builds do not compile PyTorch stack for Polaris/gfx803; recompilation is needed</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.94</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="obs:recompile_rocblas_needed_rocm6x">
+      <data key="d0">On ROCm 6.x, Ollama path may require recompiling rocBLAS for gfx803</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.86</data>
+      <data key="d4">web</data>
+    </node>
+    <node id="unk:which_stack_is_best_baseline">
+      <data key="d0">Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="unk:which_build_flags_are_required_per_workload">
+      <data key="d0">Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)</data>
+      <data key="d1">unknown</data>
+      <data key="d2">known_unknown</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
     <node id="obs:workgroup_mapping_a">
       <data key="d0">WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux</data>
       <data key="d1">observation</data>
@@ -332,6 +514,203 @@
       <data key="d3">0.95</data>
       <data key="d4">conversation</data>
     </node>
+    <node id="kernel:6.13">
+      <data key="d0">Linux Kernel 6.13</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="kernel:6.14">
+      <data key="d0">Linux Kernel 6.14</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="kernel:6.12.21">
+      <data key="d0">Linux Kernel 6.12.21 (stable)</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="kernel:6.15.8">
+      <data key="d0">Linux Kernel 6.15.8 (stable)</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="os:fedora_41">
+      <data key="d0">Fedora 41</data>
+      <data key="d1">os</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="os:arch">
+      <data key="d0">Arch Linux</data>
+      <data key="d1">os</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="os:debian_13">
+      <data key="d0">Debian 13 (Trixie)</data>
+      <data key="d1">os</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="obs:kfd_segfault_6.13_6.14">
+      <data key="d0">/dev/kfd and /dev/dri SegFaults on kernels 6.13/6.14</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="flag:whisperx_joblib_0">
+      <data key="d0">JOBLIB_MULTIPROCESSING=0</data>
+      <data key="d1">runtime_flag</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="obs:ollama_vram_7b">
+      <data key="d0">Ollama 7B models require 8GB VRAM</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.9</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="runtime:vulkan">
+      <data key="d0">Vulkan Runtime</data>
+      <data key="d1">runtime</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="obs:vulkan_functional_on_host">
+      <data key="d0">Vulkan is tested and working on the current host (kernel 6.19)</data>
+      <data key="d1">observation</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="hyp:vulkan_as_ground_truth">
+      <data key="d0">Vulkan implementations (e.g. Vulkan-based diffusers) can serve as numerical ground truth</data>
+      <data key="d1">hypothesis</data>
+      <data key="d2">hypothesis</data>
+      <data key="d3">0.9</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="exp:vulkan_parity_check">
+      <data key="d0">Direct tensor parity comparison: Vulkan vs ROCm/Docker</data>
+      <data key="d1">experiment</data>
+      <data key="d2">proposed</data>
+      <data key="d3">0.95</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="os:ubuntu_24.04">
+      <data key="d0">Ubuntu 24.04 (Noble)</data>
+      <data key="d1">os</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="lang:python_3.12">
+      <data key="d0">Python 3.12</data>
+      <data key="d1">language</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.99</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="stack:rosenbusch_rocm64_base">
+      <data key="d0">Rosenbusch ROCm 6.4.0 Baseimage</data>
+      <data key="d1">stack</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">rosenbusch_repo</data>
+    </node>
+    <node id="os:arch_linux">
+      <data key="d0">Arch Linux (Host)</data>
+      <data key="d1">operating_system</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="runtime:nix">
+      <data key="d0">Nix / NixOS Package Manager</data>
+      <data key="d1">runtime</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="constraint:low_disk_space">
+      <data key="d0">Limited Disk Space (Strategic isolation required)</data>
+      <data key="d1">metric</data>
+      <data key="d2">known_known</data>
+      <data key="d3">1.0</data>
+      <data key="d4">user_report</data>
+    </node>
+    <node id="branch:vulkan_comparison">
+      <data key="d0">Vulkan Comparison Branch (Active Call for Testers)</data>
+      <data key="d1">experiment</data>
+      <data key="d2">proposed</data>
+      <data key="d3">1.0</data>
+      <data key="d4">analysis</data>
+    </node>
+    <node id="kernel:6.1">
+      <data key="d0">Linux Kernel 6.1</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="discussion:rocm_rx580_noise_issue" />
+    <node id="kernel:6.8">
+      <data key="d0">Linux Kernel 6.8</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="kernel:6.6">
+      <data key="d0">Linux Kernel 6.6</data>
+      <data key="d1">kernel_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="rocm:7.2">
+      <data key="d0">ROCm 7.2</data>
+      <data key="d1">rocm_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="rocm:5.71">
+      <data key="d0">ROCm 5.71</data>
+      <data key="d1">rocm_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="rocm:6.3">
+      <data key="d0">ROCm 6.3</data>
+      <data key="d1">rocm_version</data>
+      <data key="d2">context</data>
+      <data key="d3">0.9</data>
+      <data key="d4">miner</data>
+    </node>
+    <node id="issue:rocm:4965">
+      <data key="d0">ROCm/ROCm Issue #4965: kernels &gt; 6.13 crash driver</data>
+      <data key="d1">issue</data>
+      <data key="d2">known_known</data>
+      <data key="d3">0.95</data>
+      <data key="d4">web</data>
+    </node>
     <edge source="hw:rx580" target="arch:gfx803" id="has_architecture">
       <data key="d5">has_architecture</data>
       <data key="d6">known_known</data>
@@ -343,6 +722,12 @@
       <data key="d6">known_known</data>
       <data key="d7">0.9</data>
       <data key="d8">conversation</data>
+    </edge>
+    <edge source="hw:rx580" target="runtime:vulkan" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">user_report</data>
     </edge>
     <edge source="arch:gfx803" target="arch:polaris" id="belongs_to_family">
       <data key="d5">belongs_to_family</data>
@@ -402,6 +787,12 @@
       <data key="d5">has_observation</data>
       <data key="d6">known_known</data>
       <data key="d7">0.9</data>
+      <data key="d8">conversation</data>
+    </edge>
+    <edge source="workload:diffusion" target="flag:cfg_1_0" id="throughput_hack">
+      <data key="d5">throughput_hack</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.78</data>
       <data key="d8">conversation</data>
     </edge>
     <edge source="workload:llm" target="obs:llm_slow_tokens" id="has_observation">
@@ -602,6 +993,228 @@
       <data key="d7">1.0</data>
       <data key="d8">analysis</data>
     </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="stack:rr_rocm64_base" id="provides">
+      <data key="d5">provides</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.92</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="stack:rr_recompiled_pytorch" id="provides">
+      <data key="d5">provides</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.92</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="stack:rr_recompiled_rocblas" id="provides">
+      <data key="d5">provides</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.85</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="obs:rr_repo_enables_apps" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.94</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="workload:comfyui" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="workload:whisperx" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="repo:robertrosenbusch_gfx803_rocm" target="workload:ollama" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="repo:chboishabba_rr_gfx803_rocm" target="repo:robertrosenbusch_gfx803_rocm" id="derived_from">
+      <data key="d5">derived_from</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="repo:chboishabba_rr_gfx803_rocm" target="obs:recompile_pytorch_needed" id="documents">
+      <data key="d5">documents</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.94</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:chboishabba_rr_gfx803_rocm" target="obs:recompile_rocblas_needed_rocm6x" id="documents">
+      <data key="d5">documents</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.86</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:chboishabba_gfx803_compat_graph" target="exp:canonical_protocol" id="contains">
+      <data key="d5">contains</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="repo:chboishabba_gfx803_compat_graph" target="exp:hip_probe_suite" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="repo:lamikr_rocm_sdk_builder" target="discussion:lamikr261" id="has_discussion">
+      <data key="d5">has_discussion</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="repo:advanced_lvl_up_fix_amd_gpu" target="issue:advanced10" id="has_issue">
+      <data key="d5">has_issue</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.97</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_rocm64_base" target="rocm:6.4" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.96</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_rocm64_base" target="unk:which_stack_is_best_baseline" id="candidate_baseline">
+      <data key="d5">candidate_baseline</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="stack:rr_recompiled_pytorch" target="pytorch:2.6.0" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_recompiled_pytorch" target="torchvision:0.21.0" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_recompiled_pytorch" target="torchaudio:2.6.0" id="uses">
+      <data key="d5">uses</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_recompiled_pytorch" target="workload:comfyui" id="enables">
+      <data key="d5">enables</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_recompiled_pytorch" target="workload:whisperx" id="enables">
+      <data key="d5">enables</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="stack:rr_recompiled_rocblas" target="workload:ollama" id="enables">
+      <data key="d5">enables</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.84</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="rocm:5.7" target="unk:which_stack_is_best_baseline" id="candidate_baseline">
+      <data key="d5">candidate_baseline</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="rocm:6.4" target="unk:which_stack_is_best_baseline" id="candidate_baseline">
+      <data key="d5">candidate_baseline</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="workload:ollama" target="obs:ollama_vram_7b" id="vram_requirement">
+      <data key="d5">vram_requirement</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="workload:comfyui" target="flag:lowvram" id="requires_flag">
+      <data key="d5">requires_flag</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.82</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="workload:comfyui" target="flag:lowvram" id="requires_for_correct_results">
+      <data key="d5">requires_for_correct_results</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="workload:comfyui" target="flag:miopen_log_level_3" id="requires_flag">
+      <data key="d5">requires_flag</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.8</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="workload:whisperx" target="flag:whisperx_joblib_0" id="requires_flag">
+      <data key="d5">requires_flag</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="flag:lowvram" target="unk:which_build_flags_are_required_per_workload" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">1.0</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="flag:miopen_log_level_3" target="unk:which_build_flags_are_required_per_workload" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">1.0</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="flag:cfg_1_0" target="unk:which_build_flags_are_required_per_workload" id="maps_to">
+      <data key="d5">maps_to</data>
+      <data key="d6">known_unknown</data>
+      <data key="d7">1.0</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="issue:advanced10" target="repo:robertrosenbusch_gfx803_rocm" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.96</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="issue:advanced10" target="rocm:5.7" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="issue:advanced10" target="rocm:6.4" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.96</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="obs:recompile_pytorch_needed" target="stack:rr_recompiled_pytorch" id="motivates">
+      <data key="d5">motivates</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.94</data>
+      <data key="d8">web</data>
+    </edge>
+    <edge source="obs:recompile_rocblas_needed_rocm6x" target="stack:rr_recompiled_rocblas" id="motivates">
+      <data key="d5">motivates</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.86</data>
+      <data key="d8">web</data>
+    </edge>
     <edge source="obs:workgroup_mapping_a" target="component:gemm_tiles" id="suggests">
       <data key="d5">suggests</data>
       <data key="d6">hypothesis</data>
@@ -625,6 +1238,168 @@
       <data key="d6">known_known</data>
       <data key="d7">0.95</data>
       <data key="d8">conversation</data>
+    </edge>
+    <edge source="kernel:6.13" target="obs:kfd_segfault_6.13_6.14" id="causes">
+      <data key="d5">causes</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="kernel:6.13" target="unk:kernel_boundary_exact" id="helps_resolve">
+      <data key="d5">helps_resolve</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="kernel:6.14" target="obs:kfd_segfault_6.13_6.14" id="causes">
+      <data key="d5">causes</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="kernel:6.14" target="unk:kernel_boundary_exact" id="helps_resolve">
+      <data key="d5">helps_resolve</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="kernel:6.12.21" target="unk:kernel_boundary_exact" id="helps_resolve">
+      <data key="d5">helps_resolve</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="os:fedora_41" target="kernel:6.14" id="uses_by_default">
+      <data key="d5">uses_by_default</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.85</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="obs:kfd_segfault_6.13_6.14" target="obs:kfd_reset_instability" id="correlates_with">
+      <data key="d5">correlates_with</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="runtime:vulkan" target="obs:vulkan_functional_on_host" id="has_observation">
+      <data key="d5">has_observation</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">user_report</data>
+    </edge>
+    <edge source="obs:vulkan_functional_on_host" target="hyp:vulkan_as_ground_truth" id="suggests">
+      <data key="d5">suggests</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="hyp:vulkan_as_ground_truth" target="exp:vulkan_parity_check" id="motivates">
+      <data key="d5">motivates</data>
+      <data key="d6">hypothesis</data>
+      <data key="d7">0.95</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="exp:vulkan_parity_check" target="unk:first_bad_layer" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">proposed</data>
+      <data key="d7">0.9</data>
+      <data key="d8">analysis</data>
+    </edge>
+    <edge source="stack:rosenbusch_rocm64_base" target="os:ubuntu_24.04" id="uses_os">
+      <data key="d5">uses_os</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.99</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="stack:rosenbusch_rocm64_base" target="rocm:6.4" id="uses_rocm">
+      <data key="d5">uses_rocm</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.99</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="stack:rosenbusch_rocm64_base" target="lang:python_3.12" id="uses_python">
+      <data key="d5">uses_python</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.99</data>
+      <data key="d8">rosenbusch_repo</data>
+    </edge>
+    <edge source="os:arch_linux" target="runtime:nix" id="supports">
+      <data key="d5">supports</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="runtime:nix" target="constraint:low_disk_space" id="motivates">
+      <data key="d5">motivates</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">strategy</data>
+    </edge>
+    <edge source="constraint:low_disk_space" target="branch:vulkan_comparison" id="affects">
+      <data key="d5">affects</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.95</data>
+      <data key="d8">strategy</data>
+    </edge>
+    <edge source="branch:vulkan_comparison" target="exp:vulkan_parity_check" id="contains">
+      <data key="d5">contains</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">local_ingest</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.1" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.8" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="kernel:6.6" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.7" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.4" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:7.2" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:5.71" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="discussion:rocm_rx580_noise_issue" target="rocm:6.3" id="mentions">
+      <data key="d5">mentions</data>
+      <data key="d6">known_known</data>
+      <data key="d7">1.0</data>
+      <data key="d8">miner</data>
+    </edge>
+    <edge source="issue:rocm:4965" target="obs:kfd_reset_instability" id="targets">
+      <data key="d5">targets</data>
+      <data key="d6">known_known</data>
+      <data key="d7">0.9</data>
+      <data key="d8">miner</data>
     </edge>
   </graph>
 </graphml>

@@ -7,6 +7,9 @@ import networkx as nx
 from graph_schema import make_graph, add_node, add_edge, NodeSpec, EdgeSpec, to_jsonable
 
 
+from ingest_external_repos import ingest_repo_cluster
+from graph_miner import run_miner
+
 def build_seed_graph(facts_path: str | Path = "seed_facts.json") -> nx.MultiDiGraph:
     path = Path(facts_path)
     data = json.loads(path.read_text())
@@ -17,6 +20,12 @@ def build_seed_graph(facts_path: str | Path = "seed_facts.json") -> nx.MultiDiGr
 
     for item in data["edges"]:
         add_edge(g, EdgeSpec(**item))
+
+    # Apply additional hardcoded knowledge/relations
+    ingest_repo_cluster(g)
+    
+    # Run the miner to extract insights from external references
+    run_miner(g)
 
     return g
 

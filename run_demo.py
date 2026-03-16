@@ -10,6 +10,7 @@ from graph_queries import (
     proposed_experiments,
     frontier_unknowns,
 )
+from experiment_planner import rank_experiments
 
 
 def main() -> None:
@@ -22,13 +23,23 @@ def main() -> None:
     ku = nodes_by_status(g, "known_unknown")
     exps = proposed_experiments(g)
     frontier = frontier_unknowns(g)
+    ranked_plan = rank_experiments(g)
 
     (out_dir / "known_knowns.json").write_text(json.dumps(kk, indent=2))
     (out_dir / "known_unknowns.json").write_text(json.dumps(ku, indent=2))
     (out_dir / "proposed_experiments.json").write_text(json.dumps(exps, indent=2))
     (out_dir / "frontier_unknowns.json").write_text(json.dumps(frontier, indent=2))
+    (out_dir / "ranked_experiment_plan.json").write_text(json.dumps(ranked_plan, indent=2))
 
     print_summary(g)
+    print()
+    print("RANKED EXPERIMENT PLAN (from current frontier)")
+    print("-" * 70)
+    for item in ranked_plan[:5]:
+        print(f"{item['id']}: score={item['score']} :: {item['label']}")
+        if item["resolves"]:
+            print(f"  resolves: {', '.join(item['resolves'])}")
+
     print()
     print("KNOWN KNOWNS")
     print("-" * 70)
@@ -60,6 +71,16 @@ def main() -> None:
 
     print()
     print(f"Wrote artifacts to: {out_dir.resolve()}")
+
+    # Inject data into visualizer for CORS-free local viewing
+    viz_file = Path("visualizer.html")
+    if viz_file.exists():
+        viz_content = viz_file.read_text()
+        graph_json = (out_dir / "gfx803_graph.json").read_text()
+        # Find the line 'let graphData;' and replace it with the actual data
+        new_viz_content = viz_content.replace('let graphData;', f'let graphData = {graph_json};')
+        (out_dir / "visualizer_portable.html").write_text(new_viz_content)
+        print(f"Created portable visualizer at: {(out_dir / 'visualizer_portable.html').resolve()}")
 
 
 if __name__ == "__main__":

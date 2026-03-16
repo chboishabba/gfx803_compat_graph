@@ -1,26 +1,49 @@
 [
   {
+    "id": "unk:first_bad_layer",
+    "label": "First corrupted tensor/layer in diffusion path",
+    "score": 3,
+    "reasons": [
+      {
+        "src": "hyp:miopen_conv_root_cause",
+        "relation": "requires_test"
+      },
+      {
+        "src": "exp:canonical_protocol",
+        "relation": "targets"
+      },
+      {
+        "src": "exp:vulkan_parity_check",
+        "relation": "targets"
+      }
+    ]
+  },
+  {
+    "id": "unk:which_build_flags_are_required_per_workload",
+    "label": "Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)",
+    "score": 3,
+    "reasons": [
+      {
+        "src": "flag:lowvram",
+        "relation": "maps_to"
+      },
+      {
+        "src": "flag:miopen_log_level_3",
+        "relation": "maps_to"
+      },
+      {
+        "src": "flag:cfg_1_0",
+        "relation": "maps_to"
+      }
+    ]
+  },
+  {
     "id": "unk:best_gemm_tiles",
     "label": "Best raw HIP GEMM tile families for gfx803",
     "score": 2,
     "reasons": [
       {
         "src": "hyp:fallback_gemm_llm",
-        "relation": "requires_test"
-      },
-      {
-        "src": "exp:canonical_protocol",
-        "relation": "targets"
-      }
-    ]
-  },
-  {
-    "id": "unk:first_bad_layer",
-    "label": "First corrupted tensor/layer in diffusion path",
-    "score": 2,
-    "reasons": [
-      {
-        "src": "hyp:miopen_conv_root_cause",
         "relation": "requires_test"
       },
       {
@@ -73,5 +96,11 @@
         "relation": "targets"
       }
     ]
+  },
+  {
+    "id": "unk:which_stack_is_best_baseline",
+    "label": "Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)",
+    "score": 0,
+    "reasons": []
   }
 ]

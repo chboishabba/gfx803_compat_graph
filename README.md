@@ -11,6 +11,34 @@ It includes:
 - `seed_facts.json` — machine-readable seed facts
 - `requirements.txt` — only depends on `networkx`
 
+## 📣 Call for Testers: Vulkan Comparison Branch
+
+We are looking for community testers to contribute to the **Vulkan Comparison** research branch. Since native ROCm is unstable on many modern Linux kernels (6.14+) for gfx803, we are using Vulkan as the "Numerical Ground Truth."
+
+**We need people who can:**
+1. Run a working Vulkan-based compute workload (e.g., Stable Diffusion via `sd.cpp` or `ncnn`) on an RX 580.
+2. Capture output tensors using the `vulkan_ground_truth_capture.py` tool.
+3. Help map these against failing ROCm/Docker outputs to isolate the "first bad layer" (noise source).
+
+## Host Environment Status
+
+Currently actively testing on:
+- **OS**: Arch Linux
+- **Kernel**: 6.19+ (CachyOS)
+- **Runtimes**: Vulkan (Working), ROCm 7.2 (Native broken/KFD issues), Nix (Installed - experimenting with low-overhead builds).
+
+> [!NOTE]
+> **Disk Space Strategy**: We are being strategic with disk usage. We prefer Nix shells or minimal containers over massive 20GB+ PyTorch Docker images where possible to avoid SSD wear.
+
+## ❄️ Nix Strategy
+
+For testers with limited disk space, we are exploring **Nix flakes** to provide reproducible development shells. This allows us to:
+1. Share system-level dependencies (like `hip`, `llvm`, `clinfo`) across projects.
+2. Avoid the storage overhead of multi-layered Docker images.
+3. Rapidly iterate on custom ROCm library builds (rocBLAS, MIOpen) without a full container rebuild.
+
+If you have Nix installed, check out the upcoming `flake.nix` in the comparison branch.
+
 ## Quick start
 
 ```bash
@@ -95,3 +123,29 @@ Known-unknown-ish:
 - This is a seed atlas, not the final truth.
 - It is designed to be extended with canonical test outputs later.
 - The code does not require PyTorch; it only manages the compatibility graph.
+
+
+## Added in v2
+
+- richer seed graph including:
+  - Rosenbusch ROCm 6.4 gfx803 stack
+  - your `rr_gfx803_rocm` fork/work repo
+  - your `gfx803_compat_graph` repo
+  - `advanced-lvl-up` issue thread integration
+  - `lamikr/rocm_sdk_builder` discussion node
+  - workload-specific flags/settings
+  - baseline stack candidates
+
+- `ingest_external_repos.py`
+  - deterministic local ingester for known repo cluster
+
+- `experiment_planner.py`
+  - ranks the next experiments to run based on graph pressure
+  - outputs `out/ranked_experiment_plan.json`
+
+### Extra run commands
+
+```bash
+python experiment_planner.py
+```
+

@@ -1,0 +1,261 @@
+[
+  {
+    "id": "probe:T13_vulkan_comparison",
+    "label": "Vulkan vs (Future) ROCm tensor parity comparison",
+    "score": 21.5,
+    "cost": 3,
+    "targets": [
+      "runtime:vulkan",
+      "workload:diffusion",
+      "metric:correctness"
+    ],
+    "resolves": [
+      "unk:first_bad_layer",
+      "unk:precision_matrix"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:first_bad_layer",
+        "pressure": 3
+      },
+      {
+        "unknown": "unk:precision_matrix",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T11_miopen_conv",
+    "label": "T11 MIOpen conv + perfdb stability",
+    "score": 21.5,
+    "cost": 5,
+    "targets": [
+      "lib:miopen",
+      "component:perfdb",
+      "workload:diffusion"
+    ],
+    "resolves": [
+      "unk:first_bad_layer",
+      "unk:miopen_perfdb_stability",
+      "unk:precision_matrix"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:first_bad_layer",
+        "pressure": 3
+      },
+      {
+        "unknown": "unk:miopen_perfdb_stability",
+        "pressure": 2
+      },
+      {
+        "unknown": "unk:precision_matrix",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T12_framework_layers",
+    "label": "T12 framework layer probes",
+    "score": 15.5,
+    "cost": 5,
+    "targets": [
+      "fw:pytorch",
+      "workload:diffusion",
+      "workload:llm"
+    ],
+    "resolves": [
+      "unk:first_bad_layer",
+      "unk:precision_matrix"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:first_bad_layer",
+        "pressure": 3
+      },
+      {
+        "unknown": "unk:precision_matrix",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T9_raw_conv",
+    "label": "T9 raw HIP conv",
+    "score": 14.0,
+    "cost": 4,
+    "targets": [
+      "component:conv_path"
+    ],
+    "resolves": [
+      "unk:first_bad_layer",
+      "unk:precision_matrix"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:first_bad_layer",
+        "pressure": 3
+      },
+      {
+        "unknown": "unk:precision_matrix",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "sweep:flags_matrix",
+    "label": "Flag/settings matrix (--lowvram, MIOPEN_LOG_LEVEL, CFG hacks)",
+    "score": 11.0,
+    "cost": 2,
+    "targets": [
+      "flag:lowvram",
+      "flag:miopen_log_level_3",
+      "flag:cfg_1_0"
+    ],
+    "resolves": [
+      "unk:which_build_flags_are_required_per_workload"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:which_build_flags_are_required_per_workload",
+        "pressure": 3
+      }
+    ]
+  },
+  {
+    "id": "sweep:baseline_matrix",
+    "label": "Baseline stack matrix (ROCm 5.7 vs 6.4, patched vs stock)",
+    "score": 10.0,
+    "cost": 4,
+    "targets": [
+      "rocm:5.7",
+      "rocm:6.4",
+      "stack:rr_rocm64_base"
+    ],
+    "resolves": [
+      "unk:which_stack_is_best_baseline"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:which_stack_is_best_baseline",
+        "pressure": 3
+      }
+    ]
+  },
+  {
+    "id": "probe:T10_rocblas_shapes",
+    "label": "T10 rocBLAS shape probe",
+    "score": 6.5,
+    "cost": 3,
+    "targets": [
+      "lib:rocblas",
+      "workload:llm"
+    ],
+    "resolves": [
+      "unk:best_gemm_tiles"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:best_gemm_tiles",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T7_raw_gemm_correctness",
+    "label": "T7 raw GEMM correctness",
+    "score": 6.5,
+    "cost": 3,
+    "targets": [
+      "component:gemm_tiles",
+      "lib:rocblas"
+    ],
+    "resolves": [
+      "unk:best_gemm_tiles"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:best_gemm_tiles",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T6_wave_sched",
+    "label": "T6 wavefront scheduling / occupancy",
+    "score": 6.0,
+    "cost": 2,
+    "targets": [
+      "component:wavefront_sched"
+    ],
+    "resolves": [
+      "unk:best_gemm_tiles"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:best_gemm_tiles",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "sweep:kernel_boundary",
+    "label": "Kernel sweep for KFD stability boundary",
+    "score": 6.0,
+    "cost": 4,
+    "targets": [
+      "component:host_kernel",
+      "driver:amdgpu_kfd"
+    ],
+    "resolves": [
+      "unk:kernel_boundary_exact"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:kernel_boundary_exact",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T8_gemm_tile_sweep",
+    "label": "T8 GEMM tile sweep",
+    "score": 5.0,
+    "cost": 4,
+    "targets": [
+      "component:gemm_tiles"
+    ],
+    "resolves": [
+      "unk:best_gemm_tiles"
+    ],
+    "reasons": [
+      {
+        "unknown": "unk:best_gemm_tiles",
+        "pressure": 2
+      }
+    ]
+  },
+  {
+    "id": "probe:T1_runtime_sanity",
+    "label": "T1 runtime sanity",
+    "score": 1.5,
+    "cost": 1,
+    "targets": [
+      "runtime:hip",
+      "driver:amdgpu_kfd"
+    ],
+    "resolves": [],
+    "reasons": []
+  },
+  {
+    "id": "probe:T3_lds_correctness",
+    "label": "T3 LDS correctness",
+    "score": 0.0,
+    "cost": 2,
+    "targets": [
+      "component:lds"
+    ],
+    "resolves": [],
+    "reasons": []
+  }
+]

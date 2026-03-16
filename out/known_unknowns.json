@@ -38,5 +38,21 @@
     "status": "known_unknown",
     "confidence": 1.0,
     "source": "analysis"
+  },
+  {
+    "id": "unk:which_build_flags_are_required_per_workload",
+    "label": "Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
+  },
+  {
+    "id": "unk:which_stack_is_best_baseline",
+    "label": "Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)",
+    "kind": "unknown",
+    "status": "known_unknown",
+    "confidence": 1.0,
+    "source": "analysis"
   }
 ]

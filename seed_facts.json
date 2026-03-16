@@ -337,6 +337,214 @@
       "source": "analysis"
     },
     {
+      "node_id": "repo:robertrosenbusch_gfx803_rocm",
+      "label": "robertrosenbusch/gfx803_rocm",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.98,
+      "source": "web"
+    },
+    {
+      "node_id": "repo:chboishabba_rr_gfx803_rocm",
+      "label": "chboishabba/rr_gfx803_rocm",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.98,
+      "source": "web"
+    },
+    {
+      "node_id": "repo:chboishabba_gfx803_compat_graph",
+      "label": "chboishabba/gfx803_compat_graph",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "web"
+    },
+    {
+      "node_id": "repo:lamikr_rocm_sdk_builder",
+      "label": "lamikr/rocm_sdk_builder",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "repo:advanced_lvl_up_fix_amd_gpu",
+      "label": "advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU",
+      "kind": "repository",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "stack:rr_rocm64_base",
+      "label": "Rosenbusch ROCm 6.4 gfx803 base image",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "node_id": "stack:rr_recompiled_pytorch",
+      "label": "Recompiled PyTorch/TorchVision/TorchAudio for gfx803",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "node_id": "stack:rr_recompiled_rocblas",
+      "label": "Recompiled rocBLAS for gfx803 on ROCm 6.x",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.88,
+      "source": "web"
+    },
+    {
+      "node_id": "rocm:5.7",
+      "label": "ROCm 5.7",
+      "kind": "rocm_version",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "conversation"
+    },
+    {
+      "node_id": "rocm:6.4",
+      "label": "ROCm 6.4.0",
+      "kind": "rocm_version",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "pytorch:2.6.0",
+      "label": "PyTorch 2.6.0",
+      "kind": "framework_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "torchvision:0.21.0",
+      "label": "TorchVision 0.21.0",
+      "kind": "framework_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "torchaudio:2.6.0",
+      "label": "TorchAudio 2.6.0",
+      "kind": "framework_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "workload:ollama",
+      "label": "Ollama",
+      "kind": "workload",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "workload:comfyui",
+      "label": "ComfyUI",
+      "kind": "workload",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "workload:whisperx",
+      "label": "WhisperX",
+      "kind": "workload",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "node_id": "flag:lowvram",
+      "label": "--lowvram",
+      "kind": "build_flag",
+      "status": "known_known",
+      "confidence": 0.88,
+      "source": "web"
+    },
+    {
+      "node_id": "flag:miopen_log_level_3",
+      "label": "MIOPEN_LOG_LEVEL=3",
+      "kind": "build_flag",
+      "status": "known_known",
+      "confidence": 0.88,
+      "source": "web"
+    },
+    {
+      "node_id": "flag:cfg_1_0",
+      "label": "CFG=1.0",
+      "kind": "runtime_flag",
+      "status": "known_known",
+      "confidence": 0.8,
+      "source": "conversation"
+    },
+    {
+      "node_id": "issue:advanced10",
+      "label": "Issue #10 ROCm 6.4 and 5.7 issues on Linux",
+      "kind": "issue",
+      "status": "known_known",
+      "confidence": 0.97,
+      "source": "web"
+    },
+    {
+      "node_id": "discussion:lamikr261",
+      "label": "lamikr/rocm_sdk_builder discussion #261",
+      "kind": "discussion",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "node_id": "obs:rr_repo_enables_apps",
+      "label": "Rosenbusch-style repo documents gfx803 Docker flows for Ollama, ComfyUI, WhisperX",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "node_id": "obs:recompile_pytorch_needed",
+      "label": "Official pip/ROCm Docker builds do not compile PyTorch stack for Polaris/gfx803; recompilation is needed",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "node_id": "obs:recompile_rocblas_needed_rocm6x",
+      "label": "On ROCm 6.x, Ollama path may require recompiling rocBLAS for gfx803",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.86,
+      "source": "web"
+    },
+    {
+      "node_id": "unk:which_stack_is_best_baseline",
+      "label": "Best baseline stack to pin first (5.7 vs 6.4, stock vs patched)",
+      "kind": "unknown",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "node_id": "unk:which_build_flags_are_required_per_workload",
+      "label": "Required flags/settings per workload (--lowvram, MIOPEN_LOG_LEVEL, CFG tricks, etc.)",
+      "kind": "unknown",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
       "node_id": "obs:workgroup_mapping_a",
       "label": "WorkGroupMappingType: A and WorkGroupMapping: 0 improves Tensile stability/speed on Linux",
       "kind": "observation",
@@ -367,6 +575,174 @@
       "status": "known_known",
       "confidence": 0.95,
       "source": "conversation"
+    },
+    {
+      "node_id": "kernel:6.13",
+      "label": "Linux Kernel 6.13",
+      "kind": "kernel_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "kernel:6.14",
+      "label": "Linux Kernel 6.14",
+      "kind": "kernel_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "kernel:6.12.21",
+      "label": "Linux Kernel 6.12.21 (stable)",
+      "kind": "kernel_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "kernel:6.15.8",
+      "label": "Linux Kernel 6.15.8 (stable)",
+      "kind": "kernel_version",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "os:fedora_41",
+      "label": "Fedora 41",
+      "kind": "os",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "os:arch",
+      "label": "Arch Linux",
+      "kind": "os",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "os:debian_13",
+      "label": "Debian 13 (Trixie)",
+      "kind": "os",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "obs:kfd_segfault_6.13_6.14",
+      "label": "/dev/kfd and /dev/dri SegFaults on kernels 6.13/6.14",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "flag:whisperx_joblib_0",
+      "label": "JOBLIB_MULTIPROCESSING=0",
+      "kind": "runtime_flag",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "obs:ollama_vram_7b",
+      "label": "Ollama 7B models require 8GB VRAM",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "runtime:vulkan",
+      "label": "Vulkan Runtime",
+      "kind": "runtime",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "obs:vulkan_functional_on_host",
+      "label": "Vulkan is tested and working on the current host (kernel 6.19)",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "hyp:vulkan_as_ground_truth",
+      "label": "Vulkan implementations (e.g. Vulkan-based diffusers) can serve as numerical ground truth",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "node_id": "exp:vulkan_parity_check",
+      "label": "Direct tensor parity comparison: Vulkan vs ROCm/Docker",
+      "kind": "experiment",
+      "status": "proposed",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "node_id": "os:ubuntu_24.04",
+      "label": "Ubuntu 24.04 (Noble)",
+      "kind": "os",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "lang:python_3.12",
+      "label": "Python 3.12",
+      "kind": "language",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "stack:rosenbusch_rocm64_base",
+      "label": "Rosenbusch ROCm 6.4.0 Baseimage",
+      "kind": "stack",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "node_id": "os:arch_linux",
+      "label": "Arch Linux (Host)",
+      "kind": "operating_system",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "runtime:nix",
+      "label": "Nix / NixOS Package Manager",
+      "kind": "runtime",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "constraint:low_disk_space",
+      "label": "Limited Disk Space (Strategic isolation required)",
+      "kind": "metric",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "node_id": "branch:vulkan_comparison",
+      "label": "Vulkan Comparison Branch (Active Call for Testers)",
+      "kind": "experiment",
+      "status": "proposed",
+      "confidence": 1.0,
+      "source": "analysis"
     }
   ],
   "edges": [
@@ -731,6 +1107,262 @@
       "source": "analysis"
     },
     {
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "stack:rr_rocm64_base",
+      "relation": "provides",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "stack:rr_recompiled_pytorch",
+      "relation": "provides",
+      "status": "known_known",
+      "confidence": 0.92,
+      "source": "web"
+    },
+    {
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "stack:rr_recompiled_rocblas",
+      "relation": "provides",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_rr_gfx803_rocm",
+      "dst": "repo:robertrosenbusch_gfx803_rocm",
+      "relation": "derived_from",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_gfx803_compat_graph",
+      "dst": "exp:canonical_protocol",
+      "relation": "contains",
+      "status": "known_known",
+      "confidence": 0.7,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_gfx803_compat_graph",
+      "dst": "exp:hip_probe_suite",
+      "relation": "targets",
+      "status": "context",
+      "confidence": 0.7,
+      "source": "analysis"
+    },
+    {
+      "src": "stack:rr_rocm64_base",
+      "dst": "rocm:6.4",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "pytorch:2.6.0",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "torchvision:0.21.0",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "torchaudio:2.6.0",
+      "relation": "uses",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "workload:comfyui",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_pytorch",
+      "dst": "workload:whisperx",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "stack:rr_recompiled_rocblas",
+      "dst": "workload:ollama",
+      "relation": "enables",
+      "status": "known_known",
+      "confidence": 0.84,
+      "source": "web"
+    },
+    {
+      "src": "repo:advanced_lvl_up_fix_amd_gpu",
+      "dst": "issue:advanced10",
+      "relation": "has_issue",
+      "status": "known_known",
+      "confidence": 0.97,
+      "source": "web"
+    },
+    {
+      "src": "issue:advanced10",
+      "dst": "repo:robertrosenbusch_gfx803_rocm",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "src": "issue:advanced10",
+      "dst": "rocm:5.7",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "web"
+    },
+    {
+      "src": "issue:advanced10",
+      "dst": "rocm:6.4",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 0.96,
+      "source": "web"
+    },
+    {
+      "src": "repo:lamikr_rocm_sdk_builder",
+      "dst": "discussion:lamikr261",
+      "relation": "has_discussion",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
+    },
+    {
+      "src": "repo:robertrosenbusch_gfx803_rocm",
+      "dst": "obs:rr_repo_enables_apps",
+      "relation": "supports",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_rr_gfx803_rocm",
+      "dst": "obs:recompile_pytorch_needed",
+      "relation": "documents",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "src": "repo:chboishabba_rr_gfx803_rocm",
+      "dst": "obs:recompile_rocblas_needed_rocm6x",
+      "relation": "documents",
+      "status": "known_known",
+      "confidence": 0.86,
+      "source": "web"
+    },
+    {
+      "src": "obs:recompile_pytorch_needed",
+      "dst": "stack:rr_recompiled_pytorch",
+      "relation": "motivates",
+      "status": "known_known",
+      "confidence": 0.94,
+      "source": "web"
+    },
+    {
+      "src": "obs:recompile_rocblas_needed_rocm6x",
+      "dst": "stack:rr_recompiled_rocblas",
+      "relation": "motivates",
+      "status": "known_known",
+      "confidence": 0.86,
+      "source": "web"
+    },
+    {
+      "src": "workload:comfyui",
+      "dst": "flag:lowvram",
+      "relation": "requires_flag",
+      "status": "known_known",
+      "confidence": 0.82,
+      "source": "web"
+    },
+    {
+      "src": "workload:comfyui",
+      "dst": "flag:miopen_log_level_3",
+      "relation": "requires_flag",
+      "status": "known_known",
+      "confidence": 0.8,
+      "source": "web"
+    },
+    {
+      "src": "workload:diffusion",
+      "dst": "flag:cfg_1_0",
+      "relation": "throughput_hack",
+      "status": "known_known",
+      "confidence": 0.78,
+      "source": "conversation"
+    },
+    {
+      "src": "flag:lowvram",
+      "dst": "unk:which_build_flags_are_required_per_workload",
+      "relation": "maps_to",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "flag:miopen_log_level_3",
+      "dst": "unk:which_build_flags_are_required_per_workload",
+      "relation": "maps_to",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "flag:cfg_1_0",
+      "dst": "unk:which_build_flags_are_required_per_workload",
+      "relation": "maps_to",
+      "status": "known_unknown",
+      "confidence": 1.0,
+      "source": "analysis"
+    },
+    {
+      "src": "stack:rr_rocm64_base",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "candidate_baseline",
+      "status": "known_unknown",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "rocm:5.7",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "candidate_baseline",
+      "status": "known_unknown",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "rocm:6.4",
+      "dst": "unk:which_stack_is_best_baseline",
+      "relation": "candidate_baseline",
+      "status": "known_unknown",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
       "src": "obs:workgroup_mapping_a",
       "dst": "component:gemm_tiles",
       "relation": "suggests",
@@ -761,6 +1393,182 @@
       "status": "known_known",
       "confidence": 0.95,
       "source": "conversation"
+    },
+    {
+      "src": "kernel:6.13",
+      "dst": "obs:kfd_segfault_6.13_6.14",
+      "relation": "causes",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "kernel:6.14",
+      "dst": "obs:kfd_segfault_6.13_6.14",
+      "relation": "causes",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "os:fedora_41",
+      "dst": "kernel:6.14",
+      "relation": "uses_by_default",
+      "status": "known_known",
+      "confidence": 0.85,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "obs:kfd_segfault_6.13_6.14",
+      "dst": "obs:kfd_reset_instability",
+      "relation": "correlates_with",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "workload:comfyui",
+      "dst": "flag:lowvram",
+      "relation": "requires_for_correct_results",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "workload:whisperx",
+      "dst": "flag:whisperx_joblib_0",
+      "relation": "requires_flag",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "workload:ollama",
+      "dst": "obs:ollama_vram_7b",
+      "relation": "vram_requirement",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "kernel:6.13",
+      "dst": "unk:kernel_boundary_exact",
+      "relation": "helps_resolve",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "src": "kernel:6.14",
+      "dst": "unk:kernel_boundary_exact",
+      "relation": "helps_resolve",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "src": "kernel:6.12.21",
+      "dst": "unk:kernel_boundary_exact",
+      "relation": "helps_resolve",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "src": "runtime:vulkan",
+      "dst": "obs:vulkan_functional_on_host",
+      "relation": "has_observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "src": "obs:vulkan_functional_on_host",
+      "dst": "hyp:vulkan_as_ground_truth",
+      "relation": "suggests",
+      "status": "hypothesis",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "hyp:vulkan_as_ground_truth",
+      "dst": "exp:vulkan_parity_check",
+      "relation": "motivates",
+      "status": "hypothesis",
+      "confidence": 0.95,
+      "source": "analysis"
+    },
+    {
+      "src": "exp:vulkan_parity_check",
+      "dst": "unk:first_bad_layer",
+      "relation": "targets",
+      "status": "proposed",
+      "confidence": 0.9,
+      "source": "analysis"
+    },
+    {
+      "src": "hw:rx580",
+      "dst": "runtime:vulkan",
+      "relation": "supports",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "src": "stack:rosenbusch_rocm64_base",
+      "dst": "os:ubuntu_24.04",
+      "relation": "uses_os",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "stack:rosenbusch_rocm64_base",
+      "dst": "rocm:6.4",
+      "relation": "uses_rocm",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "stack:rosenbusch_rocm64_base",
+      "dst": "lang:python_3.12",
+      "relation": "uses_python",
+      "status": "known_known",
+      "confidence": 0.99,
+      "source": "rosenbusch_repo"
+    },
+    {
+      "src": "os:arch_linux",
+      "dst": "runtime:nix",
+      "relation": "supports",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "user_report"
+    },
+    {
+      "src": "runtime:nix",
+      "dst": "constraint:low_disk_space",
+      "relation": "motivates",
+      "status": "known_known",
+      "confidence": 0.9,
+      "source": "strategy"
+    },
+    {
+      "src": "constraint:low_disk_space",
+      "dst": "branch:vulkan_comparison",
+      "relation": "affects",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "strategy"
+    },
+    {
+      "src": "branch:vulkan_comparison",
+      "dst": "exp:vulkan_parity_check",
+      "relation": "contains",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "analysis"
     }
   ]
 }
