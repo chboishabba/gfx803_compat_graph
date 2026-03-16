@@ -1394,6 +1394,26 @@
       "status": "context",
       "confidence": 0.9,
       "source": "miner"
+    },
+    {
+      "node_id": "fact:run:nix:.._rr_gfx803_rocm",
+      "label": "Probe Result on nix: unknown",
+      "kind": "observation",
+      "status": "known_known",
+      "attrs": {
+        "verdict": "unknown",
+        "env": "nix"
+      }
+    },
+    {
+      "node_id": "fact:run:docker:itir_latest",
+      "label": "Probe Result on docker: success",
+      "kind": "observation",
+      "status": "known_known",
+      "attrs": {
+        "verdict": "success",
+        "env": "docker"
+      }
     }
   ],
   "edges": [
@@ -2900,6 +2920,18 @@
       "status": "known_known",
       "confidence": 1.0,
       "source": "miner"
+    },
+    {
+      "src": "fact:run:nix:.._rr_gfx803_rocm",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "verify_runner"
+    },
+    {
+      "src": "fact:run:docker:itir_latest",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "verify_runner"
     }
   ]
 }

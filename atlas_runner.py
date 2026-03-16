@@ -139,6 +139,11 @@ def main():
     cap_parser = subparsers.add_parser("capture", help="Run the Vulkan Ground Truth Capture tool")
     cap_parser.add_argument("--name", type=str, default="layer_output", help="Name of the tensor layer")
 
+    # Command: verify
+    verify_parser = subparsers.add_parser("verify", help="Run basic PyTorch compatibility probe")
+    verify_parser.add_argument("--env", type=str, choices=["docker", "nix", "local"], default="local", help="Execution environment")
+    verify_parser.add_argument("--env-path", type=str, help="Docker image name (e.g., 'rocm/pytorch:rocm5.7_ubuntu22.04_py3.10_pytorch_2.0.1') or Nix flake path (e.g. '../rr_gfx803_rocm')")
+
     # Command: artifacts
     subparsers.add_parser("artifacts", help="List generated artifacts and images")
 
@@ -269,6 +274,87 @@ def main():
                  print(f"Action: Run 'python atlas_runner.py update' to refresh local context and check 'out/' artifacts.")
         else:
             print(f"\n{YELLOW}* TIP: Run 'python atlas_runner.py update' to generate a ranked research plan for your system.{RESET}")
+
+    elif args.command == "verify":
+        env = args.env
+        env_path = args.env_path
+        print(f"{BLUE}{BOLD}GFX803 PROBE VERIFICATION{RESET}")
+        
+        probe_script = "probe.py"
+        if not Path(probe_script).exists():
+            print(f"{RED}Error: {probe_script} not found in current directory.{RESET}")
+            return
+            
+        cmd = ""
+        if env == "local":
+            cmd = f"python {probe_script}"
+        elif env == "docker":
+            if not env_path:
+                print(f"{RED}Please specify a Docker image via --env-path (e.g., my_rocm_docker_image){RESET}")
+                return
+            print(f"{YELLOW}Preparing Docker container from image '{env_path}'...{RESET}")
+            cmd = f"docker run --rm --entrypoint '' -v $(pwd):/app -w /app --device=/dev/kfd --device=/dev/dri --group-add=video --ipc=host {env_path} python3 {probe_script}"
+        elif env == "nix":
+            if not env_path:
+                print(f"{RED}Please specify a path to the Nix flake via --env-path (e.g., '../rr_gfx803_rocm'){RESET}")
+                return
+            print(f"{YELLOW}Spawning into Nix environment '{env_path}'...{RESET}")
+            cmd = f"nix develop {env_path}#default --command python {probe_script}"
+            
+        print(f"\n{GREEN}Executing Test:{RESET}")
+        print(f"  {cmd}\n")
+        
+        try:
+            result = subprocess.run(cmd, shell=True, text=True, capture_output=True)
+            print(result.stdout)
+            if result.stderr:
+                print(f"{RED}STDERR output:{RESET}")
+                print(result.stderr)
+            
+            # Simple Graph Patch auto-generation based on output!
+            patch = {"nodes": [], "edges": []}
+            out_lower = result.stdout.lower()
+            
+            status = "unknown"
+            if "nan_inf_noise_detected" in out_lower:
+                status = "failed_noise"
+            elif "success_basic_compat" in out_lower:
+                status = "success"
+            elif "segfault" in out_lower or result.returncode == 139:
+                status = "failed_segfault"
+            elif "no_torch" in out_lower:
+                status = "missing_pytorch"
+            elif "no_cuda_available" in out_lower:
+                status = "missing_cuda_backend"
+                
+            print(f"\n{BOLD}=> Verdict: {status.upper()}{RESET}")
+            
+            # Append this result dynamically to the graph (example of loop closing)
+            target = env_path if env_path else "local_system"
+            node_id = f"fact:run:{env}:{target.replace('/', '_').replace(':', '_')}"
+            
+            patch["nodes"].append({
+                "node_id": node_id,
+                "label": f"Probe Result on {env}: {status}",
+                "kind": "observation",
+                "status": "known_known",
+                "attrs": {"verdict": status, "env": env}
+            })
+            patch["edges"].append({
+                "src": node_id,
+                "dst": "hw:rx580",
+                "relation": "observed_on",
+                "source": "verify_runner"
+            })
+            
+            patch_file = f"probe_patch_{env}.json"
+            Path(patch_file).write_text(json.dumps(patch, indent=2))
+            
+            print(f"{GREEN}Auto-generated patch `{patch_file}`. Automatically calling `python merge.py` to ingest...{RESET}")
+            run_command(f"python merge.py seed_facts.json {patch_file} && python run_demo.py", "Merging probe facts and recalculating graph")
+            
+        except Exception as e:
+             print(f"{RED}Failed to run verification command: {e}{RESET}")
 
     elif args.command == "viz":
         viz_path = Path("out/visualizer_portable.html").resolve()

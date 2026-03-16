@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {
+      "node_id": "fact:run:docker:itir_latest",
+      "label": "Probe Result on docker: success",
+      "kind": "observation",
+      "status": "known_known",
+      "attrs": {
+        "verdict": "success",
+        "env": "docker"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "fact:run:docker:itir_latest",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "verify_runner"
+    }
+  ]
+}

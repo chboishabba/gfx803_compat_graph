@@ -224,6 +224,26 @@
     "source": "user_report"
   },
   {
+    "id": "fact:run:docker:itir_latest",
+    "label": "Probe Result on docker: success",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 1.0,
+    "source": "manual_seed",
+    "verdict": "success",
+    "env": "docker"
+  },
+  {
+    "id": "fact:run:nix:.._rr_gfx803_rocm",
+    "label": "Probe Result on nix: unknown",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 1.0,
+    "source": "manual_seed",
+    "verdict": "unknown",
+    "env": "nix"
+  },
+  {
     "id": "obs:cfg1_speedup",
     "label": "CFG=1.0 materially improves diffusion throughput in at least one report",
     "kind": "observation",
@@ -294,6 +314,14 @@
     "status": "known_known",
     "confidence": 0.75,
     "source": "conversation"
+  },
+  {
+    "id": "obs:nix_sudo_ld_scrubbing",
+    "label": "sudo nix run scrubs LD_LIBRARY_PATH, preventing nixGL from bridging host drivers",
+    "kind": "observation",
+    "status": "known_known",
+    "confidence": 0.95,
+    "source": "experiment"
   },
   {
     "id": "obs:nix_vulkan_glibc_mismatch",
@@ -477,22 +505,6 @@
     "kind": "repository",
     "status": "known_known",
     "confidence": 0.98,
-    "source": "web"
-  },
-  {
-    "id": "rocm:5.7",
-    "label": "ROCm 5.7",
-    "kind": "rocm_version",
-    "status": "known_known",
-    "confidence": 0.9,
-    "source": "conversation"
-  },
-  {
-    "id": "rocm:6.4",
-    "label": "ROCm 6.4.0",
-    "kind": "rocm_version",
-    "status": "known_known",
-    "confidence": 0.96,
     "source": "web"
   },
   {

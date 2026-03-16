@@ -408,17 +408,17 @@
       "id": "rocm:5.7",
       "label": "ROCm 5.7",
       "kind": "rocm_version",
-      "status": "known_known",
+      "status": "context",
       "confidence": 0.9,
-      "source": "conversation"
+      "source": "miner"
     },
     {
       "id": "rocm:6.4",
-      "label": "ROCm 6.4.0",
+      "label": "ROCm 6.4",
       "kind": "rocm_version",
-      "status": "known_known",
-      "confidence": 0.96,
-      "source": "web"
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
     },
     {
       "id": "pytorch:2.6.0",
@@ -837,63 +837,20 @@
       "source": "analysis"
     },
     {
-      "id": "kernel:6.6",
-      "label": "Linux Kernel 6.6",
-      "kind": "kernel_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "discussion:rocm_rx580_noise_issue"
-    },
-    {
-      "id": "kernel:6.8",
-      "label": "Linux Kernel 6.8",
-      "kind": "kernel_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "kernel:6.1",
-      "label": "Linux Kernel 6.1",
-      "kind": "kernel_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "rocm:5.71",
-      "label": "ROCm 5.71",
-      "kind": "rocm_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "rocm:6.3",
-      "label": "ROCm 6.3",
-      "kind": "rocm_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "rocm:7.2",
-      "label": "ROCm 7.2",
-      "kind": "rocm_version",
-      "status": "context",
-      "confidence": 0.9,
-      "source": "miner"
-    },
-    {
-      "id": "issue:rocm:4965",
-      "label": "ROCm/ROCm Issue #4965: kernels > 6.13 crash driver",
-      "kind": "issue",
+      "id": "obs:nix_sudo_ld_scrubbing",
+      "label": "sudo nix run scrubs LD_LIBRARY_PATH, preventing nixGL from bridging host drivers",
+      "kind": "observation",
       "status": "known_known",
       "confidence": 0.95,
-      "source": "web"
+      "source": "experiment"
+    },
+    {
+      "id": "exp:native_vulkan_ground_truth",
+      "label": "Native Arch Linux Vulkan Build (Bypass Nix isolation)",
+      "kind": "experiment",
+      "status": "active",
+      "confidence": 1.0,
+      "source": "manual_seed"
     },
     {
       "id": "issue:pytorch:pytorch:84044",
@@ -1126,6 +1083,14 @@
       "state": "open"
     },
     {
+      "id": "rocm:7.2",
+      "label": "ROCm 7.2",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
       "id": "issue:ROCm:ROCm:5264",
       "label": "ROCm/ROCm #5264: [Issue]: HIP error: invalid device function",
       "kind": "issue",
@@ -1228,6 +1193,14 @@
       "source": "github_api",
       "url": "https://github.com/ROCm/ROCm/issues/4190",
       "state": "closed"
+    },
+    {
+      "id": "rocm:6.3",
+      "label": "ROCm 6.3",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
     },
     {
       "id": "issue:ROCm:ROCm:3743",
@@ -1422,6 +1395,69 @@
       "status": "context",
       "confidence": 0.9,
       "source": "miner"
+    },
+    {
+      "id": "fact:run:nix:.._rr_gfx803_rocm",
+      "label": "Probe Result on nix: unknown",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "manual_seed",
+      "verdict": "unknown",
+      "env": "nix"
+    },
+    {
+      "id": "fact:run:docker:itir_latest",
+      "label": "Probe Result on docker: success",
+      "kind": "observation",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "manual_seed",
+      "verdict": "success",
+      "env": "docker"
+    },
+    {
+      "id": "kernel:6.8",
+      "label": "Linux Kernel 6.8",
+      "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "discussion:rocm_rx580_noise_issue"
+    },
+    {
+      "id": "kernel:6.1",
+      "label": "Linux Kernel 6.1",
+      "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "kernel:6.6",
+      "label": "Linux Kernel 6.6",
+      "kind": "kernel_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "rocm:5.71",
+      "label": "ROCm 5.71",
+      "kind": "rocm_version",
+      "status": "context",
+      "confidence": 0.9,
+      "source": "miner"
+    },
+    {
+      "id": "issue:rocm:4965",
+      "label": "ROCm/ROCm Issue #4965: kernels > 6.13 crash driver",
+      "kind": "issue",
+      "status": "known_known",
+      "confidence": 0.95,
+      "source": "web"
     }
   ],
   "edges": [
@@ -2479,85 +2515,22 @@
       "source": "analysis"
     },
     {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.6",
-      "key": "mentions",
-      "relation": "mentions",
+      "src": "obs:nix_vulkan_glibc_mismatch",
+      "dst": "obs:nix_sudo_ld_scrubbing",
+      "key": "exacerbated_by",
+      "relation": "exacerbated_by",
       "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
+      "confidence": 0.9,
+      "source": "analysis"
     },
     {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.8",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "kernel:6.1",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:5.71",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.4",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:6.3",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:7.2",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "discussion:rocm_rx580_noise_issue",
-      "dst": "rocm:5.7",
-      "key": "mentions",
-      "relation": "mentions",
-      "status": "known_known",
-      "confidence": 1.0,
-      "source": "miner"
-    },
-    {
-      "src": "issue:rocm:4965",
-      "dst": "obs:kfd_reset_instability",
+      "src": "exp:native_vulkan_ground_truth",
+      "dst": "unk:first_bad_layer",
       "key": "targets",
       "relation": "targets",
       "status": "known_known",
-      "confidence": 0.9,
-      "source": "miner"
+      "confidence": 1.0,
+      "source": "manual_seed"
     },
     {
       "src": "issue:pytorch:pytorch:84044",
@@ -3133,6 +3106,105 @@
       "relation": "mentions",
       "status": "known_known",
       "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "fact:run:nix:.._rr_gfx803_rocm",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "src": "fact:run:docker:itir_latest",
+      "dst": "hw:rx580",
+      "key": "observed_on",
+      "relation": "observed_on",
+      "status": "context",
+      "confidence": 1.0,
+      "source": "verify_runner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "kernel:6.8",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "kernel:6.1",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "kernel:6.6",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "rocm:6.4",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "rocm:6.3",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "rocm:7.2",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "rocm:5.7",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "discussion:rocm_rx580_noise_issue",
+      "dst": "rocm:5.71",
+      "key": "mentions",
+      "relation": "mentions",
+      "status": "known_known",
+      "confidence": 1.0,
+      "source": "miner"
+    },
+    {
+      "src": "issue:rocm:4965",
+      "dst": "obs:kfd_reset_instability",
+      "key": "targets",
+      "relation": "targets",
+      "status": "known_known",
+      "confidence": 0.9,
       "source": "miner"
     }
   ]

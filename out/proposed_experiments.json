@@ -40,6 +40,16 @@
     "measures": []
   },
   {
+    "id": "exp:native_vulkan_ground_truth",
+    "label": "Native Arch Linux Vulkan Build (Bypass Nix isolation)",
+    "status": "active",
+    "tests": [],
+    "targets": [
+      "unk:first_bad_layer"
+    ],
+    "measures": []
+  },
+  {
     "id": "exp:vulkan_parity_check",
     "label": "Direct tensor parity comparison: Vulkan vs ROCm/Docker",
     "status": "proposed",

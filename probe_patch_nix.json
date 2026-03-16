@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {
+      "node_id": "fact:run:nix:.._rr_gfx803_rocm",
+      "label": "Probe Result on nix: unknown",
+      "kind": "observation",
+      "status": "known_known",
+      "attrs": {
+        "verdict": "unknown",
+        "env": "nix"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "src": "fact:run:nix:.._rr_gfx803_rocm",
+      "dst": "hw:rx580",
+      "relation": "observed_on",
+      "source": "verify_runner"
+    }
+  ]
+}

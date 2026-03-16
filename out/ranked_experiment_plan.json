@@ -2,7 +2,7 @@
   {
     "id": "probe:T13_vulkan_comparison",
     "label": "Vulkan vs (Future) ROCm tensor parity comparison",
-    "score": 21.5,
+    "score": 24.5,
     "cost": 3,
     "targets": [
       "runtime:vulkan",
@@ -16,7 +16,7 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 3
+        "pressure": 4
       },
       {
         "unknown": "unk:precision_matrix",
@@ -27,7 +27,7 @@
   {
     "id": "probe:T11_miopen_conv",
     "label": "T11 MIOpen conv + perfdb stability",
-    "score": 21.5,
+    "score": 24.5,
     "cost": 5,
     "targets": [
       "lib:miopen",
@@ -42,7 +42,7 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 3
+        "pressure": 4
       },
       {
         "unknown": "unk:miopen_perfdb_stability",
@@ -57,7 +57,7 @@
   {
     "id": "probe:T12_framework_layers",
     "label": "T12 framework layer probes",
-    "score": 15.5,
+    "score": 18.5,
     "cost": 5,
     "targets": [
       "fw:pytorch",
@@ -71,7 +71,7 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 3
+        "pressure": 4
       },
       {
         "unknown": "unk:precision_matrix",
@@ -82,7 +82,7 @@
   {
     "id": "probe:T9_raw_conv",
     "label": "T9 raw HIP conv",
-    "score": 14.0,
+    "score": 17.0,
     "cost": 4,
     "targets": [
       "component:conv_path"
@@ -94,7 +94,7 @@
     "reasons": [
       {
         "unknown": "unk:first_bad_layer",
-        "pressure": 3
+        "pressure": 4
       },
       {
         "unknown": "unk:precision_matrix",

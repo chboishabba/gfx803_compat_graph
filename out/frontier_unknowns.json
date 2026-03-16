@@ -2,7 +2,7 @@
   {
     "id": "unk:first_bad_layer",
     "label": "First corrupted tensor/layer in diffusion path",
-    "score": 3,
+    "score": 4,
     "reasons": [
       {
         "src": "hyp:miopen_conv_root_cause",
@@ -14,6 +14,10 @@
       },
       {
         "src": "exp:vulkan_parity_check",
+        "relation": "targets"
+      },
+      {
+        "src": "exp:native_vulkan_ground_truth",
         "relation": "targets"
       }
     ]
