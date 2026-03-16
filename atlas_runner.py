@@ -144,6 +144,11 @@ def main():
     verify_parser.add_argument("--env", type=str, choices=["docker", "nix", "local"], default="local", help="Execution environment")
     verify_parser.add_argument("--env-path", type=str, help="Docker image name (e.g., 'rocm/pytorch:rocm5.7_ubuntu22.04_py3.10_pytorch_2.0.1') or Nix flake path (e.g. '../rr_gfx803_rocm')")
 
+    # Command: verify-deep (diffusion simulation)
+    vdeep_parser = subparsers.add_parser("verify-deep", help="Run diffusion simulation probe (multi-step UNet loop)")
+    vdeep_parser.add_argument("--env", type=str, choices=["docker", "nix", "local"], default="local", help="Execution environment")
+    vdeep_parser.add_argument("--env-path", type=str, help="Docker image or Nix flake path")
+
     # Command: artifacts
     subparsers.add_parser("artifacts", help="List generated artifacts and images")
 
@@ -275,12 +280,17 @@ def main():
         else:
             print(f"\n{YELLOW}* TIP: Run 'python atlas_runner.py update' to generate a ranked research plan for your system.{RESET}")
 
-    elif args.command == "verify":
+    elif args.command in ("verify", "verify-deep"):
         env = args.env
         env_path = args.env_path
-        print(f"{BLUE}{BOLD}GFX803 PROBE VERIFICATION{RESET}")
         
-        probe_script = "probe.py"
+        if args.command == "verify-deep":
+            probe_script = "probe_diffusion.py"
+            print(f"{BLUE}{BOLD}GFX803 DIFFUSION STRESS PROBE{RESET}")
+        else:
+            probe_script = "probe.py"
+            print(f"{BLUE}{BOLD}GFX803 PROBE VERIFICATION{RESET}")
+        
         if not Path(probe_script).exists():
             print(f"{RED}Error: {probe_script} not found in current directory.{RESET}")
             return
