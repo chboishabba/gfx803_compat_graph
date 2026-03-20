@@ -18,7 +18,7 @@ if [ ! -f "$COMPAT_DIR/libhsa-runtime64.so.1" ]; then
 fi
 
 # ── ROCm 6.4 compat (gfx803 HSA unlock) ─────────────────────────────────────
-export LD_LIBRARY_PATH="$COMPAT_DIR:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$COMPAT_DIR:${LD_LIBRARY_PATH:-}"
 
 # ── Polaris GPU identity ──────────────────────────────────────────────────────
 export HSA_OVERRIDE_GFX_VERSION=8.0.3

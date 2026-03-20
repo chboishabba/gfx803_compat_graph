@@ -32,6 +32,13 @@ export HSA_OVERRIDE_GFX_VERSION="${HSA_OVERRIDE_GFX_VERSION:-8.0.3}"
 export ROC_ENABLE_PRE_VEGA="${ROC_ENABLE_PRE_VEGA:-1}"
 export HSA_ENABLE_SDMA="${HSA_ENABLE_SDMA:-0}"
 export ROCM_PATH="$OUTDIR/rocm-6.4.3"
+if [ -z "${AMDGPU_ASIC_ID_TABLE_PATHS:-}" ]; then
+  if [ -f /opt/amdgpu/share/libdrm/amdgpu.ids ]; then
+    export AMDGPU_ASIC_ID_TABLE_PATHS="/opt/amdgpu/share/libdrm/amdgpu.ids"
+  elif [ -f /usr/share/libdrm/amdgpu.ids ]; then
+    export AMDGPU_ASIC_ID_TABLE_PATHS="/usr/share/libdrm/amdgpu.ids"
+  fi
+fi
 
 if [ -d "$OLLAMA_LIB" ] || [ -d "$ROCM_LIBS" ] || [ -d "$AMDGPU_LIBS" ]; then
   export LD_LIBRARY_PATH="$OLLAMA_LIB:$ROCM_LIBS:$AMDGPU_LIBS:${LD_LIBRARY_PATH:-}"

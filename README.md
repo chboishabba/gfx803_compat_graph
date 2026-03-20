@@ -15,13 +15,15 @@ This repo currently combines four kinds of work in one place:
 
 ## Current state
 
-As of `2026-03-19`, the repo state is:
+As of `2026-03-21`, the repo state is:
 
 - the repo now has a public Cachix binary cache for the extracted artifact sets: `https://gfx803-rocm.cachix.org`
 - `itir:latest` is still the expected source image for the extracted `6.4` compatibility runtime, but it may need to be re-pulled locally after a Docker reset
 - `lib-compat/` and `docker-venv/` are present in this working tree as previously extracted artifacts
 - `gfx803_flake_v1/` is the clearest reproducible entrypoint for the current Nix-based workflow
 - the extracted `6.4` host path now covers the previously working torch, WhisperX, and ComfyUI surfaces
+- the extracted `6.4` host path also has a working LeechTransformer GPU runbook for short runs; a `--max_tokens 32` smoke run still selects `device=cuda` on this machine
+- longer LeechTransformer generations remain a guarded compatibility path rather than a settled baseline: checkpoint loading and short-run GPU use are fixed, `--kv_cache` is still unsafe by default, and the current ROCm workaround disables `top_p` sampling above `36` generated tokens
 - the stock host `ollama` binary still falls back to CPU
 - the extracted `artifacts/ollama_reference/` bundle is now available and publishable through Cachix, but host stability is still under investigation after a GPU reset/system crash during follow-up validation on this machine
 - for short-term Ollama use, re-downloading the already-working Robert image is currently the pragmatic path; rebuilding or host-porting that patched stack locally remains slower and less settled
@@ -210,6 +212,31 @@ Or via flake shell:
 cd gfx803_flake_v1
 nix develop .#ollama-bundle
 OLLAMA_HOST=http://127.0.0.1:11434 ../scripts/host-ollama-bundle.sh serve
+```
+
+If you want to persist model/data fetches in the Robert container path instead of re-downloading each run, use:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh
+OLLAMA_HOST=http://127.0.0.1:11434 ollama pull mistral:7b
+OLLAMA_HOST=http://127.0.0.1:11434 ollama run mistral:7b "Once upon a time Lila"
+```
+
+The script starts the container with:
+- persistent cache mount for models/manifests (default: `~/.cache/gfx803-ollama/.ollama`)
+- `OLLAMA_MODELS=/workspace/.ollama/models` inside the container
+- no Open WebUI startup path (so no UI migration/fetch on each run)
+
+To stop it:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh --stop
+```
+
+If you need the full image behavior (including Open WebUI), pass `--with-webui`:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh --with-webui
 ```
 
 ## Important limitations

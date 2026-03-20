@@ -15,9 +15,62 @@ The short version:
 - `ComfyUI` is available through the extracted host runtime, with Polaris safety flags strongly recommended
 - `Ollama` has a working patched reference bundle extracted from `robertrosenbusch/rocm6_gfx803_ollama:6.4.3_0.11.5`, but host stability is still under investigation on this machine
 
-## What You Can Use Today
 
-These are the practical surfaces currently exposed by the repo:
+## New-machine onboarding in one pass
+
+If you want a setup you can hand to anyone (including people who do not usually use Nix), use this sequence exactly:
+
+1. Install Nix (or make sure your Nix is healthy):
+
+```bash
+curl -L https://nixos.org/nix/install | sh
+```
+
+2. Enable the project cache:
+
+```bash
+cachix use gfx803-rocm
+```
+
+3. Clone and restore payloads from Cachix:
+
+```bash
+git clone https://github.com/chboishabba/gfx803_compat_graph.git
+td=$(mktemp -d)
+cd "$td/gfx803_compat_graph"
+bash scripts/restore-cachix-artifacts.sh
+```
+
+4. Enter the maintained flake and run the GPU verification step:
+
+```bash
+cd gfx803_flake_v1
+nix develop .#pytorch
+verify-gfx803-host
+```
+
+If verification shows a healthy GPU, the practical surfaces should all work from this same checkout:
+
+- `torch` via extracted runtime
+- `WhisperX` via extracted runtime
+- `ComfyUI` via extracted runtime
+- extracted Ollama reference bundle for local `ollama` experiments (still marked unstable on some workloads)
+
+If you cannot access the GPU, run:
+
+```bash
+bash scripts/capture-amdgpu-crash-artifacts.sh '20 minutes ago'
+```
+
+and include `out/crashlogs/...` in your report.
+
+For Python runs where you want live crash capture during the command, set:
+
+```bash
+WATCH_AMDGPU_DEVCOREDUMP=1 bash scripts/host-docker-python.sh tests/bug_report_mre.py
+```
+
+## What you can use today
 
 - `torch` via the extracted `6.4` host runtime
 - `WhisperX` via the extracted `6.4` host runtime
@@ -77,6 +130,107 @@ That path is the practical host entrypoint for:
 - `torch`
 - `WhisperX`
 - `ComfyUI`
+
+## Persisted Ollama container mode (for less repeated fetch/setup)
+
+If you want to avoid repeating web/UI fetches and model downloads when using the Robert image directly, run:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh
+OLLAMA_HOST=http://127.0.0.1:11434 ollama pull mistral:7b
+OLLAMA_HOST=http://127.0.0.1:11434 ollama run mistral:7b "Once upon a time Lila"
+```
+
+This starts the container with:
+
+- persistent model cache mount at:
+  - default: `~/.cache/gfx803-ollama/.ollama`
+  - can be overridden with `--root` / `OLLAMA_CACHE_ROOT`
+- `OLLAMA_MODELS=/workspace/.ollama/models` inside the container
+- `ollama` binary launch only (no Open WebUI startup path by default)
+
+To avoid port collisions in a second terminal, the launcher is idempotent:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh
+# if container is already running, this prints and reuses it
+bash scripts/run-gfx803-ollama-container.sh --restart
+```
+
+To use a different host port (for example while tracing), pass `--port`:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh --port 11435 --root ~/.cache/gfx803-ollama-port11435
+OLLAMA_HOST=http://127.0.0.1:11435 ollama pull mistral:7b
+```
+
+Stop with:
+
+```bash
+bash scripts/run-gfx803-ollama-container.sh --stop
+```
+
+If you need Open WebUI behavior in the same image, add `--with-webui`.
+
+## LeechTransformer Runbook (CUDA/PyTorch path)
+
+If you use the extracted host runtime, LeechTransformer can be run directly:
+
+```bash
+cd /home/c/Documents/code/__OTHER/gfx803_compat_graph
+HOST_DOCKER_PYTHON_GPU_PRECHECK=1 bash scripts/host-docker-python.sh \
+  /home/c/Documents/code/DASHIg/LeechTransformer/scripts/run_inference.py \
+  --checkpoint /home/c/Documents/code/DASHIg/LeechTransformer/data/best_model.pt \
+  --prompt "Once upon a time Lila" \
+  --max_tokens 32
+```
+
+Expected behavior on this setup:
+
+- script selects `device=cuda`
+- checkpoint loads without the `__main__.LeechConfig` unpickle error
+- short prompts complete on GPU
+- a `--max_tokens 32` smoke run was re-confirmed on `2026-03-21` on this machine with `device=cuda`
+
+Important notes for stability on this machine:
+
+- `--kv_cache` currently triggers ROCm GPU page faults (`Memory access fault`) on some runs.
+- for `--max_tokens > 36`, the current inference script forces `top_p=1.0` on ROCm because the tested nucleus-sampling path was the repeatable crash trigger on this host.
+- treat that `top_p` guardrail as a compatibility workaround, not as proof that arbitrary long generations are fully stable.
+- if you specifically want to test `--kv_cache`, do it with:
+
+```bash
+LEECH_ALLOW_KVCACHE_GPU=1 HOST_DOCKER_PYTHON_GPU_PRECHECK=1 bash scripts/host-docker-python.sh \
+  ... --kv_cache ...
+```
+
+- If you want to triage higher-token instability with a full matrix (tokens × kv-cache × profiles),
+  run:
+
+```bash
+bash scripts/debug-leech-high-token-instability.sh \
+  --checkpoint /home/c/Documents/code/DASHIg/LeechTransformer/data/best_model.pt \
+  --prompt "Once upon a time Lila" \
+  --tokens "8,16,24,32,40,48,64" \
+  --kv-cache off,on \
+  --profiles baseline,direct_only,gemm_only \
+  --repeats 3 \
+  --quiet
+```
+
+- Harness outputs:
+  - `out/leech-debug-high-tokens/<timestamp>/summary.csv`
+  - per-case run logs: `out/leech-debug-high-tokens/<timestamp>/<case>/run.log`
+  - per-case kernel/journal snapshots and capture artifacts under each case directory
+
+- the public stable recommendation is still `--max_tokens <= 36`.
+- runs above that window are still an active validation lane even with the current `top_p` workaround.
+- if you hit an immediate fault, rerun with a shorter `--max_tokens`, and capture logs with:
+
+```bash
+WATCH_AMDGPU_DEVCOREDUMP=1 bash scripts/host-docker-python.sh \
+  /home/c/Documents/code/DASHIg/LeechTransformer/scripts/run_inference.py ...
+```
 
 ## Cachix Details
 

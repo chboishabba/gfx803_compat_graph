@@ -1,13 +1,29 @@
 # Changelog
 
+## 2026-03-21
+
+- updated `README.md` and `docs/USER_GUIDE.md` to match the current LeechTransformer reality on this machine: a short GPU smoke run still selects `device=cuda`, while longer runs remain a guarded ROCm compatibility lane rather than a declared stable baseline
+- documented the current long-token mitigation in the public runbook: on this ROCm path, the active inference script disables `top_p` sampling above `36` generated tokens to avoid the faulting nucleus-sampling path
+- updated `TODO.md` so the next LeechTransformer step is explicit: rerun the higher-token matrix with the current guardrails and then decide whether the public recommendation should move beyond `--max_tokens <= 36`
+
+Why:
+
+- the repo docs had fallen slightly behind the actual operational state of the LeechTransformer path
+- short GPU runs are now good enough to document as working, but the longer-token path still needs measured re-baselining before it should be presented as solved
+
 ## 2026-03-20
 
+- fixed `scripts/run_inference.py` compatibility with checkpoints that contain legacy pickled `LeechConfig` objects and added robust state-dict extraction for mixed checkpoint layouts
+- added GPU-usage guardrails in `scripts/run_inference.py` for this path: warnings when requested token count exceeds known-stable range, and a safe default-disable for `--kv_cache` unless `LEECH_ALLOW_KVCACHE_GPU=1` is set
+- expanded `docs/USER_GUIDE.md` with a practical LeechTransformer CUDA runbook (including exact wrapper invocation, working token limits, and crash mitigation notes)
 - added `cachix-artifacts.manifest` plus `scripts/restore-cachix-artifacts.sh` so a fresh clone can relink the published extracted payloads from Cachix instead of rerunning the Docker extraction steps
 - updated the publish helper so it refreshes the tracked manifest whenever artifact store paths are published
 - added `docs/USER_GUIDE.md` as the single shareable setup, status, and contribution guide for non-specialist users
 - updated `README.md` and `docs/START_HERE.md` so they point newcomers at the new guide first
 - corrected the documented Ollama status: the extracted `artifacts/ollama_reference/` bundle now exists and is published through the artifact workflow, but host stability is still under investigation after a GPU reset / system crash during follow-up validation on this machine
 - updated `TODO.md` so the next Ollama host-validation step is explicit after the recent extraction and launcher fixes
+- improved `scripts/host-docker-python.sh` with optional GPU precheck warnings, optional automatic `devcoredump` watcher enablement, and explicit `/dev/kfd` visibility checks so users can capture crash evidence without manually polling device nodes
+- expanded `docs/USER_GUIDE.md` with a plain-language clone-to-ready state onboarding path and a short crash capture workflow for non-technical readers
 
 Why:
 
