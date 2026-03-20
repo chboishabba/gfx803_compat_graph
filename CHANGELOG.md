@@ -8,6 +8,8 @@
 - fixed `scripts/debug-leech-high-token-instability.sh` fault classification so it no longer mistakes the devcoredump watcher banner for a GPU fault
 - reran the focused `direct_only` LeechTransformer matrix on this machine and confirmed clean CUDA passes for `40`, `48`, and `64` generated tokens with both `kv_cache=off` and `kv_cache=on`
 - updated the public LeechTransformer guidance to reflect that measured result: the currently documented `direct_only` path is now validated through `--max_tokens 64`, while `>64` and other profile families remain the next validation lane
+- extended the same focused `direct_only` matrix further and confirmed clean CUDA passes for `80`, `96`, and `128` generated tokens with both `kv_cache=off` and `kv_cache=on`
+- raised the documented `direct_only` LeechTransformer guidance again so the current measured ceiling is now `--max_tokens 128`; the next open boundary is `>128` or non-`direct_only` profiles
 
 Why:
 

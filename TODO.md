@@ -12,9 +12,9 @@
 - Preserve the current `5.7` extracted host path as a separate reusable artifact alongside the top-level extracted `6.4` baseline
 - Fix LeechTransformer inference checkpoint loading on ROCm hosts (`__main__.LeechConfig` unpickle path) and document operational GPU limits for stable runs ✅
 - Re-run the LeechTransformer higher-token matrix after the ROCm `top_p` guardrail and harness fault-classification fix, then update the documented stable token window from measured results ✅
-- Decide whether guarded long-token runs (`top_p` forced off on ROCm above `36` tokens) are good enough for the public default, or whether the runbook should remain capped at `--max_tokens <= 36` ✅ (current direct-only measured guidance is now `<= 64`)
+- Decide whether guarded long-token runs (`top_p` forced off on ROCm above `36` tokens) are good enough for the public default, or whether the runbook should remain capped at `--max_tokens <= 36` ✅ (current direct-only measured guidance is now `<= 128`)
 - Commit and push the helper scripts already referenced by the docs (`scripts/debug-leech-high-token-instability.sh`, `scripts/run-gfx803-ollama-container.sh`, `scripts/watch-amdgpu-devcoredump.sh`, and the tracing wrappers) so a fresh clone actually contains the documented workflows ✅
-- Extend the LeechTransformer matrix beyond `64` tokens and across additional prompts/profile families before broadening the public guidance beyond the currently measured `direct_only` path
+- Extend the LeechTransformer matrix beyond `128` tokens and across additional prompts/profile families before broadening the public guidance beyond the currently measured `direct_only` path
 - Run several `ROCm 7+` extracted-host smoke attempts under `artifacts/rocm-latest/` before resuming `5.7` drift/noise work
 - Re-pull `itir:latest` locally so the `6.4` extraction flow is runnable again after the Docker reset
 - Verify `gfx803_flake_v1` entrypoints on the current host after the Docker reset
