@@ -63,9 +63,11 @@
     ];
 
     repoRootDetect = ''
-      if [[ -d "$PWD/tests" && -d "$PWD/scripts" ]]; then
+      if REPO_ROOT_GIT="$(git rev-parse --show-toplevel 2>/dev/null)" && [[ -n "$REPO_ROOT_GIT" ]]; then
+        REPO_ROOT_DEFAULT="$REPO_ROOT_GIT"
+      elif [[ -d "$PWD/scripts" ]]; then
         REPO_ROOT_DEFAULT="$PWD"
-      elif [[ -d "$PWD/../tests" && -d "$PWD/../scripts" ]]; then
+      elif [[ -d "$PWD/../scripts" ]]; then
         REPO_ROOT_DEFAULT="$(cd "$PWD/.." && pwd)"
       else
         REPO_ROOT_DEFAULT="$PWD"
@@ -241,6 +243,8 @@
       pytorch = pkgs.mkShell {
         buildInputs = commonInputs ++ [ driftRunner graphUpdater verifyHost communityBundle releaseManifest ] ++ (with pkgs; [
           python312Packages.numpy
+          python312Packages.sentencepiece
+          python312Packages.requests
         ]);
         shellHook = ''
           ${gfx803EnvText}
