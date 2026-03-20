@@ -224,6 +224,16 @@ OLLAMA_HOST=http://127.0.0.1:11434 ../scripts/host-ollama-bundle.sh serve
 - the top-level `flake.nix` is an older shell definition; the more current flake work is under `gfx803_flake_v1/`
 - CI/CD is not implemented here yet, so the repo is still driven manually
 
+## Crash capture
+
+If the GPU glitches, resets, or the desktop shows checkerboard corruption after a run, capture the kernel-side evidence immediately:
+
+```bash
+bash scripts/capture-amdgpu-crash-artifacts.sh '10 minutes ago'
+```
+
+That writes a timestamped folder under `out/crashlogs/` and attempts to copy the live amdgpu `devcoredump` payload before it disappears.
+
 ## Main files and directories
 
 - `docs/START_HERE.md`: newcomer entrypoint

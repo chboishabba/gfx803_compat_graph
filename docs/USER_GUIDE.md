@@ -141,6 +141,12 @@ Feedback is useful when it is specific. The most useful reports include:
 - exact command run
 - the last useful log lines you captured
 
+If the GPU resets or the desktop corrupts after a run, capture evidence first:
+
+```bash
+bash scripts/capture-amdgpu-crash-artifacts.sh '10 minutes ago'
+```
+
 For benchmark or drift reports, also include:
 
 - `out/drift/benchmark-results.jsonl`
