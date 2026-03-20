@@ -1,69 +1,179 @@
 {
-  description = "sd.cpp Vulkan development environment for RX580 ground-truth testing";
+  description = "gfx803 ROCm compatibility environment";
+
+  nixConfig = {
+    extra-substituters = [ "https://gfx803-rocm.cachix.org" ];
+    extra-trusted-public-keys = [ "gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=" ];
+  };
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = { self, nixpkgs }: let
+  outputs = { self, nixpkgs }:
+  let
     system = "x86_64-linux";
-    pkgs = import nixpkgs { inherit system; };
+
+    pkgs = import nixpkgs {
+      inherit system;
+      config = {
+        allowUnfree = true;
+        rocmSupport = true;
+      };
+    };
+
+    # Polaris compatibility environment
+    gfx803Env = ''
+      export HSA_OVERRIDE_GFX_VERSION=8.0.3
+      export ROC_ENABLE_PRE_VEGA=1
+
+      export PYTORCH_ROCM_ARCH=gfx803
+      export ROCM_ARCH=gfx803
+
+      export TORCH_BLAS_PREFER_HIPBLASLT=0
+
+      export MIOPEN_DEBUG_CONV_WINOGRAD=0
+      export MIOPEN_DEBUG_CONV_FFT=0
+
+      # Fix for ENOMEM on some Polaris cards
+      export HSA_ENABLE_SDMA=0
+    '';
+
   in {
-    packages.${system}.default = pkgs.stdenv.mkDerivation {
-      pname = "stable-diffusion-cpp";
-      version = "v1.0.0"; # Or track a specific commit
-      src = pkgs.fetchFromGitHub {
-        owner = "leejet";
-        repo = "stable-diffusion.cpp";
-        rev = "master"; # Recommend pinning this in production
-        sha256 = pkgs.lib.fakeSha256; # Need to update checksum next built or pull via git
-        fetchSubmodules = true;
+
+    devShells.${system} = {
+
+      # ----------------------------------------
+      # ROCm base environment
+      # replaces Docker rocm base image
+      # ----------------------------------------
+      base = pkgs.mkShell {
+
+        buildInputs = with pkgs; [
+          rocmPackages.clr
+          rocmPackages.rocblas
+          rocmPackages.hipblas
+          rocmPackages.miopen
+          rocmPackages.rocm-smi
+
+          rocmPackages.rocminfo
+
+          clang
+          cmake
+          git
+          python312
+          
+          libdrm
+          numactl
+          pciutils
+        ];
+
+        shellHook = ''
+          ${gfx803Env}
+          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:$LD_LIBRARY_PATH"
+
+          echo "gfx803 ROCm base shell"
+          echo "Try: rocminfo"
+        '';
       };
 
-      nativeBuildInputs = with pkgs; [ cmake ninja pkg-config ];
-      buildInputs = with pkgs; [ vulkan-headers vulkan-loader vulkan-tools glslang gcc ];
+      # ----------------------------------------
+      # PyTorch development shell
+      # replaces Docker pytorch image
+      # ----------------------------------------
+      pytorch = pkgs.mkShell {
 
-      cmakeFlags = [
-        "-DSD_VULKAN=ON"
-        "-G Ninja"
-      ];
+        buildInputs = with pkgs; [
+          python312
 
-      installPhase = ''
-        mkdir -p $out/bin
-        cp bin/* $out/bin/
-      '';
+          python312Packages.pip
+          python312Packages.numpy
+
+          python312Packages.torch
+          python312Packages.torchvision
+          python312Packages.torchaudio
+
+          rocmPackages.clr
+          rocmPackages.miopen
+          rocmPackages.rocblas
+
+          rocmPackages.rocminfo
+          rocmPackages.rocm-smi
+          
+          libdrm
+          numactl
+          pciutils
+        ];
+
+        shellHook = ''
+          ${gfx803Env}
+          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:$LD_LIBRARY_PATH"
+
+          echo "gfx803 PyTorch shell"
+          python - <<EOF
+import torch
+print("PyTorch:", torch.__version__)
+print("HIP available:", torch.cuda.is_available())
+EOF
+        '';
+      };
+
+      # ----------------------------------------
+      # Drift CI testing shell
+      # feeder for compatibility atlas
+      # ----------------------------------------
+      drift = pkgs.mkShell {
+
+        buildInputs = with pkgs; [
+          python312
+          python312Packages.numpy
+          python312Packages.torch
+
+          rocmPackages.clr
+          rocmPackages.miopen
+          rocmPackages.rocblas
+          rocmPackages.rocminfo
+          rocmPackages.rocm-smi
+          rocmPackages.rocprofiler
+          rocmPackages.roctracer
+
+          jq
+          libdrm
+          numactl
+          pciutils
+        ];
+
+        shellHook = ''
+          ${gfx803Env}
+          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:$LD_LIBRARY_PATH"
+
+          export DRIFT_RESULTS_DIR=$PWD/out
+          mkdir -p $DRIFT_RESULTS_DIR
+
+          echo "gfx803 drift testing shell"
+          echo "Run: run-drift-matrix"
+          
+          # Add scripts to PATH so they are easy to run
+          export PATH="$PWD/scripts:$PATH"
+        '';
+      };
     };
 
-    devShells.${system}.default = pkgs.mkShell {
-      buildInputs = with pkgs; [
-        cmake
-        ninja
-        gcc
-        git
-        pkg-config
-        vulkan-headers
-        vulkan-loader
-        vulkan-tools
-        vulkan-validation-layers
-        glslang
-      ];
+    apps.${system} = {
+      drift-matrix = {
+        type = "app";
+        program = "${pkgs.writeShellScript "drift-matrix" ''
+          exec ${pkgs.bash}/bin/bash scripts/run-drift-matrix
+        ''}";
+      };
 
-      shellHook = ''
-        echo "=========================================================="
-        echo "❄️  Nix environment active: sd.cpp (Vulkan)"
-        echo "=========================================================="
-        echo "To build sd.cpp to start getting Vulkan ground-truth data:"
-        echo ""
-        echo "  nix build .#default  # <--- Use this to build directly!"
-        echo ""
-        echo "Or for manual building:"
-        echo "  git clone --recursive https://github.com/leejet/stable-diffusion.cpp.git"
-        echo "  cd stable-diffusion.cpp"
-        echo "  mkdir build && cd build"
-        echo "  cmake .. -G Ninja -DSD_VULKAN=ON"
-        echo "  cmake --build . --config Release"
-        echo "=========================================================="
-      '';
+      update-graph = {
+        type = "app";
+        program = "${pkgs.writeShellScript "update-graph" ''
+          exec ${pkgs.python312}/bin/python scripts/update_graph.py
+        ''}";
+      };
     };
+
   };
 }

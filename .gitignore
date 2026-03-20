@@ -1,1 +1,13 @@
 __pycache__
+.venv
+artifacts/
+docker-venv/
+lib-compat/
+ComfyUI/
+out/
+results.*
+*.log
+*.db
+*.zip
+*.gguf
+gfx803_flake_v1.zip

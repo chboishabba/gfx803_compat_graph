@@ -1,0 +1,44 @@
+name: compatibility
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unit tests
+        run: python -m unittest tests/test_benchmark_schema.py
+      - name: Check shell scripts
+        run: bash -n scripts/extract-docker-libs.sh scripts/extract-rocm57-artifacts.sh scripts/extract_artifacts.sh scripts/host-docker-python.sh scripts/polaris-env.sh scripts/run-drift-matrix
+
+  nix-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Evaluate flake entrypoints
+        run: nix flake show ./gfx803_flake_v1
+
+  gpu-benchmark:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, linux, rocm]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Run reference benchmark matrix
+        run: nix develop --impure "path:${{ github.workspace }}/gfx803_flake_v1#pytorch" -c bash -lc 'run-drift-matrix'
+      - name: Build release manifest
+        run: python scripts/build_release_manifest.py --results out/drift/benchmark-results.jsonl --out out/drift/release-manifest.json --stack-id rocm64_extracted_host --release-id "${{ github.sha }}" --install-note "Reference benchmark run from CI"
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocm-benchmark-results
+          path: out/drift/

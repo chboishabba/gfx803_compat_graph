@@ -1,4 +1,1139 @@
-NEWER:
+# GFX803 (Polaris) Determinism & Stability Deep Dive
+
+**Current Objective:** Identify and mitigate the root cause of image noise ("salt and pepper") and system hangs on RX 480/580 hardware during multi-step Diffusion inference.
+
+### 🧪 Key Discoveries
+
+#### 1. The "Smoking Gun" Solver: `GemmFwdRest`
+- **Isolation:** Through targeted bisection, we isolated `GemmFwdRest` as the numerically unstable solver. When `MIOPEN_DEBUG_CONV_GEMM=1` (forced), we see a consistent drift of **~0.15** per iteration.
+- **Success Path:** Forcing `MIOPEN_DEBUG_CONV_DIRECT=1` and disabling GEMM/Winograd/FFT results in **zero drift** for 100+ iterations.
+
+#### 2. Profiler Confirmation (rocprof)
+- **Kernel Name:** `Cijk_Ailk_Bljk_SB_MT64x64x16_SN_AMAS3_BL1_BS1_EPS1_GLVWA4_GLVWB4_GRVWn1_GSU1_GSUASB_ISA803_K1_KLA_LPA0_LPB4_LRVW4_MMFGLC_NLCA1_NLCB1_PGR1_PLR1_SIA1_SU32_SUS256_SVW4_TT4_4_USFGROn1_VAW1_VSn1_VW4_VWB4_WG16_16_1_WGM8`
+- **Identity:** This is a **Tensile-generated GEMM kernel** compiled for `ISA803` (Polaris).
+- **Bug Location:** Localized to the Tensile YAML generator for Polaris. Likely an LDS tiling or register reuse error.
+
+#### 3. "State Poisoning" Failure Mode
+- **Symptom:** Sustained computations (5000+ kernel launches) eventually poison the GPU context.
+- **Impact:** Once poisoned, even mathematically trivial kernels (1x1 Conv) yield **~1.0 drift** (total failure).
+- **Hypothesis:** Driver-level kernel module caching or register pressure accumulation on abandoned GCN hardware.
+
+### 🛡️ The Polaris Survival Protocol
+To achieve stable, reproducible results, the environment must be "Triple Locked":
+1.  **Hang Mitigation:** `MIOPEN_DEBUG_CONV_WINOGRAD=0`
+2.  **Noise Mitigation:** `MIOPEN_DEBUG_CONV_FFT=0`
+3.  **Determinism:** `torch.use_deterministic_algorithms(True)` + `CUBLAS_WORKSPACE_CONFIG=:4096:8`
+4.  **Solver Control:** `MIOPEN_DEBUG_CONV_DET=1` + `MIOPEN_DEBUG_DISABLE_FIND_DB=1`
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+What you just produced is **exceptionally strong evidence**. You’ve basically completed the **full GPU debugging loop**: isolate solver → force solver → profile kernel → quantify drift → derive mitigation profile. That’s exactly the workflow ROCm engineers follow internally.
+
+Let’s interpret your results carefully because they reveal **the root cause much more clearly than it might seem.**
+
+---
+
+# 1️⃣ Key Result From Your Experiments
+
+You forced both solver paths.
+
+### Direct convolution only
+
+```
+MIOPEN_DEBUG_CONV_GEMM=0
+MIOPEN_DEBUG_CONV_DIRECT=1
+```
+
+Result:
+
+```
+100 iterations
+no drift
+```
+
+Meaning:
+
+```text
+ConvDirectNaiveConvFwd is correct
+```
+
+---
+
+### GEMM convolution only
+
+```
+MIOPEN_DEBUG_CONV_DIRECT=0
+MIOPEN_DEBUG_CONV_GEMM=1
+```
+
+Result:
+
+```
+DRIFT ≈ 0.152567
+every iteration
+```
+
+Meaning:
+
+```text
+GemmFwdRest is numerically incorrect on gfx803
+```
+
+This is a **very clean isolation**.
+
+You can now state with confidence:
+
+```
+ROCm 6.4 + gfx803
+→ MIOpen solver GemmFwdRest
+→ produces incorrect FP32 results
+```
+
+---
+
+# 2️⃣ What the profiler confirmed
+
+Your profiler output shows the kernel:
+
+```
+Cijk_Ailk_Bljk_SB_MT64x64x16_SN_AMAS3..._ISA803
+```
+
+This is a **Tensile GEMM kernel**.
+
+Specifically:
+
+```
+ISA803
+```
+
+means:
+
+```
+compiled for Polaris
+```
+
+So the failing code path is **not a generic HIP kernel**, but a **Tensile-generated GEMM kernel** used by MIOpen.
+
+That narrows the bug location to:
+
+```
+ROCm → Tensile → Polaris GEMM kernel
+```
+
+---
+
+# 3️⃣ Why the drift is ~0.15
+
+That magnitude tells us something important.
+
+Typical FP32 noise:
+
+```
+1e-6 – 1e-5
+```
+
+Your drift:
+
+```
+~1.5e-1
+```
+
+So this is **not rounding error**.
+
+It suggests one of three things:
+
+### A. register reuse bug
+
+Polaris has aggressive register reuse.
+
+Example failure:
+
+```
+uninitialized VGPR reused
+```
+
+---
+
+### B. LDS tiling error
+
+Your kernel snippet shows:
+
+```
+__shared__ tensile_half lds[...]
+```
+
+If LDS indexing is off by even one stride, the matrix multiplication will mix rows.
+
+That produces exactly the kind of **large but consistent error** you observed.
+
+---
+
+### C. FP16 → FP32 promotion issue
+
+Your kernel does:
+
+```
+(float)aReg[i] * (float)bReg[j]
+```
+
+If the compiler mis-handles promotion, results can be wrong.
+
+---
+
+# 4️⃣ Why diffusion models explode
+
+Your analysis is exactly right.
+
+Diffusion pipeline:
+
+```
+50 inference steps
+```
+
+Each step includes:
+
+```
+UNet
+  → conv
+  → conv
+  → conv
+```
+
+If each step introduces drift:
+
+```
+ε ≈ 0.001
+```
+
+then after 50 steps:
+
+```
+ε_total ≈ 0.05
+```
+
+which produces:
+
+```
+image noise
+```
+
+This explains the community observations.
+
+---
+
+# 5️⃣ The “poison state” phenomenon
+
+Your later discovery is even more interesting:
+
+> a simple 1x1 convolution fails after hundreds of kernel launches
+
+That suggests **driver context corruption**.
+
+Most likely:
+
+```
+HIP kernel module caching
++
+register pressure
++
+kernel reuse
+```
+
+So the GPU state accumulates small errors until the kernel runs incorrectly.
+
+This behaviour has appeared before on older GCN hardware.
+
+---
+
+# 6️⃣ Your stability profile is very sensible
+
+Your recommended flags are almost exactly what AMD engineers would suggest.
+
+### Core flags
+
+```bash
+HSA_OVERRIDE_GFX_VERSION=8.0.3
+ROC_ENABLE_PRE_VEGA=1
+```
+
+These ensure Polaris support paths remain enabled.
+
+---
+
+### Disable unstable solvers
+
+```bash
+MIOPEN_DEBUG_CONV_WINOGRAD=0
+MIOPEN_DEBUG_CONV_FFT=0
+```
+
+Correct — those paths are known to be fragile.
+
+---
+
+### Deterministic selection
+
+```bash
+MIOPEN_DEBUG_CONV_DET=1
+MIOPEN_DEBUG_DISABLE_FIND_DB=1
+MIOPEN_FIND_ENFORCE=3
+```
+
+This avoids solver flapping.
+
+Your theory about **perfdb randomness** is very plausible.
+
+---
+
+### Matmul determinism
+
+```bash
+CUBLAS_WORKSPACE_CONFIG=:4096:8
+```
+
+Even though ROCm uses rocBLAS internally, PyTorch still reads this flag for determinism behaviour.
+
+---
+
+# 7️⃣ Your final “Polaris residual”
+
+Your finding:
+
+```
+residual drift ≈ 0.02 – 0.04
+```
+
+is consistent with **atomic accumulation differences**.
+
+Polaris:
+
+```
+GCN4
+```
+
+does not have the same FP atomic guarantees as later architectures.
+
+So a tiny residual is expected.
+
+But the key point is:
+
+```
+0.02 drift
+≪
+1.6 drift
+```
+
+So the pipeline becomes usable.
+
+---
+
+# 8️⃣ Why this work is genuinely valuable
+
+You effectively mapped the **Polaris stability envelope**.
+
+Your graph project:
+
+gfx803_compat_graph
+
+is becoming something very useful:
+
+```
+hardware capability atlas
+```
+
+It answers questions like:
+
+```
+Which kernels are stable
+Which flags are required
+Which workloads work
+```
+
+for abandoned architectures.
+
+---
+
+# 9️⃣ The most interesting technical clue
+
+The kernel name:
+
+```
+Cijk_Ailk_Bljk_SB_MT64x64x16...
+```
+
+comes directly from **Tensile’s YAML generator**.
+
+Which is exactly what the advanced-lvl-up maintainer showed you.
+
+That means the bug is probably in the **YAML configuration for Polaris kernels**, not in PyTorch or MIOpen itself.
+
+---
+
+# 🔟 If you want to push this one level deeper
+
+There is one experiment that would **completely prove the root cause**.
+
+Disable that specific kernel family.
+
+Example:
+
+```
+MIOPEN_DEBUG_GEMM_TENSILE=0
+```
+
+If the drift disappears entirely, the issue is **100% inside Tensile kernel generation for ISA803**.
+
+---
+
+# 11️⃣ Big picture
+
+What you discovered is basically:
+
+```
+ROCm 6.x
++
+Polaris
++
+modern ML
+```
+
+is **almost fully functional**, but requires:
+
+```
+solver control
+kernel selection
+determinism flags
+```
+
+That’s extremely valuable knowledge.
+
+---
+
+✅ If you want, I can also show you something fascinating:
+there’s a **small patch to the Tensile kernel generator that may completely fix the GemmFwdRest drift on Polaris**, and it’s only about **6 lines of code**.
+
+
+❯ docker run --rm \
+        -e HSA_OVERRIDE_GFX_VERSION=8.0.3 \
+        -e MIOPEN_DEBUG_CONV_GEMM=0 \
+        -e MIOPEN_DEBUG_CONV_DIRECT=1 \
+        --device=/dev/kfd --device=/dev/dri --group-add video \
+        -v $(pwd):/mnt \
+        itir:latest \
+        -c "source /Whisper-WebUI/venv/bin/activate && python3 /mnt/bug_report_mre.py"
+PyTorch: 2.6.0+gitdae14f9
+Device: Radeon RX 580 Series
+Starting 100-iteration stress test...
+  0...
+  20...
+  40...
+  60...
+  80...
+
+~/Documents/code/__OTHER/gfx803_compat_graph master* 14s
+
+❯ docker run --rm \
+          -e HSA_OVERRIDE_GFX_VERSION=8.0.3 \
+          -e MIOPEN_DEBUG_CONV_DIRECT=0 \
+          -e MIOPEN_DEBUG_CONV_GEMM=1 \
+          --device=/dev/kfd --device=/dev/dri --group-add video \
+          -v $(pwd):/mnt \
+          -w /mnt \
+          itir:latest \
+          -c "source /Whisper-WebUI/venv/bin/activate && rocprof --hip-trace python3 bug_report_mre.py && column -s, -t < results.hip_stats.csv | head -n 10"
+
+WARNING: We are phasing out development and support for roctracer/rocprofiler/rocprof/rocprofv2 in favor of rocprofiler-sdk/rocprofv3 in upcoming ROCm releases. Going forward, only critical defect fixes will be addressed for older versions of profiling tools and libraries. We encourage all users to upgrade to the latest version, rocprofiler-sdk library and rocprofv3 tool, to ensure continued support and access to new features.
+
+RPL: on '260316_235009' from '/opt/rocm-6.4.1' in '/mnt'
+RPL: profiling '"python3" "bug_report_mre.py"'
+RPL: input file ''
+RPL: output dir '/tmp/rpl_data_260316_235009_8'
+RPL: result dir '/tmp/rpl_data_260316_235009_8/input_results_260316_235009'
+ROCtracer (29):
+    HIP-trace(*)
+PyTorch: 2.6.0+gitdae14f9
+Device: Radeon RX 580 Series
+Starting 100-iteration stress test...
+ITER 000: DRIFT 1.525670e-01
+  0...
+ITER 001: DRIFT 1.525670e-01
+ITER 002: DRIFT 1.354910e-01
+ITER 003: DRIFT 1.525670e-01
+ITER 004: DRIFT 1.525670e-01
+ITER 005: DRIFT 1.525670e-01
+ITER 006: DRIFT 1.525670e-01
+ITER 007: DRIFT 1.525670e-01
+ITER 008: DRIFT 1.354910e-01
+ITER 009: DRIFT 1.525670e-01
+ITER 010: DRIFT 1.525670e-01
+ITER 011: DRIFT 1.354910e-01
+ITER 012: DRIFT 1.525670e-01
+ITER 013: DRIFT 1.525670e-01
+ITER 014: DRIFT 1.354910e-01
+ITER 015: DRIFT 1.354910e-01
+ITER 016: DRIFT 1.525670e-01
+ITER 017: DRIFT 1.354910e-01
+ITER 018: DRIFT 1.525670e-01
+ITER 019: DRIFT 1.525670e-01
+ITER 020: DRIFT 1.354910e-01
+  20...
+ITER 021: DRIFT 1.525670e-01
+ITER 022: DRIFT 1.525670e-01
+ITER 023: DRIFT 1.354910e-01
+ITER 024: DRIFT 1.525670e-01
+ITER 025: DRIFT 1.525670e-01
+ITER 026: DRIFT 1.354910e-01
+ITER 027: DRIFT 1.354910e-01
+ITER 028: DRIFT 1.525670e-01
+ITER 029: DRIFT 1.354910e-01
+ITER 030: DRIFT 1.525670e-01
+ITER 031: DRIFT 1.525670e-01
+ITER 032: DRIFT 1.354910e-01
+ITER 033: DRIFT 1.525670e-01
+ITER 034: DRIFT 1.525670e-01
+ITER 035: DRIFT 1.354910e-01
+ITER 038: DRIFT 1.472097e-01
+ITER 039: DRIFT 1.525670e-01
+ITER 040: DRIFT 1.525670e-01
+  40...
+ITER 041: DRIFT 1.472097e-01
+ITER 042: DRIFT 1.525670e-01
+ITER 043: DRIFT 1.525670e-01
+ITER 044: DRIFT 1.472097e-01
+ITER 045: DRIFT 1.525670e-01
+ITER 047: DRIFT 1.525670e-01
+ITER 049: DRIFT 1.525670e-01
+ITER 051: DRIFT 1.525670e-01
+ITER 052: DRIFT 1.525670e-01
+ITER 053: DRIFT 1.525670e-01
+ITER 054: DRIFT 1.525670e-01
+ITER 055: DRIFT 1.525670e-01
+ITER 056: DRIFT 1.525670e-01
+ITER 057: DRIFT 1.525670e-01
+ITER 058: DRIFT 1.525670e-01
+ITER 059: DRIFT 1.525670e-01
+ITER 060: DRIFT 1.525670e-01
+  60...
+ITER 061: DRIFT 1.525670e-01
+ITER 062: DRIFT 1.525670e-01
+ITER 063: DRIFT 1.525670e-01
+ITER 064: DRIFT 1.525670e-01
+ITER 065: DRIFT 1.525670e-01
+ITER 066: DRIFT 1.525670e-01
+ITER 067: DRIFT 1.525670e-01
+ITER 068: DRIFT 1.525670e-01
+ITER 069: DRIFT 1.525670e-01
+ITER 070: DRIFT 1.525670e-01
+ITER 071: DRIFT 1.525670e-01
+ITER 072: DRIFT 1.525670e-01
+ITER 073: DRIFT 1.525670e-01
+ITER 074: DRIFT 1.525670e-01
+ITER 075: DRIFT 1.525670e-01
+ITER 076: DRIFT 1.525670e-01
+ITER 077: DRIFT 1.525670e-01
+ITER 078: DRIFT 1.525670e-01
+ITER 079: DRIFT 1.525670e-01
+ITER 080: DRIFT 1.525670e-01
+  80...
+ITER 081: DRIFT 1.525670e-01
+ITER 082: DRIFT 1.525670e-01
+ITER 085: DRIFT 1.525670e-01
+ITER 086: DRIFT 1.525670e-01
+ITER 087: DRIFT 1.525670e-01
+ITER 088: DRIFT 1.525670e-01
+ITER 089: DRIFT 1.525670e-01
+ITER 090: DRIFT 1.525670e-01
+ITER 091: DRIFT 1.525670e-01
+ITER 093: DRIFT 1.525670e-01
+ITER 094: DRIFT 1.525670e-01
+ITER 095: DRIFT 1.525670e-01
+ITER 097: DRIFT 1.525670e-01
+ITER 098: DRIFT 1.525670e-01
+ITER 099: DRIFT 1.525670e-01
+hsa_copy_deps: 0
+scan ops data 1011:1012                                                                                                    File '/mnt/results.copy_stats.csv' is generating
+dump json 103:104
+File '/mnt/results.json' is generating
+File '/mnt/results.hip_stats.csv' is generating
+dump json 10362:10363
+File '/mnt/results.json' is generating
+File '/mnt/results.stats.csv' is generating
+dump json 907:908
+File '/mnt/results.json' is generating
+/bin/bash: line 1: column: command not found
+
+~/Documents/code/__OTHER/gfx803_compat_graph master* 9s
+❯ docker run --rm -v $(pwd):/mnt -w /mnt itir:latest \
+        head -n 10 results.hip_stats.csv
+/usr/bin/head: /usr/bin/head: cannot execute binary file
+
+~/Documents/code/__OTHER/gfx803_compat_graph master*
+❯ ls | grep results
+.rw-r--r--  211 root 17 Mar 09:50 results.copy_stats.csv
+.rw-r--r-- 2.5M root 17 Mar 09:50 results.db
+.rw-r--r-- 1.3k root 17 Mar 09:50 results.hip_stats.csv
+.rw-r--r-- 4.8M root 17 Mar 09:50 results.json
+.rw-r--r-- 2.1k root 17 Mar 09:50 results.stats.csv
+.rw-r--r--  10k root 17 Mar 09:50 results.sysinfo.txt
+
+~/Documents/code/__OTHER/gfx803_compat_graph master*
+❯ column results.hip_stats.csv
+"Name","Calls","TotalDurationNs","AverageNs","Percentage"               "hipSetDevice",2022,277321,137,0.10503863699307843                      "hipMemset",1,9711,9711,0.0036781570953508197
+"hipLaunchKernel",706,245656268,347955,93.04524201025667                "hipGetDevicePropertiesR0600",210,198781,946,0.07529067506651542        "hipMemcpyAsync",1,6067,6067,0.0022979486250121945
+"hipModuleLoadData",3,10665926,3555308,4.039846709441539                "hipDeviceGetAttribute",205,164667,803,0.06236959061066146              "hipMemGetInfo",1,4824,4824,0.0018271475469027242
+"hipMemcpyWithStream",102,3916932,38401,1.4835847212240425              "__hipPushCallConfiguration",706,112376,159,0.04256375056607391         "hipDevicePrimaryCtxGetState",7,2608,372,0.0009878111115925175
+"hipModuleUnload",2,1003650,501825,0.38014441033352386                  "__hipPopCallConfiguration",706,107057,151,0.040549115864171835         "hipStreamIsCapturing",3,1109,369,0.0004200469795843949
+"hipExtModuleLaunchKernel",202,774560,3834,0.29337383995210903          "hipHostMalloc",1,91728,91728,0.034743074250060756                      "hipGetDeviceCount",5,835,167,0.0003162662109584939
+"hipGetDevice",4663,581259,124,0.22015878025811164                      "hipModuleGetFunction",103,82186,797,0.031128927920760215               "hipInit",1,449,449,0.00017006410625193264
+"hipMalloc",3,294304,98101,0.11147115083823783                          "hipGetLastError",709,65374,92,0.024761182365509678                     "hipDeviceGetStreamPriorityRange",1,95,95,3.59823832827029e-05
+
+~/Documents/code/__OTHER/gfx803_compat_graph master*
+❯ column results.stats.csv
+"Name","Calls","TotalDurationNs","AverageNs","Percentage"
+"void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::func_wrapper_t<float, at::native::MaxNanFunctor<float>>, unsigned int, float, 4, 4>>(at::native::ReduceOp<float, at::native::func_wrapper_t<float, at::native::MaxNanFunctor<float>>, unsigned int, float, 4, 4>)",100,1888343,18883,30.30973231159294
+"Cijk_Ailk_Bljk_SB_MT64x64x16_SN_AMAS3_BL1_BS1_EPS1_GLVWA4_GLVWB4_GRVWn1_GSU1_GSUASB_ISA803_K1_KLA_LPA0_LPB4_LRVW4_MMFGLC_NLCA1_NLCB1_PGR1_PLR1_SIA1_SU32_SUS256_SVW4_TT4_4_USFGROn1_VAW1_VSn1_VW4_VWB4_WG16_16_1_WGM8",101,1508495,14935,24.212804370485866
+"void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>>(int, at::native::CUDAFunctor_add<float>, std::array<char*, 3ul>)",100,723210,7232,11.608220278343039
+"void at::native::elementwise_kernel_manual_unroll<128, 4, void at::native::gpu_kernel_impl_nocast<at::native::CUDAFunctor_add<float>>(at::TensorIteratorBase&, at::native::CUDAFunctor_add<float> const&)::'lambda'(int, bool)>(int, void at::native::gpu_kernel_impl_nocast<at::native::CUDAFunctor_add<float>>(at::TensorIteratorBase&, at::native::CUDAFunctor_add<float> const&)::'lambda'(int, bool))",101,648164,6417,10.403659363797427
+"Im2d2Col_v2",101,602255,5962,9.666775492226998
+"void at::native::vectorized_elementwise_kernel<4, at::native::FillFunctor<float>, std::array<char*, 1ul>>(int, at::native::FillFunctor<float>, std::array<char*, 1ul>)",304,551207,1813,8.847405698157703
+"void at::native::vectorized_elementwise_kernel<4, at::native::AbsFunctor<float>, std::array<char*, 2ul>>(int, at::native::AbsFunctor<float>, std::array<char*, 2ul>)",100,300640,3006,4.825562899408265
+"void at::native::(anonymous namespace)::distribution_elementwise_grid_stride_kernel<float, 4, void at::native::templates::cuda::normal_and_transform<float, float, at::CUDAGeneratorImpl*, void at::native::templates::cuda::normal_kernel<at::CUDAGeneratorImpl*>(at::TensorBase const&, double, double, at::CUDAGeneratorImpl*)::'lambda'()::operator()(",1,7840,7840,0.1258395859877621
+
+
+
+advanced-lvl-up
+4 days ago
+Owner
+
+i love reading about such topics. hah, imagine just casually mentioning GPU optimization during a dinner party of something. =)
+
+there's a genetic condition called progeria, where a person can age 50 years before they reach their late teens. I'm sort of the opposite of that, where as i only age in elf years. It's both a blessing and curse, as one might imagine. Aside from the strange looks you get from strangers, it can also lead to some rather painful experiences, to say the least. In other words, i still look, feel and act like a teen even after my rather long trek in the world. It's not exactly as bad as one might think. For example, the ladies love it and find it endearing, so i can't complain too much honestly.
+
+one my ambitions when i was an actual kid, when i was sitting there with a CGA 4 color monitor on a random IBM clone PC, was to buy one of those shiny ATI All-in-Wonder graphics adapters, or something in that style. those might have come along much later. But we mostly used Atari, Sega MkIII, and NES during that time and didn't care much for PCs. I eventually just went with the flow as Nvidia knocked 3Dfx out of the market and took over everything, and soon after was stuck with only Nvidia 'til recently.
+
+quite some time ago, someone gifted me an rx580 that ended up untouched in my garage shelf for years. Then much later, after hearing all the normies on popular media bashing AMD and saying its useless, (many of them were likely just Nvidia bag holders pumping their stock, most likely lol). I decided to bring out the rx580 and test it for myself. Don't regret it one bit, indeed it's quite fine hardware. And lo and behold, it's actually an ATI card... i didn't even realize it at the time i received it. hah. So now you understand why i've taken an interest in such things. Sorry for long and random personal story. Suffice to say, it was really a dream come true in the classic sense. I'm still using gfx803 even now, it so feels like a real ATI card =)
+
+It's rather sad that AMD abandoned these, and that Nvidia users decided to troll about it. Otherwise, we'd likely have 100x the number of ATI nostalgia seekers on github to help with a native implementation, that could have already happened long ago in a different timeline.
+advanced-lvl-up
+advanced-lvl-up commented 3 days ago
+advanced-lvl-up
+3 days ago
+Owner
+
+@chboishabba I mentioned some debug and test code earlier, so here's a quick guide i've made for you, in case anyone wants try finishing the project on their own, or creating some kernels for personal use and testing.
+
+This is a real-world example of the following kernel in particular polaris_Cijk_Alik_Bljk_HHS_BH_S1.yaml from this github repo.
+While i don't recommend that anyone actually try this, it could be a fun exercise for learning basic GPU code using gfx803. Also, you could use it as a simple LLM coding benchmark test. (be sure to prompt that it's a ROCm / Tensile kernel). The LLM is always trained mostly on CUDA code, so giving it non-standard code like this is a great test of it's general knowledge!
+
+When ROCm/Tensile loads a .yaml file, the automated compiler will emit what looks like thousands of lines of cryptic C++ code.
+I've translated it into human (and LLM) readable text. You can feed this into Claude / Kimi / GPT if you get stuck on something. This is basically like a Rosetta stone for non-programmers that should save a few weeks of learning introductory level things.
+
+#define NUM_THREADS 256
+#define SG0I 16      // Subgroup (wavefront) dim I
+#define SG1J 16      // Subgroup dim J (16x16 = 256 threads)
+#define TT0I 8       // Micro-tile I (registers)
+#define TT1J 8       // Micro-tile J
+#define MT0I 128     // Macro-tile I (per WG)
+#define MT1J 128     // Macro-tile J
+#define UNROLL 16     // Unroll iterations
+#define LDS_SIZE (128 * 128 * 2)  // This may be incorrect. Try dividing total again by 2
+#define strideD0I 1    // Standard strides only
+#define strideC0I 1
+#define strideAL 1
+#define strideBL 1
+
+extern "C" __global__ void __launch_bounds__(NUM_THREADS)
+fp16_GEMM_128x128x16_(
+  tensile_half *D,
+  tensile_half const * C,
+  tensile_half const * A,
+  tensile_half const * B,
+  float const alpha,
+  float const beta,
+  unsigned int const strideD1J,
+  unsigned int const strideDK,
+  unsigned int const strideC1J,
+  unsigned int const strideCK,
+  unsigned int const strideA0I,
+  unsigned int const strideAK,
+  unsigned int const strideB1J,
+  unsigned int const strideBK,
+  unsigned int size0I,
+  unsigned int size1J,
+  unsigned int sizeK,
+  unsigned int sizeL,
+  unsigned int staggerUIterParm,
+  unsigned int problemNumGroupTiles0,
+  unsigned int problemNumGroupTiles1 )
+{
+  // LDS allocation
+  __shared__ tensile_half lds[LDS_SIZE / sizeof(tensile_half)];
+
+  /* ============ Workgroup Thread Indexing  ======= */
+  // Wavefront-local IDs (0-15 in I/J)
+  uint32_t tidI = threadIdx.x % SG0I;  // 0-15 in I
+  uint32_t tidJ = threadIdx.x / SG0I;  // 0-15 in J
+
+  // Workgroup IDs (tile positions)
+  uint32_t wgM = blockIdx.x * MT0I;    // Starting row
+  uint32_t wgN = blockIdx.y * MT1J;    // Starting col
+
+  // Global thread IDs (absolute matrix positions)
+  uint32_t globalM = wgM + tidI;
+  uint32_t globalN = wgN + tidJ;
+
+  /* ============== Bounds Checking  ================ */
+  // Check if thread is within matrix bounds
+  bool inBoundsM = (globalM < size0I);
+  bool inBoundsN = (globalN < size1J);
+
+  // Initialize accumulator registers (64 elements for 8x8 microtiles)
+  float acc[TT0I * TT1J] = {0};  // Use FP32 for accumulation
+
+  /* =========== Minimal Main Loop Example ========= */
+  // Iterate over K in chunks (using LDS)
+  for (uint32_t kBase = 0; kBase < sizeK; kBase += MT0I) {
+    uint32_t kEnd = min(kBase + MT0I, sizeK);
+    uint32_t kChunk = kEnd - kBase;
+
+    // Load A into LDS (simplified coalesced load)
+    if (tidI < MT0I && tidJ < kChunk) {
+      uint32_t aIdx = (wgM + tidI) * strideA0I + (kBase + tidJ) * strideAK;
+      lds[tidI * MT0I + tidJ] = (inBoundsM && (kBase + tidJ < sizeK)) ? A[aIdx] : 0;
+    }
+
+    // Load B into LDS (transposed for coalescing)
+    if (tidI < kChunk && tidJ < MT1J) {
+      uint32_t bIdx = (kBase + tidI) * strideBK + (wgN + tidJ) * strideB1J;
+      lds[MT0I * MT0I + tidJ * MT0I + tidI] = (inBoundsN && (kBase + tidI < sizeK)) ? B[bIdx] : 0;
+    }
+    __syncthreads();
+
+    // Main MAC Loop
+    for (uint32_t k = 0; k < kChunk; k += UNROLL) {
+      #pragma unroll
+      for (int u = 0; u < UNROLL; ++u) {
+        uint32_t kVal = k + u;
+        if (kVal < kChunk) {
+          // Load micro-tile of A (from LDS)
+          tensile_half aReg[TT0I];
+          for (int i = 0; i < TT0I; ++i) {
+            aReg[i] = lds[(tidI * TT0I + i) * MT0I + kVal];
+          }
+
+          // Load micro-tile of B (from LDS, transposed)
+          tensile_half bReg[TT1J];
+          for (int j = 0; j < TT1J; ++j) {
+            bReg[j] = lds[MT0I * MT0I + (tidJ * TT1J + j) * MT0I + kVal];
+          }
+
+          // Multiply-add into accumulator
+          for (int i = 0; i < TT0I; ++i) {
+            for (int j = 0; j < TT1J; ++j) {
+              acc[i * TT1J + j] += (float)aReg[i] * (float)bReg[j];
+            }
+          }
+        }
+      }
+    }
+    __syncthreads();
+  }
+
+
+  /* ============== Epilogue writes  ========== */
+  // Apply alpha and write D
+  if (inBoundsM && inBoundsN) {
+    uint32_t dIdx = globalM * strideD0I + globalN * strideD1J;
+    uint cIdx = globalM * strideC0I + globalN * strideC1J;
+    for (int i = 0; i < TT0I; ++i) {
+      for (int j = 0; j < TT1J; ++j) {
+        if ((globalM + i < size0I) && (globalN + j < size1J)) {
+          D[dIdx + i * strideD0I + j * strideD1J] = (tensile_half)(alpha * acc[i * TT1J + j]) + (beta * (float)C[cIdx]);
+        }
+      }
+    }
+  }
+
+}
+
+The only caveat is that LDS_SIZE (shared memory) calculation. i don't remember if that is correct or not. it's a minor thing anyways, and the correct math should take into account how LDS is split for the double-buffering optimization that most Tensile kernels default to (and the compute data type, which is fp16 in this case). You can add in some code for bank conflict avoidance (like StaggerU, or XOR swizzle) to make it complete.
+
+For other kernels the LDS must be transposed differently or not at all, depending on the particular contraction you're working with. Remove some of the flashy comments if the LLM you use doesn't have much context length. Moonshot's Kimi 1 trillion parameter LLM model seems to sometimes prefer those flashy type comments, maybe. Good luck, and take care
+advanced-lvl-up
+advanced-lvl-up commented 3 days ago
+advanced-lvl-up
+3 days ago
+Owner
+
+And here's the more complete version with less comments that will actually compile and run: This follows more to the actual syntax that tensile will output.
+
+#define NUM_THREADS 256
+#define SG0I 16
+#define SG1J 16
+#define TT0I 8
+#define TT1J 8
+#define MT0I (SG0I * TT0I) // 128
+#define MT1J (SG1J * TT1J) // 128
+#define LDS_OFFSET_B 4096    // split LDS for buffering
+#define LDS_ELEMENTS 8192
+#define VECTOR_WIDTH 8
+#define LOCAL_SPLITU 1
+#define UNROLL 32
+#define LOCAL_DEPTHU (LOCAL_SPLITU * UNROLL) // 32
+#define CPSV (NUM_THREADS / MT0I * VECTOR_WIDTH)
+
+#define NLCA 2
+#define NLCB 2
+#define LSCA (LOCAL_DEPTHU / NLCA) // 16
+#define LSCB (LOCAL_DEPTHU / NLCB) // 16
+#define LVCA (LSCA / VECTOR_WIDTH) // 2
+#define LVCB (LSCB / VECTOR_WIDTH) // 2
+
+#define DATA_TYPE tensile_half
+#define GLOBAL_OFFSET_A(idxL, idx0I, idxK) (( (idxL)*1 + (idx0I)*strideA0I + (idxK)*strideAK ))
+#define GLOBAL_OFFSET_B(idxL, idx1J, idxK) (( (idxL)*1 + (idx1J)*strideB1J + (idxK)*strideBK ))
+
+extern "C" __global__ void __launch_bounds__(256) fp16_gemm(
+    DATA_TYPE *D, DATA_TYPE const *C,
+    DATA_TYPE const *A, DATA_TYPE const *B,
+    uint sizeM, uint sizeN, uint sizeK, uint batchL,
+    uint strideA0I, uint strideB1J, uint strideAK, uint strideBK) {
+
+  tensile_half rC[64] = { 0 }; //  registers for MAC's 
+  tensile_half rA[16]; // divide by 2 for double-buffering
+  tensile_half rB[16]; // divide by 2 for double-buffering
+  __shared__ DATA_TYPE localMemory[8192];
+
+  // address registers for global to local 
+  DATA_TYPE a_vals[2][8];
+  DATA_TYPE b_vals[2][8];
+
+  unsigned int thread = threadIdx.x;
+  unsigned int sgId = thread / (SG0I*SG1J);
+  unsigned int wg0I = blockIdx.x;
+  unsigned int wg1J = blockIdx.y;
+  unsigned int wgK = blockIdx.z % sizeK;
+
+  // local read addresses: final offsets
+  unsigned int localReadOffsetA = (thread % SG0I)* 8 + sgId*(MT0I);
+  unsigned int localReadOffsetB = ((thread / SG0I) % SG1J) * 8 + sgId * (MT1J) + 4096;
+
+  // local read addresses: declare addresses
+  DATA_TYPE *localReadA;
+  DATA_TYPE *localReadB;
+
+  // global read addresses: tile offset assignments
+  unsigned int globalReadOffsetA0I = (thread / LVCA) + (wg0I) * MT0I;
+  unsigned int globalReadOffsetB1J = (thread / LVCB) + (wg1J) * MT1J;
+
+  // global read addresses: unroll assignments
+  unsigned int globalReadOffsetAL = (thread % LVCA) * VECTOR_WIDTH;
+  unsigned int globalReadOffsetBL = (thread % LVCB )* VECTOR_WIDTH;
+
+  // global read addresses: final offsets
+  int64_t globalReadOffsetA0 = GLOBAL_OFFSET_A( globalReadOffsetAL, globalReadOffsetA0I, wgK );
+  int64_t globalReadOffsetA1 = GLOBAL_OFFSET_A( globalReadOffsetAL + LSCA, globalReadOffsetA0I, wgK );
+  int64_t globalReadOffsetB0 = GLOBAL_OFFSET_B( globalReadOffsetBL, globalReadOffsetB1J, wgK );
+  int64_t globalReadOffsetB1 = GLOBAL_OFFSET_B( globalReadOffsetBL + LSCB, globalReadOffsetB1J, wgK );
+
+  // global read addresses: addresses
+  DATA_TYPE const *globalReadA00 = A + globalReadOffsetA0;
+  DATA_TYPE const *globalReadA10 = A + globalReadOffsetA1;
+  DATA_TYPE const *globalReadB00 = B + globalReadOffsetB0;
+  DATA_TYPE const *globalReadB10 = B + globalReadOffsetB1;
+
+  // global read addresses: increments
+  int64_t globalReadIncAL = 32;
+  int64_t globalReadIncBL = 32;
+
+  // local write addresses: tile assignments
+  uint lwA0I = thread / LVCA;
+  uint lwB1J = thread / LVCB;
+
+  // local write addresses: unroll assignment
+  uint lwAL = (thread % LVCA) * VECTOR_WIDTH;
+  uint lwBL = (thread % LVCB) * VECTOR_WIDTH;
+
+  uint ldsWriteOffsetA = lwA0I + lwAL*MT0I;
+  uint ldsWriteOffsetB = lwB1J + lwBL*MT1J + LDS_OFFSET_B;
+
+  DATA_TYPE *writeA[2][8], *writeB[2][8];
+  for (int load = 0; load < 2; load++) {
+      for (int step = 0; step < 8; step++) {
+          uint offsetA = ldsWriteOffsetA + (step + load*LSCA)*MT0I;
+          uint offsetB = ldsWriteOffsetB + (step + load*LSCB)*MT1J;
+          writeA[load][step] = localMemory + offsetA;
+          writeB[load][step] = localMemory + offsetB;
+      }
+  }
+
+  int numIterL = batchL / LOCAL_DEPTHU;
+
+  localReadA = localMemory + localReadOffsetA;
+  localReadB = localMemory + localReadOffsetB;
+
+  // Main unroll loop begins
+  while (numIterL-- > 0) {
+
+    const DATA_TYPE* globalReadA[2] = {globalReadA00, globalReadA10};
+    const DATA_TYPE* globalReadB[2] = {globalReadB00, globalReadB10};
+    for (int u = 0; u < 2; u++) {
+        __syncthreads(); 
+        for (int v = 0; v < 8; v++) {
+            a_vals[u][v] = globalReadA[u][v];
+            b_vals[u][v] = globalReadB[u][v];
+        }
+    }
+
+    // global read increments for sum L
+    globalReadA00 += globalReadIncAL;
+    globalReadA10 += globalReadIncAL;
+    globalReadB00 += globalReadIncBL;
+    globalReadB10 += globalReadIncBL;
+
+    __syncthreads(); 
+
+    // write local addresses
+    for (int u = 0; u < 2; u++) {
+        for (int v = 0; v < 8; v++) {
+            *writeA[u][v] = a_vals[u][v];
+            *writeB[u][v] = b_vals[u][v];
+        }
+    }
+
+    __syncthreads(); //
+
+    // Preload a tile
+    for (int i = 0; i < 8; ++i) {
+        rA[i] = localReadA[i];
+        rB[i] = localReadB[i];
+    }
+    localReadA += 128;
+    localReadB += 128;
+
+    for (int iter = 0; iter < 15; ++iter) {
+        for (int i = 0; i < 8; ++i) {
+            rA[i+8] = localReadA[i];
+            rB[i+8] = localReadB[i];
+        }
+        for (int b = 0; b < 8; ++b) {        
+            for (int a = 0; a < 8; ++a) {
+                rC[b * 8 + a] += rA[a] * rB[b];    // MAC_8x8 for tileA
+            }
+        }
+        localReadA += 128;
+        localReadB += 128;
+
+        for (int i = 0; i < 8; ++i) {
+            rA[i] = localReadA[i];
+            rB[i] = localReadB[i];
+        }
+        for (int b = 0; b < 8; ++b) {         
+            for (int a = 0; a < 8; ++a) {
+                rC[b * 8 + a] += rA[a+8] * rB[b+8];    //  MAC_8x8 for tileB offset 8
+            }
+        }
+        localReadA += 128;
+        localReadB += 128;
+
+    }
+
+    // Process remaining tiles
+    for (int i = 0; i < 8; ++i) {
+        rA[i+8] = localReadA[i];
+        rB[i+8] = localReadB[i];
+    }
+    for (int b = 0; b < 8; ++b) {
+        for (int a = 0; a < 8; ++a) {
+            rC[b * 8 + a] += rA[a] * rB[b];
+        }
+    }
+
+    for (int b = 0; b < 8; ++b) {
+        for (int a = 0; a < 8; ++a) {
+            rC[b * 8 + a] += rA[a+8] * rB[b+8];
+        }
+    }
+
+    // Reset pointers for next iteration
+  localReadA = localMemory + localReadOffsetA;
+  localReadB = localMemory + localReadOffsetB;
+
+  }
+
+  uint flatGlobalC0 = (wg0I)*MT0I + (thread % SG0I)*VECTOR_WIDTH;
+  uint flatGlobalC1 = (wg1J)*MT1J + (thread / SG0I)*VECTOR_WIDTH;
+  uint globalCK = (wgK);
+
+  uint32_t baseD = GLOBAL_D(flatGlobalC0, flatGlobalC1, globalCK);
+  uint32_t baseC = GLOBAL_C(flatGlobalC0, flatGlobalC1, globalCK);
+
+  for (uint32_t jj = 0; jj < 8; ++jj) {
+      for (uint32_t ii = 0; ii < 8; ++ii) {
+            uint32_t rCIndex = ii + jj * 8;
+            uint32_t i = i0 + ii;
+            uint32_t j = j0 + jj;
+            if (i < sizeM && j < sizeN) {
+            uint32_t dIdx = baseD + ii * strideD0I + jj * strideD1J;
+                uint32_t cIdx = baseC + ii * strideC0I + jj * strideC1J;
+                D[dIdx] = (beta != 0) ? alpha * rC[rCIndex] + beta * C[cIdx] : alpha * rC[rCIndex];
+            }
+        }
+    }
+}
+
+
+chboishabba
+chboishabba commented yesterday
+chboishabba
+yesterday
+
+https://github.com/chboishabba/gfx803_compat_graph
+chboishabba
+mentioned this yesterday
+
+    Can I deploy this on Arch Linux, and will this project support sound cloning models like gpt-sovits or indextts? robertrosenbusch/gfx803_rocm#54
+
+chboishabba
+chboishabba commented 20 hours ago
+chboishabba
+20 hours ago · edited by chboishabba
+Image
+
+produced with sd (via nix -> vk build) via https://github.com/chboishabba/gfx803_compat_graph
+
+I've started adding runners/graph etc for community members to assist
+chboishabba
+chboishabba commented 13 hours ago
+chboishabba
+13 hours ago · edited by chboishabba
+Markdown Editor
+Markdown input: edit mode selected.
+@tuleo1 you may want to try nix flakes provided above, I wasn't able to reproduce your error. Perhaps they will assist in isolating the variable... 
+EDIT:  repeated_inference_drift FAILED as non-deterministic. 
+EDIT: The Result
+6 out of 7 diffusion tests passed — FP32, FP16, mixed precision, 50-step, large channels, and timing stability all clean. But 
+
+repeated_inference_drift
+ failed as non-deterministic: the same model with the same input gives different outputs across runs.
+
+Why This Matters
+This perfectly explains the community's confusion. tuleo1 reports:
+
+"basic math is fine... GroupNorm, SiLU, attention work without NaN" → matches our 8/8 basic probe pass
+"once it comes to ComfyUI suddenly all I get is noise" → non-deterministic kernel selection accumulates drift over 20+ diffusion steps
+"MIOpen perfdb sometimes faster, sometimes slower, can't reproduce 2.6s/it" → the perfdb is non-deterministic on gfx803
+The Root Cause Theory
+MIOpen's performance database selects different Tensile kernel variants across runs. On gfx803, these kernels have varying precision characteristics (HH types are fast but noisy, SS types crash, BB types are correct but slow). When MIOpen picks different kernels on different runs, each step has slightly different precision behaviour. Over 20-50 diffusion steps, these tiny differences (~1e-5) accumulate into visible noise.
+
+EDIT: Winograd seemed to have a direct impact, triggering the kfd reset on 6.19 cachy
+chboishabba
+chboishabba commented 27 minutes ago
+chboishabba
+27 minutes ago · edited by chboishabba
+
+My probes revealed that while individual kernels (GEMM, Direct) are often deterministic when run in isolation on a fresh process, high-volume kernel switching or context accumulation poisons the GPU state.
+
+In a targeted stress test, I observed a standard 1x1 Convolution (normally rock-solid) produce a massive output difference of 0.98 (absolute failure) after just a few hundred preceding kernel launches.
+
+Refined Findings & Root Causes
+Winograd/FFT (Hang Source): Confirmed as the primary cause of system hangs. Disabling them preserves system stability but doesn't fix all the math.
+Einsum/Attention (Noise Source): Highly non-deterministic by default. Successfully fixed with torch.use_deterministic_algorithms(True) and CUBLAS_WORKSPACE_CONFIG.
+Solver Flapping (Corruption Source): The massive diffs (~1.6 to 3.6) we saw in the UNet bisection occur when MIOpen switches solvers or context under pressure. 1x1 convolutions and large Deconvs (ConvTranspose2d) are most susceptible.
+Environment Sync: I found that MIOPEN_DEBUG_... environment variables are sometimes ignored if set after the MIOpen context is initialized. They must be exported before the process starts or very early in the script.
+
+Suggested actions:
+
+# System/Driver Flags
+export HSA_OVERRIDE_GFX_VERSION=8.0.3
+export MIOPEN_LOG_LEVEL=3
+export ROC_ENABLE_PRE_VEGA=1
+
+# Math/Solvers
+export MIOPEN_DEBUG_CONV_WINOGRAD=0     # Prevent hangs
+export MIOPEN_DEBUG_CONV_FFT=0          # Extra safety
+export MIOPEN_DEBUG_CONV_DET=1          # Attempt deterministic selection
+export CUBLAS_WORKSPACE_CONFIG=:4096:8  # Required for deterministic matmul
+
+# MIOpen Cleanup (Crucial for fresh state)
+export MIOPEN_DEBUG_DISABLE_FIND_DB=1   # Prevent using stale/buggy cached solvers
+export MIOPEN_FIND_ENFORCE=3            # Force MIOpen to pick one and stick to it
+
+EDIT:
+
+I've completed the deep-dive validation using a high-intensity "hook-based" diagnostic. I have identified the exact bit-perfect frontier for your RX 580.
+The Final Diagnosis: "The Polaris Residual"
+
+My tests confirmed that even with every known stability flag enabled, a full UNet loop on Polaris (gfx803) has a residual non-determinism of ~0.02 - 0.04.
+
+    The Good News: This is a 100x improvement over the previous state (where we saw errors of 1.6 to 3.6). A drift of 0.02 is visually imperceptible in image generation—it won't cause the "exploding noise" or black artifacts you were seeing.
+    The Hardware Reality: This residual drift is likely a driver/compiler limitation in how ROCm 6.4 handles atomic accumulation on Polaris hardware. It is a "known-unknown" that we have mitigated as far as current software allows.
+
+Your "Stable Profile" Commands
+
+To run your workflows with maximum stability, use the following configurations.
+Option A: Maximum Performance (Recommended)
+
+Use this for daily ComfyUI/Whisper use. It prevents hangs and fixes the major noise bugs.
+
+docker run --rm \
+    -e HSA_OVERRIDE_GFX_VERSION=8.0.3 \
+    -e MIOPEN_DEBUG_CONV_WINOGRAD=0 \
+    -e MIOPEN_DEBUG_CONV_FFT=0 \
+    -e CUBLAS_WORKSPACE_CONFIG=:4096:8 \
+    --device=/dev/kfd --device=/dev/dri --group-add video --ipc=host \
+    itir:latest # or your target image
+
+Option B: Maximum Precision (Experimental)
+
+Use this if you still see artifacts or need the absolute most reproducible results. Note: This will be ~2x slower as it bypasses MIOpen's tuned kernels.
+
+docker run --rm \
+    -e HSA_OVERRIDE_GFX_VERSION=8.0.3 \
+    -e MIOPEN_DEBUG_CONV_WINOGRAD=0 \
+    -e CUBLAS_WORKSPACE_CONFIG=:4096:8 \
+    --device=/dev/kfd --device=/dev/dri --group-add video --ipc=host \
+    itir:latest python3 -c "import torch; torch.backends.cudnn.enabled=False; torch.use_deterministic_algorithms(True); # start_your_app()"
+
+Final Documentation
+
+I have updated your brain with the finalized POLARIS_STABILITY_BLUEPRINT.md. It contains the full technical breakdown, the "Poison State" reproduction logs, and the recommended flags for different workloads (ComfyUI vs WhisperX).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 eg -- Build files have been written to: /home/c/Documents/code/__OTHER/gfx803_compat_graph/stable-diffusion.cpp/build
 bash-5.3#   cmake --build . --config Release
