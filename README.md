@@ -96,6 +96,14 @@ The intended cached artifact sets are:
 
 Both flakes now advertise this cache in `nixConfig` so `nix develop` and related commands can discover the published binaries automatically once the paths are available upstream.
 
+For a fresh clone, restore the extracted payloads back into the working tree with:
+
+```bash
+bash scripts/restore-cachix-artifacts.sh
+```
+
+That uses the tracked `cachix-artifacts.manifest` file to relink the published store paths into `lib-compat/`, `docker-venv/`, and the supported `artifacts/` directories.
+
 ## Recommended workflows
 
 ### 1. Reuse the extracted `6.4` userspace on the host

@@ -2,6 +2,8 @@
 
 ## 2026-03-20
 
+- added `cachix-artifacts.manifest` plus `scripts/restore-cachix-artifacts.sh` so a fresh clone can relink the published extracted payloads from Cachix instead of rerunning the Docker extraction steps
+- updated the publish helper so it refreshes the tracked manifest whenever artifact store paths are published
 - added `docs/USER_GUIDE.md` as the single shareable setup, status, and contribution guide for non-specialist users
 - updated `README.md` and `docs/START_HERE.md` so they point newcomers at the new guide first
 - corrected the documented Ollama status: the extracted `artifacts/ollama_reference/` bundle now exists and is published through the artifact workflow, but host stability is still under investigation after a GPU reset / system crash during follow-up validation on this machine
@@ -10,6 +12,7 @@
 Why:
 
 - the repo needed one document that could be handed to users without asking them to reconstruct the workflow from multiple notes
+- a public Cachix cache is only half of the restore story unless the repo also tracks the exact store paths to relink on a fresh machine
 - the previous docs overstated the current Ollama host status and needed to match observed reality before more users rely on that path
 
 ## 2026-03-19

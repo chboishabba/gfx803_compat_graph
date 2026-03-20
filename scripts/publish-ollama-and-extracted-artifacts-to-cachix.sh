@@ -4,12 +4,16 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 CACHE_NAME="${CACHIX_CACHE:-gfx803-rocm}"
+CACHE_URL="${CACHIX_URL:-https://${CACHE_NAME}.cachix.org}"
+CACHE_PUBLIC_KEY="${CACHIX_PUBLIC_KEY:-gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=}"
+MANIFEST_PATH="${CACHIX_MANIFEST_PATH:-$REPO_ROOT/cachix-artifacts.manifest}"
 
 usage() {
   cat <<USAGE
 Usage: $(basename "$0") [artifact-dir...]
 
 Uploads artifact directories to the ${CACHE_NAME} Cachix cache.
+Also refreshes ${MANIFEST_PATH} so a fresh clone can relink the same store paths.
 
 If no paths are provided, uploads the repository's standard extracted payloads that exist:
 - lib-compat
@@ -43,6 +47,7 @@ else
 fi
 
 TO_UPLOAD=()
+MANIFEST_LINES=()
 for path in "${ARTIFACT_PATHS[@]}"; do
   if [ ! -e "$path" ]; then
     echo "INFO: skipping missing path: $path" >&2
@@ -54,9 +59,16 @@ for path in "${ARTIFACT_PATHS[@]}"; do
     continue
   fi
 
-  store_path=$(nix store add-path "$path")
-  echo "Mapped $(realpath "$path") -> $store_path"
+  abs_path="$(realpath "$path")"
+  store_path=$(nix store add-path "$abs_path")
+  echo "Mapped $abs_path -> $store_path"
   TO_UPLOAD+=("$store_path")
+
+  if [[ "$abs_path" == "$REPO_ROOT/"* ]]; then
+    MANIFEST_LINES+=("${abs_path#"$REPO_ROOT/"}"$'\t'"$store_path")
+  else
+    echo "INFO: skipping manifest entry for external path: $abs_path" >&2
+  fi
 
 done
 
@@ -66,6 +78,16 @@ if [ "${#TO_UPLOAD[@]}" -eq 0 ]; then
   exit 1
 fi
 
-cachix push "$CACHE_NAME" "${TO_UPLOAD[@]}"
+{
+  echo "# cache_name=$CACHE_NAME"
+  echo "# cache_url=$CACHE_URL"
+  echo "# public_key=$CACHE_PUBLIC_KEY"
+  printf '%s\n' "${MANIFEST_LINES[@]}"
+} > "$MANIFEST_PATH"
 
-echo "Done. Uploaded ${#TO_UPLOAD[@]} path(s) to Cachix cache '$CACHE_NAME'."
+if [ "${WRITE_MANIFEST_ONLY:-0}" != "1" ]; then
+  cachix push "$CACHE_NAME" "${TO_UPLOAD[@]}"
+  echo "Done. Uploaded ${#TO_UPLOAD[@]} path(s) to Cachix cache '$CACHE_NAME'."
+else
+  echo "Done. Refreshed manifest only at $MANIFEST_PATH."
+fi

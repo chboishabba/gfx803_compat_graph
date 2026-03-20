@@ -44,7 +44,9 @@ If you already use Nix, this is the fastest low-friction start:
 ```bash
 cachix use gfx803-rocm
 git clone https://github.com/chboishabba/gfx803_compat_graph.git
-cd gfx803_compat_graph/gfx803_flake_v1
+cd gfx803_compat_graph
+bash scripts/restore-cachix-artifacts.sh
+cd gfx803_flake_v1
 nix develop .#base
 verify-gfx803-host
 ```
@@ -65,7 +67,7 @@ If you want the extracted host runtime directly from this repo:
 ```bash
 git clone https://github.com/chboishabba/gfx803_compat_graph.git
 cd gfx803_compat_graph
-bash scripts/extract-docker-libs.sh
+bash scripts/restore-cachix-artifacts.sh
 source scripts/polaris-env.sh
 ./scripts/host-docker-python.sh tests/bug_report_mre.py
 ```
@@ -90,6 +92,12 @@ cachix use gfx803-rocm
 ```
 
 That allows Nix to fetch published extracted artifacts instead of recreating them locally.
+
+Then restore the tracked extracted payloads into the clone:
+
+```bash
+bash scripts/restore-cachix-artifacts.sh
+```
 
 ## Which Path To Choose
 

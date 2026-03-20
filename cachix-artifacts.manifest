@@ -1,0 +1,8 @@
+# cache_name=gfx803-rocm
+# cache_url=https://gfx803-rocm.cachix.org
+# public_key=gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=
+lib-compat	/nix/store/ji0b1hqsbq037xlcj36z02yhrsac3hwd-lib-compat
+docker-venv	/nix/store/wfrbf90xkvwgpf375qjxzwdx92nsj6km-docker-venv
+artifacts/ollama_reference	/nix/store/56dq7v2i7dfsjhqn8r3dgzn41a55kkw3-ollama_reference
+artifacts/rocm57	/nix/store/rq8n2cvy72wscqqmzm0fh7lajjxfvpn8-rocm57
+artifacts/rocm-latest	/nix/store/lm87myh6cfaiyp1l1rsjzs8janbi8fhl-rocm-latest
