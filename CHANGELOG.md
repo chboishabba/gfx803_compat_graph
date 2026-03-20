@@ -5,6 +5,9 @@
 - updated `README.md` and `docs/USER_GUIDE.md` to match the current LeechTransformer reality on this machine: a short GPU smoke run still selects `device=cuda`, while longer runs remain a guarded ROCm compatibility lane rather than a declared stable baseline
 - documented the current long-token mitigation in the public runbook: on this ROCm path, the active inference script disables `top_p` sampling above `36` generated tokens to avoid the faulting nucleus-sampling path
 - updated `TODO.md` so the next LeechTransformer step is explicit: rerun the higher-token matrix with the current guardrails and then decide whether the public recommendation should move beyond `--max_tokens <= 36`
+- fixed `scripts/debug-leech-high-token-instability.sh` fault classification so it no longer mistakes the devcoredump watcher banner for a GPU fault
+- reran the focused `direct_only` LeechTransformer matrix on this machine and confirmed clean CUDA passes for `40`, `48`, and `64` generated tokens with both `kv_cache=off` and `kv_cache=on`
+- updated the public LeechTransformer guidance to reflect that measured result: the currently documented `direct_only` path is now validated through `--max_tokens 64`, while `>64` and other profile families remain the next validation lane
 
 Why:
 

@@ -22,8 +22,8 @@ As of `2026-03-21`, the repo state is:
 - `lib-compat/` and `docker-venv/` are present in this working tree as previously extracted artifacts
 - `gfx803_flake_v1/` is the clearest reproducible entrypoint for the current Nix-based workflow
 - the extracted `6.4` host path now covers the previously working torch, WhisperX, and ComfyUI surfaces
-- the extracted `6.4` host path also has a working LeechTransformer GPU runbook for short runs; a `--max_tokens 32` smoke run still selects `device=cuda` on this machine
-- longer LeechTransformer generations remain a guarded compatibility path rather than a settled baseline: checkpoint loading and short-run GPU use are fixed, `--kv_cache` is still unsafe by default, and the current ROCm workaround disables `top_p` sampling above `36` generated tokens
+- the extracted `6.4` host path also has a working LeechTransformer GPU runbook; on `2026-03-21`, the focused `direct_only` matrix passed `40`, `48`, and `64` generated tokens on this machine with both `kv_cache=off` and `kv_cache=on`
+- for the currently documented LeechTransformer path, the practical measured ceiling is now `--max_tokens <= 64`; runs above `64` and non-`direct_only` profiles remain the next validation lane
 - the stock host `ollama` binary still falls back to CPU
 - the extracted `artifacts/ollama_reference/` bundle is now available and publishable through Cachix, but host stability is still under investigation after a GPU reset/system crash during follow-up validation on this machine
 - for short-term Ollama use, re-downloading the already-working Robert image is currently the pragmatic path; rebuilding or host-porting that patched stack locally remains slower and less settled

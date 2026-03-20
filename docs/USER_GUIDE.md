@@ -191,13 +191,14 @@ Expected behavior on this setup:
 - checkpoint loads without the `__main__.LeechConfig` unpickle error
 - short prompts complete on GPU
 - a `--max_tokens 32` smoke run was re-confirmed on `2026-03-21` on this machine with `device=cuda`
+- a focused `direct_only` matrix on `2026-03-21` also passed `40`, `48`, and `64` generated tokens with both `kv_cache=off` and `kv_cache=on`
 
 Important notes for stability on this machine:
 
-- `--kv_cache` currently triggers ROCm GPU page faults (`Memory access fault`) on some runs.
 - for `--max_tokens > 36`, the current inference script forces `top_p=1.0` on ROCm because the tested nucleus-sampling path was the repeatable crash trigger on this host.
-- treat that `top_p` guardrail as a compatibility workaround, not as proof that arbitrary long generations are fully stable.
-- if you specifically want to test `--kv_cache`, do it with:
+- that `top_p` guardrail is now part of the measured working path for the `direct_only` profile on this machine through `64` tokens.
+- the `2026-03-21` rerun did not reproduce the older `kv_cache` faults for the tested `direct_only` path through `64` tokens, but it is still sensible to treat other prompts, higher token counts, and other profiles as separate validation lanes.
+- if you specifically want to test `--kv_cache` outside the current measured envelope, do it with:
 
 ```bash
 LEECH_ALLOW_KVCACHE_GPU=1 HOST_DOCKER_PYTHON_GPU_PRECHECK=1 bash scripts/host-docker-python.sh \
@@ -223,8 +224,8 @@ bash scripts/debug-leech-high-token-instability.sh \
   - per-case run logs: `out/leech-debug-high-tokens/<timestamp>/<case>/run.log`
   - per-case kernel/journal snapshots and capture artifacts under each case directory
 
-- the public stable recommendation is still `--max_tokens <= 36`.
-- runs above that window are still an active validation lane even with the current `top_p` workaround.
+- the public stable recommendation for the currently tested `direct_only` path is now `--max_tokens <= 64`.
+- runs above `64` tokens, or runs under other profile families, are still an active validation lane.
 - if you hit an immediate fault, rerun with a shorter `--max_tokens`, and capture logs with:
 
 ```bash

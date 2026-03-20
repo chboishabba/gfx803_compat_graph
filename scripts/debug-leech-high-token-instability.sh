@@ -149,7 +149,7 @@ echo "run_id,profile,kv_cache,max_tokens,attempt,status,exit_code,fault_signals,
 classify_faults() {
   local file="$1"
   local sigs=""
-  if grep -Eq "Memory access fault|GPU core dump failed|GPU reset|kfd|amdgpu:.*coredump|ring .*timeout|VRAM is lost|init_user_pages|devcoredump" "$file"; then
+  if grep -Eq "Memory access fault|GPU core dump failed|GPU reset|kfd|amdgpu:.*coredump|ring .*timeout|VRAM is lost|init_user_pages" "$file"; then
     sigs="gpu_memory_fault"
   elif grep -Eq "Segmentation fault|SIGABRT|Traceback|RuntimeError" "$file"; then
     sigs="application_error"
