@@ -47,6 +47,7 @@ extract_dir_from_container() {
 }
 
 extract_dir_from_container "/ComfyUI/venv" "$OUTDIR_ABS/docker-venv/venv"
+extract_dir_from_container "/opt/venv" "$OUTDIR_ABS/docker-venv/venv"
 extract_dir_from_container "/opt/conda" "$OUTDIR_ABS/docker-venv/conda-python"
 
 docker run --rm \
@@ -204,6 +205,9 @@ PY
       [ -e "$lib" ] || continue
       clear_execstack_flag "$lib"
     done
+
+    mkdir -p /out/lib-compat/rocblas
+    ln -sfn ../../rocblas-library /out/lib-compat/rocblas/library
 
     {
       echo "IMAGE='"$IMAGE:$TAG"'"

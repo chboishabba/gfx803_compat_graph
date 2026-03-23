@@ -10,6 +10,8 @@ ARTIFACT_DIR="${ROCM_LATEST_OUTDIR:-$REPO_ROOT/artifacts/rocm-latest}"
 COMPAT_DIR="$ARTIFACT_DIR/lib-compat"
 VENV_DIR="$ARTIFACT_DIR/docker-venv"
 VENV_PYTHON="$VENV_DIR/venv/bin/python"
+VENV_PYTHON3="$VENV_DIR/venv/bin/python3"
+VENV_LIB="$VENV_DIR/venv/lib"
 CONDA_ROOT_PYTHON="$VENV_DIR/conda-python/bin/python"
 CONDA_ROOT_LIB="$VENV_DIR/conda-python/lib"
 
@@ -20,7 +22,10 @@ shopt -u nullglob
 
 if [ -x "$VENV_PYTHON" ]; then
   PYTHON_BIN="$VENV_PYTHON"
-  PYTHON_HOME_CANDIDATE="$VENV_DIR/venv"
+  PYTHON_HOME_CANDIDATE=""
+elif [ -x "$VENV_PYTHON3" ]; then
+  PYTHON_BIN="$VENV_PYTHON3"
+  PYTHON_HOME_CANDIDATE=""
 elif [ "${#CONDA_ENV_PYTHONS[@]}" -gt 0 ] && [ -x "${CONDA_ENV_PYTHONS[0]}" ]; then
   PYTHON_BIN="${CONDA_ENV_PYTHONS[0]}"
   PYTHON_HOME_CANDIDATE="$(dirname "$(dirname "$PYTHON_BIN")")"
@@ -39,6 +44,9 @@ if [ ! -d "$COMPAT_DIR" ] || [ -z "$PYTHON_BIN" ]; then
 fi
 
 LD_PATH_PREFIX="$COMPAT_DIR"
+if [ -d "$VENV_LIB" ]; then
+  LD_PATH_PREFIX="$VENV_LIB:$LD_PATH_PREFIX"
+fi
 for env_lib in "${CONDA_ENV_LIBS[@]}"; do
   if [ -d "$env_lib" ]; then
     LD_PATH_PREFIX="$env_lib:$LD_PATH_PREFIX"

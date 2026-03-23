@@ -10,12 +10,108 @@
 - Port the previously working Robert `6.4` Ollama GPU path into a smaller extracted or Nix-managed workflow so the full Robert container is no longer required for Ollama (in progress: reference bundle + host launcher + flake shell exist)
 - Re-test the extracted `artifacts/ollama_reference/` host path after the AMDGPU `libdrm` copy fix and `HSA_ENABLE_SDMA=0` host launcher change, because the last host run triggered a GPU reset / PC crash
 - Preserve the current `5.7` extracted host path as a separate reusable artifact alongside the top-level extracted `6.4` baseline
-- Fix LeechTransformer inference checkpoint loading on ROCm hosts (`__main__.LeechConfig` unpickle path) and document operational GPU limits for stable runs ✅
+- Fix LeechTransformer inference checkpoint loading on ROCm hosts (`__main__.LeechConfig` unpickle path) and document current GPU correctness status ✅
 - Re-run the LeechTransformer higher-token matrix after the ROCm `top_p` guardrail and harness fault-classification fix, then update the documented stable token window from measured results ✅
-- Decide whether guarded long-token runs (`top_p` forced off on ROCm above `36` tokens) are good enough for the public default, or whether the runbook should remain capped at `--max_tokens <= 36` ✅ (current direct-only measured guidance is now `<= 128`)
+- Decide whether guarded long-token runs (`top_p` forced off on ROCm above `36` tokens) are good enough for the public default, or whether the runbook should remain capped at `--max_tokens <= 36` ✅ (superseded: crash behavior improved, but output correctness is still not trustworthy)
 - Commit and push the helper scripts already referenced by the docs (`scripts/debug-leech-high-token-instability.sh`, `scripts/run-gfx803-ollama-container.sh`, `scripts/watch-amdgpu-devcoredump.sh`, and the tracing wrappers) so a fresh clone actually contains the documented workflows ✅
-- Extend the LeechTransformer matrix beyond `128` tokens and across additional prompts/profile families before broadening the public guidance beyond the currently measured `direct_only` path
-- Run several `ROCm 7+` extracted-host smoke attempts under `artifacts/rocm-latest/` before resuming `5.7` drift/noise work
+- Replace the old Leech token-window guidance with a correctness-first status: `6.4` is wrong early, `5.7` is less wrong but still nondeterministic, and CPU is the only trustworthy output path today
+- Extend the Leech debugging from the current `block0.attn_out_preproj_view` finding into a smaller flatten/layout repro so the first nondeterministic kernel can be isolated
+- Capture an upstream-quality repro for the Leech ROCm correctness bug on Polaris/gfx803 that shows: stable `attn_probs`, stable `attn_weighted`, unstable `transpose(...).reshape(B, T, -1)`, and stable `permute(...).contiguous().reshape(...)`
+- Explain why the local Leech attention workaround (`permute(...).contiguous().reshape(...)`) stabilizes the probe tensor path but does not stabilize end-to-end first-step logits on the extracted `5.7` runtime
+- Narrow the remaining same-process `5.7` drift after the local attention patch: the next active target is the path from `block0.attn_out_manual` into `resid1` / later blocks, not the already-isolated flatten step
+- Turn the new tensor-only layout repro plus the `HIP_LAUNCH_BLOCKING=1` stabilization result into an upstream-ready ROCm bug report with exact commands, shapes, and observed diffs
+- Use the in-progress `rocm/pytorch:latest` pull as a component source for the `6.4`-upgrade lane instead of treating pure `latest` as the primary runtime target
+- Record the now-observed latest-class runtime result explicitly: both pure `ROCm latest` and the fully synced `6.4`-upgrade lane can import torch but remain GPU-gated on Polaris because the HSA/HIP boundary is still unresolved
+- Decide whether the next `6.4`-upgrade step should target explicit device-gating checks in the latest torch/ROCm stack or move sideways into a smaller GPU-detection repro before rerunning the Leech minimal repro matrix
+- Only rerun `scripts/capture-leech-minimal-repros.sh` for the swapped `rocm64-upgrade` lane after GPU visibility is restored; the current latest-class lane is importable but still GPU-gated
+- Record the latest-class runtime split explicitly:
+  - latest `libhsa-runtime64` breaks `rocminfo` on Polaris
+  - latest HIP alone does not
+  - old-HSA hybrid lanes can restore `rocminfo`
+  - rebuilt torch still fails there at the HIP/HSA ABI seam
+- Materialize and keep the current HSA-hybrid runtime lanes reproducible under `artifacts/rocm-runtime-hybrids/`
+- Promote the preserved old-HSA/HIP ABI lane to the actual short-term upgrade default:
+  - materialize it at `artifacts/rocm64-upgrade-oldabi/`
+  - point `gfx803-pytorch-stack-upgrade` at it
+  - point the framework rebuild driver at it by default
+- Extract and publish a coherent old-ABI ROCm SDK root for builds:
+  - populate `artifacts/rocm64-oldabi-sdk/opt-rocm` from the known-working Robert `6.4.3_0.11.5` image
+  - use it as the default `FRAMEWORK_REBUILD_ROCM_ROOT`
+  - stop treating a bare runtime-lib overlay as sufficient for framework rebuilds
+- Probe the smallest HSA-side cluster that restores both:
+  - `rocminfo` on Polaris
+  - rebuilt torch import with GPU visibility
+- Stop treating `torchvision` / `torchaudio` as the immediate blockers for the latest-class framework lane; they remain deferred behind raw runtime enumeration and HIP/HSA ABI bring-up
+- Decide whether the first realistic upgrade target is:
+  - old HSA/HIP ABI preserved with newer layers around it, or
+  - a patched newer HSA/HIP line that restores Polaris enumeration
+- Prefer the old-HSA/HIP-preserved direction first unless a newer Polaris-capable HSA runtime fix becomes concrete
+- Turn the original working `rr_gfx803_rocm` Docker recipe into a shared Nix-owned build graph:
+  - preserve only the essential gfx803 env and source patches
+  - stop copying historical Docker-specific Python/package mutations
+  - split runtime libs, math libs, framework layer, and app layer explicitly
+- Make the first explicit Nix-owned artifact boundary the shared `gfx803-pytorch-stack`:
+  - one Python environment
+  - one rebuilt `torch` wheel
+  - one rebuilt `torchvision` wheel
+  - one rebuilt `torchaudio` wheel
+  - explicit dependency on the selected runtime/math layers
+- Expose two explicit flake shells for that boundary:
+  - `gfx803-pytorch-stack` as the untouched control lane
+  - `gfx803-pytorch-stack-upgrade` as the ROCm-upgrade lane using the same frozen Python/framework layer
+- Freeze and publish `artifacts/rocm64-upgrade-safe-support/` as the first accepted low-risk support overlay:
+  - upgraded `libamd_comgr`
+  - upgraded `librocm-core`
+  - upgraded `libelf`
+  - upgraded `libnuma`
+  - upgraded `libdrm*`
+- Keep the fully synced latest-class `artifacts/rocm64-upgrade/` lane documented as a separate negative-control experiment:
+  - imports can succeed
+  - GPU visibility still drops away on Polaris once the newer HIP/HSA ABI is in play
+- Probe the next boundary systematically from the safe-support base:
+  - keep the old HIP ABI
+  - overlay newer math subsets one family at a time
+  - save import/GPU-visibility outputs per profile
+- Record the loader-resolution result explicitly in user-facing upgrade notes:
+  - the coarse-pass math profiles were false positives
+  - the frozen framework kept binding control `6.4` math libs because latest math payloads expose newer sonames
+- Decide the first real long-running build target from the now-confirmed boundary:
+  - rebuild the framework layer against the newer sonames / ABI, or
+  - rebuild selected math libs to match the frozen framework’s older sonames / ABI expectations
+- Keep the Docker/Robert extraction fallback noted but secondary:
+  - if the first Nix-owned framework rebuild driver blocks badly, trigger the container snapshot/rebuild path later and feed those artifacts back into the flake
+- Treat these as current hard ABI-seam failures under the frozen framework:
+  - `miopen_only`
+  - `rocsparse_only`
+  - `rocsolver_only`
+- If the project stays PyTorch-first, prefer a narrower math/runtime rebuild before a full framework rebuild only when it can target the old soname/ABI contract deliberately; otherwise move straight to the framework rebuild lane
+- Add the first real Nix-owned framework rebuild entrypoint:
+  - one app/shell for building `torch`, `torchvision`, and `torchaudio`
+  - preserved old-ABI extracted runtime + SDK as the default source
+  - repo-local wheels/logs output
+- Keep the rebuild driver aligned with the observed first hard failure:
+  - current known blocker was `fbgemm` AVX512 with `-Werror=maybe-uninitialized`
+  - carry the conservative PyTorch build flags from the later Docker attempts before judging the rebuild lane
+- Make the rebuild driver stop on a torch-only smoke failure before attempting `torchvision`:
+  - current first packaging/runtime gate is whether the freshly built torch wheel imports cleanly
+  - current minimum signal is `torch.cuda.is_available()`
+- Keep the rebuild driver incremental enough for iterative debugging:
+  - reuse an existing torch wheel by default after a successful torch build
+  - only rebuild torch again when explicitly forced or when no wheel is present
+- Keep the rebuild driver self-discovering at runtime:
+  - inspect the built torch shared objects
+  - resolve missing `.so` dependencies from known ROCm/system roots automatically
+  - stop using one-lib-at-a-time manual path fixes as the default approach
+- Keep the rebuild driver binding wheel-local `torch/lib` ahead of system `libtorch_*` libraries:
+  - this is now a required part of the runtime contract for the rebuilt wheel
+- Make the rebuild driver reject silent fallback to `/opt/rocm` latest ROCm payloads during an old-ABI-targeted run:
+  - fail fast if `libamdhip64`, `libhsa-runtime64`, `librocblas`, `libhipblas*`, `libMIOpen`, or related ROCm libs resolve outside the intended old-ABI roots
+- Only trust the next torch smoke result after the old-ABI SDK root exists and the rebuild driver proves the wheel is not binding latest `/opt/rocm` sonames
+- Back only the PyTorch-essential Docker-era workarounds into derivations now:
+  - gfx803 env contract
+  - rebuilt `rocBLAS`
+  - clean TorchVision build isolation
+- Keep Ollama-specific patches and app-layer Docker transport details out of the first PyTorch artifact; move them later once the shared framework layer is stable
 - Re-pull `itir:latest` locally so the `6.4` extraction flow is runnable again after the Docker reset
 - Verify `gfx803_flake_v1` entrypoints on the current host after the Docker reset
 - Investigate the `rocmNative-franken` segmentation fault that occurs before the drift matrix can emit results
@@ -31,10 +127,16 @@
 - Document explicitly that, for now, re-downloading the known-good Robert Ollama image is still the faster practical route than rebuilding that patched stack locally
 - Keep the new shareable user guide aligned with README and START_HERE whenever the status of Ollama host stability changes
 - Keep the top-level README focused on newcomer orientation instead of mixing old and new workflows
+- Keep the Leech docs aligned with the current correctness finding: GPU launch success is not the same as trustworthy output
+- Document explicitly that the current extracted-runtime PyTorch build has no Vulkan backend, so Vulkan is not a fallback path for Leech under this runtime
+- Document the new `6.4`-upgrade lane as the preferred path toward a reproducible newer stack for others, distinct from the pure `ROCm latest` extraction lane
+- Keep the new Docker-to-Nix migration checklist aligned with the actual flake/runtime split as the repo stops relying on historical Docker rebuilds
+- Keep the migration checklist explicit that PyTorch is the first boundary and Ollama is deferred until after the shared framework layer works
+- Document explicitly that `gfx803-pytorch-stack-upgrade` now means the curated safe-support lane, not the fully synced latest-class experiment
 - Record which image and tag were used for the latest `5.7` extraction in `artifacts/rocm57/meta/info.txt`
 - Add a short results note once the first `ROCm 7+` smoke attempt completes and once the refreshed `5.7` drift run completes
 - Document the first accepted community benchmark workflow IDs and required artifact set
-- Add/maintain a LeechTransformer runbook with exact command line, known-good token window, and kv-cache warning for Polaris hosts ✅
+- Add/maintain a LeechTransformer runbook with exact command line, current correctness warning, and kv-cache/crash notes for Polaris hosts ✅
 
 ## Deferred
 

@@ -18,6 +18,10 @@ Also refreshes ${MANIFEST_PATH} so a fresh clone can relink the same store paths
 If no paths are provided, uploads the repository's standard extracted payloads that exist:
 - lib-compat
 - docker-venv
+- artifacts/rocm64-upgrade
+- artifacts/rocm64-upgrade-oldabi
+- artifacts/rocm64-oldabi-sdk
+- artifacts/rocm64-upgrade-safe-support
 - artifacts/ollama_reference
 - artifacts/rocm57
 - artifacts/rocm-latest
@@ -38,6 +42,10 @@ if [ "$#" -eq 0 ]; then
   ARTIFACT_PATHS=(
     "$REPO_ROOT/lib-compat"
     "$REPO_ROOT/docker-venv"
+    "$REPO_ROOT/artifacts/rocm64-upgrade"
+    "$REPO_ROOT/artifacts/rocm64-upgrade-oldabi"
+    "$REPO_ROOT/artifacts/rocm64-oldabi-sdk"
+    "$REPO_ROOT/artifacts/rocm64-upgrade-safe-support"
     "$REPO_ROOT/artifacts/ollama_reference"
     "$REPO_ROOT/artifacts/rocm57"
     "$REPO_ROOT/artifacts/rocm-latest"

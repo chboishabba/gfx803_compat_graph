@@ -51,9 +51,15 @@
       git
       cmake
       ninja
+      gnumake
+      pkg-config
+      ccache
+      which
       python312
       python312Packages.pip
       python312Packages.virtualenv
+      python312Packages.setuptools
+      python312Packages.wheel
       graphPy
       rocmPackages.clr
       rocmPackages.rocblas
@@ -173,12 +179,47 @@
       '';
     };
 
+    frameworkRebuildDriver = pkgs.writeShellApplication {
+      name = "run-gfx803-pytorch-framework-rebuild";
+      runtimeInputs = commonInputs;
+      text = ''
+        set -euo pipefail
+        ${repoRootDetect}
+        REPO_ROOT=''${REPO_ROOT:-$REPO_ROOT_DEFAULT}
+        exec "$REPO_ROOT/scripts/run-gfx803-pytorch-framework-rebuild.sh" "$@"
+      '';
+    };
+
+    mkPytorchStackShell = { message, torchRunner, stackId, runtimeFamily, runtimeSource, extraHook ? "" }:
+      pkgs.mkShell {
+        buildInputs = commonInputs ++ [ driftRunner graphUpdater verifyHost communityBundle releaseManifest ] ++ (with pkgs; [
+          python312Packages.numpy
+          python312Packages.sentencepiece
+          python312Packages.requests
+        ]);
+        shellHook = ''
+          ${gfx803EnvText}
+          ${repoRootDetect}
+          export REPO_ROOT=''${REPO_ROOT:-$REPO_ROOT_DEFAULT}
+          export TORCH_PYTHON="$REPO_ROOT/${torchRunner}"
+          export STACK_ID="${stackId}"
+          export REFERENCE_CLASS="reference"
+          export RUNTIME_FAMILY="${runtimeFamily}"
+          export RUNTIME_SOURCE="${runtimeSource}"
+          ${extraHook}
+          echo "${message}"
+          echo "TORCH_PYTHON=$TORCH_PYTHON"
+          echo "Use: run-drift-matrix"
+        '';
+      };
+
   in {
     packages.${system} = {
       gfx803-env = pkgs.writeText "gfx803-env.sh" gfx803EnvText;
       run-drift-matrix = driftRunner;
       update-compat-graph = graphUpdater;
       verify-gfx803-host = verifyHost;
+      run-gfx803-pytorch-framework-rebuild = frameworkRebuildDriver;
       create-community-bundle = communityBundle;
       build-release-manifest = releaseManifest;
     };
@@ -203,6 +244,10 @@
       verify-host = {
         type = "app";
         program = "${verifyHost}/bin/verify-gfx803-host";
+      };
+      framework-rebuild = {
+        type = "app";
+        program = "${frameworkRebuildDriver}/bin/run-gfx803-pytorch-framework-rebuild";
       };
     };
 
@@ -259,6 +304,40 @@
             echo "No .venv detected. Set TORCH_PYTHON, create a local venv, or use docker-venv."
           fi
           echo "Use: run-drift-matrix"
+        '';
+      };
+
+      "gfx803-pytorch-stack" = mkPytorchStackShell {
+        message = "gfx803 PyTorch control stack (frozen Python/framework + known-working selected libs)";
+        torchRunner = "scripts/host-docker-python.sh";
+        stackId = "gfx803_pytorch_stack_control";
+        runtimeFamily = "rocm64_extracted_control";
+        runtimeSource = "frozen extracted 6.4 Python/framework with known-working selected libs";
+      };
+
+      "gfx803-pytorch-stack-upgrade" = mkPytorchStackShell {
+        message = "gfx803 PyTorch upgrade stack (same frozen Python/framework + preserved old HSA/HIP ABI lane)";
+        torchRunner = "scripts/host-rocm64-upgrade-oldabi-python.sh";
+        stackId = "gfx803_pytorch_stack_upgrade";
+        runtimeFamily = "rocm64_upgrade_oldabi";
+        runtimeSource = "frozen extracted 6.4 Python/framework with preserved old HSA/HIP ABI and selected newer support libs";
+      };
+
+      "gfx803-pytorch-framework-rebuild" = pkgs.mkShell {
+        buildInputs = commonInputs ++ [ driftRunner graphUpdater verifyHost communityBundle releaseManifest frameworkRebuildDriver ] ++ (with pkgs; [
+          python312Packages.numpy
+          python312Packages.requests
+        ]);
+        shellHook = ''
+          ${gfx803EnvText}
+          ${repoRootDetect}
+          export REPO_ROOT=''${REPO_ROOT:-$REPO_ROOT_DEFAULT}
+          export FRAMEWORK_REBUILD_RUNTIME_LIBDIR="''${FRAMEWORK_REBUILD_RUNTIME_LIBDIR:-$REPO_ROOT/artifacts/rocm64-upgrade-oldabi/lib-compat}"
+          export FRAMEWORK_REBUILD_ROCM_ROOT="''${FRAMEWORK_REBUILD_ROCM_ROOT:-$REPO_ROOT/artifacts/rocm64-oldabi-sdk/opt-rocm}"
+          echo "gfx803 PyTorch framework rebuild shell"
+          echo "Runtime compat: $FRAMEWORK_REBUILD_RUNTIME_LIBDIR"
+          echo "ROCm root: $FRAMEWORK_REBUILD_ROCM_ROOT"
+          echo "Use: run-gfx803-pytorch-framework-rebuild"
         '';
       };
 

@@ -8,12 +8,16 @@ It is intended to replace ad hoc container juggling with a smaller set of reprod
 
 - `.#base`: host visibility and ROCm sanity checks
 - `.#pytorch`: drift-testing shell
+- `.#gfx803-pytorch-stack`: frozen control PyTorch stack
+- `.#gfx803-pytorch-stack-upgrade`: primary short-term upgrade PyTorch stack with the same frozen Python/framework layer and a preserved old-HSA/HIP ABI lane underneath
+- `.#gfx803-pytorch-framework-rebuild`: first Nix-owned framework rebuild shell
 - `.#rocmNative-franken`: newer runtime plus extracted `5.7` math payload
 - `.#comfyui`: app shell with low-VRAM defaults
 - `.#whisperx`: app shell with WhisperX-oriented defaults
 - `nix run .#verify-host`
 - `nix run .#drift-matrix`
 - `nix run .#community-bundle`
+- `nix run .#framework-rebuild`
 - `nix run .#release-manifest`
 - `nix run .#update-graph`
 
@@ -28,6 +32,14 @@ It is intended to replace ad hoc container juggling with a smaller set of reprod
 - The `rocmNative-franken` shell still needs follow-up because the workload crashes before a full drift-matrix result is emitted
 - Separate `ROCm 7+` extracted-host experiments should live under `../artifacts/rocm-latest/`, outside the flake shells, until one proves stable enough to promote
 - The extracted `6.4` host path now covers torch, WhisperX, and ComfyUI, but it is still not a GPU Ollama replacement
+- The intended next shell split is:
+  - `.#gfx803-pytorch-stack` as the untouched control lane
+  - `.#gfx803-pytorch-stack-upgrade` as the first practical ROCm-upgrade lane using the same frozen extracted Python/framework layer
+- Current measured status:
+  - `.#gfx803-pytorch-stack` follows the known-working extracted `6.4` Python/framework path
+  - `.#gfx803-pytorch-stack-upgrade` now points at the preserved old-HSA/HIP ABI lane and treats the earlier safe-support lane as an implementation detail of that direction
+  - the fully upgraded latest-class userspace is still a separate experiment because Polaris breaks at the newer HSA/HIP seam before rebuilt torch can use it
+  - `.#framework-rebuild` / `.#gfx803-pytorch-framework-rebuild` now default to the preserved old-ABI upgrade lane and should use an extracted old-ABI ROCm SDK root rather than leaking `/opt/rocm` latest libs
 
 ## Fastest checks
 
@@ -87,6 +99,8 @@ At the moment, the missing piece is Ollama:
 - the stock host `ollama` binary starts under the extracted `6.4` runtime but still discovers only CPU
 - the previously known-good GPU path still comes from the patched Robert container lineage
 - a real Nix-first replacement therefore still needs an Ollama-specific port, not just the general PyTorch-side extracted runtime
+
+If you want the checklist for turning the original working Docker recipe into a modular Nix-owned graph, read [docs/NIX_MIGRATION_CHECKLIST.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/NIX_MIGRATION_CHECKLIST.md).
 
 ## Cachix
 

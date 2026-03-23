@@ -70,7 +70,7 @@
 
         shellHook = ''
           ${gfx803Env}
-          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:${pkgs.rocmPackages.clr}/lib:${pkgs.rocmPackages.hipblas}/lib:${pkgs.rocmPackages.rocblas}/lib:$LD_LIBRARY_PATH"
 
           echo "gfx803 ROCm base shell"
           echo "Try: rocminfo"
@@ -93,6 +93,9 @@
           python312Packages.torchvision
           python312Packages.torchaudio
 
+          python312Packages.sentencepiece
+          python312Packages.requests
+
           rocmPackages.clr
           rocmPackages.miopen
           rocmPackages.rocblas
@@ -107,7 +110,7 @@
 
         shellHook = ''
           ${gfx803Env}
-          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:${pkgs.rocmPackages.clr}/lib:${pkgs.rocmPackages.hipblas}/lib:${pkgs.rocmPackages.rocblas}/lib:$LD_LIBRARY_PATH"
 
           echo "gfx803 PyTorch shell"
           python - <<EOF
@@ -145,7 +148,7 @@ EOF
 
         shellHook = ''
           ${gfx803Env}
-          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:$LD_LIBRARY_PATH"
+          export LD_LIBRARY_PATH="${pkgs.libdrm}/lib:${pkgs.numactl}/lib:${pkgs.pciutils}/lib:${pkgs.rocmPackages.clr}/lib:${pkgs.rocmPackages.hipblas}/lib:${pkgs.rocmPackages.rocblas}/lib:$LD_LIBRARY_PATH"
 
           export DRIFT_RESULTS_DIR=$PWD/out
           mkdir -p $DRIFT_RESULTS_DIR

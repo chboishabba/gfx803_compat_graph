@@ -10,6 +10,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 ARTIFACT_DIR="${ROCM57_OUTDIR:-$REPO_ROOT/artifacts/rocm57}"
 COMPAT_DIR="$ARTIFACT_DIR/lib-compat"
+ROCBLAS_DIR="$ARTIFACT_DIR/rocblas-library"
+MIOPEN_DB_DIR="$ARTIFACT_DIR/miopen-db"
 VENV_DIR="$ARTIFACT_DIR/docker-venv"
 VENV_PYTHON="$VENV_DIR/venv/bin/python"
 CONDA_ENV_PYTHON="$VENV_DIR/conda-python/envs/py_3.10/bin/python"
@@ -48,6 +50,19 @@ export ROC_ENABLE_PRE_VEGA="${ROC_ENABLE_PRE_VEGA:-1}"
 export PYTORCH_ROCM_ARCH="${PYTORCH_ROCM_ARCH:-gfx803}"
 export ROCM_ARCH="${ROCM_ARCH:-gfx803}"
 export TORCH_BLAS_PREFER_HIPBLASLT="${TORCH_BLAS_PREFER_HIPBLASLT:-0}"
+if [ -z "${ROCBLAS_TENSILE_LIBPATH:-}" ] && [ -d "$ROCBLAS_DIR" ]; then
+  export ROCBLAS_TENSILE_LIBPATH="$ROCBLAS_DIR"
+fi
+if [ -z "${MIOPEN_SYSTEM_DB_PATH:-}" ] && [ -d "$MIOPEN_DB_DIR" ]; then
+  export MIOPEN_SYSTEM_DB_PATH="$MIOPEN_DB_DIR"
+fi
+if [ -z "${AMDGPU_ASIC_ID_TABLE_PATHS:-}" ]; then
+  if [ -f /opt/amdgpu/share/libdrm/amdgpu.ids ]; then
+    export AMDGPU_ASIC_ID_TABLE_PATHS="/opt/amdgpu/share/libdrm/amdgpu.ids"
+  elif [ -f /usr/share/libdrm/amdgpu.ids ]; then
+    export AMDGPU_ASIC_ID_TABLE_PATHS="/usr/share/libdrm/amdgpu.ids"
+  fi
+fi
 export PATH="$VENV_DIR/venv/bin:$VENV_DIR/conda-python/bin:$VENV_DIR/conda-python/envs/py_3.10/bin:$PATH"
 if [ -n "$PYTHON_HOME_CANDIDATE" ] && [ -d "$PYTHON_HOME_CANDIDATE" ]; then
   export PYTHONHOME="$PYTHON_HOME_CANDIDATE"

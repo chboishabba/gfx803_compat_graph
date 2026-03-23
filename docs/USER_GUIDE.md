@@ -14,6 +14,7 @@ The short version:
 - `WhisperX` and related Python workflows are available through the same extracted host runtime
 - `ComfyUI` is available through the extracted host runtime, with Polaris safety flags strongly recommended
 - `Ollama` has a working patched reference bundle extracted from `robertrosenbusch/rocm6_gfx803_ollama:6.4.3_0.11.5`, but host stability is still under investigation on this machine
+- the path toward a reproducible newer ROCm-class stack is now a cloned `6.4` upgrade lane, not a direct jump to pure `latest`
 
 
 ## New-machine onboarding in one pass
@@ -77,6 +78,7 @@ WATCH_AMDGPU_DEVCOREDUMP=1 bash scripts/host-docker-python.sh tests/bug_report_m
 - `ComfyUI` via the extracted `6.4` host runtime
 - extracted `5.7` artifacts for comparison and mixed-runtime experiments
 - a separate `ROCm 7+` experiment lane for newer upstream attempts
+- a `6.4`-derived upgrade lane for incrementally testing newer components while preserving the current working runtime shape
 - an extracted patched `Ollama` reference bundle for investigation and packaging work
 
 ## Current Reality
@@ -86,6 +88,7 @@ Please use this project with the following expectations:
 - the extracted `6.4` host path is the current baseline
 - the public binary cache is `https://gfx803-rocm.cachix.org`
 - the `5.7` and `ROCm 7+` paths are experiment lanes, not the default recommendation
+- the preferred route toward a more current reproducible stack is now a cloned `6.4` upgrade lane rather than a direct switch to pure `ROCm latest`
 - the extracted `Ollama` reference bundle now extracts correctly and is published to Cachix, but it is not yet a settled "safe daily driver" host path
 - on this host, the extracted `Ollama` bundle can start and then trigger a GPU reset / system instability; that investigation is still open
 - if you need GPU `Ollama` immediately, the already-working Robert container lineage is still the safer fallback than the host bundle
@@ -172,9 +175,9 @@ bash scripts/run-gfx803-ollama-container.sh --stop
 
 If you need Open WebUI behavior in the same image, add `--with-webui`.
 
-## LeechTransformer Runbook (CUDA/PyTorch path)
+## LeechTransformer Status (CUDA/PyTorch path)
 
-If you use the extracted host runtime, LeechTransformer can be run directly:
+If you use the extracted host runtime, LeechTransformer can still be launched directly for debugging:
 
 ```bash
 cd /home/c/Documents/code/__OTHER/gfx803_compat_graph
@@ -185,20 +188,26 @@ HOST_DOCKER_PYTHON_GPU_PRECHECK=1 bash scripts/host-docker-python.sh \
   --max_tokens 32
 ```
 
-Expected behavior on this setup:
+What is currently true on this setup:
 
 - script selects `device=cuda`
 - checkpoint loads without the `__main__.LeechConfig` unpickle error
-- short prompts complete on GPU
-- a `--max_tokens 32` smoke run was re-confirmed on `2026-03-21` on this machine with `device=cuda`
-- focused `direct_only` matrices on `2026-03-21` also passed `40`, `48`, `64`, `80`, `96`, and `128` generated tokens with both `kv_cache=off` and `kv_cache=on`
+- short and long prompts can complete on GPU without an immediate crash
+- the extracted `6.4` host path is not numerically trustworthy for Leech output on this machine, even though it selects `device=cuda`
+- the extracted `5.7` path is useful for comparison and diagnostics, but it is also not yet trustworthy for inference output
 
-Important notes for stability on this machine:
+What the current debugging says:
 
-- for `--max_tokens > 36`, the current inference script forces `top_p=1.0` on ROCm because the tested nucleus-sampling path was the repeatable crash trigger on this host.
-- that `top_p` guardrail is now part of the measured working path for the `direct_only` profile on this machine through `128` tokens.
-- the `2026-03-21` rerun did not reproduce the older `kv_cache` faults for the tested `direct_only` path through `64` tokens, but it is still sensible to treat other prompts, higher token counts, and other profiles as separate validation lanes.
-- if you specifically want to test `--kv_cache` outside the current measured envelope, do it with:
+- `ROCm 6.4` diverges from CPU almost immediately, with the first large corruption detected around `block0.q_raw`
+- `ROCm 5.7` avoids that early `6.4` failure mode, but repeated identical GPU runs still diverge; the finer probe now finds the first repeated-run instability at `block0.attn_out_preproj_view`
+- on the current `5.7` repro, `attn_probs`, `attn_weighted`, and `attn_heads_transposed` stay stable while the flattening step `transpose(...).reshape(B, T, -1)` drifts; the alternative `permute(...).contiguous().reshape(...)` path is stable on the same tensor
+- a local attempt to apply that `permute(...).contiguous().reshape(...)` materialization in the actual Leech attention code did not stabilize end-to-end first-step logits on this machine, so that finding is useful for upstream debugging but is not yet a sufficient fix
+- after that local attention patch, a same-process repeated-run probe still shows large intra-GPU first-step drift, which means the flatten/layout issue is only one part of the remaining ROCm correctness problem
+- a newer tensor-only layout repro now shows that even repeated materialization of a fixed `attn_weighted` tensor can drift on the extracted `5.7` runtime, while the same repro becomes stable under `HIP_LAUNCH_BLOCKING=1`; that makes launch ordering / synchronization a concrete upstream lead
+- this means the present Leech path is a ROCm correctness investigation, not a validated end-user workflow
+- the `temperature=0` greedy-decoding bug in upstream LeechTransformer was fixed separately, so the remaining bad output here should be treated as a runtime/math issue rather than a decode-logic bug
+- for `--max_tokens > 36`, the current inference script still forces `top_p=1.0` on ROCm because the tested nucleus-sampling path was a repeatable crash trigger on this host; that guard remains useful for crash avoidance, but it does not make the output trustworthy
+- if you specifically want to test `--kv_cache` as part of the ongoing debugging, do it with:
 
 ```bash
 LEECH_ALLOW_KVCACHE_GPU=1 HOST_DOCKER_PYTHON_GPU_PRECHECK=1 bash scripts/host-docker-python.sh \
@@ -224,8 +233,9 @@ bash scripts/debug-leech-high-token-instability.sh \
   - per-case run logs: `out/leech-debug-high-tokens/<timestamp>/<case>/run.log`
   - per-case kernel/journal snapshots and capture artifacts under each case directory
 
-- the public stable recommendation for the currently tested `direct_only` path is now `--max_tokens <= 128`.
-- runs above `128` tokens, or runs under other profile families, are still an active validation lane.
+- there is currently no public "known-good" Leech GPU recommendation in this repo for Polaris hosts; CPU remains the only trustworthy output path here until the ROCm correctness issue is isolated or worked around.
+- the focused `direct_only` token matrices are still useful as crash-behavior data, but they should not be read as proof of inference correctness.
+- the current upstream-quality repro direction is no longer just "attention is unstable"; it is specifically "the attention flatten/layout path becomes nondeterministic on the extracted `5.7` ROCm stack while equivalent alternate layout materialization stays stable."
 - if you hit an immediate fault, rerun with a shorter `--max_tokens`, and capture logs with:
 
 ```bash
@@ -261,8 +271,90 @@ Choose the workflow based on your goal:
 - if you want the clearest current setup: use `gfx803_flake_v1`
 - if you want the most direct host runtime reuse: use `scripts/extract-docker-libs.sh` and `scripts/host-docker-python.sh`
 - if you want to help test older math/runtime combinations: use `artifacts/rocm57/`
+- if you want to help build a shareable path toward newer ROCm components without discarding the current working runtime shape: use `artifacts/rocm64-upgrade/`
 - if you want to help test newer upstream ROCm attempts: use `artifacts/rocm-latest/`
 - if you want to help on `Ollama`: use `artifacts/ollama_reference/`, but treat it as an active investigation rather than a finished host product
+- if you want correct LeechTransformer text today: use CPU, not the current extracted ROCm host paths
+
+## `6.4` Upgrade Lane
+
+The current project direction for a reproducible newer stack is:
+
+- keep the extracted `6.4` runtime as the control
+- clone it into `artifacts/rocm64-upgrade/`
+- swap newer components into that cloned lane incrementally
+- run the smallest Leech repros after each swap instead of relying on large end-to-end runs
+
+Initialize the lane with:
+
+```bash
+bash scripts/clone-rocm64-upgrade-lane.sh
+```
+
+Smoke-test the cloned lane with:
+
+```bash
+bash scripts/host-rocm64-upgrade-python.sh -c 'import torch; print(torch.__version__); print(torch.cuda.is_available())'
+```
+
+Current result on this machine:
+
+- the cloned lane imports `torch 2.6.0+gitdae14f9`
+- `torch.cuda.is_available()` returns `True`
+
+Capture the current minimal repro set for a lane with:
+
+```bash
+bash scripts/capture-leech-minimal-repros.sh \
+  --runner scripts/host-rocm64-upgrade-python.sh \
+  --label rocm64-upgrade
+```
+
+That capture script records:
+
+- live-process layout repro
+- live-process layout repro with `HIP_LAUNCH_BLOCKING=1`
+- saved-tensor standalone repro
+- first-step logits probe
+
+When `artifacts/rocm-latest/docker-venv/` is ready, the first planned swap is:
+
+```bash
+bash scripts/swap-rocm64-upgrade-python-from-latest.sh
+bash scripts/swap-rocm64-upgrade-support-libs-from-latest.sh
+bash scripts/swap-rocm64-upgrade-math-libs-from-latest.sh
+bash scripts/sync-rocm64-upgrade-lib-compat-from-latest.sh
+```
+
+Then rerun the same capture command for `rocm64-upgrade`.
+
+Current frozen captures:
+
+- control `6.4`: `out/leech-min-repros/rocm64-control/2026-03-22T13-02-21`
+- cloned `6.4`-upgrade pre-swap baseline: `out/leech-min-repros/rocm64-upgrade/2026-03-22T13-01-09`
+
+Current swap status:
+
+- pure `ROCm latest` now imports `torch 2.10.0+rocm7.2.0.gitb6ee5fde`
+- that pure latest lane reports `torch.cuda.is_available() == False` on this Polaris host
+- the cloned `6.4`-upgrade lane behaves the same way once its Python layer and full `lib-compat` are synced from latest
+- intermediate failures were informative:
+  - latest Python on top of old `6.4` libs failed on missing `ROCR_1` symbols
+  - adding newer non-math support libs moved the failure into `hipsparse/rocsparse`
+  - full latest `lib-compat` removed import-time linker failures, but not the GPU gate
+
+So the current classification of the `6.4`-upgrade lane is:
+
+- importable
+- reproducible
+- still GPU-gated on Polaris with the current latest userspace
+- cloned `6.4`-upgrade: `out/leech-min-repros/rocm64-upgrade/2026-03-22T13-01-09`
+
+The goal of this lane is reproducibility for others:
+
+- repo-local artifact layout
+- compatible with the existing Cachix publish/restore workflow
+- explicit runner script instead of ad hoc local shell state
 
 ## Ollama Status
 
@@ -278,6 +370,15 @@ What is not yet true:
 
 - the extracted host bundle is not yet a universally safe replacement for the Robert container
 - this host has already shown a GPU reset / system crash while exercising the extracted host bundle
+
+## Vulkan Note
+
+The current extracted-runtime PyTorch build used in this repo does not expose a Vulkan backend:
+
+- `torch 2.6.0+gitdae14f9`
+- `torch.backends.vulkan -> None`
+
+That means Vulkan is not a practical fallback compute path for LeechTransformer under the current PyTorch setup. Installing Vulkan-capable user-space through Steam may help other Vulkan applications, but it does not add a Vulkan execution backend to this torch runtime.
 
 So if someone asks, "What is the safest GPU Ollama path today?" the answer is still:
 

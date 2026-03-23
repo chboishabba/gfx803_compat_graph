@@ -1,5 +1,6 @@
 __pycache__
 .venv
+.cache/
 artifacts/
 docker-venv/
 lib-compat/
