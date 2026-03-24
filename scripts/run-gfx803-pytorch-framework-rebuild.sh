@@ -92,6 +92,7 @@ export USE_CUDA="${USE_CUDA:-0}"
 export USE_ROCM="${USE_ROCM:-1}"
 export USE_NINJA="${USE_NINJA:-1}"
 export FORCE_CUDA="${FORCE_CUDA:-1}"
+export USE_KINETO="${USE_KINETO:-0}"
 export BUILD_TEST="${BUILD_TEST:-0}"
 export USE_NNPACK="${USE_NNPACK:-0}"
 export USE_TENSORPIPE="${USE_TENSORPIPE:-0}"
@@ -99,9 +100,10 @@ export USE_DISTRIBUTED="${USE_DISTRIBUTED:-0}"
 export USE_RPC="${USE_RPC:-0}"
 export USE_SYSTEM_PROTOBUF="${USE_SYSTEM_PROTOBUF:-1}"
 export BUILD_CUSTOM_PROTOBUF="${BUILD_CUSTOM_PROTOBUF:-OFF}"
-export CXXFLAGS="${CXXFLAGS:--Wno-error=maybe-uninitialized}"
+export CXXFLAGS="${CXXFLAGS:--Wno-error=maybe-uninitialized} -U_GLIBCXX_ASSERTIONS -D_GLIBCXX_ASSERTIONS=0"
+export HIPFLAGS="${HIPFLAGS:-} -U_GLIBCXX_ASSERTIONS -D_GLIBCXX_ASSERTIONS=0"
+export CMAKE_ARGS="${CMAKE_ARGS:-} -DCMAKE_HIP_FLAGS:STRING=-U_GLIBCXX_ASSERTIONS\\ -D_GLIBCXX_ASSERTIONS=0"
 export MAX_JOBS
-export LD_LIBRARY_PATH="$RUNTIME_LIBDIR:$ROCM_ROOT/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export PYTHONNOUSERSITE=1
 export PYTHONPATH=
 export PATH="$ROCM_ROOT/bin${PATH:+:$PATH}"
@@ -114,6 +116,7 @@ export CMAKE_INCLUDE_PATH="$ROCM_ROOT/include${CMAKE_INCLUDE_PATH:+:$CMAKE_INCLU
 export CPATH="$ROCM_ROOT/include${CPATH:+:$CPATH}"
 export CPLUS_INCLUDE_PATH="$ROCM_ROOT/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
 export PKG_CONFIG_PATH="$ROCM_ROOT/lib/pkgconfig:$ROCM_ROOT/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+export LD_LIBRARY_PATH="$RUNTIME_LIBDIR:$ROCM_ROOT/lib"
 
 prepend_ld_dir() {
   local candidate="$1"
@@ -203,6 +206,22 @@ if command -v c++ >/dev/null 2>&1; then
     prepend_ld_dir "$(dirname "$LIBGOMP_PATH")"
   fi
 fi
+
+find_and_prepend_runtime_lib() {
+  local libname="$1"
+  local found=""
+  while IFS= read -r candidate; do
+    found="$candidate"
+    break
+  done < <(find /usr/lib /usr/lib64 /lib /lib64 /nix/store -maxdepth 3 -name "$libname" 2>/dev/null)
+  if [ -n "$found" ]; then
+    prepend_ld_dir "$(dirname "$found")"
+  fi
+}
+
+# ROCm's bundled LLVM tools depend on host libs like libxml2 that are not part of
+# the extracted SDK closure on this machine.
+find_and_prepend_runtime_lib "libxml2.so.2"
 
 assert_rocm_resolution() {
   local log_path="$1"

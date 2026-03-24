@@ -334,6 +334,7 @@ bash scripts/run-gfx803-ollama-container.sh --with-webui
 - the top-level `flake.nix` is an older shell definition; the more current flake work is under `gfx803_flake_v1/`
 - CI/CD is not implemented here yet, so the repo is still driven manually
 - the extracted-runtime PyTorch build used here does not expose Vulkan support, so installing Vulkan-capable user-space through Steam does not by itself make Leech runnable on Vulkan
+- the old-ABI framework rebuild driver now forces `FRAMEWORK_REBUILD_ROOT=artifacts/pytorch-framework-rebuild-oldabi-kinetooff`, injects `_GLIBCXX_ASSERTIONS` through `HIPFLAGS/CMAKE_ARGS`, and prepends the host `libxml2.so.2` path before running `amdgcn-link`, so the next run under that directory is the authoritative torch-smoke signal
 
 ## Crash capture
 

@@ -98,6 +98,18 @@
   - `torch.cuda.is_available() == False`
   - `ldd` showed `libamdhip64.so.7`, `librocblas.so.5`, and related latest-class libs resolving from `/opt/rocm/lib`
   - so the next concrete fix is a coherent extracted old-ABI ROCm SDK root plus a rebuild-driver guard that rejects that leakage
+- The rebuild driver now starts from a clean `LD_LIBRARY_PATH` built from the intended old-ABI roots only, so the next smoke should no longer inherit `/opt/rocm` from the caller environment.
+- The next build failure on the old-ABI lane came from Kineto / `roctracer` headers, so the rebuild driver should disable `USE_KINETO` for this lane rather than trying to compile profiling support from the extracted SDK.
+- After disabling Kineto, the next old-ABI lane failure moved into HIP-generated CUB objects under libstdc++ 15:
+  - `torch_hip_generated_cub.hip.o`
+  - `torch_hip_generated_cub-RadixSortPairs.hip.o`
+  - the failure is `std::array` hitting `__glibcxx_assert_fail` in `__host__ __device__` code
+  - the first `_GLIBCXX_ASSERTIONS` workaround only reached top-level `CXX flags`
+  - the generated HIP compile commands did not carry it into `HIP_CLANG_FLAGS`
+  - the workaround is now injected through `HIPFLAGS` and CMake configuration arguments
+  - the next failure moved to the ROCm LLVM toolchain itself: bundled `lld` cannot load `libxml2.so.2`
+  - the rebuild driver now prepends a host `libxml2` provider before rerunning
+  - a later live run showed the first `CMAKE_HIP_FLAGS` env injection was malformed at the cmake command line, so the driver now passes it through `CMAKE_ARGS` as a single escaped value
 - The next practical migration target is no longer `latest HIP on gfx803`. It is:
   - preserve the old HSA/HIP ABI while upgrading around it where possible, or
   - patch the newer HSA/HIP line itself before expecting a latest-class framework lane to work

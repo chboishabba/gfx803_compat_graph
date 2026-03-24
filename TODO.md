@@ -107,6 +107,14 @@
 - Make the rebuild driver reject silent fallback to `/opt/rocm` latest ROCm payloads during an old-ABI-targeted run:
   - fail fast if `libamdhip64`, `libhsa-runtime64`, `librocblas`, `libhipblas*`, `libMIOpen`, or related ROCm libs resolve outside the intended old-ABI roots
 - Only trust the next torch smoke result after the old-ABI SDK root exists and the rebuild driver proves the wheel is not binding latest `/opt/rocm` sonames
+- Validate the cleaned old-ABI smoke path:
+  - confirm `LD_LIBRARY_PATH` is rebuilt from only the preserved old-ABI roots
+  - rerun the torch-only smoke
+  - record whether `torch.cuda.is_available()` flips to `True`
+- Disable Kineto for the old-ABI torch rebuild lane so the build does not trip over the incompatible `roctracer` headers from the extracted SDK
+- Keep the `_GLIBCXX_ASSERTIONS` workaround in HIP-specific flags and rerun the old-ABI lane now that:
+  - ROCm LLVM tools have a host `libxml2.so.2` provider in `LD_LIBRARY_PATH`
+  - the HIP flag override is passed through `CMAKE_ARGS` as a single value instead of malformed `-DCMAKE_HIP_FLAGS=` shell fragments
 - Back only the PyTorch-essential Docker-era workarounds into derivations now:
   - gfx803 env contract
   - rebuilt `rocBLAS`

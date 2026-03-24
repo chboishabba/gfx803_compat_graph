@@ -6,6 +6,8 @@
   - added `scripts/extract-rocm64-oldabi-sdk.sh` to snapshot `/opt/rocm` from the known-working Robert `6.4.3_0.11.5` image into `artifacts/rocm64-oldabi-sdk/`
   - updated the rebuild docs/TODOs to record that a runtime-lib overlay alone was not enough because the first smoke still leaked latest `/opt/rocm` sonames
   - prepared the repo to require a coherent old-ABI ROCm SDK root for future framework rebuilds
+- cleaned the framework rebuild driver so it now rebuilds `LD_LIBRARY_PATH` from the intended old-ABI roots instead of inheriting the caller's `/opt/rocm` entries
+- disabled Kineto in the old-ABI torch rebuild lane after the extracted SDK's `roctracer` headers triggered ambiguous `operator<<` compile failures in `libkineto`
 - promoted the preserved old-HSA/HIP ABI direction from a documented recommendation into repo wiring:
   - added `scripts/create-rocm64-upgrade-oldabi-lane.sh`
   - added `scripts/host-rocm64-upgrade-oldabi-python.sh`
@@ -158,6 +160,23 @@ Why:
 - the tensor-only repro plus the launch-blocking result are stronger than the earlier full-model symptom reports and are the most actionable upstream artifacts so far
 - the newer CPU/GPU and GPU/GPU probe results show that crash-free execution is not the same thing as correct inference output
 - short GPU runs are now good enough to document as working, but the longer-token path still needs measured re-baselining before it should be presented as solved
+
+## 2026-03-23
+
+- tightened the old-ABI framework rebuild lane again after the Kineto-off torch build started failing in HIP-generated CUB objects under libstdc++ 15
+- confirmed the failure is `__glibcxx_assert_fail` inside `std::array` in `__host__ __device__` code, not another `/opt/rocm` leakage or Kineto issue
+- updated the rebuild driver to undefine `_GLIBCXX_ASSERTIONS` for the old-ABI lane so the next rebuild can test whether this is the last compile-time blocker before the torch smoke gate
+- confirmed from the live build log that the first `_GLIBCXX_ASSERTIONS` workaround only hit host `CXX flags` and never reached the generated HIP compile commands
+- updated the rebuild driver to export the same workaround through `HIPFLAGS` and `CMAKE_HIP_FLAGS` so the failing `torch_hip_generated_cub*.hip.o` path actually sees it
+- confirmed the next failure is no longer the HIP/CUB assertion path itself: the bundled ROCm `lld` now fails to load `libxml2.so.2` during `amdgcn-link`
+- updated the rebuild driver to discover a host `libxml2.so.2` provider and prepend that directory before the HIP toolchain runs
+- confirmed from the next live command line that exporting `CMAKE_HIP_FLAGS` directly produced a malformed cmake invocation (`-DCMAKE_HIP_FLAGS=` followed by stray tokens)
+- updated the rebuild driver to pass the HIP assertion workaround via `CMAKE_ARGS` as a single escaped `-DCMAKE_HIP_FLAGS:STRING=...` value instead
+
+Why:
+
+- the previous failures had already eliminated the packaging/runtime-path issues and the Kineto/roctracer header mismatch
+- the remaining compile failure is now specific enough to justify a narrow compiler-flag workaround before trying broader source or toolchain changes
 
 ## 2026-03-20
 
