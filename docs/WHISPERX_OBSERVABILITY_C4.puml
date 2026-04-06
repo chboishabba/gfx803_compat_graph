@@ -1,0 +1,37 @@
+@startuml
+title WhisperX RCA Observability Container View
+
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment left
+
+rectangle "Operator" as Operator
+rectangle "WhisperX Trace Wrapper\nscripts/trace-whisperx-rocprof.sh" as Wrapper
+rectangle "WhisperX Harness\nscripts/whisperx_rca_harness.py" as Harness
+rectangle "rocprofv3 / rocprofiler-sdk" as Profiler
+rectangle "Host Watchers\nheartbeat + cpu + devcoredump" as Watchers
+rectangle "Kernel / Driver\namdgpu + KFD + journal + devcoredump" as Kernel
+rectangle "Retained Evidence Bundle\nout/whisperx-trace/<stamp>" as Bundle
+
+Operator --> Wrapper : starts reduced RCA lane
+Wrapper --> Harness : stage-controlled workload
+Wrapper --> Profiler : optional profiler backend
+Wrapper --> Watchers : low-noise side channel
+Harness --> Bundle : events.jsonl\nrun-config.json
+Profiler --> Bundle : marker and kernel traces\nif flush survives reset
+Watchers --> Bundle : heartbeat.log\nhost-cpu.log\ndevcoredump-watch.log
+Kernel --> Bundle : indirect evidence via watcher capture
+Harness --> Kernel : GPU work submission
+Profiler --> Kernel : profiler instrumentation
+
+note right of Profiler
+Crashy runs can lose structured profiler output
+if reset lands before profiler finalize/flush.
+end note
+
+note bottom of Watchers
+Breadcrumb channel should stay cheap and line-buffered.
+It is not the primary kernel-attribution surface.
+end note
+
+@enduml

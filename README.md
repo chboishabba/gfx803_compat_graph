@@ -21,7 +21,24 @@ As of `2026-03-22`, the repo state is:
 - `itir:latest` is still the expected source image for the extracted `6.4` compatibility runtime, but it may need to be re-pulled locally after a Docker reset
 - `lib-compat/` and `docker-venv/` are present in this working tree as previously extracted artifacts
 - `gfx803_flake_v1/` is the clearest reproducible entrypoint for the current Nix-based workflow
-- the extracted `6.4` host path now covers the previously working torch, WhisperX, and ComfyUI surfaces
+- the extracted `6.4` host path remains the baseline runtime for torch and ComfyUI, while WhisperX is usable as a GPU RCA/reproducer surface but is not yet promoted as host-stable under real GPU workload
+- the `gfx803_flake_v1` `.#whisperx` shell is currently only a candidate normal path: a short-file non-RCA run surfaced a separate Nix/extracted-runtime mixing bug where `/nix/store` ROCm device-libs (`LLVM 22`) leaked into the extracted runtime (`LLVM 19` reader), failed blit-kernel compilation, and then segfaulted before normal transcription could begin
+- the next normal-path blocker after that shell fix is now explicit too: `--vad_method silero` depends on a `torch.hub` repo cache, so the repo now carries a local-cache bootstrap path instead of relying on live GitHub fetches at runtime
+- the latest WhisperX split is now sharper:
+  - without profiler, the reduced `stage=align` repro completed `transcribe`, entered `align`, and then hit a retained `GPU Hang` followed by an `amdgpu` reset / VRAM-loss wave around `2026-03-30 01:13:28`
+  - with `rocprofv3`, the same reduced path completed successfully and emitted real profiler traces, but `rocprofiler-sdk` later segfaulted during teardown after writing result files
+- the first named `blocking` matrix lane now also has a long-file summary-level
+  success under `out/whisperx-rca-matrix/2026-03-30T16-45-56/summary.csv`,
+  which strengthens `HIP_LAUNCH_BLOCKING=1` as a practical stabilizing lever
+- that `blocking` success was not retained as a trace bundle
+  (`kept_bundle=0`), so stronger log-level claims still need a rerun with
+  `KEEP_SUCCESS_TRACE=1`
+- this is enough definition to influence adjacent compat work:
+  - prefer blocking-first defaults for fragile runtime-facing workflows
+  - prefer short real workloads over synthetic-only smokes when checking a new
+    compat lane
+  - keep long async GPU workloads in the RCA-needed bucket instead of treating
+    them as baseline-stable
 - LeechTransformer remains an active GPU correctness investigation, not a finished runbook: the extracted `6.4` host path selects `device=cuda` but produces incorrect results, while the extracted `5.7` path is better only as a diagnostic baseline and is still not trustworthy for inference output
 - the current LeechTransformer evidence points to a ROCm correctness issue on Polaris/gfx803: `6.4` shows early corruption from `block0.q_raw`, and the finer `5.7` probe now shows the first repeated-run instability at the attention flatten step `block0.attn_out_preproj_view`
 - on the current `5.7` repro, `attn_probs`, `attn_weighted`, and `attn_heads_transposed` stay stable while `transpose(...).reshape(B, T, -1)` drifts; `permute(...).contiguous().reshape(...)` is stable on the same tensor, which makes the flatten/layout path a strong upstream debugging target
@@ -53,6 +70,13 @@ As of `2026-03-22`, the repo state is:
   - latest `libhsa-runtime64` alone is enough to trigger that failure on top of the working base
   - latest HIP userspace alone is not
 - the repo now has reproducible HSA-side hybrid probe lanes that restore `rocminfo` by mixing the latest userspace with selected old HSA-side libraries, but rebuilt torch still fails there because latest `libamdhip64.so.7` expects newer ROCR/HSA symbols than the restored old runtime provides
+- practical RCA split:
+  - use `gdb` / `mcp-gdb` when the target is a host userspace failure such as `rocminfo` returning `HSA_STATUS_ERROR` or crashing inside the HSA stack
+  - use `rocprofv3` plus kernel/devcoredump evidence when the target is a GPU hang, KFD reset, or pre-reset kernel/queue attribution
+- the first debugger-backed `rocminfo` note is now captured too:
+  - under `LD_LIBRARY_PATH=$PWD/artifacts/rocm-latest/lib-compat`, `rocminfo` resolves the latest `libhsa-runtime64.so.1.18.70200`
+  - `hsa_init()` itself returns `4096` before agent enumeration starts
+  - the retained artifact is `out/rocminfo-gdb/2026-03-29T21-59-30/gdb-hsa-flow.txt`
 - the practical next target is therefore to preserve the old HSA/HIP ABI where needed and upgrade around it deliberately, not to assume a simple `latest HIP on old HSA` hybrid will work
 - the `rocmNative-franken` shell still needs follow-up after the standalone `5.7` host artifact work; the next active experiments are incremental newer-component swaps into the `6.4`-upgrade lane, with pure `ROCm 7+` extraction treated as a component source rather than the main runtime target
 - the repo now includes an initial GitHub Actions workflow for shell checks, unit tests, Nix evaluation, and an optional self-hosted GPU benchmark lane; full publish automation still remains future work
@@ -164,7 +188,13 @@ What this does:
 - reuses the known-good ROCm `6.4` userspace from `itir:latest`
 - applies the Polaris compatibility environment
 - runs the extracted Python environment on the host
-- now covers the host-side torch, WhisperX, and ComfyUI surfaces that were previously validated inside the `6.4` Docker lineage
+- now covers the host-side torch and ComfyUI surfaces that were previously validated inside the `6.4` Docker lineage
+- WhisperX can launch and use the GPU on this extracted host runtime, but it remains an RCA/reproducer surface because real runs can still trigger KFD / reset instability
+- the strongest current no-profiler boundary is now:
+  - `transcribe` completed
+  - `align` started
+  - then the run hit `GPU Hang` and the host entered an `amdgpu` reset / VRAM-loss wave
+- `rocprofv3` is now proven usable enough to emit real kernel and marker traces here, but its own teardown can segfault after the workload succeeds
 - defaults to the `direct_only` zero-drift solver path for end users
 
 ### 2. Use the Nix flake entrypoints
@@ -325,7 +355,7 @@ bash scripts/run-gfx803-ollama-container.sh --with-webui
 ## Important limitations
 
 - Newer native ROCm stacks still gate Polaris aggressively
-- `6.4` remains the known practical runtime baseline in this repo
+- `6.4` remains the known practical runtime baseline in this repo for torch import and the broader extracted userspace bring-up story
 - For Ollama GPU, the stock host binary still falls back to CPU
 - The extracted reference bundle (patched `6.4.3/0.11.5`) now exists and is distributed through the repo artifact workflow, but it has not yet earned "safe host replacement" status because follow-up validation on this machine triggered GPU reset/system instability
 - The upstream Robert image remains the safer working path until the extracted host bundle is stabilized or replaced with a cleaner Nix build
@@ -345,6 +375,117 @@ bash scripts/capture-amdgpu-crash-artifacts.sh '10 minutes ago'
 ```
 
 That writes a timestamped folder under `out/crashlogs/` and attempts to copy the live amdgpu `devcoredump` payload before it disappears.
+
+For WhisperX-specific RCA on this host, there is now a narrower tracing path:
+
+```bash
+bash scripts/run-whisperx-rca-matrix.sh /path/to/sample.wav --language en
+```
+
+That runner defaults to the likely fault surfaces (`align` and `diarize`), compares `int8` against `float16`, sweeps `HIP_LAUNCH_BLOCKING=0/1`, and only keeps trace bundles for suspicious runs. For one focused case, use:
+
+```bash
+STAGE=align WHISPERX_COMPUTE_TYPE=int8 \
+bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+The wrapper now prefers `rocprofv3` automatically when it is available. To force a specific backend:
+
+```bash
+WHISPERX_PROFILER_BACKEND=rocprofv3 bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+WHISPERX_PROFILER_BACKEND=rocprof bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+For crashy profiler runs, prefer the reduced crash-capture mode:
+
+```bash
+WHISPERX_PROFILER_MODE=crash-capture \
+WHISPERX_PROFILER_BACKEND=rocprofv3 \
+bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+For the next crash-focused run on the main long file, prefer a compute-stage
+policy instead of a fixed named stage:
+
+```bash
+WHISPERX_PROFILER_MODE=crash-capture \
+WHISPERX_PROFILER_BACKEND=rocprofv3 \
+WHISPERX_ROCPROFV3_OUTPUT_MODE=rocpd \
+WHISPERX_ROCPROFV3_ENABLE_MEMORY_COPY_TRACE=1 \
+WHISPERX_PROFILE_STAGE_POLICY=first_compute \
+bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+Exact-stage selection is still available for comparison runs through
+`WHISPERX_PROFILE_SELECTED_STAGE=align` or another explicit stage, but it is no
+longer the primary crash-lane recommendation for the long file.
+
+If copy-path suspicion is the current target, enable
+`WHISPERX_ROCPROFV3_ENABLE_MEMORY_COPY_TRACE=1` on the `first_compute` lane so
+the retained `rocpd` bundle captures memory-copy activity directly instead of
+inferring it only from older heavier traces.
+
+If stage-gated profiling is not sufficient, the wrapper still supports a
+bounded fallback collection window through `WHISPERX_ROCPROFV3_COLLECTION_PERIOD`
+and `WHISPERX_ROCPROFV3_COLLECTION_PERIOD_UNIT`.
+
+The retained bundle correlates:
+
+- profiler output from `rocprofv3` or legacy `rocprof`
+- ROCTX stage markers from the WhisperX harness
+- structured stage timing and GPU-memory snapshots
+- host CPU hotspot snapshots, which are useful when the real bottleneck is media decode or CPU-only fallback rather than GPU work
+- lightweight `heartbeat.log` snapshots so profiler mode and last retained stage evidence survive even if the host resets before profiler finalize
+- `observer.log` snapshots with recent run output, recent stage events, profiler file sizes, and current-boot kernel tail
+- any captured `amdgpu` devcoredump artifacts
+
+Operational note:
+
+- `zkperf` is relevant here as a pattern source for run orchestration and stage comparison, but it is not used directly for WhisperX RCA because it does not provide ROCm, `amdgpu`, or `devcoredump`-specific capture
+- the repo now also has an execution-path admissibility registry surface under `schemas/execution_path_claim.schema.json` and `artifacts/execution_path_claims/examples/`
+- if an `MP4` source pegs CPU, check `host-cpu.log` first; the common culprit is `ffmpeg` decoding/transcoding the input before WhisperX reaches the suspect GPU stage
+- current WhisperX evidence should be read narrowly:
+  - the workload can start, use the GPU, and progress into real work
+  - the host can still hit a KFD / reset crash at an as-yet unknown point under real GPU pressure
+  - the stronger current model is lower-level than a single WhisperX stage: pinned-page pressure, GPU VM faults, queue timeout, and reset behavior are all in play
+  - the currently confirmed failure class is queue/ring forward-progress loss, because the kernel repeatedly reports `ring gfx timeout`
+  - the current strongest promoted boundary is the exposure point: D2H copy plus host wait
+  - the first `Host active wait ... for -1 ns` is now the earliest reliable pre-crash sentinel on the retained userspace path
+  - pinned host memory likely sits on that DMA path, but the current evidence fits stalled copy completion much better than successful delivery of bad data into host userspace
+  - the current leading trigger classes remain lower-level: GPU VM or pinned-page failure, or DMA/copy-path stall
+  - the current leading ownership hypothesis is ROCm/amdgpu instability on `gfx803` / Polaris under this mixed compute+copy path
+  - that still does not promote copy overflow or a host-only crash as the root cause
+  - the current remediation view is also layered:
+    - VM-pressure patch shapes aim to move the first `-1 ns` later or remove it
+    - queue-visibility patch shapes aim to surface failure earlier and more cleanly
+    - D2H-relief patch shapes aim to weaken the copy/wait boundary
+    - backend-substitution patch shapes aim to expose a narrower ROCm/library/kernel ownership path
+  - the pressure model is now tighter:
+    - raw file length is only a proxy
+    - segment size is a stronger direct control
+    - the practical danger surface is closer to segment size × batch size × concurrency
+    - smaller segment windows can be safer even when they create more total segments
+  - the concrete existing tool surface is now documented too:
+    - runtime/env controls such as `HIP_LAUNCH_BLOCKING=1`, shorter inputs, smaller segment windows, alternate compute type, and memory-copy trace off
+    - API-level mitigation patterns such as sync fences, pinned-buffer reuse, chunked D2H, and dedicated copy streams if the path becomes editable
+    - kernel/driver stabilizers such as `amdgpu.lockup_timeout=...` and `amdgpu.gpu_recovery=1`
+  - desktop redraw or `alt-tab` activity may aggravate or expose the fault, but that is still a hypothesis rather than a promoted causal claim
+  - so WhisperX is currently a useful reproducer and RCA surface, not a promoted host-stable workflow
+- the retained `2026-03-27` reduced repro shows the run got through `load_model` and `load_audio` and had already entered `transcribe` before the crash boundary, so the current evidence is broader than "alignment specifically crashes it"
+- the harness now prefers `librocprofiler-sdk-roctx` over legacy `libroctx64` and emits explicit `roctxMarkA` run/stage markers in addition to pushed ranges; a light `stage=load` verification bundle now shows `run_start`, `stage_start:load_model`, `stage_end:load_model`, `whisperx:load_model`, and `run_end:load_model` in `whisperx_marker_api_trace.csv`
+- exact-stage `align` profiling is now validated on successful shorter runs, but the main long-file crash run on `2026-03-30T12-38-04` failed earlier during `transcribe`, so the next long-file crash attempt should use a compute-stage policy instead of another fixed stage name
+
+## WhisperX RCA lane matrix
+
+We now treat the RCA surface as five governed lanes whose tooling must move the live sentinels before we promote any root-cause claim:
+
+1. Baseline crash lane (`first_compute + memory-copy-trace`) – anchors the current `-1 ns` timing and failure window.
+2. Queue / async visibility lane (`HIP_LAUNCH_BLOCKING=1`, sync fences) – ensures the queue timeout is explicit and exposes if async progression alone triggers the failure.
+3. Pressure-control lane (smaller segment windows, `batch_size=1`, chunk reuse) – keeps the per-segment working set bounded even on long files so we can test the pressure hypothesis directly.
+4. DMA-light lane (memory-copy trace off, staged/streamed D2H when supported) – isolates the copy path as the only difference.
+5. Backend / compute lane (alternate compute types / kernel mixes) – proves whether a library/runtime path owns the failure once pressure and queue effects are controlled.
+
+Each lane describes the expected effect on `Host active wait ... for -1 ns` and the subsequent `ring gfx timeout`, and the full matrix is tracked in [docs/USER_GUIDE.md](docs/USER_GUIDE.md), [TODO.md](TODO.md), [docs/ADMISSIBILITY_CONE_TREE.md](docs/ADMISSIBILITY_CONE_TREE.md) and the Polaris toolbox in [POLARIS_STABILITY_BLUEPRINT.md](POLARIS_STABILITY_BLUEPRINT.md).
 
 ## Main files and directories
 

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.gfx803-compat-graph/schemas/compatibility_claim.schema.json",
+  "title": "CompatibilityClaim",
+  "description": "Bounded truth-bearing claim for one lane. Promotion is explicit and observation-backed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "lane_id",
+    "claim_scope",
+    "witness_label",
+    "promotion_status",
+    "statement",
+    "observation_refs"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane_id": {
+      "type": "string",
+      "enum": [
+        "control-6.4",
+        "upgrade-oldabi",
+        "diag-5.7",
+        "diag-latest-hybrid",
+        "ollama-ref"
+      ]
+    },
+    "claim_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "witness_label": {
+      "type": "string",
+      "enum": [
+        "canonical",
+        "validation",
+        "alternative",
+        "experimental",
+        "negative_control"
+      ]
+    },
+    "promotion_status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "promoted",
+        "blocked",
+        "superseded"
+      ]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "admissibility_status": {
+      "type": "string",
+      "enum": [
+        "admissible",
+        "partially_admissible",
+        "diagnostic_only",
+        "investigation_only",
+        "not_admissible"
+      ]
+    },
+    "observation_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "proof_tree_ref": {
+      "type": "string"
+    },
+    "logic_tree_ref": {
+      "type": "string"
+    },
+    "blocker": {
+      "type": "string"
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "supersedes": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.gfx803-compat-graph/schemas/execution_path_claim.schema.json",
+  "title": "ExecutionPathClaim",
+  "description": "Bounded admissibility claim for one execution path below the app-stage layer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path_id",
+    "path_level",
+    "surface",
+    "lane_id",
+    "workload_id",
+    "captured_at",
+    "artifact_refs",
+    "symptoms",
+    "observations",
+    "verdict",
+    "separation",
+    "promotion_basis",
+    "blocked_by",
+    "notes"
+  ],
+  "properties": {
+    "path_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "path_level": {
+      "type": "string",
+      "enum": [
+        "userspace_init",
+        "userspace_abi",
+        "cpu_preprocess",
+        "pinned_page",
+        "gpu_vm",
+        "queue_stall",
+        "reset",
+        "vram_loss"
+      ]
+    },
+    "surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane_id": {
+      "type": "string",
+      "enum": [
+        "control-6.4",
+        "upgrade-oldabi",
+        "diag-5.7",
+        "diag-latest-hybrid",
+        "ollama-ref"
+      ]
+    },
+    "workload_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifact_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "symptoms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repro_count",
+        "same_inputs",
+        "gpu_visible",
+        "reset_observed",
+        "vram_loss_observed"
+      ],
+      "properties": {
+        "repro_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "same_inputs": {
+          "type": "boolean"
+        },
+        "hip_launch_blocking": {
+          "type": "string",
+          "enum": [
+            "unset",
+            "0",
+            "1",
+            "mixed"
+          ]
+        },
+        "cpu_fallback_possible": {
+          "type": "boolean"
+        },
+        "gpu_visible": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no",
+            "unknown"
+          ]
+        },
+        "reset_observed": {
+          "type": "boolean"
+        },
+        "vram_loss_observed": {
+          "type": "boolean"
+        },
+        "hsa_init_return": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admissibility",
+        "scope",
+        "confidence"
+      ],
+      "properties": {
+        "admissibility": {
+          "type": "string",
+          "enum": [
+            "observed",
+            "candidate",
+            "promoted",
+            "rejected"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      }
+    },
+    "separation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "userspace_debug_rca",
+        "gpu_reset_rca"
+      ],
+      "properties": {
+        "userspace_debug_rca": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "gpu_reset_rca": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "promotion_basis": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blocked_by": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

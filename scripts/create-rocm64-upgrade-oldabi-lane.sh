@@ -50,13 +50,30 @@ copy_matches "$LATEST_LIBDIR" "$TARGET_LIBDIR" \
   'libdrm_amdgpu.so*' \
   'libdrm_radeon.so*'
 
+create_compat_symlink() {
+  local link_name="$1"
+  local target_name="$2"
+  ln -sfn "$target_name" "$TARGET_LIBDIR/$link_name"
+}
+
+# The preserved old-ABI lane already carries the older sonames that the rebuilt
+# torch tree expects. Add explicit compatibility aliases for the newer sonames
+# that appeared during direct runtime smoke so the lane stays reproducible.
+create_compat_symlink libamdhip64.so.7 libamdhip64.so.6
+create_compat_symlink libhipblas.so.3 libhipblas.so.2
+create_compat_symlink libhipsparse.so.4 libhipsparse.so.1
+create_compat_symlink librocblas.so.5 librocblas.so.4
+create_compat_symlink libhipblaslt.so.1 libhipblaslt.so.0
+create_compat_symlink libhipsolver.so.1 libhipsolver.so.0
+
 cat > "$OUT_ROOT/meta/source.txt" <<EOF
 lane=rocm64-upgrade-oldabi
 created_at=$(date -Iseconds)
 base=control-6.4-lib-compat
 preserved_abi=hsa/hip
 latest_overlay=libamd_comgr librocm-core libelf libnuma libdrm libdrm_amdgpu libdrm_radeon
-notes=primary short-term upgrade lane; preserves old HSA/HIP ABI and upgrades around it deliberately
+compat_shims=libamdhip64.so.7->libamdhip64.so.6 libhipblas.so.3->libhipblas.so.2 libhipsparse.so.4->libhipsparse.so.1 librocblas.so.5->librocblas.so.4 libhipblaslt.so.1->libhipblaslt.so.0 libhipsolver.so.1->libhipsolver.so.0
+notes=primary short-term upgrade lane; preserves old HSA/HIP ABI, upgrades around it deliberately, and carries explicit newer-soname aliases for torch runtime loading
 EOF
 
 echo "Created old-ABI preserved upgrade lane at $OUT_ROOT"

@@ -68,6 +68,22 @@ if [ -n "$PYTHON_HOME_CANDIDATE" ] && [ -d "$PYTHON_HOME_CANDIDATE" ]; then
 fi
 export VIRTUAL_ENV="$VENV_DIR/venv"
 
+# This wrapper is for the extracted runtime. If it is launched from a Nix shell,
+# do not let Nix ROCm toolchain hints redirect device-lib resolution back into
+# `/nix/store`, which can mix incompatible LLVM/device-libs with this runtime.
+sanitize_nix_rocm_var() {
+  local name="$1"
+  local value="${!name:-}"
+  if [[ -n "$value" && "$value" == *"/nix/store/"* ]]; then
+    unset "$name"
+  fi
+}
+
+sanitize_nix_rocm_var ROCM_PATH
+sanitize_nix_rocm_var HIP_PATH
+sanitize_nix_rocm_var DEVICE_LIB_PATH
+sanitize_nix_rocm_var HIP_DEVICE_LIB_PATH
+
 if [ ! -e /dev/kfd ]; then
   echo "WARNING: /dev/kfd not present. HIP GPU devices may not be visible from this shell."
   echo "This wrapper can still run CPU-only PyTorch checks, but GPU checks will likely return false."

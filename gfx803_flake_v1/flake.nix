@@ -68,6 +68,14 @@
       rocmPackages.rocm-smi
     ];
 
+    whisperxInputs = builtins.filter
+      (pkg: !(builtins.elem pkg [
+        pkgs.rocmPackages.clr
+        pkgs.rocmPackages.rocblas
+        pkgs.rocmPackages.miopen
+      ]))
+      commonInputs;
+
     repoRootDetect = ''
       if REPO_ROOT_GIT="$(git rev-parse --show-toplevel 2>/dev/null)" && [[ -n "$REPO_ROOT_GIT" ]]; then
         REPO_ROOT_DEFAULT="$REPO_ROOT_GIT"
@@ -353,13 +361,24 @@
       };
 
       whisperx = pkgs.mkShell {
-        buildInputs = commonInputs ++ [ driftRunner graphUpdater verifyHost communityBundle releaseManifest ];
+        buildInputs = whisperxInputs ++ [ driftRunner graphUpdater verifyHost communityBundle releaseManifest ];
         shellHook = ''
           ${gfx803EnvText}
           ${repoRootDetect}
           export REPO_ROOT=''${REPO_ROOT:-$REPO_ROOT_DEFAULT}
           export JOBLIB_MULTIPROCESSING=0
+          export HIP_LAUNCH_BLOCKING=''${HIP_LAUNCH_BLOCKING:-1}
+          export TORCH_HOME="''${TORCH_HOME:-$REPO_ROOT/.cache/torch}"
+          export TORCH_PYTHON="$REPO_ROOT/scripts/host-docker-python.sh"
+          mkdir -p "$TORCH_HOME/hub"
           echo "gfx803 WhisperX shell"
+          echo "HIP_LAUNCH_BLOCKING=$HIP_LAUNCH_BLOCKING"
+          echo "TORCH_HOME=$TORCH_HOME"
+          echo "Using extracted WhisperX runtime without Nix ROCm device-lib injection"
+          echo "Run normal transcription with:"
+          echo '  bash "$REPO_ROOT/scripts/host-docker-python.sh" -m whisperx /path/to/audio --model small --compute_type int8 --language en'
+          echo 'Bootstrap Silero cache once with:'
+          echo '  bash "$REPO_ROOT/scripts/bootstrap-silero-vad-cache.sh"'
         '';
       };
 

@@ -11,7 +11,7 @@ Those GPUs use the `gfx803` architecture. Modern ROCm releases no longer support
 The short version:
 
 - `torch` works on the extracted `ROCm 6.4` host path
-- `WhisperX` and related Python workflows are available through the same extracted host runtime
+- `WhisperX` and related Python workflows can launch on the same extracted host runtime, but on this machine they remain RCA/reproducer surfaces rather than promoted host-stable GPU workflows
 - `ComfyUI` is available through the extracted host runtime, with Polaris safety flags strongly recommended
 - `Ollama` has a working patched reference bundle extracted from `robertrosenbusch/rocm6_gfx803_ollama:6.4.3_0.11.5`, but host stability is still under investigation on this machine
 - the path toward a reproducible newer ROCm-class stack is now a cloned `6.4` upgrade lane, not a direct jump to pure `latest`
@@ -53,7 +53,10 @@ verify-gfx803-host
 If verification shows a healthy GPU, the practical surfaces should all work from this same checkout:
 
 - `torch` via extracted runtime
-- `WhisperX` via extracted runtime
+- `WhisperX` via extracted runtime as an RCA/reproducer surface, not a promoted stable workflow
+- for normal WhisperX transcription attempts on this host, prefer the Nix
+  `.#whisperx` shell with `HIP_LAUNCH_BLOCKING=1` before using the heavier RCA
+  tracing wrappers
 - `ComfyUI` via extracted runtime
 - extracted Ollama reference bundle for local `ollama` experiments (still marked unstable on some workloads)
 
@@ -74,7 +77,7 @@ WATCH_AMDGPU_DEVCOREDUMP=1 bash scripts/host-docker-python.sh tests/bug_report_m
 ## What you can use today
 
 - `torch` via the extracted `6.4` host runtime
-- `WhisperX` via the extracted `6.4` host runtime
+- `WhisperX` via the extracted `6.4` host runtime as an RCA/reproducer surface
 - `ComfyUI` via the extracted `6.4` host runtime
 - extracted `5.7` artifacts for comparison and mixed-runtime experiments
 - a separate `ROCm 7+` experiment lane for newer upstream attempts
@@ -85,13 +88,26 @@ WATCH_AMDGPU_DEVCOREDUMP=1 bash scripts/host-docker-python.sh tests/bug_report_m
 
 Please use this project with the following expectations:
 
-- the extracted `6.4` host path is the current baseline
+- the extracted `6.4` host path is the current baseline for torch import and the broader extracted userspace
 - the public binary cache is `https://gfx803-rocm.cachix.org`
 - the `5.7` and `ROCm 7+` paths are experiment lanes, not the default recommendation
 - the preferred route toward a more current reproducible stack is now a cloned `6.4` upgrade lane rather than a direct switch to pure `ROCm latest`
 - the extracted `Ollama` reference bundle now extracts correctly and is published to Cachix, but it is not yet a settled "safe daily driver" host path
 - on this host, the extracted `Ollama` bundle can start and then trigger a GPU reset / system instability; that investigation is still open
 - if you need GPU `Ollama` immediately, the already-working Robert container lineage is still the safer fallback than the host bundle
+- the latest reduced WhisperX split is:
+  - no profiler: `transcribe` completed, `align` started, then the run retained `GPU Hang` and the host entered an `amdgpu` reset / VRAM-loss wave
+  - `rocprofv3`: the same reduced path completed and wrote profiler artifacts, but `rocprofiler-sdk` later segfaulted during teardown
+- that means profiler attachment is now a known confounder for this RCA lane: it can change timing or pressure enough to let the workload survive
+- the newer named `blocking` lane adds one more practical constraint:
+  - `HIP_LAUNCH_BLOCKING=1` is now the first summary-confirmed stabilizing
+    lever on the long-file WhisperX repro
+  - that does not promote long-form WhisperX as fully solved, but it is enough
+    to shape adjacent compat defaults on this host
+- practical carryover for other compat work on this machine:
+  - blocking-first defaults are reasonable for fragile runtime-facing workflows
+  - short real workloads are more informative than synthetic-only smokes
+  - long async GPU workloads still belong in the RCA-needed bucket
 
 ## Quick Setup
 
@@ -131,7 +147,7 @@ source scripts/polaris-env.sh
 That path is the practical host entrypoint for:
 
 - `torch`
-- `WhisperX`
+- `WhisperX` as an RCA/reproducer surface
 - `ComfyUI`
 
 ## Persisted Ollama container mode (for less repeated fetch/setup)
@@ -255,6 +271,42 @@ If you use Nix, run this once:
 ```bash
 cachix use gfx803-rocm
 ```
+
+## Normal WhisperX transcription
+
+If you want to try WhisperX directly without the RCA logging stack:
+
+```bash
+cd /home/c/Documents/code/__OTHER/gfx803_compat_graph/gfx803_flake_v1
+nix develop .#whisperx
+bash "$REPO_ROOT/scripts/host-docker-python.sh" -m whisperx /path/to/audio --model small --compute_type int8 --language en
+```
+
+That shell now defaults to:
+
+- `HIP_LAUNCH_BLOCKING=1`
+- `JOBLIB_MULTIPROCESSING=0`
+- `TORCH_HOME=$REPO_ROOT/.cache/torch`
+
+This is still not promoted as a host-stable workflow on long files, and it is
+not yet a verified short-file baseline either. The newest normal-path failure
+is a different class from the earlier RCA hang lane: the `.#whisperx` shell
+was exposing Nix ROCm device-libs from `/nix/store` into the extracted host
+runtime, which produced an `LLVM22` producer vs `LLVM19` reader mismatch while
+building blit kernels. Treat this as a candidate normal path until a short-file
+smoke passes cleanly after the shell surface is repaired.
+
+If you want `--vad_method silero`, bootstrap the local `torch.hub` cache first:
+
+```bash
+cd /home/c/Documents/code/__OTHER/gfx803_compat_graph/gfx803_flake_v1
+nix develop .#whisperx -c bash -lc 'bash "$REPO_ROOT/scripts/bootstrap-silero-vad-cache.sh"'
+```
+
+That seeds `snakers4/silero-vad` into the exact cache directories that
+`torch.hub` checks (`$TORCH_HOME/hub/snakers4_silero-vad_main` and
+`..._master`), so later WhisperX runs can use `--vad_method silero` without
+trying to fetch the repo live from GitHub.
 
 That allows Nix to fetch published extracted artifacts instead of recreating them locally.
 
@@ -403,6 +455,210 @@ If the GPU resets or the desktop corrupts after a run, capture evidence first:
 bash scripts/capture-amdgpu-crash-artifacts.sh '10 minutes ago'
 ```
 
+If the suspect surface is WhisperX itself, use the narrower RCA runner instead of only collecting a post-fact journal snapshot:
+
+```bash
+bash scripts/run-whisperx-rca-matrix.sh /path/to/sample.wav --language en
+```
+
+Default behavior:
+
+- stages: `align`, `diarize`
+- compute types: `int8`, `float16`
+- `HIP_LAUNCH_BLOCKING`: `0`, `1`
+- clean runs are discarded automatically
+- suspicious runs keep their timestamped trace bundle
+
+For one focused case, run:
+
+```bash
+STAGE=align WHISPERX_COMPUTE_TYPE=int8 \
+bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+The wrapper now prefers `rocprofv3` automatically when it is available. To force a specific backend:
+
+```bash
+WHISPERX_PROFILER_BACKEND=rocprofv3 bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+WHISPERX_PROFILER_BACKEND=rocprof bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+For a reduced crash-capture run, prefer:
+
+```bash
+WHISPERX_PROFILER_MODE=crash-capture \
+WHISPERX_PROFILER_BACKEND=rocprofv3 \
+bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+For the next crash-focused run on the main long file, prefer a compute-stage
+policy instead of a fixed named stage:
+
+```bash
+WHISPERX_PROFILER_MODE=crash-capture \
+WHISPERX_PROFILER_BACKEND=rocprofv3 \
+WHISPERX_ROCPROFV3_OUTPUT_MODE=rocpd \
+WHISPERX_ROCPROFV3_ENABLE_MEMORY_COPY_TRACE=1 \
+WHISPERX_PROFILE_STAGE_POLICY=first_compute \
+bash scripts/trace-whisperx-rocprof.sh /path/to/sample.wav --language en
+```
+
+Exact-stage selection is still available for comparison runs, but it is no
+longer the primary crash-lane recommendation for the long file.
+
+Use `WHISPERX_ROCPROFV3_ENABLE_MEMORY_COPY_TRACE=1` when the active question is
+whether the crash boundary is landing in a copy-heavy subwindow. Leave it off
+for the lightest possible crash-capture run.
+
+If stage-gated profiling is not sufficient, the wrapper still supports a
+bounded fallback collection window through `WHISPERX_ROCPROFV3_COLLECTION_PERIOD`
+and `WHISPERX_ROCPROFV3_COLLECTION_PERIOD_UNIT`.
+
+Use the profiler for GPU execution-path RCA. If the problem is a host userspace
+failure instead, such as `rocminfo` returning `HSA_STATUS_ERROR` or crashing in
+the HSA stack, switch to `gdb` / `mcp-gdb` so the failing call path and loaded
+libraries can be inspected directly.
+
+The first debugger-backed `rocminfo` artifact now shows the current latest-HSA
+failure is already present at `hsa_init()`, not only later in agent
+enumeration:
+
+- `out/rocminfo-gdb/2026-03-29T21-59-30/gdb-hsa-flow.txt`
+
+That retained bundle contains:
+
+- profiler output from `rocprofv3` or legacy `rocprof`
+- ROCTX-marked stage boundaries from the WhisperX harness
+- `events.jsonl` with stage start/end/error records and GPU memory snapshots
+- `host-cpu.log` with periodic top-CPU snapshots from the host
+- `heartbeat.log` with cheap periodic bundle-state snapshots that survive better than end-of-run profiler finalize
+- `observer.log` with stronger periodic snapshots of run output, recent events, profiler file sizes, and current-boot kernel lines
+- any `amdgpu` devcoredump captures that occurred during the run
+
+Notes:
+
+- `zkperf` is useful as a design reference for stage comparison and artifact collation, but it is not the active WhisperX RCA engine because it lacks ROCm and `amdgpu` fault capture
+- if CPU usage spikes unexpectedly on `MP4` input, inspect `host-cpu.log`; `ffmpeg` decode is often the first hotspot and can mask the actual GPU stage boundary
+- current WhisperX interpretation on this host:
+  - the workload can use the GPU and progress into real work
+  - the machine can still hit a KFD / reset crash at an unknown point under real compute pressure
+  - the stronger current model is lower-level than a single WhisperX stage:
+    - pinned host pages or GPU VM mappings can fail
+    - queue or kernel progress can stall
+    - `amdgpu` / KFD can then reset the device and lose VRAM
+  - the currently confirmed failure class is queue/ring forward-progress loss, because the kernel repeatedly reports `ring gfx timeout`
+  - the current strongest promoted boundary is the exposure point: D2H copy plus host wait
+  - the first `Host active wait ... for -1 ns` is now the earliest reliable pre-crash sentinel on the retained userspace path
+  - pinned host memory likely sits on that DMA path, but the current evidence fits stalled copy completion much better than successful delivery of bad data into host userspace
+  - the current leading trigger classes remain lower-level: GPU VM or pinned-page failure, or DMA/copy-path stall
+  - the current leading ownership hypothesis is ROCm/amdgpu instability on `gfx803` / Polaris under this mixed compute+copy path
+  - that still does not promote copy overflow or a host-only crash as the root cause
+  - the current remediation model is also layered:
+    - VM-pressure patch shapes should move the first `-1 ns` later or remove it
+    - queue-visibility patch shapes should surface failure earlier and more cleanly
+    - D2H-relief patch shapes should weaken the copy/wait boundary if D2H completion pressure is the trigger
+    - backend-substitution patch shapes should produce a more binary path split if the bug is library/kernel specific
+  - the pressure model is now tighter too:
+    - raw file length is only a proxy
+    - segment size is a stronger direct control
+    - the practical danger surface is closer to:
+      - segment size × batch size × concurrency
+    - smaller segment windows can be safer even when they produce more segments
+  - compositor redraw, `alt-tab`, or other desktop activity may aggravate the failure, but that is still a hypothesis rather than a proven trigger
+  - so WhisperX is not yet promoted here as a host-stable GPU workflow
+  - the retained `2026-03-27` reduced repro had already completed `load_model` and `load_audio` and had entered `transcribe` before the crash boundary, so the current evidence does not isolate `align` as the first bad stage
+  - later `2026-03-30` follow-up validated selected-region `align` profiling on shorter successful runs, but the main long-file crash moved earlier and died during `transcribe` with a final retained `DeviceToHost` copy, so the next long-file repro should use a compute-stage policy instead of another fixed stage name
+  - the harness now prefers `librocprofiler-sdk-roctx` and emits explicit `roctxMarkA` run/stage markers as well as pushed ranges
+  - a light verification bundle under `out/whisperx-trace/2026-03-30T07-54-25/` now shows those labels directly in `whisperx_marker_api_trace.csv`
+
+Minimal discriminating matrix for the current WhisperX crash lane:
+
+- baseline:
+  - long file
+  - `first_compute`
+  - memory-copy trace on
+- lower memory pressure:
+  - shorter slice or shorter file that still reaches the compute path
+- lower per-segment pressure:
+  - same long file, but force smaller segment windows and keep `batch_size=1`
+- lower copy-path perturbation:
+  - same long file, same lane, memory-copy trace off
+- alternate compute mix:
+  - same long file and lane, different compute type if the stack supports it
+
+Record per run:
+
+- whether the first `-1 ns` host wait appears
+- last concrete operation before that sentinel
+- rough delay from first `-1 ns` to visible crash/reset
+- whether `profiler/` retained anything
+- whether kernel logs show timeout, BACO reset, VRAM loss, or VM fault
+
+Read the matrix in layers:
+
+- observed failure class:
+  - does `ring gfx timeout` still appear?
+- trigger class:
+  - does lower memory pressure help?
+  - do smaller segment windows on the same long file help?
+  - does lower copy-path perturbation help?
+- ownership hypothesis:
+  - does changing compute type move the failure enough to implicate a specific
+    ROCm/kernel/library path?
+
+Read remediation attempts in the same layered way:
+
+- VM-pressure patch shapes:
+  - if they help, the first `-1 ns` should move later or disappear
+- queue-visibility patch shapes:
+  - if they help, failure may surface earlier but more explicitly
+- D2H-relief patch shapes:
+  - if they help, the copy/wait boundary should weaken
+- backend-substitution patch shapes:
+  - if they help, the ownership hypothesis narrows toward a specific
+    ROCm/kernel/library path
+
+## Lane matrix summary
+
+The current RCA tooling is organized into five implementation lanes that must be tested before we promote a claim:
+
+1. Baseline crash lane (`first_compute + memory-copy trace`) – anchors the retainable `-1 ns`/`ring gfx timeout` boundary.
+2. Queue/visibility lane (`HIP_LAUNCH_BLOCKING=1`, explicit syncs) – surfaces queue forward-progress failure deterministically.
+3. Pressure-control lane (shorter segment windows, `batch_size=1`, chunk reuse) – bounds per-segment working set even on long files.
+4. DMA-light lane (copy trace disabled, staged or dedicated copy stream where possible) – isolates the copy path as the only variable.
+5. Backend lane (alternate compute type or kernel mix) – constrains ownership to a specific ROCm/library path once pressure and queue effects are controlled.
+
+Each lane records the same sentinels and metadata (`-1 ns`, timeout delta, last op, segment window, batch/concurrency) so the docs only promote the lane whose tooling visibly moves the sentinel behavior as expected.
+
+Useful existing tools and controls for that layered read:
+
+- runtime / env controls:
+  - `HIP_LAUNCH_BLOCKING=1`
+  - shorter or chunked input
+  - smaller segment windows
+  - alternate compute type
+  - memory-copy trace off
+- HIP / ROCm API patterns if the workload path becomes editable:
+  - sync fences
+  - event timing
+  - pinned-buffer reuse
+  - chunked D2H
+  - dedicated copy stream
+- kernel / driver controls:
+  - `amdgpu.lockup_timeout=...`
+  - `amdgpu.gpu_recovery=1`
+  - previous-boot `journalctl -k`
+
+For the full Polaris-oriented tool matrix, read:
+
+- [POLARIS_STABILITY_BLUEPRINT.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/POLARIS_STABILITY_BLUEPRINT.md)
+
+The repo now also carries a machine-readable execution-path admissibility
+surface for bounded lower-level RCA claims:
+
+- `schemas/execution_path_claim.schema.json`
+- `artifacts/execution_path_claims/examples/`
+
 For benchmark or drift reports, also include:
 
 - `out/drift/benchmark-results.jsonl`
@@ -448,3 +704,5 @@ If you need more detail after this guide:
 - [docs/START_HERE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/START_HERE.md)
 - [gfx803_flake_v1/README.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/gfx803_flake_v1/README.md)
 - [POLARIS_STABILITY_BLUEPRINT.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/POLARIS_STABILITY_BLUEPRINT.md)
+  - includes the current Polaris ROCm sanity checklist for ring-timeout /
+    `-1 ns` / reset-class failures

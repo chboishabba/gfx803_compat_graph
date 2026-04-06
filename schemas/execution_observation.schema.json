@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.gfx803-compat-graph/schemas/execution_observation.schema.json",
+  "title": "ExecutionObservation",
+  "description": "Receipt-bearing execution evidence for one lane/workload run. Observational only; not truth-bearing by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observation_id",
+    "lane_id",
+    "workload_id",
+    "captured_at",
+    "command",
+    "environment",
+    "metrics"
+  ],
+  "properties": {
+    "observation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane_id": {
+      "type": "string",
+      "enum": [
+        "control-6.4",
+        "upgrade-oldabi",
+        "diag-5.7",
+        "diag-latest-hybrid",
+        "ollama-ref"
+      ]
+    },
+    "workload_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host_id",
+        "gpu_arch",
+        "runtime_lane"
+      ],
+      "properties": {
+        "host_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gpu_arch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtime_lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kernel_version": {
+          "type": "string"
+        },
+        "python_env": {
+          "type": "string"
+        },
+        "artifact_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": [
+          "number",
+          "integer",
+          "string",
+          "boolean"
+        ]
+      }
+    },
+    "trace_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "proof_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "related_artifact_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "verdicts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "import_ok": {
+          "type": "boolean"
+        },
+        "gpu_visible": {
+          "type": "boolean"
+        },
+        "crash_free": {
+          "type": "boolean"
+        },
+        "numerically_stable": {
+          "type": "boolean"
+        },
+        "same_process_repeatable": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": [
+            "trace_refs"
+          ],
+          "properties": {
+            "trace_refs": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "proof_refs"
+          ],
+          "properties": {
+            "proof_refs": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

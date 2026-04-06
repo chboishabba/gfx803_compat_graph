@@ -13,7 +13,7 @@ It is intended to replace ad hoc container juggling with a smaller set of reprod
 - `.#gfx803-pytorch-framework-rebuild`: first Nix-owned framework rebuild shell
 - `.#rocmNative-franken`: newer runtime plus extracted `5.7` math payload
 - `.#comfyui`: app shell with low-VRAM defaults
-- `.#whisperx`: app shell with WhisperX-oriented defaults
+- `.#whisperx`: app shell for the extracted host WhisperX path, with `HIP_LAUNCH_BLOCKING=1` and a reduced Nix ROCm surface so the shell does not leak incompatible `/nix/store` device-libs into the extracted runtime
 - `nix run .#verify-host`
 - `nix run .#drift-matrix`
 - `nix run .#community-bundle`
@@ -59,6 +59,39 @@ update-compat-graph
 ```
 
 The benchmark runner now emits standardized records to `../out/drift/benchmark-results.jsonl`.
+
+## Normal WhisperX use
+
+For plain transcription rather than RCA tracing, use the WhisperX shell:
+
+```bash
+nix develop .#whisperx
+bash "$REPO_ROOT/scripts/host-docker-python.sh" -m whisperx /path/to/audio --model small --compute_type int8 --language en
+```
+
+That shell currently defaults to:
+
+- `JOBLIB_MULTIPROCESSING=0`
+- `HIP_LAUNCH_BLOCKING=1`
+- `TORCH_HOME=$REPO_ROOT/.cache/torch`
+
+The intent is pragmatic stability on Polaris, not maximum throughput.
+
+This path is still only a candidate normal path until a short-file smoke passes
+cleanly on the current host. The immediate failure we just isolated was not the
+earlier WhisperX RCA hang class; it was a Nix/extracted-runtime mix where the
+shell exposed `/nix/store` ROCm device-libs (`LLVM 22`) to the extracted
+runtime (`LLVM 19` reader), which then failed while building blit kernels.
+
+If you want `--vad_method silero`, seed the local `torch.hub` cache first:
+
+```bash
+bash "$REPO_ROOT/scripts/bootstrap-silero-vad-cache.sh"
+```
+
+That bootstrap script populates the exact `torch.hub` cache directories that
+WhisperX expects for `snakers4/silero-vad`, so later runs do not need live
+GitHub access or Python SSL trust to fetch the VAD repo at runtime.
 
 ## `5.7` payload workflow
 

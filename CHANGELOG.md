@@ -1,5 +1,160 @@
 # Changelog
 
+## 2026-03-30
+
+- added a reduced WhisperX crash-capture mode to the `rocprofv3` wrapper so crashy runs can prefer marker trace plus kernel trace with CSV-only output instead of the heavier default trace set
+- added a lightweight `heartbeat.log` side channel to the WhisperX trace bundle so current stage, profiler mode, and any already-materialized profiler filenames are flushed periodically even when the host resets before profiler finalize
+- extended the crash-capture path so crashy runs can switch `rocprofv3` to `rocpd` output and add `--collection-period` without editing the wrapper directly
+- added a stronger `observer.log` stream to the WhisperX trace bundle that periodically snapshots the tail of `run.log`, the tail of `events.jsonl`, current profiler filenames and sizes, and the current-boot kernel tail
+- taught the WhisperX harness to call `roctxProfilerResume/Pause` around a selected stage and taught the wrapper to enable `rocprofv3 --selected-regions`, so the next heavy run can start collection when `align` begins instead of using a fixed start delay
+- recorded the follow-up selected-region results more accurately:
+  - `align`-selected profiling now works and retains `whisperx_results.db` on shorter successful runs
+  - the main long-file crash at `out/whisperx-trace/2026-03-30T12-38-04/` died earlier during `transcribe`, before the selected `align` region began
+  - the retained `run.log` there ends with `hipMemcpyWithStream(... hipMemcpyDeviceToHost ...)`, host active wait, then `GPU Hang`
+  - the matching reset wave starts at `2026-03-30 12:39:27` with BACO reset, VRAM loss, and a VM fault on `TC4`
+- replaced the “pick one exact stage” assumption with a stage-policy surface:
+  - the harness now supports `--profile-stage-policy exact|first_compute`
+  - the wrapper now forwards `WHISPERX_PROFILE_STAGE_POLICY`
+  - `first_compute` latches profiling on at the first compute stage reached and keeps it active through the rest of the run
+  - exact-stage selection remains available for comparison runs
+- extended the WhisperX `rocprofv3` wrapper with `WHISPERX_ROCPROFV3_ENABLE_MEMORY_COPY_TRACE=1` so the primary `first_compute` crash lane can retain memory-copy activity in the same `rocpd` bundle when the copy-path hypothesis is being tested
+- recorded the later `2026-03-30T14-45-28` `first_compute + memory-copy-trace` crash more tightly:
+  - `transcribe` completed
+  - `align` started
+  - the final retained userspace sequence is D2H copy, `Host active wait ... for -1 ns`, H2D copy setup, another `-1 ns` wait, then `GPU Hang`
+  - previous-boot kernel logs at `15:27:20` show gfx ring timeout, failed suspend of the WhisperX process, BACO reset, and VRAM loss
+  - repo wording is now tightened to "copy/wait exposure point" rather than a promoted copy-overflow root-cause claim
+- updated the admissibility lattice and repo-facing RCA wording to split:
+  - promoted exposure point: copy/wait-adjacent crash boundary
+  - candidate root-cause classes: queue-progress loss, GPU VM/pinned-page failure, or DMA/copy-path stall
+  - not promoted: copy overflow or host-only userspace crash as the primary RCA
+- tightened the pinned-memory wording across repo docs:
+  - pinned host memory remains on the suspect DMA surface
+  - but the current evidence fits stalled copy completion much better than successful delivery of bad data into host userspace
+- updated the lattice and WhisperX docs again to promote the first
+  `Host active wait ... for -1 ns` line as the earliest reliable pre-crash
+  sentinel on the retained userspace path
+- documented the minimal discriminating 4-run matrix:
+  - A baseline
+  - B lower memory pressure
+  - C memory-copy trace off
+  - D alternate compute type if supported
+- tightened the layered RCA wording again:
+  - confirmed failure class: `ring gfx timeout` / queue forward-progress loss
+  - promoted exposure point: copy/wait-adjacent boundary
+  - promoted sentinel: first `Host active wait ... for -1 ns`
+  - candidate trigger classes: GPU VM/pinned-page failure or DMA/copy-path stall
+  - candidate ownership hypothesis: ROCm/amdgpu instability on `gfx803` / Polaris
+- expanded [POLARIS_STABILITY_BLUEPRINT.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/POLARIS_STABILITY_BLUEPRINT.md) with a Polaris ROCm sanity checklist for reset-class failures:
+  - baseline bring-up
+  - known-good stack discipline
+  - VRAM / pinned-memory hygiene
+  - watchdog and recovery settings
+  - queue-sensitivity probe
+  - display isolation
+  - thermal sanity
+  - current `-1 ns` sentinel handling
+  - the minimal 4-run discriminator matrix
+- extended the RCA docs again so they now carry a remediation / patch-shape layer in addition to the failure lattice:
+  - VM / mapping-pressure reduction
+  - queue visibility / drain-point insertion
+  - DMA / D2H completion-path relief
+  - backend / kernel-path substitution
+  - display isolation as a secondary aggravator check
+  - the docs now state the expected movement of the live sentinels (`Host active wait ... for -1 ns` and `ring gfx timeout`) for each patch-shape family
+- added a concrete tool / mitigation matrix on top of those patch-shape families:
+  - runtime and environment controls
+  - HIP / ROCm API patterns
+  - `rocprofv3` / copy-trace usage
+  - kernel/driver stabilizers
+  - display isolation and version/stack swap surfaces
+  - the docs now distinguish "existing mitigation patterns" from "promoted fixes"
+- tightened the pressure model across the WhisperX RCA docs:
+  - raw file length is now treated as a proxy rather than the main control variable
+  - segment size and effective concurrency are now documented as the stronger direct controls
+  - the docs now state the practical danger surface as approximately `segment size × batch size × concurrency`
+  - smaller segment windows are now documented as a first-class stabilizing test on the same long file
+- documented the new five-lane RCA matrix (baseline, queue/visibility, pressure-control, DMA-light, backend) and clarified that promotion happens only when the lane-specific tooling moves the shared sentinels as expected
+- recorded the first named `blocking` lane success more carefully:
+  - `out/whisperx-rca-matrix/2026-03-30T16-45-56/summary.csv` shows
+    `lane=blocking`, `hip_launch_blocking=1`, and `exit_code=0`
+  - but `kept_bundle=0`, so this is currently a summary-only success rather
+    than a kept-bundle success
+  - repo wording now promotes `HIP_LAUNCH_BLOCKING=1` as the first practical
+    stabilizing lever for the long-file repro while keeping the next follow-up
+    explicit: rerun with `KEEP_SUCCESS_TRACE=1`
+- updated the repo-facing policy boundary so this WhisperX result now informs
+  adjacent compat work too:
+  - use blocking-first defaults for fragile runtime-facing workflows
+  - prefer short real workloads over synthetic-only smokes when probing a new
+    compat lane
+  - keep long async GPU workloads outside promoted baseline claims unless they
+    have retained success evidence
+- added `docs/WHISPERX_OBSERVABILITY_C4.puml` as the current observability container view for the WhisperX RCA path
+- added a new WhisperX incident note for the March 30 split between the no-profiler crash path and the profiler-attached success path
+- recorded that the reduced no-profiler WhisperX run now has a stronger retained boundary: `transcribe` completed, `align` started, then the run ended with `GPU Hang` and the matching host reset wave produced `/var/log/amdgpu-devcoredumps/card1-devcoredump-20260330-011329.bin`
+- recorded that the reduced `rocprofv3` WhisperX run completed and emitted real profiler artifacts, but `rocprofiler-sdk` later segfaulted during teardown after writing result files
+- added a new execution-path claim record for the no-profiler WhisperX `align`-start crash boundary and updated project context/TODO so the next RCA step is explicit kernel/marker correlation against the successful `rocprofv3` bundle
+- recorded the first successful-profiler readout too: late `align` is GEMM-heavy with interleaved layer norm / GELU / direct-copy / softmax kernels, but the current `rocprofv3` marker CSV still does not expose the expected harness `stage_*` ROCTX labels
+- updated `scripts/whisperx_rca_harness.py` so it now prefers `librocprofiler-sdk-roctx` over legacy `libroctx64` and emits explicit `roctxMarkA` run/stage markers alongside pushed ranges, giving `rocprofv3` a better chance to expose the harness stage labels directly
+- verified that marker fix with a light `stage=load` profiler run under `out/whisperx-trace/2026-03-30T07-54-25/`: `whisperx_marker_api_trace.csv` now contains `run_start`, `stage_start:load_model`, `stage_end:load_model`, `whisperx:load_model`, and `run_end:load_model`
+- recorded the next heavy profiled `align` crash under `out/whisperx-trace/2026-03-30T08-23-52/`: the run completed `transcribe`, entered `align`, then hit `GPU Hang`; the matching host reset wave starts at `09:40:16`, but the `profiler/` directory stayed empty because `rocprofv3` did not flush outputs before reset
+
+## 2026-03-29
+
+- tightened the WhisperX and GPU-reset wording across docs so the safe current model is explicitly lower-level than a single app stage: pinned-page failure, GPU VM faults, queue stalls, reset behavior, and VRAM loss are now treated as the active RCA ladder
+- updated `TODO.md` to stop describing the extracted `6.4` host path as if it already covered WhisperX host stability and to add follow-up work for a GPU execution-path admissibility registry
+- documented the RCA tool split more explicitly: `gdb` / `mcp-gdb` for host userspace failures such as `rocminfo` HSA errors, and `rocprofv3` plus kernel/devcoredump evidence for GPU hang/reset attribution
+- added a debugger-backed `rocminfo` incident note showing that the failing latest-HSA surface reaches `hsa_init()` and returns `4096` before agent enumeration begins
+- added `schemas/execution_path_claim.schema.json` plus the first seed records under `artifacts/execution_path_claims/examples/` so lower-level RCA claims can be attached to userspace-init, GPU VM fault, and reset surfaces without blending evidence classes
+
+## 2026-03-27
+
+- added a structured incident note for the `2026-03-25 21:42:41` Wayland-visible reset sequence and recorded the stronger working model: real `amdgpu` reset instability with `kwin_wayland` as the likely first visible casualty rather than the root cause
+- added `scripts/correlate-amdgpu-reset-window.sh` to correlate kernel reset lines, `amdgpu-devcoredump.service` activity, and `/var/log/amdgpu-devcoredumps` files for one time window
+- added `scripts/whisperx_rca_harness.py` so WhisperX can be exercised stage-by-stage (`load_model`, `transcribe`, `align`, `diarize`) with structured timing, GPU-memory snapshots, and ROCTX stage markers
+- added `scripts/trace-whisperx-rocprof.sh` to run that harness under `rocprof` with HIP/HSA tracing plus the existing devcoredump watcher
+- tightened the WhisperX trace wrapper so clean runs are discarded by default and only suspicious runs keep their trace bundle
+- taught the WhisperX trace wrapper to classify the current `rocprof` `libstdc++` / `CXXABI_1.3.15` startup failure as a tooling dependency problem instead of a fake GPU wedge
+- taught the WhisperX trace wrapper to prefer `rocprofv3` automatically when it is available, while keeping legacy `rocprof` as an explicit backend
+- forced system `libstdc++.so.6` when using legacy `rocprof` so the extracted Conda runtime does not break `roctracer` startup with the missing `CXXABI_1.3.15` symbol version
+- added `scripts/watch-host-cpu-hotspots.sh` and enabled it from the WhisperX trace wrapper so retained bundles now show when `ffmpeg` or another host process is saturating CPU during RCA runs
+- added `scripts/run-whisperx-rca-matrix.sh` with the practical default sweep for this failure class:
+  - stages: `align`, `diarize`
+  - compute types: `int8`, `float16`
+  - `HIP_LAUNCH_BLOCKING=0/1`
+  - retain bundles only when the run exits badly, logs a stage error, or captures devcoredump evidence
+- updated `README.md` and `docs/USER_GUIDE.md` so the new WhisperX RCA workflow is documented in the same place as the existing crash-capture guidance, including the current decision to use `zkperf` only as a pattern source rather than a direct dependency
+- tightened the baseline runtime wording so the extracted `6.4` lane now promotes torch import / ComfyUI / userspace bring-up, while WhisperX is documented separately as a GPU RCA surface that can still hit KFD / reset instability at an unknown point
+- added a dedicated incident note for the retained `2026-03-27` WhisperX repro evidence, recording that the run had already entered `transcribe` before the crash boundary and therefore does not justify an `align`-specific blame claim
+
+## 2026-03-25
+
+- completed the old-ABI PyTorch framework rebuild lane under `artifacts/pytorch-framework-rebuild-oldabi-kinetooff/work/pytorch/`
+  - redirected ccache to a writable workspace cache so the build could run on this filesystem
+  - added the ROCm include root to `c10_hip`
+  - added a gfx803-safe fallback for `__AMDGCN_WAVEFRONT_SIZE` in the ROCm HIP headers
+  - gated hipBLASLt outer-vector scale-mode calls on installed header symbol availability so the bundled ROCm 7.2.26043-9999 SDK can compile the gfx803 lane cleanly
+- the build now reaches install successfully and writes the rebuilt framework tree to `work/pytorch/torch/`
+- the remaining compiler output is warning-only; the build no longer stops on the earlier HIP/CUB, hipBLASLt, or ROCm header mismatches
+- direct runtime smoke against `libtorch_python.so` still shows the ROCm ABI seam is not fully closed:
+  - the preserved old-ABI path resolves the older ROCm sonames cleanly
+  - the host `/opt/rocm/lib` path can still leak newer `libamdhip64.so.7` / `libhipblas.so.3` style dependencies into the load graph
+  - the rebuild is therefore install-complete, but the final runtime path still needs isolation before it can be treated as a fully importable smoke-passed torch tree
+- added reproducible compatibility aliases to `artifacts/rocm64-upgrade-oldabi/lib-compat` so the preserved old-ABI lane can satisfy the newer sonames requested by the rebuilt framework at direct-load time:
+  - `libamdhip64.so.7 -> libamdhip64.so.6`
+  - `libhipblas.so.3 -> libhipblas.so.2`
+  - `libhipsparse.so.4 -> libhipsparse.so.1`
+  - `librocblas.so.5 -> librocblas.so.4`
+  - `libhipblaslt.so.1 -> libhipblaslt.so.0`
+  - `libhipsolver.so.1 -> libhipsolver.so.0`
+- verified that `ctypes.CDLL(libtorch_python.so)` now succeeds on the preserved old-ABI lane without borrowing `/opt/rocm/lib`, which closes the direct runtime loading gap that was left after the framework install succeeded
+- clarified the remaining runtime verification path so `import torch` should be tested from an isolated wrapper package around the rebuilt `torch` tree, not by pointing Python at the whole source root or by invoking `setup.py develop` (which triggers a rebuild path)
+- the non-building wrapper probe still fails because the rebuilt tree does not yet expose a packaged `torch._C` extension module; at present it only provides `libtorch_python.so`, which is enough for direct loading but not enough for a clean `import torch`
+- refined the import-smoke workflow to target the tiny `torch/csrc/stub.c` loader that exports `PyInit__C`, so the remaining verification can be done without rerunning the full PyTorch packaging pipeline
+- the isolated wrapper smoke now succeeds after compiling the tiny `torch/csrc/stub.c` loader and adding `torchgen` to the wrapper path, which keeps the import path clean without invoking `setup.py develop`
+- the smoke helper now captures stderr and prints only the success lines from `import torch`, so the verified path is readable even when the runtime emits harmless ROCm table noise
+
 ## 2026-03-22
 
 - tightened the old-ABI framework rebuild direction so it is internally coherent:
@@ -160,6 +315,26 @@ Why:
 - the tensor-only repro plus the launch-blocking result are stronger than the earlier full-model symptom reports and are the most actionable upstream artifacts so far
 - the newer CPU/GPU and GPU/GPU probe results show that crash-free execution is not the same thing as correct inference output
 - short GPU runs are now good enough to document as working, but the longer-token path still needs measured re-baselining before it should be presented as solved
+
+## 2026-03-30
+
+- added a repo-local Silero VAD bootstrap path for the candidate normal WhisperX shell:
+  - `.#whisperx` now exports `TORCH_HOME=$REPO_ROOT/.cache/torch`
+  - added `scripts/bootstrap-silero-vad-cache.sh`
+  - the script seeds `snakers4/silero-vad` into the exact `torch.hub` cache layout WhisperX expects (`..._main` plus `..._master`)
+- updated the WhisperX docs so `silero` is documented as a local asset/bootstrap step rather than a live network fetch expectation
+- tightened the documented status of the `gfx803_flake_v1` `.#whisperx` shell: it is still only a candidate normal path, not a verified short-file baseline
+- recorded the new normal-path failure class explicitly: the non-RCA WhisperX CLI was mixing Nix ROCm device-libs from `/nix/store` (`LLVM 22`) with the extracted runtime toolchain (`LLVM 19` reader), which failed blit-kernel compilation and then segfaulted before transcription began
+- updated the `.#whisperx` shell to stop injecting Nix ROCm toolchain packages (`clr`, `rocblas`, `miopen`) into the extracted host runtime path
+- hardened `scripts/host-docker-python.sh` so it drops inherited Nix ROCm toolchain hints such as `ROCM_PATH`, `HIP_PATH`, `DEVICE_LIB_PATH`, and `HIP_DEVICE_LIB_PATH` when they point into `/nix/store`
+- kept `HIP_LAUNCH_BLOCKING=1` and `JOBLIB_MULTIPROCESSING=0` as the practical Polaris-oriented defaults for the candidate normal WhisperX shell
+
+Why:
+
+- the new short-file normal WhisperX attempt failed for a different reason than the traced long-run WhisperX GPU hang lane
+- the retained stderr identified a concrete ROCm/LLVM mixing problem rather than another ambiguous WhisperX crash
+- the normal Nix shell needed to stop leaking incompatible Nix ROCm toolchain state into the extracted runtime before more short-file validation could be trusted
+- once that was fixed, the next blocker became asset-locality rather than GPU/runtime correctness: `silero` was failing in `torch.hub` due to SSL trust / missing cache, so the repo now carries an explicit local-cache bootstrap path
 
 ## 2026-03-23
 

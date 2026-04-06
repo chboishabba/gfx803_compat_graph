@@ -1,6 +1,8 @@
 __pycache__
 .venv
 .cache/
+.codex
+.rocprofv3/
 artifacts/
 docker-venv/
 lib-compat/

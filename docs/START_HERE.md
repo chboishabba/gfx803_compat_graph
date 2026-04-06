@@ -21,7 +21,8 @@ This repo is where those pieces are being tested and documented.
 - The repo contains a previously extracted Python environment in `docker-venv/`
 - The more current reproducible workflow is in `gfx803_flake_v1/`
 - The repo now has a public Cachix binary cache at `https://gfx803-rocm.cachix.org` for the extracted artifact sets
-- The extracted `6.4` host path now covers torch, WhisperX, and ComfyUI without needing the old full Docker at runtime
+- The extracted `6.4` host path now covers torch and ComfyUI without needing the old full Docker at runtime
+- WhisperX can launch on the same runtime and use the GPU, but on this machine it should currently be treated as an RCA/reproducer surface because real runs can still trigger KFD / reset instability
 - The patched Ollama GPU path is extracted to `artifacts/ollama_reference/` and published with the other extracted artifacts, but host stability is still under investigation
 - The stock host `ollama` binary still falls back to CPU; the upstream Robert image remains the safer practical GPU option until the extracted host bundle is fully stabilized
 - The `5.7` payload artifacts are now extracted into `artifacts/rocm57/` and are usable as a standalone host artifact path via `scripts/host-rocm57-python.sh`
@@ -53,7 +54,8 @@ source scripts/polaris-env.sh
 ```
 
 This path now defaults to the zero-drift `direct_only` solver profile.
-It also covers the currently validated host-side torch, WhisperX, and ComfyUI surfaces.
+It also covers the currently validated host-side torch and ComfyUI surfaces.
+WhisperX is available for RCA on the same runtime, but it is not yet promoted as a stable host GPU workflow.
 
 ### Path B: Use the Nix entrypoints
 
