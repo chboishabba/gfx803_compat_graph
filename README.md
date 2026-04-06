@@ -366,6 +366,38 @@ bash scripts/run-gfx803-ollama-container.sh --with-webui
 - the extracted-runtime PyTorch build used here does not expose Vulkan support, so installing Vulkan-capable user-space through Steam does not by itself make Leech runnable on Vulkan
 - the old-ABI framework rebuild driver now forces `FRAMEWORK_REBUILD_ROOT=artifacts/pytorch-framework-rebuild-oldabi-kinetooff`, injects `_GLIBCXX_ASSERTIONS` through `HIPFLAGS/CMAKE_ARGS`, and prepends the host `libxml2.so.2` path before running `amdgcn-link`, so the next run under that directory is the authoritative torch-smoke signal
 
+## WhisperX-WebUI on gfx803
+
+The gfx803-specific Nix entrypoint for `WhisperX-WebUI` now lives in this repo's top-level flake.
+
+Use it from this repo root:
+
+```bash
+nix develop .#whisperx-webui-gfx803
+start-whisperx-webui-gfx803 --server_name 0.0.0.0 --server_port 7860
+```
+
+Or directly:
+
+```bash
+nix run .#whisperx-webui-gfx803 -- --server_name 0.0.0.0 --server_port 7860
+```
+
+That shell/app:
+
+- launches `/home/c/Documents/code/ITIR-suite/WhisperX-WebUI/app.py`
+- uses this repo's extracted `lib-compat/` and `docker-venv/` runtime
+- keeps the Polaris env defaults (`HSA_OVERRIDE_GFX_VERSION=8.0.3`, `ROC_ENABLE_PRE_VEGA=1`, `HIP_LAUNCH_BLOCKING=1`)
+- writes cache/model output under the WebUI repo so the app still behaves like a normal project checkout
+
+Quick check:
+
+```bash
+nix run .#verify-whisperx-webui-runtime
+```
+
+The `WhisperX-WebUI` repo may still carry its own local wrapper flake for convenience, but the canonical gfx803-specific compatibility entrypoint is now this repo.
+
 ## Crash capture
 
 If the GPU glitches, resets, or the desktop shows checkerboard corruption after a run, capture the kernel-side evidence immediately:
