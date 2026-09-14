@@ -9,304 +9,62 @@
 - Keep a plain-language clone-to-ready onboarding section in the public guide for non-technical users ✅
 - Record the extracted `6.4` host path as covering torch import / GPU visibility, ComfyUI, and general userspace bring-up, while keeping WhisperX outside the promoted stable baseline ✅
 - Verify that the published `gfx803-rocm` Cachix entries can be consumed cleanly from another machine or a clean local profile
+
+### Current-upstream TheRock / official-support lane
+
+- Keep Arch/CachyOS ROCm `7.2.4` as the untouched distro control; do not call it `latest`
+- Run `scripts/build-therock-gfx803-artifacts.sh --prepare-only` on the host and retain the exact patch-applicability receipt for current `ROCm/TheRock`
+- If prepare succeeds, run `--core-only` before a full build; record build/enumeration/HIP/OpenCL states independently
+- Keep Luca Bruni's `3d4ad609...` restoration as a known-restored reference, not the primary current source
+- Preserve AMD's graceful unsupported-device skip behavior while re-admitting only legacy doorbell types whose queue semantics are actually restored/tested
+- Use TheRock's out-of-tree `therock_custom_amdgpu_targets.cmake` hook during bring-up; upstream objective is a normal `gfx803` target plus corresponding release extra
+- Treat `Build Passing`, `Sanity Tested`, and `Release Ready` as separate promotion states; endpoint is official AMD RX580/Polaris support
+
+### ROCm 10 full-stack reference / patch snowball
+
+- Probe the prebuilt `ghcr.io/schaka/rocm-migraphx-ort-torch-builder:rocm10.0-gfx803` image on this RX580 using `scripts/probe-schaka-rocm10-gfx803-reference.sh`
+- Record image digest plus hardware/VBIOS/VRAM-clock state before interpreting any reset-class result
+- Run the Leech tensor-only layout/determinism reproducer against the ROCm 10 reference before rebuilding current TheRock
+- Run the smallest WhisperX/copy reproducer against the ROCm 10 reference
+- Compare direct D2H versus staged D2H behavior before relating `d2h-staged-copy.patch` to our existing copy/wait sentinel
+- Keep `d2h-null-dsthost.patch` and `va-reuse-defer-noremap.patch` as separate candidate mechanisms until our repro exercises their exact allocation/lifetime conditions
+- Do not promote `sdma-doorbell-missing-sfence.patch` as causal: its own source history retracts the SFENCE and ring hypotheses and attributes the tested hang to VRAM-clock marginality
+- Expand `docs/GFX803_UPSTREAM_PATCH_ATLAS.md` across Schaka's rocBLAS, MIOpen, rocSOLVER, MIGraphX, PyTorch and Triton patches; classify each as runtime prerequisite, correctness, fallback, performance, genuine ISA absence, superseded diagnostic, hardware/VBIOS, or release-policy debt
+- Prefer alternative algorithms/fallback computation where modern fast paths require unavailable instructions; `unsupported instruction != unsupported GPU`
+- Specifically retain bf16 as a truthful hardware limitation while keeping fp16/fp32 paths eligible for support
+- Shrink the patch set toward the smallest upstreamable set instead of importing every community workaround into current TheRock
+
 - Treat the Robert `6.4` Ollama image as the short-term practical GPU fallback until the Ollama-specific port is reproduced outside the full container ✅ (reference bundle extracted and published at `artifacts/ollama_reference/`, host stability still under investigation)
 - Port the previously working Robert `6.4` Ollama GPU path into a smaller extracted or Nix-managed workflow so the full Robert container is no longer required for Ollama (in progress: reference bundle + host launcher + flake shell exist)
 - Re-test the extracted `artifacts/ollama_reference/` host path after the AMDGPU `libdrm` copy fix and `HSA_ENABLE_SDMA=0` host launcher change, because the last host run triggered a GPU reset / PC crash
 - Document the lower-level GPU execution-path model explicitly:
   - `init_user_pages` failure, VM fault, ring timeout, reset, VRAM loss
   - compositor redraw / `alt-tab` as a trigger hypothesis rather than a proven root cause
-- Keep the Polaris stability blueprint current as the repo’s broad sanity /
-  stabilization checklist for reset-class failures ✅
-  - now includes baseline bring-up, watchdog settings, queue-sensitivity probe,
-    display isolation, thermal sanity, and the current 4-run discriminator
+- Keep the Polaris stability blueprint current as the repo’s broad sanity / stabilization checklist for reset-class failures ✅
 - Add a GPU execution-path admissibility registry so RCA claims can attach to queues, VM faults, reset paths, and profiler evidence instead of only to app stages
 - Capture one debugger-backed `rocminfo` RCA note ✅
-  - latest-HSA `rocminfo` now has a retained `gdb` artifact under `out/rocminfo-gdb/2026-03-29T21-59-30/`
-  - the strongest current reading is that `hsa_init()` already fails under `libhsa-runtime64.so.1.18.70200`
-  - keep that userspace-debug lane distinct from the GPU reset/profiler lane
-- Populate the new execution-path admissibility registry beyond the first seed records:
-  - add profiler-backed WhisperX records now that one retained `rocprofv3` bundle exists ✅
-  - add more leech queue-stall and layout-transition records where the artifact surface is already strong
-- Record the new WhisperX split explicitly:
-  - no-profiler reduced repro completes `transcribe`, enters `align`, then hits `GPU Hang` / reset / VRAM-loss wave ✅
-  - `rocprofv3`-attached reduced repro completes `align` and emits real profiler artifacts, but `rocprofiler-sdk` segfaults later during teardown ✅
-- Correlate the successful `rocprofv3` WhisperX bundle against the no-profiler crash boundary:
-  - align `whisperx_marker_api_trace.csv` with `whisperx_kernel_trace.csv`
-  - identify the last kernel families and memory-copy bursts near the `transcribe -> align` transition
-  - compare those with the `2026-03-30 01:13:28` reset window
-- Fix the current WhisperX `rocprofv3` observability gap:
-  - the retained profiler bundle names kernel families, but `whisperx_marker_api_trace.csv` does not expose the expected harness `stage_*` ROCTX ranges
-  - the harness now prefers `librocprofiler-sdk-roctx` and emits explicit `roctxMarkA` run/stage markers in addition to ranges
-  - reran one light profiler case and confirmed those labels now appear in `out/whisperx-trace/2026-03-30T07-54-25/profiler/whisperx_marker_api_trace.csv` ✅
-  - reran one heavier profiler case and confirmed the workload still crashes after `stage_start:align`, but the `profiler/` directory stays empty when the host resets before rocprofv3 flushes outputs ✅
-  - narrowed next move:
-    - add a dedicated crash-capture mode with reduced `rocprofv3` domains ✅
-    - keep a cheap `heartbeat.log` breadcrumb channel in the retained bundle ✅
-    - add `rocpd` output support plus `--collection-period` control for crashy runs ✅
-    - add a stronger external observer log that snapshots `run.log`, `events.jsonl`, profiler file sizes, and current-boot kernel tail ✅
-    - gate profiling on a selected stage directly through `roctxProfilerResume/Pause` plus `--selected-regions` ✅
-    - validated `align`-selected profiling on successful shorter runs ✅
-    - main long-file crash moved earlier and now dies during `transcribe` before `align` begins ✅
-    - moved the primary crash lane to a compute-stage policy instead of another fixed stage label ✅
-    - reran and confirmed `first_compute` latches profiling on at `transcribe` and writes retained `rocpd` output on a killed long-file run ✅
-    - reran the long file with `WHISPERX_PROFILE_STAGE_POLICY=first_compute` plus memory-copy trace enabled ✅
-    - latest crash now tightens the boundary to copy/wait adjacency:
-      - final retained D2H copy
-      - `Host active wait ... for -1 ns`
-      - later H2D copy setup
-      - another `-1 ns` wait
-      - `GPU Hang` / reset ✅
-    - next: keep the RCA wording bounded to:
-      - confirmed failure class: `ring gfx timeout` / queue forward-progress failure
-      - promoted exposure point: copy/wait-adjacent crash boundary
-      - promoted sentinel: first `Host active wait ... for -1 ns`
-      - candidate trigger classes: GPU VM/pinned-page failure, DMA/copy-path stall
-      - candidate ownership hypothesis: ROCm/amdgpu path on `gfx803` / Polaris under this mixed compute+copy load
-      - pinned memory stays on the suspect surface as part of the DMA path, but "successful bad-data delivery to host" stays unpromoted
-    - only escalate to a custom SDK flush tool if `rocpd` plus collection-period still leaves `profiler/` empty
-    - next: run the minimal 4-run discriminating matrix:
-      - A: long-file baseline with memory-copy trace on
-      - B: shorter or chunked input, same lane
-      - C: same long input, memory-copy trace off
-      - D: same long input, alternate compute type if supported
-    - keep the intervention ladder explicit while running that matrix:
-      - VM / mapping-pressure patch shapes:
-        - chunk input
-        - allocation reuse
-        - lower peak footprint
-      - queue-visibility patch shapes:
-        - `HIP_LAUNCH_BLOCKING=1`
-        - explicit drain / sync points if the workload surface allows them
-      - DMA / D2H-relief patch shapes:
-        - memory-copy trace off
-        - smaller or staged D2H if the path becomes editable
-      - backend-substitution patch shapes:
-        - alternate compute type
-      - display-isolation patch shapes:
-        - lower compositor pressure / TTY comparison
-      - treat these as intervention families, not promoted fixes
-      - keep the existing tool matrix tied to those families:
-        - runtime/env:
-          - `HIP_LAUNCH_BLOCKING=1`
-          - shorter or chunked input
-          - smaller segment windows on the same long file
-          - alternate compute type
-          - memory-copy trace off
-        - API-level patterns if the path becomes editable:
-          - sync fences
-          - event timing
-          - pinned-buffer reuse
-          - chunked D2H
-          - dedicated copy stream
-        - kernel/driver:
-          - `amdgpu.lockup_timeout=...`
-          - `amdgpu.gpu_recovery=1`
-          - previous-boot `journalctl -k`
-    - for each run, record:
-      - whether the first `-1 ns` host wait appears
-      - the last concrete op before that sentinel
-      - rough delay from first `-1 ns` to visible crash/reset
-      - whether `ring gfx timeout` appears in kernel logs
-      - whether `profiler/` retained anything
-      - kernel timeout / BACO / VRAM-loss / VM-fault signals
-      - segment size / chunk window
-      - effective batch / concurrency level if known
-    - tighten the pressure model explicitly:
-      - raw file length is only a proxy
-      - segment size is a stronger direct control
-      - current working approximation:
-        - segment size × batch size × concurrency
-- prioritize the pressure-focused discriminator after the baseline:
-  - same long file with smaller segment windows and `batch_size=1`
-  - then `HIP_LAUNCH_BLOCKING=1`
-- record the first `blocking` lane result as a bounded success:
-  - `out/whisperx-rca-matrix/2026-03-30T16-45-56/summary.csv` shows
-    `exit_code=0` with `hip_launch_blocking=1`
-  - but `kept_bundle=0`, so this is currently summary-only evidence
-- rerun the `blocking` lane with `KEEP_SUCCESS_TRACE=1` so the success case
-  leaves:
-  - `run.log`
-  - `harness/events.jsonl`
-  - `profiler/whisperx_results.db`
-  for direct comparison against the crashing non-blocking lanes
-- use the current WhisperX classification to unblock adjacent compat work:
-  - prefer blocking-first defaults for fragile runtime-facing workflows
-  - use short real workloads first when checking new compat lanes
-  - keep long async GPU workflows out of promoted baseline claims unless they
-    have their own retained success evidence
-- repair the `gfx803_flake_v1` `.#whisperx` shell so the extracted host runtime
-  no longer mixes with Nix ROCm device-libs:
-  - the current short-file non-RCA failure is a separate bug from the traced
-    WhisperX hang lane
-  - retained symptom: `opencl.bc` from `/nix/store/...rocm-device-libs...`
-    compiled by `LLVM22` is being read by the extracted runtime's `LLVM19`
-    toolchain, which fails blit-kernel creation and then segfaults
-  - keep the shell documented as a candidate normal path until a short-file
-    smoke passes after the Nix surface is tightened
-- keep `silero` on an explicit local-asset path for the normal WhisperX shell:
-  - export a repo-local `TORCH_HOME`
-  - seed `snakers4/silero-vad` into the exact `torch.hub` cache layout
-  - do not rely on live GitHub fetches or the current Python SSL trust path at
-    runtime
-- keep the five-liLane doc matrix explicit so each lane is promoted only once its tooling moves the shared sentinels:
-  1. baseline crash lane
-  2. queue/visibility lane
-  3. pressure-control lane
-  4. DMA-light lane
-  5. backend/compute lane
+- Preserve current WhisperX classification: confirmed `ring gfx timeout` / queue forward-progress loss; copy/wait-adjacent exposure point; first `Host active wait ... for -1 ns` sentinel; VM/pinned-page and DMA/copy-path remain candidate triggers
+- Rerun the `blocking` WhisperX success lane with `KEEP_SUCCESS_TRACE=1` so success retains logs/profiler evidence
 - Preserve the current `5.7` extracted host path as a separate reusable artifact alongside the top-level extracted `6.4` baseline
-- Fix LeechTransformer inference checkpoint loading on ROCm hosts (`__main__.LeechConfig` unpickle path) and document current GPU correctness status ✅
-- Re-run the LeechTransformer higher-token matrix after the ROCm `top_p` guardrail and harness fault-classification fix, then update the documented stable token window from measured results ✅
-- Decide whether guarded long-token runs (`top_p` forced off on ROCm above `36` tokens) are good enough for the public default, or whether the runbook should remain capped at `--max_tokens <= 36` ✅ (superseded: crash behavior improved, but output correctness is still not trustworthy)
-- Commit and push the helper scripts already referenced by the docs (`scripts/debug-leech-high-token-instability.sh`, `scripts/run-gfx803-ollama-container.sh`, `scripts/watch-amdgpu-devcoredump.sh`, and the tracing wrappers) so a fresh clone actually contains the documented workflows ✅
-- Replace the old Leech token-window guidance with a correctness-first status: `6.4` is wrong early, `5.7` is less wrong but still nondeterministic, and CPU is the only trustworthy output path today
-- Extend the Leech debugging from the current `block0.attn_out_preproj_view` finding into a smaller flatten/layout repro so the first nondeterministic kernel can be isolated
-- Capture an upstream-quality repro for the Leech ROCm correctness bug on Polaris/gfx803 that shows: stable `attn_probs`, stable `attn_weighted`, unstable `transpose(...).reshape(B, T, -1)`, and stable `permute(...).contiguous().reshape(...)`
-- Explain why the local Leech attention workaround (`permute(...).contiguous().reshape(...)`) stabilizes the probe tensor path but does not stabilize end-to-end first-step logits on the extracted `5.7` runtime
-- Narrow the remaining same-process `5.7` drift after the local attention patch: the next active target is the path from `block0.attn_out_manual` into `resid1` / later blocks, not the already-isolated flatten step
-- Turn the new tensor-only layout repro plus the `HIP_LAUNCH_BLOCKING=1` stabilization result into an upstream-ready ROCm bug report with exact commands, shapes, and observed diffs
-- Use the in-progress `rocm/pytorch:latest` pull as a component source for the `6.4`-upgrade lane instead of treating pure `latest` as the primary runtime target
-- Record the now-observed latest-class runtime result explicitly: both pure `ROCm latest` and the fully synced `6.4`-upgrade lane can import torch but remain GPU-gated on Polaris because the HSA/HIP boundary is still unresolved
-- Decide whether the next `6.4`-upgrade step should target explicit device-gating checks in the latest torch/ROCm stack or move sideways into a smaller GPU-detection repro before rerunning the Leech minimal repro matrix
-- Only rerun `scripts/capture-leech-minimal-repros.sh` for the swapped `rocm64-upgrade` lane after GPU visibility is restored; the current latest-class lane is importable but still GPU-gated
-- Record the latest-class runtime split explicitly:
-  - latest `libhsa-runtime64` breaks `rocminfo` on Polaris
-  - latest HIP alone does not
-  - old-HSA hybrid lanes can restore `rocminfo`
-  - rebuilt torch still fails there at the HIP/HSA ABI seam
-- Materialize and keep the current HSA-hybrid runtime lanes reproducible under `artifacts/rocm-runtime-hybrids/`
-- Promote the preserved old-HSA/HIP ABI lane to the actual short-term upgrade default:
-  - materialize it at `artifacts/rocm64-upgrade-oldabi/`
-  - point `gfx803-pytorch-stack-upgrade` at it
-  - point the framework rebuild driver at it by default
-- Extract and publish a coherent old-ABI ROCm SDK root for builds:
-  - populate `artifacts/rocm64-oldabi-sdk/opt-rocm` from the known-working Robert `6.4.3_0.11.5` image
-  - use it as the default `FRAMEWORK_REBUILD_ROCM_ROOT`
-  - stop treating a bare runtime-lib overlay as sufficient for framework rebuilds
-- Probe the smallest HSA-side cluster that restores both:
-  - `rocminfo` on Polaris
-  - rebuilt torch import with GPU visibility
-- Stop treating `torchvision` / `torchaudio` as the immediate blockers for the latest-class framework lane; they remain deferred behind raw runtime enumeration and HIP/HSA ABI bring-up
-- Decide whether the first realistic upgrade target is:
-  - old HSA/HIP ABI preserved with newer layers around it, or
-  - a patched newer HSA/HIP line that restores Polaris enumeration
-- Prefer the old-HSA/HIP-preserved direction first unless a newer Polaris-capable HSA runtime fix becomes concrete
-- Turn the original working `rr_gfx803_rocm` Docker recipe into a shared Nix-owned build graph:
-  - preserve only the essential gfx803 env and source patches
-  - stop copying historical Docker-specific Python/package mutations
-  - split runtime libs, math libs, framework layer, and app layer explicitly
-- Make the first explicit Nix-owned artifact boundary the shared `gfx803-pytorch-stack`:
-  - one Python environment
-  - one rebuilt `torch` wheel
-  - one rebuilt `torchvision` wheel
-  - one rebuilt `torchaudio` wheel
-  - explicit dependency on the selected runtime/math layers
-- Expose two explicit flake shells for that boundary:
-  - `gfx803-pytorch-stack` as the untouched control lane
-  - `gfx803-pytorch-stack-upgrade` as the ROCm-upgrade lane using the same frozen Python/framework layer
-- Freeze and publish `artifacts/rocm64-upgrade-safe-support/` as the first accepted low-risk support overlay:
-  - upgraded `libamd_comgr`
-  - upgraded `librocm-core`
-  - upgraded `libelf`
-  - upgraded `libnuma`
-  - upgraded `libdrm*`
-- Keep the fully synced latest-class `artifacts/rocm64-upgrade/` lane documented as a separate negative-control experiment:
-  - imports can succeed
-  - GPU visibility still drops away on Polaris once the newer HIP/HSA ABI is in play
-- Probe the next boundary systematically from the safe-support base:
-  - keep the old HIP ABI
-  - overlay newer math subsets one family at a time
-  - save import/GPU-visibility outputs per profile
-- Record the loader-resolution result explicitly in user-facing upgrade notes:
-  - the coarse-pass math profiles were false positives
-  - the frozen framework kept binding control `6.4` math libs because latest math payloads expose newer sonames
-- Decide the first real long-running build target from the now-confirmed boundary:
-  - rebuild the framework layer against the newer sonames / ABI, or
-  - rebuild selected math libs to match the frozen framework’s older sonames / ABI expectations
-- Keep the Docker/Robert extraction fallback noted but secondary:
-  - if the first Nix-owned framework rebuild driver blocks badly, trigger the container snapshot/rebuild path later and feed those artifacts back into the flake
-- Treat these as current hard ABI-seam failures under the frozen framework:
-  - `miopen_only`
-  - `rocsparse_only`
-  - `rocsolver_only`
-- If the project stays PyTorch-first, prefer a narrower math/runtime rebuild before a full framework rebuild only when it can target the old soname/ABI contract deliberately; otherwise move straight to the framework rebuild lane
-- Add the first real Nix-owned framework rebuild entrypoint:
-  - one app/shell for building `torch`, `torchvision`, and `torchaudio`
-  - preserved old-ABI extracted runtime + SDK as the default source
-  - repo-local wheels/logs output
-- Keep the rebuild driver aligned with the observed first hard failure:
-  - current known blocker was `fbgemm` AVX512 with `-Werror=maybe-uninitialized`
-  - carry the conservative PyTorch build flags from the later Docker attempts before judging the rebuild lane
-- Make the rebuild driver stop on a torch-only smoke failure before attempting `torchvision`:
-  - current first packaging/runtime gate is whether the freshly built torch wheel imports cleanly
-  - current minimum signal is `torch.cuda.is_available()`
-- Keep the rebuild driver incremental enough for iterative debugging:
-  - reuse an existing torch wheel by default after a successful torch build
-  - only rebuild torch again when explicitly forced or when no wheel is present
-- Keep the rebuild driver self-discovering at runtime:
-  - inspect the built torch shared objects
-  - resolve missing `.so` dependencies from known ROCm/system roots automatically
-  - stop using one-lib-at-a-time manual path fixes as the default approach
-- Keep the rebuild driver binding wheel-local `torch/lib` ahead of system `libtorch_*` libraries:
-  - this is now a required part of the runtime contract for the rebuilt wheel
-- Make the rebuild driver reject silent fallback to `/opt/rocm` latest ROCm payloads during an old-ABI-targeted run:
-  - fail fast if `libamdhip64`, `libhsa-runtime64`, `librocblas`, `libhipblas*`, `libMIOpen`, or related ROCm libs resolve outside the intended old-ABI roots
-- Only trust the next torch smoke result after the old-ABI SDK root exists and the rebuild driver proves the wheel is not binding latest `/opt/rocm` sonames
-- Validate the cleaned old-ABI smoke path:
-  - confirm `LD_LIBRARY_PATH` is rebuilt from only the preserved old-ABI roots
-  - rerun the torch-only smoke
-  - record whether `torch.cuda.is_available()` flips to `True`
-- Disable Kineto for the old-ABI torch rebuild lane so the build does not trip over the incompatible `roctracer` headers from the extracted SDK
-- Keep the `_GLIBCXX_ASSERTIONS` workaround in HIP-specific flags and rerun the old-ABI lane now that:
-  - ROCm LLVM tools have a host `libxml2.so.2` provider in `LD_LIBRARY_PATH`
-  - the HIP flag override is passed through `CMAKE_ARGS` as a single value instead of malformed `-DCMAKE_HIP_FLAGS=` shell fragments
-- Back only the PyTorch-essential Docker-era workarounds into derivations now:
-  - gfx803 env contract
-  - rebuilt `rocBLAS`
-  - clean TorchVision build isolation
-- Keep Ollama-specific patches and app-layer Docker transport details out of the first PyTorch artifact; move them later once the shared framework layer is stable
-- Re-pull `itir:latest` locally so the `6.4` extraction flow is runnable again after the Docker reset
-- Verify `gfx803_flake_v1` entrypoints on the current host after the Docker reset
-- Investigate the `rocmNative-franken` segmentation fault that occurs before the drift matrix can emit results
-- Capture a minimal repro for the franken-shell crash with the extracted `5.7` payload
-- Run the same standardized benchmark matrix through `scripts/host-rocm57-python.sh` after the `ROCm 7+` attempt window is complete
-- Expand the benchmark record schema to include ComfyUI workflow/image bundle fields directly once the first community workflow is finalized
+- Keep Leech correctness-first status: `6.4` is wrong early, `5.7` is less wrong but still nondeterministic, CPU is the trustworthy output path until a GPU lane earns numerical receipts
+- Turn the tensor-only layout repro plus `HIP_LAUNCH_BLOCKING=1` result into an upstream-quality operation/ordering reproducer
+- Keep `artifacts/rocm-latest/` as a moving source/control lane rather than the primary runtime target
+- Keep the preserved old-HSA/HIP ABI lane as the practical short-term control until current TheRock earns equivalent receipts
+- Keep the first explicit Nix-owned artifact boundary as the shared `gfx803-pytorch-stack`
 
 ## Documentation
 
-- Keep `6.4`, `5.7`, and `ROCm 7+` artifact paths clearly separated in newcomer docs and scripts
+- Keep `6.4`, `5.7`, native Arch `7.2.4`, moving upstream extraction, current TheRock, Luca reference, and ROCm 10 full-stack reference clearly separated in newcomer docs and scripts
 - Keep the Cachix cache name, URL, and public key documented anywhere Nix entrypoints are presented
-- Document explicitly that Ollama GPU is still the one remaining surface tied to the Robert container lineage while the host `6.4` extraction now covers torch import, ComfyUI, and broader userspace bring-up, with WhisperX kept separate as an RCA/reproducer surface
-- Document explicitly that, for now, re-downloading the known-good Robert Ollama image is still the faster practical route than rebuilding that patched stack locally
-- Keep the new shareable user guide aligned with README and START_HERE whenever the status of Ollama host stability changes
-- Keep the top-level README focused on newcomer orientation instead of mixing old and new workflows
-- Keep the Leech docs aligned with the current correctness finding: GPU launch success is not the same as trustworthy output
-- Document explicitly that the current extracted-runtime PyTorch build has no Vulkan backend, so Vulkan is not a fallback path for Leech under this runtime
-- Document the new `6.4`-upgrade lane as the preferred path toward a reproducible newer stack for others, distinct from the pure `ROCm latest` extraction lane
-- Keep the new Docker-to-Nix migration checklist aligned with the actual flake/runtime split as the repo stops relying on historical Docker rebuilds
-- Keep the migration checklist explicit that PyTorch is the first boundary and Ollama is deferred until after the shared framework layer works
-- Document explicitly that `gfx803-pytorch-stack-upgrade` now means the curated safe-support lane, not the fully synced latest-class experiment
-- Record which image and tag were used for the latest `5.7` extraction in `artifacts/rocm57/meta/info.txt`
-- Add a short results note once the first `ROCm 7+` smoke attempt completes and once the refreshed `5.7` drift run completes
-- Document the first accepted community benchmark workflow IDs and required artifact set
-- Add/maintain a LeechTransformer runbook with exact command line, current correctness warning, and kv-cache/crash notes for Polaris hosts ✅
-- Keep the new WhisperX RCA workflow documented and aligned across README and the user guide:
-  - `scripts/trace-whisperx-rocprof.sh`
-  - `scripts/whisperx_rca_harness.py`
-  - `scripts/run-whisperx-rca-matrix.sh`
-  - retain-only-on-suspicion behavior
-  - host CPU hotspot capture so CPU-bound `ffmpeg` decode does not get mistaken for GPU work
-- Keep the new WhisperX observability design note aligned with the live wrapper behavior:
-  - `docs/WHISPERX_OBSERVABILITY_C4.puml`
-  - reduced crash-capture mode
-  - heartbeat side channel
-
-- Defer any direct `zkperf` integration unless we specifically need its compare/report layer:
-  - current decision: borrow orchestration/reporting ideas only
-  - do not pull in `zkperf` scripts as the WhisperX RCA engine because they are not ROCm or `amdgpu` aware
+- Keep the patch atlas explicit that a component exclusion is investigation debt, not an impossibility proof
+- Keep source corrections/retractions visible; do not silently retain superseded root-cause narratives
+- Keep the new shareable user guide aligned with README and START_HERE whenever promotion states change
+- Keep the Leech docs aligned with the current correctness finding: GPU launch success is not trustworthy output
+- Keep the WhisperX RCA workflow documented and aligned across README and user guide
 
 ## Deferred
 
 - Decide whether the top-level `flake.nix` should be updated to match `gfx803_flake_v1` or explicitly marked legacy
-- Add repo-level CI once there is a stable GPU-backed execution target
-- Promote the compatibility graph outputs into a more obvious summary view for non-technical readers
+- Add a self-hosted gfx803 hardware runner capable of paying TheRock-style Sanity Tested receipts once the current-source core lane is stable
+- Draft upstream AMD target/roadmap PR only after the minimal current patch set and hardware sanity receipts are reproducible
+- Promote compatibility graph outputs into a more obvious summary view for non-technical readers
