@@ -6,6 +6,9 @@ The purpose is not merely to say "ROCm changed from X to Y". For gfx803, that is
 
 ```text
 component/source revision
+!= SONAME / DT_NEEDED surface
+!= compiled GPU target
+!= device/topology
 != target registration
 != patch set
 != GPU enumeration
@@ -33,38 +36,47 @@ python stack_manifest_diff.py old-release.json new-release.json \
   --markdown-out out/UPDATE_NOTES.md
 ```
 
-The existing `scripts/build_release_manifest.py` output is accepted as-is. Optional richer fields are also understood:
+The existing `scripts/build_release_manifest.py` output is accepted as-is. Optional richer fields are also understood, including `components`, `targets`, `topology`, `patch_set`, benchmark states, and evidence states. Missing optional sections are treated as empty so historical manifests remain comparable.
 
-```json
-{
-  "release_id": "rocm10-gfx803-2026-09-14",
-  "stack_id": "gfx803",
-  "components": {
-    "rocm-systems": "c83f23b31d8a64aef9cefece339713e6898efb2d",
-    "rocblas": "release/rocm-rel-10.0"
-  },
-  "targets": ["gfx803"],
-  "patch_set": [
-    "legacy-doorbell",
-    "d2h-staged-copy"
-  ],
-  "benchmark_summary": {
-    "statuses": {
-      "enumeration": "pass",
-      "leech": "partial",
-      "whisperx": "crash"
-    }
-  },
-  "evidence": {
-    "build": "paid",
-    "enumeration": "paid",
-    "numerical_correctness": "partial",
-    "reset_safety": "unpaid"
-  }
-}
+## Automatic stack inventory
+
+`stack_inventory.py` now supplies the first automatic enrichment layer:
+
+```bash
+python stack_inventory.py /opt/rocm --out out/stack-inventory.json
 ```
 
-Missing optional sections are treated as empty so historical manifests remain comparable.
+Where host tools permit, it records:
+
+- SHA-256 and size of shared/code objects
+- ELF SONAME
+- `DT_NEEDED` dependencies
+- embedded `gfx*` target strings
+- `rocminfo` GPU-agent topology
+- marketing identity, chip ID, BDF identity and CU count
+- explicit paid/unpaid inventory evidence state
+
+It can also enrich an existing manifest directly:
+
+```bash
+python stack_inventory.py /opt/rocm \
+  --out out/stack-inventory.json \
+  --manifest out/release-manifest-base.json \
+  --manifest-out out/release-manifest.json
+```
+
+The differ reports GPU-agent topology changes separately from GPU target strings, because the same `gfx803` ISA label can describe materially different devices/topologies.
+
+## Local Arch/CachyOS versus ROCm 10 path
+
+`docs/LOCAL_ROCM10_TRIAL.md` gives the prepared comparison path:
+
+```bash
+bash scripts/capture-native-rocm-manifest.sh
+bash scripts/probe-schaka-rocm10-gfx803-reference.sh
+```
+
+Both produce timestamped `release-manifest.json` files suitable for `stack_manifest_diff.py`. The native capture does not mutate `/opt/rocm`; the Schaka lane runs in Docker and remains explicitly `reference-only`.
 
 ## Status ordering
 
@@ -98,24 +110,23 @@ Therefore:
 same gfx ISA string != same physical device != same topology != same compatibility result
 ```
 
-Future manifest enrichment should retain PCI/BDF or stable device identity so the differ can distinguish topology changes from software changes.
+The implemented topology coordinate retains BDF/chip/device identity separately from the target list.
 
 ### Source build progress is not whole-stack support
 
 The earlier `lamikr/rocm_sdk_builder` gfx803 work is another useful pattern. The gfx803 target could be introduced to the build configuration and the build progressed deeply into the stack; rocFFT then failed during its shipped AOT-cache generation because the helper invocation lacked a target argument. That is a component/build-seam defect, not evidence that gfx803 itself cannot execute FFTs.
 
-A later `rocm_sdk_builder` issue hit a SONAME mismatch (`librocm_smi64.so.1` expected versus `.so.7` produced) while building torchvision. That motivates a future ABI/ELF manifest coordinate rather than treating all failures as target-architecture failures.
+A later `rocm_sdk_builder` issue hit a SONAME mismatch (`librocm_smi64.so.1` expected versus `.so.7` produced) while building torchvision. That motivates the ABI/ELF manifest coordinate rather than treating all failures as target-architecture failures.
 
-## Intended next enrichment
+## Remaining enrichment
 
-The next useful manifest coordinates, in priority order, are:
+The highest-value remaining coordinates are:
 
 1. component repo + exact commit/tag
-2. exported/required SONAMEs and symbol versions
-3. compiled GPU target/code-object inventory
-4. GPU identity/topology (BDF, chip ID, marketing name, ISA)
-5. patch provenance (source repo/commit/blob)
-6. benchmark/consumer status
-7. evidence/payment state
+2. exported/required symbol versions beyond SONAME/`DT_NEEDED`
+3. exact code-object inventory where strings are insufficient
+4. patch provenance (source repo/commit/blob)
+5. VBIOS / clocks / kernel-driver coordinates for reset-class comparisons
+6. richer benchmark/consumer status
 
-The differ should remain a projection over those recorded facts. It must not infer AMD support, root cause, or hardware capability merely from a changed field.
+The differ remains a projection over recorded facts. It must not infer AMD support, root cause, or hardware capability merely from a changed field.
