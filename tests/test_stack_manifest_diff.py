@@ -14,6 +14,11 @@ class StackManifestDiffTests(unittest.TestCase):
             },
             "targets": ["gfx803"],
             "patch_set": ["legacy-doorbell", "old-workaround"],
+            "topology": {
+                "agents": [
+                    {"name": "gfx803", "chip_id": "26591(0x67df)", "bdfid": "256", "marketing_name": "RX 580"}
+                ]
+            },
             "benchmark_summary": {
                 "statuses": {
                     "enumeration": "pass",
@@ -38,6 +43,12 @@ class StackManifestDiffTests(unittest.TestCase):
             },
             "targets": ["gfx803", "gfx900"],
             "patch_set": ["legacy-doorbell", "d2h-staged-copy"],
+            "topology": {
+                "agents": [
+                    {"name": "gfx803", "chip_id": "26591(0x67df)", "bdfid": "256", "marketing_name": "RX 580"},
+                    {"name": "gfx803", "chip_id": "5597(0x15dd)", "bdfid": "1024", "marketing_name": "Vega 8"},
+                ]
+            },
             "benchmark_summary": {
                 "statuses": {
                     "enumeration": "pass",
@@ -80,6 +91,18 @@ class StackManifestDiffTests(unittest.TestCase):
             {"record": "comfyui", "status": "partial"}
         ])
 
+    def test_diff_tracks_agent_topology_separately_from_target_name(self):
+        delta = diff_manifests(self.before, self.after)
+        self.assertEqual(delta["topology_changes"]["added"], [
+            {
+                "name": "gfx803",
+                "chip_id": "5597(0x15dd)",
+                "bdfid": "1024",
+                "marketing_name": "Vega 8",
+            }
+        ])
+        self.assertEqual(delta["topology_changes"]["removed"], [])
+
     def test_diff_keeps_evidence_payment_distinct_from_behavior(self):
         delta = diff_manifests(self.before, self.after)
         self.assertEqual(delta["evidence_changes"], [
@@ -92,6 +115,8 @@ class StackManifestDiffTests(unittest.TestCase):
         self.assertIn("# gfx803 update: old → new", markdown)
         self.assertIn("## Component/source deltas", markdown)
         self.assertIn("`rocm-systems`: `aaa111` → `bbb222`", markdown)
+        self.assertIn("## Device/topology deltas", markdown)
+        self.assertIn("Vega 8", markdown)
         self.assertIn("## Validation promotions", markdown)
         self.assertIn("`leech`: partial → pass", markdown)
         self.assertIn("## Evidence still unpaid", markdown)
@@ -105,6 +130,7 @@ class StackManifestDiffTests(unittest.TestCase):
         )
         self.assertEqual(delta["component_changes"], [])
         self.assertEqual(delta["patch_changes"], {"added": [], "removed": []})
+        self.assertEqual(delta["topology_changes"], {"added": [], "removed": []})
         self.assertEqual(delta["benchmark_changes"]["promotions"], [])
         self.assertEqual(delta["unpaid_evidence"], [])
 
