@@ -20,7 +20,7 @@ created_at=$(date -Iseconds)
 EOF
 
 # Pulling is deliberate: this lane tests the published community artifact rather
-# than rebuilding it locally. The resolved image ID is retained below.
+# than rebuilding it locally. The resolved image ID/digest is retained below.
 docker pull "$IMAGE" | tee "$RUN_ROOT/pull.log"
 IMAGE_ID="$(docker image inspect "$IMAGE" --format '{{.Id}}')"
 IMAGE_DIGEST="$(docker image inspect "$IMAGE" --format '{{join .RepoDigests ","}}')"
@@ -35,6 +35,7 @@ DOCKER_ARGS=(
   --device=/dev/dri
   --group-add video
   -v "$PWD:/workspace/gfx803_compat_graph:ro"
+  -v "$RUN_ROOT:/workspace/out"
   -w /workspace/gfx803_compat_graph
 )
 
@@ -46,6 +47,11 @@ docker run "${DOCKER_ARGS[@]}" "$IMAGE" bash -lc '
   rocminfo 2>&1
 ' > "$RUN_ROOT/rocminfo.txt" 2>&1
 ROCMINFO_RC=$?
+
+docker run "${DOCKER_ARGS[@]}" "$IMAGE" bash -lc '
+  python stack_inventory.py /opt/rocm --out /workspace/out/stack-inventory.json
+' > "$RUN_ROOT/inventory.log" 2>&1
+INVENTORY_RC=$?
 
 docker run "${DOCKER_ARGS[@]}" "$IMAGE" bash -lc '
   python - <<"PY"
@@ -70,19 +76,96 @@ set -e
 cat > "$RUN_ROOT/promotion.env" <<EOF
 claim_scope=reference-only
 rocminfo_exit=$ROCMINFO_RC
+inventory_exit=$INVENTORY_RC
 torch_smoke_exit=$TORCH_RC
 amd_build_passing=not-claimed
 amd_sanity_tested=not-claimed
 amd_release_ready=not-claimed
 EOF
 
+export IMAGE IMAGE_ID IMAGE_DIGEST ROCMINFO_RC INVENTORY_RC TORCH_RC RUN_ROOT
+python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+run_root = Path(os.environ["RUN_ROOT"])
+try:
+    inventory = json.loads((run_root / "stack-inventory.json").read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    inventory = {
+        "components": {},
+        "targets": [],
+        "topology": {"agents": []},
+        "inventory_evidence": {
+            "elf_inventory": "unpaid",
+            "gpu_target_inventory": "unpaid",
+            "topology": "unpaid",
+        },
+        "inventory_errors": ["inventory output unavailable"],
+    }
+
+try:
+    torch_smoke = json.loads((run_root / "torch-smoke.json").read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    torch_smoke = {}
+
+def status(rc):
+    return "pass" if rc == 0 else "fail"
+
+evidence = dict(inventory.get("inventory_evidence") or {})
+evidence.update({
+    "enumeration": "paid" if int(os.environ["ROCMINFO_RC"]) == 0 else "unpaid",
+    "tiny_tensor_correctness": (
+        "paid" if int(os.environ["TORCH_RC"]) == 0 and torch_smoke.get("tiny_tensor_ok") is True else "unpaid"
+    ),
+    "amd_build_passing": "unpaid",
+    "amd_sanity_tested": "unpaid",
+    "amd_release_ready": "unpaid",
+})
+
+manifest = {
+    "release_id": os.environ["IMAGE_DIGEST"] or os.environ["IMAGE_ID"],
+    "stack_id": "schaka-rocm10-gfx803-reference",
+    "reference_class": "community-reference",
+    "source": {
+        "image": os.environ["IMAGE"],
+        "image_id": os.environ["IMAGE_ID"],
+        "image_digest": os.environ["IMAGE_DIGEST"],
+        "claim_scope": "reference-only",
+    },
+    "components": inventory.get("components", {}),
+    "targets": inventory.get("targets", []),
+    "topology": inventory.get("topology", {"agents": []}),
+    "patch_set": [],
+    "benchmark_summary": {
+        "statuses": {
+            "enumeration": status(int(os.environ["ROCMINFO_RC"])),
+            "stack_inventory": status(int(os.environ["INVENTORY_RC"])),
+            "tiny_tensor": status(int(os.environ["TORCH_RC"])),
+        }
+    },
+    "evidence": evidence,
+    "inventory_errors": inventory.get("inventory_errors", []),
+    "probe": torch_smoke,
+    "install_notes": [
+        "Reference-only Schaka ROCm 10 gfx803 image; community success is not AMD Release Ready."
+    ],
+}
+(run_root / "release-manifest.json").write_text(
+    json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+)
+PY
+
 cat <<EOF
 ROCm 10 gfx803 community-reference probe finished.
-  image:      $IMAGE
-  image id:   $IMAGE_ID
-  output:     $RUN_ROOT
-  rocminfo rc:$ROCMINFO_RC
-  torch rc:   $TORCH_RC
+  image:        $IMAGE
+  image id:     $IMAGE_ID
+  output:       $RUN_ROOT
+  rocminfo rc:  $ROCMINFO_RC
+  inventory rc: $INVENTORY_RC
+  torch rc:     $TORCH_RC
+  manifest:     $RUN_ROOT/release-manifest.json
 
 This is a reference-only receipt. Community success != AMD Release Ready.
 EOF
