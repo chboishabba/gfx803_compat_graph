@@ -14,13 +14,14 @@ There are several related historical lines and they should not be collapsed:
 - `lamikr/rocm_sdk_builder` was another early community build-system route, and received a public gfx803 support request in 2024;
 - Robert Rosenbusch's gfx803 builds established practical application stacks by rebuilding omitted target code;
 - Luca Bruni's March 2026 TheRock fork demonstrated that modern TheRock could enumerate gfx803 again by restoring legacy doorbell semantics and CLR admission;
+- `Schaka/rocm-gfx803` now provides a separately maintained ROCm 10.0 full-stack reference with prebuilt GHCR images and real-hardware correctness/workload receipts;
 - current `ROCm/TheRock` is AMD's build/release system and now exposes an optional `therock_custom_amdgpu_targets.cmake` hook specifically suitable for out-of-tree target bring-up.
 
 The current lane uses those earlier results as evidence and regression fixtures while targeting present upstream source.
 
-## Primary source and reference source
+## Primary source and reference sources
 
-The default producer now pins current upstream TheRock:
+The default producer pins current upstream TheRock:
 
 - repo: `https://github.com/ROCm/TheRock.git`
 - pinned commit: `4213e176e29199c5dea5b54513bc3b1d36d91ca9`
@@ -34,6 +35,22 @@ Luca's known-restored source remains independently reproducible with:
 - option: `--reference-luca`
 
 The reference commit reported `rocminfo` and `clinfo` successfully detecting an RX 550. That receipt establishes a restoration precedent; it is not a claim that every current component or workload is correct.
+
+The Schaka ROCm 10 line is a second, stronger downstream reference rather than an upstream source dependency. Its published image can be probed with:
+
+```bash
+bash scripts/probe-schaka-rocm10-gfx803-reference.sh
+```
+
+The default image is:
+
+```text
+ghcr.io/schaka/rocm-migraphx-ort-torch-builder:rocm10.0-gfx803
+```
+
+The probe records the resolved image ID/digest plus `rocminfo` and a tiny PyTorch GPU correctness smoke under `out/rocm10-gfx803-reference/`. Every receipt is marked `reference-only`: **community success != AMD Release Ready**.
+
+For the source-bound patch/capability classification behind that reference, see `docs/GFX803_UPSTREAM_PATCH_ATLAS.md`.
 
 ## Current rebase strategy
 
@@ -120,7 +137,7 @@ The initial exclusion frontier follows the known-restored March target:
 - `rocprofiler-compute`
 - `MIOpen`
 
-Each exclusion is now an investigation item, not a declaration that the card can never support the library.
+Each exclusion is now an investigation item, not a declaration that the card can never support the library. The ROCm 10 reference is particularly useful here: it already includes working gfx803-specific paths for components that the initial TheRock target excluded, so exclusion from one build target cannot establish technical impossibility.
 
 Classify each missing component into one of these categories:
 
@@ -175,6 +192,8 @@ The old lanes already provide downstream tests rather than forcing the modern la
 - LeechTransformer isolates a layout/materialization nondeterminism boundary and records that `HIP_LAUNCH_BLOCKING=1` changes the outcome;
 - WhisperX exposes a copy/wait-adjacent queue forward-progress/reset failure under real load;
 - the old-ABI and extracted 5.7/6.4 lanes provide comparison points for ABI, enumeration and numerical behavior.
+
+The ROCm 10 reference adds another discriminator: its patch history contains independently hardware-tested copy/GPUVM fixes. Those are candidate mechanisms to test against our Leech/WhisperX reproducers, not automatic explanations of them.
 
 Once current TheRock pays enumeration and basic execution, route it directly into those existing discriminators.
 
