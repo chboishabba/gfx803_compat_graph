@@ -2,7 +2,7 @@ name: compatibility
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
   pull_request:
   workflow_dispatch:
 
@@ -15,9 +15,19 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run unit tests
-        run: python -m unittest tests/test_benchmark_schema.py
+        run: python -m unittest discover -s tests -p 'test_*.py'
       - name: Check shell scripts
-        run: bash -n scripts/extract-docker-libs.sh scripts/extract-rocm57-artifacts.sh scripts/extract_artifacts.sh scripts/host-docker-python.sh scripts/polaris-env.sh scripts/run-drift-matrix
+        run: >-
+          bash -n
+          scripts/extract-docker-libs.sh
+          scripts/extract-rocm57-artifacts.sh
+          scripts/extract_artifacts.sh
+          scripts/host-docker-python.sh
+          scripts/polaris-env.sh
+          scripts/run-drift-matrix
+          scripts/build-therock-gfx803-artifacts.sh
+          scripts/publish-ollama-and-extracted-artifacts-to-cachix.sh
+          scripts/restore-cachix-artifacts.sh
 
   nix-eval:
     runs-on: ubuntu-latest
