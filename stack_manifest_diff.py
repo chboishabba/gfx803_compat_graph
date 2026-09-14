@@ -53,6 +53,37 @@ def _set_changes(before: Any, after: Any) -> dict[str, list[str]]:
     }
 
 
+def _agent_identity(agent: Any) -> tuple[str, str, str, str]:
+    row = _mapping(agent)
+    return (
+        str(row.get("name") or ""),
+        str(row.get("chip_id") or ""),
+        str(row.get("bdfid") or ""),
+        str(row.get("marketing_name") or ""),
+    )
+
+
+def _agent_from_identity(identity: tuple[str, str, str, str]) -> dict[str, str]:
+    name, chip_id, bdfid, marketing_name = identity
+    return {
+        "name": name,
+        "chip_id": chip_id,
+        "bdfid": bdfid,
+        "marketing_name": marketing_name,
+    }
+
+
+def _topology_changes(before: dict[str, Any], after: dict[str, Any]) -> dict[str, list[dict[str, str]]]:
+    old_topology = _mapping(before.get("topology"))
+    new_topology = _mapping(after.get("topology"))
+    old_agents = {_agent_identity(agent) for agent in old_topology.get("agents", []) if isinstance(agent, dict)}
+    new_agents = {_agent_identity(agent) for agent in new_topology.get("agents", []) if isinstance(agent, dict)}
+    return {
+        "added": [_agent_from_identity(identity) for identity in sorted(new_agents - old_agents)],
+        "removed": [_agent_from_identity(identity) for identity in sorted(old_agents - new_agents)],
+    }
+
+
 def _benchmark_changes(before: dict[str, Any], after: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     old_summary = _mapping(before.get("benchmark_summary"))
     new_summary = _mapping(after.get("benchmark_summary"))
@@ -120,6 +151,7 @@ def diff_manifests(before: dict[str, Any], after: dict[str, Any]) -> dict[str, A
         "component_changes": _component_changes(before, after),
         "target_changes": _set_changes(before.get("targets"), after.get("targets")),
         "patch_changes": _set_changes(before.get("patch_set"), after.get("patch_set")),
+        "topology_changes": _topology_changes(before, after),
         "benchmark_changes": _benchmark_changes(before, after),
         "evidence_changes": evidence_changes,
         "unpaid_evidence": unpaid_evidence,
@@ -132,6 +164,15 @@ def _fmt(value: Any) -> str:
 
 def _bullet(lines: list[str], text: str) -> None:
     lines.append(f"- {text}")
+
+
+def _agent_label(agent: dict[str, str]) -> str:
+    bits = [agent.get("marketing_name") or agent.get("name") or "GPU"]
+    for key in ("name", "chip_id", "bdfid"):
+        value = agent.get(key)
+        if value and value not in bits:
+            bits.append(f"{key}={value}")
+    return ", ".join(bits)
 
 
 def render_markdown(delta: dict[str, Any]) -> str:
@@ -155,6 +196,17 @@ def render_markdown(delta: dict[str, Any]) -> str:
     for label, key in (("Targets removed", "target_changes"), ("Patches removed", "patch_changes")):
         values = delta[key]["removed"]
         _bullet(lines, f"{label}: " + (", ".join(f"`{x}`" for x in values) if values else "none"))
+    lines.append("")
+
+    lines.extend(["## Device/topology deltas", ""])
+    topology = delta["topology_changes"]
+    if not topology["added"] and not topology["removed"]:
+        _bullet(lines, "No recorded GPU-agent topology changes.")
+    else:
+        for agent in topology["added"]:
+            _bullet(lines, f"Added: {_agent_label(agent)}")
+        for agent in topology["removed"]:
+            _bullet(lines, f"Removed: {_agent_label(agent)}")
     lines.append("")
 
     validation_sections = [
@@ -197,7 +249,7 @@ def render_markdown(delta: dict[str, Any]) -> str:
     lines.extend([
         "## Interpretation boundary",
         "",
-        "This report compares recorded manifests. A changed version, target, patch, or benchmark status does not by itself establish a causal mechanism, hardware support guarantee, or release-readiness promotion.",
+        "This report compares recorded manifests. A changed version, target, patch, topology, or benchmark status does not by itself establish a causal mechanism, hardware support guarantee, or release-readiness promotion.",
         "",
     ])
     return "\n".join(lines)
