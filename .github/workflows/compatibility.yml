@@ -26,6 +26,7 @@ jobs:
           scripts/polaris-env.sh
           scripts/run-drift-matrix
           scripts/build-therock-gfx803-artifacts.sh
+          scripts/probe-schaka-rocm10-gfx803-reference.sh
           scripts/publish-ollama-and-extracted-artifacts-to-cachix.sh
           scripts/restore-cachix-artifacts.sh
 
