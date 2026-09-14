@@ -27,7 +27,9 @@ This repo is where those pieces are being tested and documented.
 - The stock host `ollama` binary still falls back to CPU; the upstream Robert image remains the safer practical GPU option until the extracted host bundle is fully stabilized
 - The `5.7` payload artifacts are now extracted into `artifacts/rocm57/` and are usable as a standalone host artifact path via `scripts/host-rocm57-python.sh`
 - A separate `ROCm 7+` experiment lane now writes into `artifacts/rocm-latest/` so newer-runtime tests do not overwrite the `6.4` or `5.7` baselines
-- The repo now has initial CI validation scaffolding, but not a finished publish pipeline yet
+- The repo has a framework rebuild driver that produces gfx803-targeted torch/vision/audio wheels against the preserved old-ABI SDK/runtime lane
+- The repo now has a dedicated modern TheRock producer, `scripts/build-therock-gfx803-artifacts.sh`, pinned to Luca Bruni's source-level gfx803 restoration commit; it writes a prebuilt ROCm tree under `artifacts/therock-gfx803/` for the existing Cachix publish/restore path
+- The repo now has initial CI validation scaffolding, but not a finished automatic GPU-backed publish pipeline yet
 
 ## If you only do one thing
 
@@ -41,7 +43,7 @@ verify-gfx803-host
 
 That tells you whether the machine can see the GPU and ROCm stack at all.
 
-## The three practical paths
+## The practical paths
 
 ### Path A: Reuse the extracted `6.4` environment
 
@@ -97,6 +99,30 @@ bash scripts/extract-rocm-latest-artifacts.sh
 bash scripts/host-rocm-latest-python.sh -c 'import torch; print(torch.__version__)'
 ```
 
+This is a moving-source experiment lane, not the modern gfx803 support path.
+
+### Path E: Build and publish the modern TheRock gfx803 lane
+
+Use this if you want the source-level restoration path rather than a hybrid of older extracted runtime pieces.
+
+```bash
+bash scripts/build-therock-gfx803-artifacts.sh --core-only
+```
+
+The default producer pins Luca Bruni's known gfx803 restoration commit and applies TheRock's `gfx803` patch tag. Once the core lane is good enough to justify the larger build:
+
+```bash
+bash scripts/build-therock-gfx803-artifacts.sh --full
+```
+
+The resulting prebuilt tree is materialized under `artifacts/therock-gfx803/` and can be pushed through the existing cache path:
+
+```bash
+bash scripts/publish-ollama-and-extracted-artifacts-to-cachix.sh artifacts/therock-gfx803
+```
+
+Read [docs/THEROCK_GFX803_PREBUILT.md](THEROCK_GFX803_PREBUILT.md) before treating any built artifact as a compatibility claim. A successful build is only the first gate; enumeration, kernel execution, numerical correctness, and workload stability remain separate promotion steps.
+
 ## Important caveat
 
 If you specifically need GPU Ollama today, do not assume the stock host `ollama` binary is equivalent to the old Robert Docker path.
@@ -113,11 +139,12 @@ If you are using Nix on another machine, enable the repo cache first:
 cachix use gfx803-rocm
 ```
 
-That allows Nix to fetch published extracted artifacts from Cachix instead of requiring them to be recreated locally.
+That allows Nix to fetch published extracted or source-built artifacts from Cachix instead of requiring them to be recreated locally.
 
 ## Files worth reading next
 
 - [docs/USER_GUIDE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/USER_GUIDE.md)
+- [docs/THEROCK_GFX803_PREBUILT.md](THEROCK_GFX803_PREBUILT.md)
 - [README.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/README.md)
 - [gfx803_flake_v1/README.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/gfx803_flake_v1/README.md)
 - [POLARIS_STABILITY_BLUEPRINT.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/POLARIS_STABILITY_BLUEPRINT.md)
