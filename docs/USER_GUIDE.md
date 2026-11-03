@@ -706,3 +706,58 @@ If you need more detail after this guide:
 - [POLARIS_STABILITY_BLUEPRINT.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/POLARIS_STABILITY_BLUEPRINT.md)
   - includes the current Polaris ROCm sanity checklist for ring-timeout /
     `-1 ns` / reset-class failures
+
+
+## C2/MoE GPU training numerical admission (3 November 2026)
+
+The separate [LeechTransformer PR #4](https://github.com/chboishabba/LeechTransformer/pull/4)
+now has a **fail-closed actual model-training GPU gate**:
+`scripts/gfx803_moe_gpu_gate.py` and
+`scripts/run_gfx803_moe_nix.sh`, with source-only regressions
+and the [training runbook](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/gfx803_gpu_training_admission_20261103.md).
+
+This does NOT replace or fork this repository's ROCm/PyTorch
+environment. The launcher enters our existing
+`gfx803_flake_v1#gfx803-pytorch-stack` Nix shell,
+then invokes our existing `scripts/host-docker-python.sh`.
+It defaults to `HIP_LAUNCH_BLOCKING=1`, preserving our
+compatibility workarounds and isolating the extracted
+ROCm 6.4 HSA/HIP ABI from unrelated Nix device libraries.
+The explicit `gfx803-pytorch-stack-upgrade` remains an
+alternative **diagnostic** lane, not automatic fallback.
+
+The gate compares **the original actual Leech checkpoint**
+and train-token window on CPU versus HIP/GPU, repeats the
+GPU computations, probes strict layer-1 C2 rather than merely
+the 0.5 hybrid gate, then checks full matched-objective
+backpropagated gradients and one optimizer update.
+`torch.cuda.is_available()==True` is necessary but far
+from sufficient. Failed, nonfinite, or missing parity
+results reject GPU training; the wrapper must not switch
+silently back to CPU.
+
+The accompanying user-executed CPU source receipts give
+frozen dense teacher CE **2.51320**, strict focused signed
+C2 **2.89186**, and matched ordinary dense FFN **2.21605**
+on the same train-derived development split (45 optimizer
+rows, 13 development rows, 819 prediction targets).
+The dense control still wins by about **0.676 nats**.
+These are independent of GPU runtime status: getting GPU
+compute working does not change the scientific quality
+comparison unless a newly measured GPU training run does.
+
+**Current admission:** No physical `gfx803` training
+gate receipt has been executed or promoted by this change.
+The prior Leech correctness failure below remains the
+authority. Our CPU baseline is still the trusted path.
+A successful single-step gate would permit bounded
+GPU experiments, *not* establish long-running Polaris
+reset safety or universal PyTorch correctness. Reuse
+`scripts/capture-leech-minimal-repros.sh` and the
+existing layerwise divergence probes to investigate
+any numerical failure. Do not reclassify the runtime as
+GPU-correct merely because the Nix shell can import torch.
+
+Original neural model: Anatolii Kornienko (Leech-LILA).
+Existing gfx803 patched runtime ownership and
+third-party contributors remain unchanged.
