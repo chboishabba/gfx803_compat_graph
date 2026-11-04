@@ -183,6 +183,12 @@ historical results.
   rebuild set from the actual published upstream build DAG. It writes
   `component-sources.json` for the Nix-native phase. The graph is **not**
   a compilation or a content-addressed input derivation.
+- `scripts/audit_gfx803_closure.py` now treats **all** unresolved ELF
+  `DT_NEEDED` SONAMEs as hazards, not just ROCm-specific ones. Explicit
+  `--provider-root /nix/store/...-libdrm` or glibc provider roots can be
+  added when actually present in the runtime dependency closure; it never
+  assumes system `/usr/lib` fills missing links. This is still a static
+  audit, not runtime or GPU proof.
 - `scripts/gfx803_oci_links.py` stages `/opt/rocm` and optional `/opt/venv`,
   resolving OCI-internal `/etc/alternatives/rocm-*` chains to relative
   in-tree links. It reports missing and outside-tree aliases instead of
@@ -324,7 +330,26 @@ Do not automatically label host-only faults as ROCm userland bugs, userland nume
 - Automated upstream change discovery and incremental builds produce candidates; only admitted candidates become stable.
 - The original 6.4 control and historical failure receipts remain available and never get relabelled as universal correctness.
 
-**Remaining exact max-cut:** first real digest import + relocation audit + on-card acceptance, then native source derivations and automated incremental build/promote. This branch implements the source lock, import/policy surface, conditional Cachix outputs, and candidate source-watch, but does not pretend the unexecuted gates are closed.
+**Updated exact remaining max-cut (source vs physical gates, 2026-11-04):**
+
+| Gate | What now exists in this PR | Irreducible remaining evidence |
+|---|---|---|
+| G0 — baseline/attribution | 5.7/6.4 and historical ComfyUI, GEMM/WGM8, diffusion, Ollama/WhisperX incident evidence linked | Preserve original raw workflow/images where available and explicitly mark missing hashes; do not recast tests as never run |
+| G1 — digest | Schaka source lock verified to the currently selected full SHA; eight-source pin parser; hosted immutable digest-lock proposal workflow | **Run** hosted OCI inspection, review the true digest, commit it to upstream.json (currently null), ensure actual published labels/pins correspond |
+| G2 — Nix bootstrap | Source-written importer, staged in-image symlink resolver, hardlink scratch optimization, component source graph, mocked negative tests | Execute Nix flake eval/checks and real skopeo/umoci import on a Nix builder, preserve real candidate and source graph |
+| G3 — runnable binary | Complete DT_NEEDED audit (including non-ROCm libraries) with explicit provider roots; RPATH/symlink static checks | Actually link/relocate the selected ROCm and venv payloads and supply a coherent compiler/libc/driver interface; demonstrate clean host execution without Ubuntu/Docker/foreign ROCm |
+| G4 — physical acceptance | Real-command receipt capture and hash policy; partial 6/7 diffusion gate fails; ComfyUI image comparator; application capability receipts | Run Schaka suite + original ComfyUI image/workflow, WGM8/GemmFwdRest, repeat/miniUNet, WhisperX hangs and long-load controls **on documented physical gfx803 hardware**, retain bytes/sha256, inspect any failures |
+| G5 — first release | Frozen accepted manifest policy, evidence-rechecking Cachix publish script, conditional fetchClosure outputs | Promote only from executed G1–G4 receipts; publish actual closures and prove clean Nix client substitution and numerical smoke |
+| G6 — native source Nix | Full resolved source provenance and exact component DAG/rebuild impact from Schaka | Implement and **compile** source derivations for ROCr/CLR, rocBLAS, MIOpen, rocSOLVER, MIGraphX, PyTorch, ORT/Triton as required; pin all compiler/base and patch artifacts; verify same G4 suite |
+| G7 — incremental fleet | Source and OCI change PR workflows, self-hosted import candidate workflow | Execute CI and self-hosted Polaris jobs; implement hash-based incremental source builds, candidate/stable separation, rollback and reproducible publication |
+
+**No G1–G7 physical gate has been falsely marked complete.** PR #5 remains
+draft pending real Nix execution, a reviewed digest lock and on-card receipts.
+The 2025 Linux KFD callback repair is **already upstream** and not part
+of G1–G7. Previously recorded newer hangs remain a distinct correctness
+qualification; Schaka's WGM and MIOpen patches are original upstream work
+reused with attribution, not new fixes claimed here.
+
 
 
 ## 4 November 2026: actual Leech/C2 dense GPU rejection and binary-factory join
