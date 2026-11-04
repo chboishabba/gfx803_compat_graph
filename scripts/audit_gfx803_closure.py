@@ -108,7 +108,7 @@ def audit_roots(roots: list[Path], *, readelf: str | None = None,
                     continue
                 provided_names.add(filename)
                 with item.open("rb") as fd:
-                    if fd.read(4) != b"\\x7fELF":
+                    if fd.read(4) != b"\x7fELF":
                         continue
                 proc = subprocess.run([readelf, "-d", str(item)], text=True,
                                       capture_output=True, check=False)
