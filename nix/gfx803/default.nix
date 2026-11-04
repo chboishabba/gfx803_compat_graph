@@ -3,6 +3,8 @@
 { pkgs }:
 let
   python = pkgs.python312;
+  sourceScripts = ../../scripts;
+  sourceLockFile = ./upstream.json;
   upstream = builtins.fromJSON (builtins.readFile ./upstream.json);
   upstreamLock = pkgs.writeText "gfx803-schaka-upstream-lock.json"
     (builtins.readFile ./upstream.json);
@@ -30,7 +32,10 @@ let
       bash coreutils findutils gnugrep jq skopeo umoci nix python
     ];
     text = ''
-      exec ${pkgs.bash}/bin/bash ${../../scripts/import-schaka-oci-to-nix.sh} "$@"
+      export GFX803_SCRIPTS_DIR="${sourceScripts}"
+      export GFX803_SOURCE_LOCK="${sourceLockFile}"
+      export PYTHONPATH="${sourceScripts}"
+      exec ${pkgs.bash}/bin/bash ${sourceScripts}/import-schaka-oci-to-nix.sh "$@"
     '';
   };
 
@@ -38,7 +43,9 @@ let
     name = "gfx803-release-policy";
     runtimeInputs = [ python ];
     text = ''
-      exec ${python}/bin/python ${../../scripts/gfx803_release.py} "$@"
+      export GFX803_SOURCE_LOCK="${sourceLockFile}"
+      export PYTHONPATH="${sourceScripts}"
+      exec ${python}/bin/python ${sourceScripts}/gfx803_release.py "$@"
     '';
   };
 
@@ -46,7 +53,8 @@ let
     name = "gfx803-capture-evidence";
     runtimeInputs = [ python ];
     text = ''
-      exec ${python}/bin/python ${../../scripts/gfx803_capture.py} "$@"
+      export PYTHONPATH="${sourceScripts}"
+      exec ${python}/bin/python ${sourceScripts}/gfx803_capture.py "$@"
     '';
   };
 
@@ -56,7 +64,7 @@ let
     name = "gfx803-comfyui-images";
     runtimeInputs = [ pythonImages ];
     text = ''
-      exec ${pythonImages}/bin/python ${../../scripts/gfx803_comfyui_images.py} "$@"
+      exec ${pythonImages}/bin/python ${sourceScripts}/gfx803_comfyui_images.py "$@"
     '';
   };
 
@@ -64,7 +72,7 @@ let
     name = "gfx803-audit-closure";
     runtimeInputs = [ python pkgs.binutils ];
     text = ''
-      exec ${python}/bin/python ${../../scripts/audit_gfx803_closure.py} "$@"
+      exec ${python}/bin/python ${sourceScripts}/audit_gfx803_closure.py "$@"
     '';
   };
 
