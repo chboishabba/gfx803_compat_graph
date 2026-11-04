@@ -76,7 +76,7 @@ class HardwareReceiptCaptureTests(unittest.TestCase):
     def test_rejects_unknown_gate_and_non_candidate(self):
         from scripts.gfx803_release import AdmissionError
         with self.assertRaises(AdmissionError):
-            capture(self.candidate, self.logs, "comfyui_image", ["true"])
+            capture(self.candidate, self.logs, "not_real_gate", ["true"])
         write(self.candidate, {"state": "accepted"})
         with self.assertRaises(AdmissionError):
             capture(self.candidate, self.logs, "gpu_enumeration", ["true"])
