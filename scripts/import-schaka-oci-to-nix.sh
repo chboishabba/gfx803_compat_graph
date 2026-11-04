@@ -72,8 +72,33 @@ done
 # enter Nix's store; no image/OCI archive is retained in the consumer closure.
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
-mkdir -p "$scratch/layout"
-echo "Fetching immutable OCI image digest: $IMAGE"
+mkdir -p "$scratch/layout" "$OUT"
+# Schaka stamps the final image with build-line, component, upstream revision
+# and resolved upstream dependency pins. Check them BEFORE pulling the layers.
+skopeo inspect --override-os linux --override-arch amd64 \
+  "docker://$IMAGE" > "$OUT/oci-inspect.json"
+python3 - "$OUT/oci-inspect.json" "$SOURCE_REV" "$rocm_version" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1]))
+labels = payload.get("Labels") or {}
+rev = sys.argv[2]
+mm = ".".join(sys.argv[3].split(".")[:2])
+expected = {
+    "io.rocm.gfx803.source-rev": rev,
+    "io.rocm.gfx803.line": "rocm" + mm,
+    "io.rocm.gfx803.stage": "final",
+}
+for name, value in expected.items():
+    if labels.get(name) != value:
+        raise SystemExit("OCI LABEL MISMATCH: " + name + ": " + repr(labels.get(name)))
+if not labels.get("io.rocm.gfx803.pins") or labels["io.rocm.gfx803.pins"] == "unrecorded":
+    raise SystemExit("OCI LABEL MISMATCH: resolved component pins missing")
+print("Source, release, final-stage and component pin labels match")
+PY
+
+echo "Fetching immutable, matching OCI image digest: $IMAGE"
 skopeo copy --override-os linux --override-arch amd64 \
   "docker://$IMAGE" "oci:$scratch/layout:locked"
 umoci unpack --rootless --image "$scratch/layout:locked" "$scratch/unpacked"
@@ -86,12 +111,6 @@ if ((WITH_VENV)); then
   [[ -d "$root/opt/venv" ]] || { echo "No /opt/venv in image" >&2; exit 3; }
   venv_store="$(nix store add-path "$root/opt/venv")"
 fi
-
-mkdir -p "$OUT"
-# Source labels and transfer metadata are evidence, not an automatic provenance
-# endorsement. A future validator must compare recorded source labels and pins.
-skopeo inspect --override-os linux --override-arch amd64 \
-  "docker://$IMAGE" > "$OUT/oci-inspect.json"
 
 OCI_IMAGE="$IMAGE" SCHAKA_SOURCE_REV="$SOURCE_REV" \
   ROCM_STORE="$rocm_store" VENV_STORE="$venv_store" ROCM_VERSION="$rocm_version" \
@@ -113,7 +132,8 @@ manifest = {
     "provenance": {
         "origin": "Schaka OCI binary import",
         "native_nix_build": False,
-        "upstream_commit_correspondence": "unverified",
+        "upstream_commit_correspondence": "publisher-oci-labels-matched",
+        "publisher_image_labels": "oci-inspect.json",
         "runtime_relocation": "unverified",
     },
     "evidence": {},
