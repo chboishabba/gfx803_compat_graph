@@ -657,6 +657,51 @@ later README identifies out-of-spec VRAM clocks as a cause of some observed
 VM faults and hangs. Those findings should be tested and scoped independently
 of the already-fixed KFD callback regression.
 
+### Our original test programme (not just community issue reports)
+
+The repository itself already investigated the **same problem family** in
+March 2026, as preserved in [CONTEXT.md](CONTEXT.md),
+[CHANGELOG.md](CHANGELOG.md), [probe_diffusion.py](probe_diffusion.py),
+[tests/drift_core.py](tests/drift_core.py), and
+[POLARIS_STABILITY_BLUEPRINT.md](POLARIS_STABILITY_BLUEPRINT.md).
+The `probe_diffusion.py` source was first committed on **16 March 2026**.
+That same-input mini-UNet test suite recorded **6/7 passes** and a
+`repeated_inference_drift` failure; the retained `itir:latest`
+stable-profile record shows max difference **0.001410** on
+`6.19.7-1-cachyos-bore`. Older GEMM-selection work also recorded
+`GemmFwdRest` drift ~0.15 versus scoped zero drift with the direct-only
+convolution profile. **Those measurements are local tests, not a
+first-party 2025 side-by-side full ComfyUI screenshot comparison.**
+The August 2025 issue #43 reports that earlier 5.7/6.4 ComfyUI
+contrast, and the user participated in it.
+
+Our earlier selected Tensile kernel was `ISA803` assembly ending in
+`WGM8`; see the directly relevant **independently validated upstream
+patch class** in [Schaka's gfx803 WorkGroupMapping repair][schaka-wgm].
+It changes invalid nonidentity assembly workgroup mappings to
+`WorkGroupMapping=1` and is an immediate differential validation target
+on the modern Nix build—not an invitation to independently rewrite
+Schaka's fix.
+
+The repository also **directly reproduced GPU hangs and resets**:
+[20 March Ollama/Mistral compute-ring timeout][hang-ollama],
+[25 March Wayland-visible repeated gfx timeouts][hang-wayland], and
+[27–30 March WhisperX GPU hangs][hang-whisperx], including a
+device-to-host copy/host-wait exposure point, BACO reset and VRAM loss.
+The repo's March 30 `HIP_LAUNCH_BLOCKING=1` run has a recorded
+exit-code-zero summary but lacks a retained complete success trace.
+These are newer evidence surfaces, **not a claim that the already-fixed
+2025 gfx7/gfx8 callback regression persisted**. Trigger attribution
+(VRAM clocks, queue scheduling, GPU VM, pinned pages, DMA or selected
+kernels) must remain scoped to measured circumstances.
+
+See [the dated evidence and exact test-to-patch crosswalk](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md#historical-first-party-numerical-and-hang-evidence--preserve-do-not-rediscover).
+
+[schaka-wgm]: https://github.com/Schaka/rocm-gfx803/blob/main/patches/rocblas/wgm-miscompute-source.patch
+[hang-ollama]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-20_OLLAMA_MISTRAL_KFD_RESET.md
+[hang-wayland]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-25_WAYLAND_GFX_TIMEOUT_RESET.md
+[hang-whisperx]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md
+
 ### All linked public issues and historical reports
 
 The 13 original user-supplied links are included **verbatim** below.
