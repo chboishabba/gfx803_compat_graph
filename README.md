@@ -633,6 +633,30 @@ itself certify the running host kernel, firmware, board or VBIOS configuration.
 | **lamikr / rocm_sdk_builder contributors** | [rocm_sdk_builder][lamikr-repo] older multi-component build recipes and ABI/dependency debugging | Historical build evidence, not a second independent ROCm 10.1 patch fork |
 | **gfx803_compat_graph and community testers** | Nix/Cachix packaging, 5.7/6.4 baselines, compatibility graph and reproducible drift/stress probes | Separate source-written, imported binary, native Nix build, executed hardware test and accepted release claims |
 
+### Distinguish the fixed KFD callback bug from later numerical regressions
+
+The [ComfyUI corruption thread #43][robert-43] is a particularly useful
+negative control for **ROCm userspace numerical correctness**, not evidence
+that the historical 2025 kernel callback fix failed. Users on RX 570/580
+reported that ROCm 6.4 image generation could yield corrupted results even
+with `--lowvram`; one also reported `--force-fp32` did not restore correct
+output, while ROCm 5.7 worked in their comparisons. These observations are
+specific to those images, boards, models and installations; they do not prove
+a universal ROCm 6.4 failure. In [October 2026][schaka-43-patches], Schaka
+pointed users toward his source-level PyTorch patches rather than another
+unmodified 6.4 image. In [November 2026][schaka-43], he accurately noted that
+the original Nix 6.4 compatibility environment alone does not supply those
+modern PyTorch/ROCm fixes.
+
+This is **not the same issue** as the fixed Linux SDMA reset callback, nor
+the ROCm 7+ userspace legacy-doorbell enumeration check. Maintain independent
+build/ABI, GPU enumeration, kernel dispatch, numerical and repeated-run
+acceptance gates. Schaka's [28 August 2026 report][schaka-aug28] noted
+intermittent vLLM hangs and subsequent evidence of VRAM instability; his
+later README identifies out-of-spec VRAM clocks as a cause of some observed
+VM faults and hangs. Those findings should be tested and scoped independently
+of the already-fixed KFD callback regression.
+
 ### All linked public issues and historical reports
 
 The 13 original user-supplied links are included **verbatim** below.
@@ -654,6 +678,7 @@ build lessons — their presence does not mean each issue is still unresolved.
 | [lamikr/rocm_sdk_builder #220][sdk-220] | TorchVision heap-corruption and mixed-library ABI pitfalls |
 | [robertrosenbusch/gfx803_rocm #6][robert-6] | WhisperX framework integration and excessive container/build-disk overhead |
 | [robertrosenbusch/gfx803_rocm #5][robert-5] | ComfyUI, TorchAudio and Python-environment linkage |
+| [robertrosenbusch/gfx803_rocm #43][robert-43] | RX 570/580 ComfyUI output corruption on some ROCm 6.4 configurations while 5.7 worked; a concrete negative numerical regression, not the already-fixed 2025 KFD callback bug |
 
 Related: [TheRock #9118][therock-9118], [TheRock #9210][therock-9210],
 [Schaka's repo][schaka-repo], [upstream KFD fix][kfd-upstream],
@@ -680,6 +705,10 @@ for independent verification of this project's binaries. See
 [sdk-220]: https://github.com/lamikr/rocm_sdk_builder/issues/220
 [robert-6]: https://github.com/robertrosenbusch/gfx803_rocm/issues/6
 [robert-5]: https://github.com/robertrosenbusch/gfx803_rocm/issues/5
+[robert-43]: https://github.com/robertrosenbusch/gfx803_rocm/issues/43
+[schaka-43]: https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-6594618560
+[schaka-43-patches]: https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-6519100882
+[schaka-aug28]: https://github.com/ROCm/TheRock/issues/9118#issuecomment-6211403475
 [therock-9118]: https://github.com/ROCm/TheRock/issues/9118
 [therock-9210]: https://github.com/ROCm/TheRock/issues/9210
 [kfd-amd-gfx]: https://lists.freedesktop.org/archives/amd-gfx/2025-July/126884.html
