@@ -82,7 +82,7 @@ against Schaka's patched ROCm 10.1 stack before creating redundant testers.
 
 | Date and origin | Retained evidence | Interpretation / qualification |
 | --- | --- | --- |
-| Aug 2025 community | [gfx803_rocm #43](https://github.com/robertrosenbusch/gfx803_rocm/issues/43) documents **RX570/580 ComfyUI image corruption in ROCm 6.4** while ROCm 5.7 produced working results on affected systems; [user's Aug 27 comment](https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-3226617434) engaged this exact comparison. | This is the **earlier externally reported cross-version image test**, not yet proven to be a first-party side-by-side ComfyUI image run. Record per-board/model/torch/driver details. |
+| 2025–26 first-party ComfyUI + community comparison | **Actual ComfyUI images were tested on gfx803**: the project reports correct generated images on ROCm 5.7 and corrupted/gradient-like images in the affected ROCm 6.4 configuration, followed by real `direct_only` and extracted-runtime trials. Independent contemporaneous [issue #43](https://github.com/robertrosenbusch/gfx803_rocm/issues/43) captures related RX570/580 results and the [user's August 27 participation](https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-3226617434). This repo's [March 19 changelog](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CHANGELOG.md) confirms extracted 6.4 ComfyUI coverage. | **First-party application tests exist and predate this Nix 10.1 roadmap.** Do not relabel them as a future test or a MiniUNet-only finding. Historical full-workflow model/config/output-image hashes are not all linked to one currently committed receipt; inventory and attach available originals before claiming bit-for-bit replay. |
 | 16 Mar 2026 first-party | [probe_diffusion.py](https://github.com/chboishabba/gfx803_compat_graph/blob/master/probe_diffusion.py) committed March 16. [CONTEXT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CONTEXT.md) and [out/known_knowns.json](https://github.com/chboishabba/gfx803_compat_graph/blob/master/out/known_knowns.json) record **6/7** diffusion probes passed; `repeated_inference_drift` failed on a same-input five-run MiniUNet test. A separately recorded stable-profile drift was **0.001410** on `itir:latest`, kernel `6.19.7-1-cachyos-bore`. | **Our own direct reproduction of a numerical correctness failure**, using a mini-UNet surrogate rather than a full rendered ComfyUI image. Individual FP32/FP16, mixed and 50-step checks passed, but that did not establish stable repeated outputs. |
 | Mar 2026 first-party bisection | [CONTEXT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CONTEXT.md), [check_drift_1x1.py](https://github.com/chboishabba/gfx803_compat_graph/blob/master/check_drift_1x1.py), [tests/drift_core.py](https://github.com/chboishabba/gfx803_compat_graph/blob/master/tests/drift_core.py), and [POLARIS_STABILITY_BLUEPRINT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/POLARIS_STABILITY_BLUEPRINT.md): reported `GemmFwdRest` / GEMM-selected drift around **0.15**, direct-only zero drift in scoped repeated convolution, and 1×1 convolution differences approaching **0.98–1.0** after sustained kernel switches/context activity. | Solver-specific bisection is **existing first-party debugging**, not a hypothetical new test. Proposed Tensile YAML/register-reuse root cause and “state poisoning” mechanism are hypotheses, not independently proven kernel patch ownership. No scoped zero-drift convolution result implies full diffusion correctness. |
 | 20 Mar 2026 | [Ollama Mistral incident](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-20_OLLAMA_MISTRAL_KFD_RESET.md): output succeeded, then `init_user_pages` failures, compute-ring timeout, GPU reset, BACO, VRAM loss and compositor artifacts. | First-party **GPU reset** evidence on an older userspace lane, distinct from an import failure. |
@@ -161,10 +161,13 @@ collapsed into the same mechanism without an equivalent reproducer.
    Triton and coherence checks first; add only needed differential
    probes. Import and native Nix derivations must pass the same
    acceptance contract before releasing.
-5. Treat a **real ComfyUI fixed-seed/model image comparison** as an
-   application-level downstream canary whose historical 2025
-   community reports provide expectations. Do not misrepresent the
-   mini-UNet surrogate as a full ComfyUI run.
+5. **Replay the already-performed first-party real ComfyUI image
+   comparison** on the new modern stack, with fixed seed/model/solver
+   and output-image hashes. Preserve the user's historical 5.7-correct
+   versus affected-6.4-corrupted observations and community #43
+   references. Identify retained original workflow/PNG/log files to
+   make this a hash-verifiable acceptance fixture. The MiniUNet
+   surrogate is a separate, additional test, not a replacement.
 
 The outstanding work is **source-pinned ROCm 10.1 integration and
 re-execution of existing qualified tests**, not invention of a first
