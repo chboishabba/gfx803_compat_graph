@@ -16,7 +16,10 @@ from pathlib import Path
 # Support both direct CLI invocation and imports from unit tests.
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from scripts.gfx803_component_graph import parse_pins
+try:
+    from scripts.gfx803_component_graph import parse_pins
+except ModuleNotFoundError:
+    from gfx803_component_graph import parse_pins
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
