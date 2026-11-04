@@ -17,6 +17,12 @@ jobs:
       - name: Run unit tests
         run: |
           python -m unittest tests/test_benchmark_schema.py
+          python -m compileall -q \
+            scripts/gfx803_release.py \
+            scripts/gfx803_component_graph.py \
+            scripts/gfx803_oci_links.py \
+            scripts/gfx803_capture.py \
+            scripts/audit_gfx803_closure.py
           python -m unittest discover -s tests -p 'test_gfx803_*.py'
       - name: Check shell scripts
         run: >-
