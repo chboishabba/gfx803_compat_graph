@@ -88,6 +88,7 @@ class ReleasePolicyTests(unittest.TestCase):
         accepted = promote(candidate, LOCK)
         self.assertEqual(accepted["state"], "accepted")
         self.assertFalse(accepted["official_amd_support"])
+        self.assertEqual(accepted["release_source_lock"]["source_revision"], LOCK["source_revision"])
         self.assertEqual(CANDIDATE["state"], "candidate")
 
     def test_read_write(self):
