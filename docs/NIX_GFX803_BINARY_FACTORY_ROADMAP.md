@@ -90,6 +90,44 @@ against Schaka's patched ROCm 10.1 stack before creating redundant testers.
 | 27–30 Mar 2026 | [WhisperX transcribe incident](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-27_WHISPERX_TRANSCRIBE_RESET.md) and [March 30 trace](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md): confirmed active GPU work followed by `GPU Hang`, ring timeout, GPU reset and VRAM loss; later long-run sequence shows device-to-host copy → `Host active wait ... for -1 ns` → hang. `rocprofv3` sometimes altered survival and `HIP_LAUNCH_BLOCKING=1` yielded a summary-only exit 0. | **A substantial first-party hang/RCA programme**, including queue, VM/pinned-page and D2H hypotheses. The exposure point is observed; exact trigger/ownership and a durable successful long-run fix remain open. |
 | 21 Mar 2026 | [CHANGELOG.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CHANGELOG.md) / [USER_GUIDE.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/USER_GUIDE.md) record 6.4 early Leech `block0.q_raw` divergence; 5.7 later repeated-run attention-layout drift, with the **tensor-only** 5.7 layout test stabilized by `HIP_LAUNCH_BLOCKING=1`. | Separate first-party attention/model correctness comparison, **not** the same full ComfyUI image test, and not proof the whole Leech model was fixed. |
 
+### Exact crosswalk to already-solved Schaka patch classes
+
+This is a **source/measurement join**, not a claim that the bugs
+are byte-identical across releases:
+
+- Our [CONTEXT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CONTEXT.md)
+  documents the selected bad `GemmFwdRest` kernel with name containing
+  `ISA803_K1_KLA` and ending `_WGM8`, together with scoped GEMM
+  drift ~0.15. Schaka's
+  [`wgm-miscompute-source.patch`](https://github.com/Schaka/rocm-gfx803/blob/main/patches/rocblas/wgm-miscompute-source.patch)
+  independently reports that gfx803 **assembly** kernels with
+  `WorkGroupMapping != 1` can mis-map workgroups to output tiles and
+  silently compute incorrect GEMM answers. His patch forces WGM=1 at
+  solution normalization for gfx803 assembly kernels, while retaining
+  WGM!=1 for independently validated HIP-source kernels. That directly
+  intersects the **kernel class** from our older profiler notes; re-run
+  the same selected solution, shapes, process-lifetime and control
+  profiles on the 10.1 Nix build to decide if it closes the exact
+  earlier failure.
+- Our older notes associate Winograd solver selection with GPU hangs
+  and mark `MIOPEN_DEBUG_CONV_WINOGRAD=0` as a scoped mitigation.
+  Schaka's [`winograd-fused-conv-miscompute.patch`](https://github.com/Schaka/rocm-gfx803/blob/main/patches/miopen/winograd-fused-conv-miscompute.patch)
+  fixes a **different measured issue**: a legacy 3x3 fused Winograd
+  solver being incorrectly selected for 1x1 shapes and returning
+  wrong numerical values on RX 470. It does not yet demonstrate that
+  our Winograd-associated **hang** shared that root cause. Keep
+  hang and numerical-correctness receipts independently.
+- Schaka's [`small-gemm-assembly-miscompute.patch`](https://github.com/Schaka/rocm-gfx803/blob/main/patches/rocblas/small-gemm-assembly-miscompute.patch)
+  routes selected tiny assembly GEMMs to correct HIP-source kernels.
+  This is worth testing against the full mini-UNet and attention/layout
+  probes, but our 1×1 **convolution** stress test is not automatically
+  equivalent to Schaka's 1×1×1 **matrix multiplication** reproducer.
+
+The immediate high-alpha reuse target is therefore a **same-kernel-class
+WGM8 differential test** under the existing drift probe with Schaka's
+actual patch applied. Preserve original 2026 profiler/test authorship,
+Schaka's later root-cause proof and his upstream patch provenance.
+
 ### Why the fixed 2025 KFD callback patch does not close these later incidents
 
 [Linux commit 34659c1a1f4f](https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd)
