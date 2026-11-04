@@ -1,0 +1,79 @@
+# Nix-managed tooling and policy for the Schaka gfx803 build/distribution lane.
+# No Nixpkgs ROCm libraries are injected: ROCm 10.1's SDK must be coherent.
+{ pkgs }:
+let
+  python = pkgs.python312;
+  upstream = builtins.fromJSON (builtins.readFile ./upstream.json);
+  upstreamLock = pkgs.writeText "gfx803-schaka-upstream-lock.json"
+    (builtins.readFile ./upstream.json);
+
+  importer = pkgs.writeShellApplication {
+    name = "gfx803-import-schaka";
+    runtimeInputs = with pkgs; [
+      bash coreutils findutils gnugrep jq skopeo umoci nix python
+    ];
+    text = ''
+      exec ${pkgs.bash}/bin/bash ${../../scripts/import-schaka-oci-to-nix.sh} "$@"
+    '';
+  };
+
+  policy = pkgs.writeShellApplication {
+    name = "gfx803-release-policy";
+    runtimeInputs = [ python ];
+    text = ''
+      exec ${python}/bin/python ${../../scripts/gfx803_release.py} "$@"
+    '';
+  };
+
+  # Bootstrap tools only: do not accidentally mix contemporary Nixpkgs ROCm
+  # device-libs/LLVM with Schaka's release-coherent ROCm compiler SDK.
+  bootstrapTools = [
+    importer policy python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
+    pkgs.binutils pkgs.skopeo pkgs.umoci pkgs.cachix pkgs.zstd
+  ];
+
+  bootstrapShell = pkgs.mkShellNoCC {
+    packages = bootstrapTools;
+    shellHook = ''
+      export GFX803_UPSTREAM_REPO="${upstream.source_repository}"
+      export GFX803_UPSTREAM_REV="${upstream.source_revision}"
+      export GFX803_ROCM_VERSION="${upstream.rocm_version}"
+      echo "gfx803 Nix OCI bootstrap; source pin: $GFX803_UPSTREAM_REV"
+      echo "This is NOT the full native-from-source ROCm build SDK."
+    '';
+  };
+
+  # CI needs no GPU and no network to validate source/promotion contracts.
+  policyCheck = pkgs.runCommand "gfx803-release-policy-tests" {
+    nativeBuildInputs = [ python pkgs.bash ];
+  } ''
+    export HOME="$TMPDIR"
+    cd ${../..}
+    ${python}/bin/python -m unittest \
+      tests.test_gfx803_release tests.test_gfx803_oci_import
+    touch "$out"
+  '';
+in
+{
+  packages = {
+    gfx803-schaka-upstream-lock = upstreamLock;
+    gfx803-schaka-import = importer;
+    gfx803-release-policy = policy;
+  };
+  devShells = {
+    gfx803-oci-build = bootstrapShell;
+  };
+  checks = {
+    gfx803-release-policy = policyCheck;
+  };
+  apps = {
+    gfx803-schaka-import = {
+      type = "app";
+      program = "${importer}/bin/gfx803-import-schaka";
+    };
+    gfx803-release-policy = {
+      type = "app";
+      program = "${policy}/bin/gfx803-release-policy";
+    };
+  };
+}
