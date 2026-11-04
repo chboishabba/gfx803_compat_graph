@@ -22,7 +22,7 @@ from pathlib import Path
 # Also works when invoked directly as python3 scripts/gfx803_capture.py.
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from scripts.gfx803_release import REQUIRED, AdmissionError, load, write
+from scripts.gfx803_release import REQUIRED, OPTIONAL, AdmissionError, load, write
 
 
 def assess_diffusion_log(path: Path) -> tuple[bool, str]:
@@ -51,7 +51,7 @@ def assess_diffusion_log(path: Path) -> tuple[bool, str]:
 def capture(candidate_path: Path, evidence_root: Path, gate: str,
             argv: list[str], *, expect_diffusion: bool = False,
             expect_text: list[str] | None = None) -> tuple[dict, bool]:
-    if gate not in REQUIRED:
+    if gate not in REQUIRED + OPTIONAL:
         raise AdmissionError("unknown or non-mandatory gate " + gate)
     if not argv:
         raise AdmissionError("empty command")
@@ -115,7 +115,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--candidate", required=True)
     p.add_argument("--evidence-root", required=True)
-    p.add_argument("--gate", choices=REQUIRED, required=True)
+    p.add_argument("--gate", choices=REQUIRED + OPTIONAL, required=True)
     p.add_argument("--expect-diffusion-all-pass", action="store_true")
     p.add_argument("--expect-text", action="append", default=[])
     p.add_argument("cmd", nargs=argparse.REMAINDER,
