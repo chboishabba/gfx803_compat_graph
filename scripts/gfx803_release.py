@@ -10,7 +10,13 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
+
+# Support both direct CLI invocation and imports from unit tests.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.gfx803_component_graph import parse_pins
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -92,9 +98,10 @@ def lock_image(lock: dict, digest: str, inspection: dict) -> bool:
     for name, want in expected.items():
         if labels.get(name) != want:
             raise AdmissionError("OCI label mismatch: " + name)
-    if not str(labels.get("io.rocm.gfx803.pins", "")).strip() or \
-            labels["io.rocm.gfx803.pins"] == "unrecorded":
-        raise AdmissionError("OCI resolved component pins are absent")
+    try:
+        parse_pins(labels.get("io.rocm.gfx803.pins", ""))
+    except ValueError as exc:
+        raise AdmissionError("OCI component pins are not complete source SHAs: " + str(exc)) from exc
     old = lock.get("image_digest")
     if old is not None and old != digest:
         raise AdmissionError("source revision is already bound to a different image digest")
