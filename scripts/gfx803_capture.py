@@ -19,6 +19,9 @@ import sys
 import uuid
 from pathlib import Path
 
+# Also works when invoked directly as python3 scripts/gfx803_capture.py.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.gfx803_release import REQUIRED, AdmissionError, load, write
 
 
