@@ -1,0 +1,71 @@
+name: gfx803 digest-pinned Nix candidate import
+
+# Deliberately selected GPU-capable, high-disk self-hosted builder.
+# No stable publication, no official-support or numerical-correctness claims.
+on:
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: "Immutable SHA256 digest of Schaka's combined gfx803 image"
+        required: true
+        type: string
+      with_venv:
+        description: "Also import upstream /opt/venv (larger payload)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gfx803-hardware-import
+  cancel-in-progress: false
+
+jobs:
+  import-and-audit:
+    runs-on: [self-hosted, linux, rocm]
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Resolve locked source and run daemonless OCI import
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ inputs.image_digest }}
+          WITH_VENV: ${{ inputs.with_venv }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+            echo "Input must be an OCI sha256 digest" >&2; exit 2;
+          }
+          repo=ghcr.io/schaka/rocm-migraphx-ort-torch-builder
+          sha="$(python3 -c 'import json; print(json.load(open("nix/gfx803/upstream.json"))["source_revision"])')"
+          flags=()
+          if [[ "$WITH_VENV" == "true" ]]; then flags+=(--with-venv); fi
+          nix develop .#gfx803-oci-build -c gfx803-import-schaka \
+            --image "$repo@$IMAGE_DIGEST" \
+            --source-revision "$sha" \
+            --out out/schaka-oci/ci-candidate "${flags[@]}"
+      - name: Audit candidate ELF closure and absolute-path hazards
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate=out/schaka-oci/ci-candidate/candidate.json
+          mapfile -t roots < <(python3 - "$candidate" <<'PY'
+          import json,sys
+          payload=json.load(open(sys.argv[1]))
+          print("\n".join(payload["store_paths"][x] for x in sorted(payload["store_paths"])))
+          PY
+          )
+          args=()
+          for root in "${roots[@]}"; do args+=(--root "$root"); done
+          nix run .#gfx803-audit-closure -- "${args[@]}" \
+            --out out/schaka-oci/ci-candidate/closure-audit.json --strict
+      - name: Preserve candidate metadata even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gfx803-schaka-nix-import-candidate
+          path: out/schaka-oci/
+          if-no-files-found: warn
