@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.gfx803_release import (
-    AdmissionError, REQUIRED, promote, update_lock, validate_candidate,
+    AdmissionError, REQUIRED, promote, update_lock, lock_image, validate_candidate,
     validate_lock, write, load,
 )
 
@@ -17,7 +17,7 @@ LOCK = {
     "source_revision": "8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78",
     "rocm_version": "10.1.0",
     "image_repository": "ghcr.io/schaka/rocm-migraphx-ort-torch-builder",
-    "image_digest": None,
+    "image_digest": "sha256:" + "a" * 64,
 }
 CANDIDATE = {
     "schema_version": 1,
@@ -38,7 +38,7 @@ class ReleasePolicyTests(unittest.TestCase):
         lock = copy.deepcopy(LOCK)
         validate_lock(lock)
         self.assertFalse(update_lock(lock, lock["source_revision"]))
-        self.assertEqual(lock["image_digest"], None)
+        self.assertEqual(lock["image_digest"], "sha256:" + "a" * 64)
 
     def test_new_revision_invalidates_digest(self):
         lock = copy.deepcopy(LOCK)
@@ -111,6 +111,42 @@ class ReleasePolicyTests(unittest.TestCase):
             p = Path(tmp) / "nested" / "candidate.json"
             write(p, CANDIDATE)
             self.assertEqual(load(p), CANDIDATE)
+
+    def test_lock_image_rejects_mismatched_publisher_labels(self):
+        inspection = {"Digest": "sha256:" + "b" * 64,
+                      "Labels": {"io.rocm.gfx803.source-rev": LOCK["source_revision"],
+                                 "io.rocm.gfx803.line": "rocm10.1",
+                                 "io.rocm.gfx803.stage": "final",
+                                 "io.rocm.gfx803.pins": "ROCM_LIBRARIES_SHA=123"}}
+        unlocked = copy.deepcopy(LOCK)
+        unlocked["image_digest"] = None
+        with self.assertRaisesRegex(AdmissionError, "inspect digest"):
+            lock_image(unlocked, "sha256:" + "a" * 64, inspection)
+        inspection["Digest"] = "sha256:" + "a" * 64
+        inspection["Labels"]["io.rocm.gfx803.source-rev"] = "f" * 40
+        with self.assertRaisesRegex(AdmissionError, "source-rev"):
+            lock_image(unlocked, "sha256:" + "a" * 64, inspection)
+        inspection["Labels"]["io.rocm.gfx803.source-rev"] = LOCK["source_revision"]
+        self.assertTrue(lock_image(unlocked, "sha256:" + "a" * 64, inspection))
+        self.assertEqual(unlocked["state"], "source-and-image-pinned")
+        self.assertFalse(lock_image(unlocked, "sha256:" + "a" * 64, inspection))
+        with self.assertRaisesRegex(AdmissionError, "already bound"):
+            lock_image(unlocked, "sha256:" + "b" * 64,
+                       dict(inspection, Digest="sha256:" + "b" * 64))
+
+    def test_unlocked_image_cannot_promote_even_with_evidence(self):
+        unlocked = copy.deepcopy(LOCK)
+        unlocked["image_digest"] = None
+        candidate = copy.deepcopy(CANDIDATE)
+        self.assertEqual(validate_candidate(candidate, unlocked), [])
+        self.assertIn("cannot promote with an unlocked OCI image digest",
+                      validate_candidate(candidate, unlocked, require_evidence=True))
+
+    def test_candidate_digest_must_match_pinned_lock(self):
+        candidate = copy.deepcopy(CANDIDATE)
+        candidate["image_ref"] = LOCK["image_repository"] + "@sha256:" + "b" * 64
+        self.assertTrue(any("digest differs" in e for e in
+                            validate_candidate(candidate, LOCK)))
 
 
 if __name__ == "__main__":
