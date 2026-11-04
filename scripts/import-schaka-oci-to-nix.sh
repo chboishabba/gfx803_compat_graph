@@ -44,16 +44,20 @@ fi
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 lock_path="$repo_root/nix/gfx803/upstream.json"
 [[ -f "$lock_path" ]] || { echo "Missing checked-in Schaka source lock" >&2; exit 2; }
-read -r locked_sha rocm_version < <(python3 - "$lock_path" <<'PY'
+read -r locked_sha rocm_version locked_digest < <(python3 - "$lock_path" <<'PY'
 import json,sys
 lock=json.load(open(sys.argv[1]))
-print(lock["source_revision"], lock["rocm_version"])
+print(lock["source_revision"], lock["rocm_version"], lock.get("image_digest") or "unlocked")
 PY
 )
 [[ "$SOURCE_REV" == "$locked_sha" ]] || {
   echo "Selected Schaka commit differs from checked-in source lock." >&2
   exit 2
 }
+if [[ "$locked_digest" != "unlocked" && "$IMAGE" != "ghcr.io/schaka/rocm-migraphx-ort-torch-builder@$locked_digest" ]]; then
+  echo "Image digest differs from the committed upstream lock." >&2
+  exit 2
+fi
 OUT="${OUT:-out/schaka-oci/${SOURCE_REV:0:12}}"
 if ((DRY_RUN)); then
   printf 'dry-run: pinned image=%s source=%s output=%s venv=%s\n' \
@@ -77,7 +81,7 @@ mkdir -p "$scratch/layout" "$OUT"
 # and resolved upstream dependency pins. Check them BEFORE pulling the layers.
 skopeo inspect --override-os linux --override-arch amd64 \
   "docker://$IMAGE" > "$OUT/oci-inspect.json"
-python3 - "$OUT/oci-inspect.json" "$SOURCE_REV" "$rocm_version" <<'PY'
+python3 - "$OUT/oci-inspect.json" "$SOURCE_REV" "$rocm_version" "$IMAGE" <<'PY'
 import json
 import sys
 
@@ -85,6 +89,9 @@ payload = json.load(open(sys.argv[1]))
 labels = payload.get("Labels") or {}
 rev = sys.argv[2]
 mm = ".".join(sys.argv[3].split(".")[:2])
+requested = sys.argv[4].split("@", 1)[1]
+if payload.get("Digest") != requested:
+    raise SystemExit("OCI DIGEST MISMATCH: inspected digest differs from requested immutable ref")
 expected = {
     "io.rocm.gfx803.source-rev": rev,
     "io.rocm.gfx803.line": "rocm" + mm,
@@ -105,22 +112,36 @@ umoci unpack --rootless --image "$scratch/layout:locked" "$scratch/unpacked"
 
 root="$scratch/unpacked/rootfs"
 [[ -d "$root/opt/rocm" ]] || { echo "No /opt/rocm in image" >&2; exit 3; }
-rocm_store="$(nix store add-path "$root/opt/rocm")"
+# The published image uses /etc/alternatives/rocm-* symlinks to
+# /opt/rocm/core-10.1; copying /opt/rocm verbatim breaks these links.
+# Resolve ONLY aliases that terminate within the selected OCI tree.
+# External links remain a reported, unverified candidate liability.
+python3 "$repo_root/scripts/gfx803_oci_links.py" \
+  --rootfs "$root" --tree /opt/rocm --out "$scratch/staged-rocm" \
+  --report "$OUT/rocm-links.json"
+rocm_store="$(nix store add-path "$scratch/staged-rocm")"
 venv_store=''
 if ((WITH_VENV)); then
   [[ -d "$root/opt/venv" ]] || { echo "No /opt/venv in image" >&2; exit 3; }
-  venv_store="$(nix store add-path "$root/opt/venv")"
+  python3 "$repo_root/scripts/gfx803_oci_links.py" \
+    --rootfs "$root" --tree /opt/venv --out "$scratch/staged-venv" \
+    --report "$OUT/venv-links.json"
+  venv_store="$(nix store add-path "$scratch/staged-venv")"
 fi
 
 OCI_IMAGE="$IMAGE" SCHAKA_SOURCE_REV="$SOURCE_REV" \
   ROCM_STORE="$rocm_store" VENV_STORE="$venv_store" ROCM_VERSION="$rocm_version" \
-  OCI_INSPECT="$OUT/oci-inspect.json" \
+  OCI_INSPECT="$OUT/oci-inspect.json" OCI_LINKS="$OUT/rocm-links.json" \
+  VENV_LINKS="$OUT/venv-links.json" \
   OUT_MANIFEST="$OUT/candidate.json" python3 - <<'PY'
 import json
 import os
 from pathlib import Path
 
 labels = json.loads(Path(os.environ["OCI_INSPECT"]).read_text())["Labels"]
+link_report = json.loads(Path(os.environ["OCI_LINKS"]).read_text())
+venv_report = (json.loads(Path(os.environ["VENV_LINKS"]).read_text())
+               if Path(os.environ["VENV_LINKS"]).is_file() else None)
 store_paths = {"rocm": os.environ["ROCM_STORE"]}
 if os.environ["VENV_STORE"]:
     store_paths["venv"] = os.environ["VENV_STORE"]
@@ -140,6 +161,10 @@ manifest = {
         "published_release_line": labels["io.rocm.gfx803.line"],
         "published_component_pins": labels["io.rocm.gfx803.pins"],
         "runtime_relocation": "unverified",
+        "rocm_symlink_relocation_report": "rocm-links.json",
+        "rocm_unresolved_symlinks": len(link_report["unresolved"]),
+        "venv_symlink_relocation_report": ("venv-links.json" if venv_report else None),
+        "venv_unresolved_symlinks": (len(venv_report["unresolved"]) if venv_report else None),
     },
     "evidence": {},
     "hardware": {},
@@ -152,4 +177,4 @@ PY
 echo "Imported into Nix store: $rocm_store"
 [[ -z "$venv_store" ]] || echo "Python environment: $venv_store"
 echo "Candidate manifest: $OUT/candidate.json"
-echo "NOT PROMOTED. Imported /opt paths may need ELF/venv relocation."
+echo "NOT PROMOTED. Reported symlinks are staged; ELF/venv relocation and runtime correctness remain unverified."
