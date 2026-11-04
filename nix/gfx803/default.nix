@@ -90,7 +90,7 @@ let
 
   # CI needs no GPU and no network to validate source/promotion contracts.
   policyCheck = pkgs.runCommand "gfx803-release-policy-tests" {
-    nativeBuildInputs = [ python pkgs.bash ];
+    nativeBuildInputs = [ python pkgs.bash pkgs.binutils pkgs.coreutils ];
   } ''
     export HOME="$TMPDIR"
     cd ${../..}
