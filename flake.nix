@@ -4,6 +4,8 @@
   nixConfig = {
     extra-substituters = [ "https://gfx803-rocm.cachix.org" ];
     extra-trusted-public-keys = [ "gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=" ];
+    # Required only for accepted binary outputs retrieved with fetchClosure.
+    extra-experimental-features = [ "fetch-closure" ];
   };
 
   inputs = {
