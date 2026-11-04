@@ -81,6 +81,10 @@ def audit_roots(roots: list[Path], *, readelf: str | None = None) -> dict:
                                 hazards.append({"kind": "foreign-rpath", "path": label,
                                                 "target": segment})
 
+    if elf_files == 0:
+        hazards.append({"kind": "no-elf-files",
+                        "detail": "Static audit cannot pass an empty/non-ELF tree"})
+
     for name, paths in sorted(sonames.items()):
         if len(paths) > 1:
             hazards.append({"kind": "duplicate-soname", "soname": name,
