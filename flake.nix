@@ -22,6 +22,8 @@
       };
     };
 
+    gfx803Nix = import ./nix/gfx803/default.nix { inherit pkgs; };
+
     # Polaris compatibility environment
     gfx803Env = ''
       export HSA_OVERRIDE_GFX_VERSION=8.0.3
@@ -140,8 +142,10 @@
     };
 
   in {
+    packages.${system} = gfx803Nix.packages;
+    checks.${system} = gfx803Nix.checks;
 
-    devShells.${system} = {
+    devShells.${system} = ({
 
       # ----------------------------------------
       # ROCm base environment
@@ -289,9 +293,9 @@ EOF
           echo "Verify runtime:     verify-whisperx-webui-gfx803-runtime"
         '';
       };
-    };
+    } // gfx803Nix.devShells);
 
-    apps.${system} = {
+    apps.${system} = ({
       drift-matrix = {
         type = "app";
         program = "${pkgs.writeShellScript "drift-matrix" ''
@@ -315,7 +319,7 @@ EOF
         type = "app";
         program = "${verifyWhisperxWebuiRuntime}/bin/verify-whisperx-webui-gfx803-runtime";
       };
-    };
+    } // gfx803Nix.apps);
 
   };
 }
