@@ -94,9 +94,7 @@ let
   } ''
     export HOME="$TMPDIR"
     cd ${../..}
-    ${python}/bin/python -m unittest \
-      tests.test_gfx803_release tests.test_gfx803_oci_import \
-      tests.test_gfx803_closure_audit
+    ${python}/bin/python -m unittest discover -s tests -p 'test_gfx803_*.py'
     touch "$out"
   '';
 in
