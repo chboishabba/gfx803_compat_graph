@@ -670,10 +670,19 @@ That same-input mini-UNet test suite recorded **6/7 passes** and a
 stable-profile record shows max difference **0.001410** on
 `6.19.7-1-cachyos-bore`. Older GEMM-selection work also recorded
 `GemmFwdRest` drift ~0.15 versus scoped zero drift with the direct-only
-convolution profile. **Those measurements are local tests, not a
-first-party 2025 side-by-side full ComfyUI screenshot comparison.**
-The August 2025 issue #43 reports that earlier 5.7/6.4 ComfyUI
-contrast, and the user participated in it.
+convolution profile. **The project also explicitly tested real ComfyUI
+image generation on gfx803**, including a 5.7-versus-6.4 comparison:
+5.7 generated correct images in the reported tests, whereas 6.4 produced
+corrupted or gradient-like output in the affected setup. The user also
+ran the `direct_only` solver and extracted-runtime ComfyUI paths.
+These application tests must not be reduced to the later MiniUNet surrogate.
+The earlier [ComfyUI issue #43][robert-43] preserves independent community
+image comparisons and the user's participation in that investigation.
+[CHANGELOG.md](CHANGELOG.md) separately records that the extracted 6.4
+host runtime covered ComfyUI, not merely a torch import. The exact
+historical full ComfyUI workflow JSON, model hash, output-image hashes,
+and per-run logs are not all indexed in this GitHub repository; keep that
+**receipt-completeness question separate from whether tests were run**.
 
 Our earlier selected Tensile kernel was `ISA803` assembly ending in
 `WGM8`; see the directly relevant **independently validated upstream
