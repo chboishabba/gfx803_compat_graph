@@ -7,6 +7,7 @@ A passing build/import or a Schaka hardware report is never a local GPU receipt.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -64,7 +65,8 @@ def update_lock(lock: dict, revision: str) -> bool:
     return changed
 
 
-def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = False) -> list[str]:
+def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = False,
+                       *, evidence_root: Path | None = None) -> list[str]:
     validate_lock(lock)
     problems = []
     if candidate.get("schema_version") != 1:
@@ -109,13 +111,23 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
                 problems.append(check + ": missing sha256 of original evidence log")
             if not str(receipt.get("command", "")).strip():
                 problems.append(check + ": missing executed command")
+            if evidence_root is not None:
+                rel = Path(str(receipt.get("log_path", "")))
+                base = Path(evidence_root).resolve()
+                log = (base / rel).resolve()
+                if (not rel.parts or rel.is_absolute() or ".." in rel.parts
+                        or not log.is_relative_to(base) or not log.is_file()):
+                    problems.append(check + ": missing or escaping retained log")
+                elif hashlib.sha256(log.read_bytes()).hexdigest() != receipt.get("log_sha256"):
+                    problems.append(check + ": log sha256 mismatch")
         if candidate.get("state") not in ("candidate", "validated"):
             problems.append("candidate must not be marked accepted before promotion")
     return problems
 
 
-def promote(candidate: dict, lock: dict) -> dict:
-    problems = validate_candidate(candidate, lock, require_evidence=True)
+def promote(candidate: dict, lock: dict, *, evidence_root: Path) -> dict:
+    problems = validate_candidate(candidate, lock, require_evidence=True,
+                                  evidence_root=evidence_root)
     if problems:
         raise AdmissionError("; ".join(problems))
     result = dict(candidate)
@@ -142,6 +154,8 @@ def main() -> int:
     promotion = sub.add_parser("promote", help="write accepted release only after GPU receipts")
     promotion.add_argument("--manifest", required=True)
     promotion.add_argument("--out", required=True)
+    promotion.add_argument("--evidence-root", required=True,
+                           help="Directory containing retained test logs used to verify sha256")
 
     args = ap.parse_args()
     try:
@@ -158,7 +172,8 @@ def main() -> int:
                 raise AdmissionError("; ".join(problems))
             print("candidate schema accepted; GPU admission not implied")
         elif args.command == "promote":
-            accepted = promote(load(args.manifest), lock)
+            accepted = promote(load(args.manifest), lock,
+                               evidence_root=Path(args.evidence_root))
             write(args.out, accepted)
             print("accepted release manifest written to " + args.out)
     except (AdmissionError, ValueError, OSError) as exc:
