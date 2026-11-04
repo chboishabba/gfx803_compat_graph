@@ -118,8 +118,13 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
                 if (not rel.parts or rel.is_absolute() or ".." in rel.parts
                         or not log.is_relative_to(base) or not log.is_file()):
                     problems.append(check + ": missing or escaping retained log")
-                elif hashlib.sha256(log.read_bytes()).hexdigest() != receipt.get("log_sha256"):
-                    problems.append(check + ": log sha256 mismatch")
+                else:
+                    digest = hashlib.sha256()
+                    with log.open("rb") as handle:
+                        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                            digest.update(chunk)
+                    if digest.hexdigest() != receipt.get("log_sha256"):
+                        problems.append(check + ": log sha256 mismatch")
         if candidate.get("state") not in ("candidate", "validated"):
             problems.append("candidate must not be marked accepted before promotion")
     return problems
