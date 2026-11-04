@@ -38,6 +38,7 @@ class OciImportContractTests(unittest.TestCase):
     def test_offline_mock_import_writes_unpromoted_manifest(self):
         import json
         import os
+        import shutil
         import tempfile
         with tempfile.TemporaryDirectory() as td:
             p = Path(td)
@@ -45,10 +46,11 @@ class OciImportContractTests(unittest.TestCase):
             bin_dir.mkdir()
             # Reproduce the skopeo -> umoci -> nix-store command boundaries
             # without downloads, GPU access, root privileges or a Nix daemon.
+            shell = "#!" + shutil.which("bash") + "\n"
             scripts = {
-                "skopeo": '#!/usr/bin/env bash\nif [[ "$1" == "inspect" ]]; then echo \'{"Labels":{}}\'; fi\n',
-                "umoci": '#!/usr/bin/env bash\nfor last; do :; done\nmkdir -p "$last/rootfs/opt/rocm" "$last/rootfs/opt/venv"\n',
-                "nix": '#!/usr/bin/env bash\necho "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
+                "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then echo \'{"Labels":{}}\'; fi\n',
+                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm" "$last/rootfs/opt/venv"\n',
+                "nix": shell + 'echo "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
             }
             for name, contents in scripts.items():
                 tool = bin_dir / name
