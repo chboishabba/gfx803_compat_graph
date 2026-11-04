@@ -7,6 +7,23 @@ let
   upstreamLock = pkgs.writeText "gfx803-schaka-upstream-lock.json"
     (builtins.readFile ./upstream.json);
 
+  # These packages do not appear until an on-card admitted release manifest
+  # is committed. Never manufacture store paths, and never substitute a tag.
+  acceptedManifest = if builtins.pathExists ./accepted-release.json
+    then builtins.fromJSON (builtins.readFile ./accepted-release.json)
+    else null;
+  acceptedBinaries = if acceptedManifest == null then {} else
+    if acceptedManifest.state != "accepted" then
+      throw "gfx803 accepted-release.json must have accepted state"
+    else pkgs.lib.mapAttrs' (name: path:
+      pkgs.lib.nameValuePair ("gfx803-" + name + "-binary")
+        (builtins.fetchClosure {
+          fromStore = "https://gfx803-rocm.cachix.org";
+          fromPath = path;
+          inputAddressed = true;
+        })
+    ) acceptedManifest.store_paths;
+
   importer = pkgs.writeShellApplication {
     name = "gfx803-import-schaka";
     runtimeInputs = with pkgs; [
@@ -55,11 +72,11 @@ let
   '';
 in
 {
-  packages = {
+  packages = ({
     gfx803-schaka-upstream-lock = upstreamLock;
     gfx803-schaka-import = importer;
     gfx803-release-policy = policy;
-  };
+  } // acceptedBinaries);
   devShells = {
     gfx803-oci-build = bootstrapShell;
   };
