@@ -48,7 +48,7 @@ class OciImportContractTests(unittest.TestCase):
             # Reproduce the skopeo -> umoci -> nix-store command boundaries
             # without downloads, GPU access, root privileges or a Nix daemon.
             shell = "#!" + shutil.which("bash") + "\n"
-            image_labels = json.dumps({"Labels": {
+            image_labels = json.dumps({"Digest": "sha256:" + "a" * 64, "Labels": {
                 "io.rocm.gfx803.source-rev": SHA,
                 "io.rocm.gfx803.line": "rocm10.1",
                 "io.rocm.gfx803.stage": "final",
@@ -78,6 +78,40 @@ class OciImportContractTests(unittest.TestCase):
             self.assertFalse(candidate["provenance"]["native_nix_build"])
             self.assertEqual(candidate["provenance"]["upstream_commit_correspondence"], "publisher-oci-labels-matched")
             self.assertEqual(set(candidate["store_paths"]), {"rocm", "venv"})
+
+    def test_rejects_inspect_digest_mismatch_before_layer_download(self):
+        import json
+        import os
+        import shutil
+        import shlex
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            bin_dir = p / "bin"
+            bin_dir.mkdir()
+            shell = "#!" + shutil.which("bash") + "\n"
+            payload = json.dumps({"Digest": "sha256:" + "f" * 64, "Labels": {
+                "io.rocm.gfx803.source-rev": SHA,
+                "io.rocm.gfx803.line": "rocm10.1",
+                "io.rocm.gfx803.stage": "final",
+                "io.rocm.gfx803.pins": "ROCM_SYSTEMS_SHA=abc",
+            }})
+            skopeo = bin_dir / "skopeo"
+            skopeo.write_text(shell + 'printf "%s\\n" ' + shlex.quote(payload) + '\n')
+            skopeo.chmod(0o755)
+            for name in ("umoci", "nix"):
+                stub = bin_dir / name
+                stub.write_text(shell + "exit 99\n")
+                stub.chmod(0o755)
+            env = os.environ.copy()
+            env["PATH"] = str(bin_dir) + os.pathsep + env["PATH"]
+            run = subprocess.run(
+                ["bash", str(SCRIPT), "--image", PREFIX + "a" * 64,
+                 "--source-revision", SHA, "--out", str(p / "candidate")],
+                env=env, capture_output=True, text=True, check=False,
+            )
+            self.assertNotEqual(run.returncode, 0)
+            self.assertIn("OCI DIGEST MISMATCH", run.stderr)
 
 
 if __name__ == "__main__":
