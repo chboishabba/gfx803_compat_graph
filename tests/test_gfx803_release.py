@@ -63,6 +63,13 @@ class ReleasePolicyTests(unittest.TestCase):
         errors = validate_candidate(candidate, LOCK)
         self.assertEqual(len(errors), 2)
 
+    def test_unverified_source_cannot_promote_even_with_green_gpu_receipts(self):
+        candidate = copy.deepcopy(CANDIDATE)
+        candidate["hardware"] = HARDWARE
+        candidate["evidence"] = {name: RECEIPT for name in REQUIRED}
+        with self.assertRaisesRegex(AdmissionError, "correspondence"):
+            promote(candidate, LOCK)
+
     def test_partial_receipts_are_not_promoted(self):
         candidate = copy.deepcopy(CANDIDATE)
         candidate["hardware"] = HARDWARE
@@ -72,6 +79,10 @@ class ReleasePolicyTests(unittest.TestCase):
 
     def test_passing_receipts_scoped(self):
         candidate = copy.deepcopy(CANDIDATE)
+        candidate["provenance"] = {
+            "upstream_commit_correspondence": "verified",
+            "runtime_relocation": "verified",
+        }
         candidate["hardware"] = HARDWARE
         candidate["evidence"] = {name: copy.deepcopy(RECEIPT) for name in REQUIRED}
         accepted = promote(candidate, LOCK)
