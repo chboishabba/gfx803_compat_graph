@@ -2,6 +2,10 @@ import subprocess
 import unittest
 from pathlib import Path
 
+from scripts.gfx803_component_graph import PIN_SOURCES
+
+PINS = " ".join(name + "=" + ("a" * 40) for name in PIN_SOURCES)
+
 
 SCRIPT = Path("scripts/import-schaka-oci-to-nix.sh")
 PREFIX = "ghcr.io/schaka/rocm-migraphx-ort-torch-builder@sha256:"
@@ -52,7 +56,7 @@ class OciImportContractTests(unittest.TestCase):
                 "io.rocm.gfx803.source-rev": SHA,
                 "io.rocm.gfx803.line": "rocm10.1",
                 "io.rocm.gfx803.stage": "final",
-                "io.rocm.gfx803.pins": "ROCM_SYSTEMS_REF=deadbeef",
+                "io.rocm.gfx803.pins": PINS,
             }})
             scripts = {
                 "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then printf "%s\n" ' + shlex.quote(image_labels) + '; fi\n',
@@ -94,7 +98,7 @@ class OciImportContractTests(unittest.TestCase):
                 "io.rocm.gfx803.source-rev": SHA,
                 "io.rocm.gfx803.line": "rocm10.1",
                 "io.rocm.gfx803.stage": "final",
-                "io.rocm.gfx803.pins": "ROCM_SYSTEMS_SHA=abc",
+                "io.rocm.gfx803.pins": PINS,
             }})
             skopeo = bin_dir / "skopeo"
             skopeo.write_text(shell + 'printf "%s\\n" ' + shlex.quote(payload) + '\n')
