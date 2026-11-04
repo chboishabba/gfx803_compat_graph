@@ -15,7 +15,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run unit tests
-        run: python -m unittest tests/test_benchmark_schema.py tests/test_gfx803_release.py tests/test_gfx803_oci_import.py tests/test_gfx803_closure_audit.py
+        run: |
+          python -m unittest tests/test_benchmark_schema.py
+          python -m unittest discover -s tests -p 'test_gfx803_*.py'
       - name: Check shell scripts
         run: >-
           bash -n
