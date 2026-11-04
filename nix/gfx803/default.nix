@@ -73,7 +73,7 @@ let
   releaseShells = if acceptedManifest == null then {} else
     let
       mm = pkgs.lib.concatStringsSep "." (
-        pkgs.lib.take 2 (pkgs.lib.splitString "." upstream.rocm_version));
+        pkgs.lib.take 2 (pkgs.lib.splitString "." acceptedManifest.rocm_version));
       sdk = "${acceptedBinaries.gfx803-rocm-binary}/core-${mm}";
     in {
       gfx803-sdk = pkgs.mkShellNoCC {
