@@ -114,11 +114,13 @@ fi
 
 OCI_IMAGE="$IMAGE" SCHAKA_SOURCE_REV="$SOURCE_REV" \
   ROCM_STORE="$rocm_store" VENV_STORE="$venv_store" ROCM_VERSION="$rocm_version" \
+  OCI_INSPECT="$OUT/oci-inspect.json" \
   OUT_MANIFEST="$OUT/candidate.json" python3 - <<'PY'
 import json
 import os
 from pathlib import Path
 
+labels = json.loads(Path(os.environ["OCI_INSPECT"]).read_text())["Labels"]
 store_paths = {"rocm": os.environ["ROCM_STORE"]}
 if os.environ["VENV_STORE"]:
     store_paths["venv"] = os.environ["VENV_STORE"]
@@ -134,6 +136,9 @@ manifest = {
         "native_nix_build": False,
         "upstream_commit_correspondence": "publisher-oci-labels-matched",
         "publisher_image_labels": "oci-inspect.json",
+        "published_source_revision": labels["io.rocm.gfx803.source-rev"],
+        "published_release_line": labels["io.rocm.gfx803.line"],
+        "published_component_pins": labels["io.rocm.gfx803.pins"],
         "runtime_relocation": "unverified",
     },
     "evidence": {},
