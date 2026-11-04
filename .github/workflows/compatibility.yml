@@ -2,7 +2,7 @@ name: compatibility
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
   pull_request:
   workflow_dispatch:
 
@@ -15,9 +15,18 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run unit tests
-        run: python -m unittest tests/test_benchmark_schema.py
+        run: python -m unittest tests/test_benchmark_schema.py tests/test_gfx803_release.py tests/test_gfx803_oci_import.py
       - name: Check shell scripts
-        run: bash -n scripts/extract-docker-libs.sh scripts/extract-rocm57-artifacts.sh scripts/extract_artifacts.sh scripts/host-docker-python.sh scripts/polaris-env.sh scripts/run-drift-matrix
+        run: >-
+          bash -n
+          scripts/extract-docker-libs.sh
+          scripts/extract-rocm57-artifacts.sh
+          scripts/extract_artifacts.sh
+          scripts/host-docker-python.sh
+          scripts/polaris-env.sh
+          scripts/run-drift-matrix
+          scripts/import-schaka-oci-to-nix.sh
+          scripts/publish-gfx803-accepted.sh
 
   nix-eval:
     runs-on: ubuntu-latest
@@ -25,7 +34,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - name: Evaluate flake entrypoints
-        run: nix flake show ./gfx803_flake_v1
+        run: |
+          nix flake show .
+          nix flake show ./gfx803_flake_v1
+          nix build .#checks.x86_64-linux.gfx803-release-policy --no-link
 
   gpu-benchmark:
     if: github.event_name == 'workflow_dispatch'
