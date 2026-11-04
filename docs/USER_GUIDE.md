@@ -761,3 +761,64 @@ GPU-correct merely because the Nix shell can import torch.
 Original neural model: Anatolii Kornienko (Leech-LILA).
 Existing gfx803 patched runtime ownership and
 third-party contributors remain unchanged.
+
+
+## 4 November 2026 — actual Leech gfx803 numerical gate rejection
+
+The original frozen extracted 6.4 Nix/PyTorch control was
+restored successfully on the moved
+`/mnt/truenas/comet-net/gfx803_compat_graph` checkout.
+It enumerates the 8 GiB `gfx803` device.
+The actual LeechTransformer GPU gate, batch=2 and
+sequence=64, rejected **before reaching C2-specific
+execution**: dense CPU↔GPU logit max error
+**28.5573**, normalized layer-1 input **2.3884**,
+teacher FFN **1.1904**, and repeated GPU logit
+differences **0.2023** / **0.2371**. No GPU
+training was authorized.
+
+The source receipt is retained in this branch at
+`docs/receipts/leech_gfx803_rocm64_dense_parity_rejected_20261104.json`
+and in LeechTransformer PR #4.
+The original SHA256 is
+`1e3b5640995eaf7ca93517a19cad7f85639926d1e9b817c8b6c0b296e516aa79`.
+`scripts/classify_leech_gfx803_gate.py` and its
+negative-control regression make the scope explicit:
+a **numerical REJECTION** is evidence of execution
+failure, not a passing Schaka/Nix release claim.
+
+The earlier direct-only configuration's zero drift
+continues to hold as a **measured convolution solver
+control only**. It says nothing by itself about the
+transformer's QKV, attention, FFN and vocabulary GEMMs.
+The original gate JSON did not save individual
+MIOpen solver flags, so later Leech gates now
+record them explicitly.
+
+[LeechTransformer PR #4](https://github.com/chboishabba/LeechTransformer/pull/4)
+adds a CPU↔HIP **first-actual-module** differential
+that reuses the exact dense teacher and genuine
+input token rows, and compares bare (unsynchronized)
+and module-hooked executions to catch a host-copy
+observer effect. The regression and runbook live
+there. A passing hooked trace never licenses GPU
+training after a bare forward failure.
+
+The updated [PR #5 roadmap](https://github.com/chboishabba/gfx803_compat_graph/blob/feat/gfx803-nix-binary-factory-20261104/docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md)
+maps the same Leech shapes to Schaka's
+source-pinned WGM assembly-GEMM and small-GEMM
+**candidate fixes**, without claiming the recorded
+Leech operations selected that bad WGM kernel.
+The next physical evidence should identify the
+selected rocBLAS/Tensile solution on the actual
+first failing transformer operation, then repeat
+the same model/source/dtype/shape under an imported
+and audited Schaka 10.1 Nix candidate.
+No on-host 10.1 validation, fully accepted Cachix
+binary or native Nix build is claimed yet.
+
+The original 2025 callback regression was fixed;
+later hang/VM/DMA/reset evidence remains separately
+open. Original Schaka patch authorship and previous
+first-party gfx803 investigation attribution stay
+unchanged.
