@@ -64,7 +64,8 @@ class ReleasePolicyTests(unittest.TestCase):
         candidate["upstream_revision"] = "0" * 40
         candidate["image_ref"] = LOCK["image_repository"] + ":latest-gfx803"
         errors = validate_candidate(candidate, LOCK)
-        self.assertEqual(len(errors), 2)
+        # Source mismatch, invalid floating tag and locked OCI digest mismatch.
+        self.assertEqual(len(errors), 3)
 
     def test_unverified_source_cannot_promote_even_with_green_gpu_receipts(self):
         candidate = copy.deepcopy(CANDIDATE)
