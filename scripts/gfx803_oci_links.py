@@ -63,7 +63,18 @@ def stage_tree(rootfs: Path, tree: str, destination: Path) -> dict:
     if destination.exists() or destination.is_symlink():
         raise ValueError("refuse to overwrite existing stage " + str(destination))
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source, destination, symlinks=True, copy_function=shutil.copy2)
+    # The unpacked image and stage normally share scratch filesystem. Hardlink
+    # immutable regular files instead of doubling a multi-GB ROCm SDK in scratch.
+    # Only staged SYMLINKS are rewritten; no staged regular file is mutated.
+    def hardlink_or_copy(src: str, dst: str) -> str:
+        try:
+            os.link(src, dst)
+        except OSError:
+            shutil.copy2(src, dst)
+        return dst
+
+    shutil.copytree(source, destination, symlinks=True,
+                    copy_function=hardlink_or_copy)
     replaced, retained, unresolved = [], [], []
     for folder, dirnames, filenames in os.walk(destination, followlinks=False):
         for name in sorted(dirnames + filenames):
