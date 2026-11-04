@@ -60,14 +60,15 @@ This has NOT run here. It produces an unvalidated candidate manifest and Nix sto
 1. Resolve and pin immutable OCI digest and verify the published build revision matches the selected Schaka SHA.
 2. Import on a Nix machine. Audit ELF DT_NEEDED, RPATH, duplicate ROCm/HIP/HSA/LLVM libraries, absolute /opt/rocm paths, wheel shebangs and runtime dependencies. Eliminate or wrap nonrelocatable paths without blending ABI lines.
 3. Run Schaka's tools/imgvalidate.sh, verify.py and relevant negative controls on actual Polaris hardware; integrate the compat graph's drift, repeated-run and reset diagnostics.
-4. Record source provenance, GPU enumeration, kernel dispatch, numerical correctness, repeatability, sustained load, and runtime linkage. Each must have pass status, executed command and retained log SHA256; also include actual gfx803 device, kernel, driver and runner.
+4. Record source provenance, GPU enumeration, kernel dispatch, numerical correctness, repeatability, sustained load, and runtime linkage. Each must have pass status, executed command, relative log_path, and retained log SHA256. Promotion opens the real log files under --evidence-root and checks their bytes against those digests; also include actual gfx803 device, kernel, driver and runner.
 5. Only after all gates pass, run the release policy promoter to generate an accepted-release.json and review it. Then publish only those accepted store paths via the Cachix script.
 6. Fetch the resulting Nix outputs on a clean client and verify they work without Docker or mixed system ROCm.
 
 ```bash
 python3 scripts/gfx803_release.py promote \
   --manifest out/schaka-oci/rocm10.1/candidate.json \
-  --out nix/gfx803/accepted-release.json
+  --out nix/gfx803/accepted-release.json \
+  --evidence-root out/schaka-oci/rocm10.1/logs
 bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json --dry-run
 bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json
 ```
