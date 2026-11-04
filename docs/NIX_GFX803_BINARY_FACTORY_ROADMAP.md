@@ -262,3 +262,174 @@ Do not automatically label host-only faults as ROCm userland bugs, userland nume
 - The original 6.4 control and historical failure receipts remain available and never get relabelled as universal correctness.
 
 **Remaining exact max-cut:** first real digest import + relocation audit + on-card acceptance, then native source derivations and automated incremental build/promote. This branch implements the source lock, import/policy surface, conditional Cachix outputs, and candidate source-watch, but does not pretend the unexecuted gates are closed.
+
+
+## 4 November 2026: actual Leech/C2 dense GPU rejection and binary-factory join
+
+**Physical host observation, source receipt preserved byte-for-byte:**
+`docs/receipts/leech_gfx803_rocm64_dense_parity_rejected_20261104.json`,
+SHA-256
+`1e3b5640995eaf7ca93517a19cad7f85639926d1e9b817c8b6c0b296e516aa79`.
+This is the actual **gfx803** GPU's extracted ROCm **6.4**
+control stack, `torch 2.6.0+gitdae14f9`,
+`HIP_LAUNCH_BLOCKING=1`, with the existing host-Python wrapper
+correctly resolving the now-moved
+`/mnt/truenas/comet-net/gfx803_compat_graph` checkout.
+The host imported torch and enumerated the **8 GiB** device:
+no failure in installation, Docker extraction, Python import,
+old-ABI wrapper or device visibility.
+
+The admission gate tested the original actual dense
+**LeechTransformer** first, using batch=2, sequence=64,
+hidden width=384 and vocabulary size=2048:
+
+| Original CPU/HIP dense gate test | max absolute difference | exact gate status |
+| --- | ---: | --- |
+| Dense full logits, shape 2×64×2048 | **28.5572929382** | FAIL |
+| Teacher normalized layer-1 input, shape 2×64×384 | **2.3883841038** | FAIL |
+| Teacher layer-1 FFN, shape 2×64×384 | **1.1904456615** | FAIL |
+| Same-device GPU repeat #1, logits | **0.2023429871** | FAIL |
+| Same-device GPU repeat #2, logits | **0.2370784283** | FAIL |
+
+The unmodified numerical gate correctly exited at **teacher
+numerical parity**, did not reach C2-specific forward/gradient
+tests and **did not authorize GPU training**. The receipt's
+teacher SHA256 is
+`581fdc3b4b6d169a03e2b06896e10d454fd4f819b40a2836c1d5b76849e4c674`.
+The specific current C2 candidate digest
+`f26a5d9246bd0e1f89330b4864124835e3df82bb86e4d1da23fdf5fb3c09224c`
+differs from the earlier matched-objective CPU quality receipt's
+student digest. Do not conflate student checkpoint identities
+when later comparing outcomes; the dense-teacher failure
+precedes any student-specific logic regardless.
+
+The user reports the historic **direct-only** configuration was
+active, but the original gate JSON did NOT record each individual
+`MIOPEN_DEBUG_CONV_*` environment variable. New gate
+source records those flags on future runs. Treat
+`direct-only zero drift` as **valid for its measured
+MIOpen/convolution scope**, not proof of Leech transformer
+GEMM/attention correctness. This is not a reappearance of the
+already-fixed 2025 KFD reset-callback regression; neither
+does it prove the cause of later GPU reset incidents.
+
+### Source-exact patch-class join, not a false solved claim
+
+The frozen Schaka source lock at
+`8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78`
+contains
+`patches/rocblas/wgm-miscompute-source.patch`,
+`small-gemm-assembly-miscompute.patch`, and
+`patches/miopen/winograd-fused-conv-miscompute.patch`.
+The *WGM* patch itself identifies the bad class:
+`gfx803` Tensile **assembly** kernels, with
+`KernelLanguage=Assembly` / `ISA803_KLA`, that
+use nonidentity `WorkGroupMapping`; Schaka forces WGM=1
+at the solution-normalization stage. Its source notes retain
+on-card evidence for this class. Schaka's source-class finding
+and our March 2026 first-party `GemmFwdRest` kernel
+ending `_ISA803_K1_KLA_..._WGM8` are a real
+**kernel-class intersection**. But neither this receipt
+nor our original direct-only flag proves that Leech's
+QKV/attention GEMMs selected one of these exact faulty
+solutions; an actual on-host kernel trace is the next
+discriminator. The Winograd patch fixes a separate
+1×1 fused-convolution selection miscompute; it has
+no automatic relevance to transformer linear GEMMs.
+
+The immediately relevant *candidate* linear algebra shape
+set, inferred from the model layout (NOT measured selected
+rocBLAS solutions), is:
+
+| Original Leech operator | candidate (M,K,N) or grouped GEMM shape |
+| --- | --- |
+| QKV projection, 384 → 1152 | (128,384,1152) |
+| Attention score QKᵀ, 8 heads × batch 2, width 48 | 16 × (64,48,64) |
+| Attention-weighted V | 16 × (64,64,48) |
+| Output attention projection, 384 → 384 | (128,384,384) |
+| Dense FFN first projection, 384 → 1536 | (128,384,1536) |
+| Dense FFN second projection, 1536 → 384 | (128,1536,384) |
+| Final vocabulary head, 384 → 2048 | (128,384,2048) |
+
+The exact transposition/stride/leading-dimension layout
+and chosen Tensile solution require **runtime measurement**;
+(M,K,N) alone does not determine kernel selection. Prior
+Leech 6.4 records placed a first bad value near
+`block0.q_raw`, so the **QKV projection** is the
+initial highest-value test, not another MIOpen Winograd
+benchmark. Do not equate a 1×1 convolution test with a
+small GEMM test.
+
+### Existing and newly joined test owners
+
+- Existing first-party `check_drift_1x1.py`,
+  `tests/drift_core.py`, `probe_diffusion.py`,
+  profiler records and long-run WhisperX/Ollama incident
+  RCA remain canonical for their original shapes and failure
+  classes. They must not be rewritten to manufacture
+  a green test.
+- New `scripts/classify_leech_gfx803_gate.py` and
+  `tests/test_leech_gfx803_gate_receipt.py`
+  check that the original physical receipt is hash-locked,
+  **negative**, teacher-first, and cannot be reported
+  as C2-tested or Schaka-fixed; this is a source-regression
+  check, **not a GPU test**.
+- LeechTransformer PR #4 now has
+  `scripts/diagnose_gfx803_leech_operator_boundary.py`
+  and `scripts/run_gfx803_dense_diagnosis_nix.sh`.
+  These reuse original checkpoint/token loaders and exact
+  model hooks at embedding, block0 LN1, QKV, attention,
+  LN2, FFN and output. Bare forward/repeat runs are compared
+  with instrumented runs to detect host-copy synchronization
+  **observer effects**; a passing hooked run must never
+  override failed bare forward.
+- Keep the existing Leech `gfx803_moe_gpu_gate.py`
+  as the **independent fail-closed authoritative gate**:
+  stage diagnostics only narrow the bug, never authorize
+  training or upgrade the ROCm compatibility status.
+
+### The revised exact physical/packaging max-cut
+
+1. **G0, already discharged negatively:** original ROCm
+   6.4 control imports/enumerates but fails numerical
+   parity for the original dense Leech workload. Retain
+   the original failure receipt without changing thresholds.
+2. **G1, SOURCE-WRITTEN not executed:** on the same GPU,
+   runtime, teacher digest and exact token-window digest,
+   run the new real-module first-bad-stage probe, retaining
+   both bare and hooked output. If hooks affect outputs,
+   investigate launch-order/synchronization before
+   blaming the apparently first bad named module.
+3. **G2, OPEN:** capture actual selected rocBLAS/Tensile
+   assembly kernel name, ISA, WGM, shapes, strides and
+   current backend profile at the first failing GEMM.
+   Establish whether `ISA803_KLA` and WGM!=1 are present.
+   If NOT present, Schaka WGM normalization is not yet
+   shown to address the Leech failure; redirect to the
+   correct operator/class. Distinguish GEMM, small GEMM,
+   fused MIOpen convolution, and layout/race problems.
+4. **G3, OPEN:** repeat same-checkpoint/same-shape CPU↔GPU,
+   exact numerical drift and intra-device repeat tests
+   under the **pinned, actually imported and audited**
+   Schaka 10.1 candidate, as well as Schaka's own suite.
+   The source lock and an OCI importer by themselves
+   are not evidence that 10.1 fixes the problem.
+5. **G4, OPEN:** once dense teacher is numerically correct,
+   rerun **strict focused C2** gradient parity, one AdamW
+   step and long async stability on-card. Keep the
+   independent dense-vs-C2 quality finding unchanged:
+   CPU matched dense control CE **2.21605** still beats
+   strict focused C2 **2.89186**.
+6. **G5, OPEN:** accept a Nix/Cachix binary only after
+   PR #5's required existing source/closure/provenance
+   checks and on-card numerical/reset gates pass. A
+   release may legitimately exclude **Leech** from its
+   supported workload set while this canary fails;
+   no release may claim Leech correctness based on
+   a scoped convolution zero-drift test.
+
+No new Golden Agda claim should promote project-run
+hardware compatibility evidence to a mathematical or
+vendor-guaranteed truth. The existing `GPUCompatibilityObservationExact`
+and `GFX803CompatibilityReceiptExact` separate
+visibility, numerical correctness and sustained reset safety.
