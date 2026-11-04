@@ -50,6 +50,16 @@ let
     '';
   };
 
+  # Optional downstream ComfyUI image canary. Keep Pillow out of ROCm SDK.
+  pythonImages = pkgs.python312.withPackages (ps: [ ps.pillow ]);
+  comfyuiImages = pkgs.writeShellApplication {
+    name = "gfx803-comfyui-images";
+    runtimeInputs = [ pythonImages ];
+    text = ''
+      exec ${pythonImages}/bin/python ${../../scripts/gfx803_comfyui_images.py} "$@"
+    '';
+  };
+
   auditor = pkgs.writeShellApplication {
     name = "gfx803-audit-closure";
     runtimeInputs = [ python pkgs.binutils ];
@@ -112,6 +122,7 @@ in
     gfx803-schaka-import = importer;
     gfx803-release-policy = policy;
     gfx803-capture-evidence = recorder;
+    gfx803-comfyui-images = comfyuiImages;
     gfx803-audit-closure = auditor;
   } // acceptedBinaries);
   devShells = ({
@@ -132,6 +143,10 @@ in
     gfx803-capture-evidence = {
       type = "app";
       program = "${recorder}/bin/gfx803-capture-evidence";
+    };
+    gfx803-comfyui-images = {
+      type = "app";
+      program = "${comfyuiImages}/bin/gfx803-comfyui-images";
     };
     gfx803-audit-closure = {
       type = "app";
