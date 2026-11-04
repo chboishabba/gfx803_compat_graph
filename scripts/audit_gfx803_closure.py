@@ -22,10 +22,14 @@ def parse_dynamic(text: str) -> dict:
     return dict(values)
 
 
-def audit_roots(roots: list[Path], *, readelf: str | None = None) -> dict:
+def audit_roots(roots: list[Path], *, readelf: str | None = None,
+                provider_roots: list[Path] | None = None) -> dict:
     roots = [Path(root).resolve() for root in roots]
     if not roots or any(not root.is_dir() for root in roots):
         raise ValueError("Each --root must be an existing directory")
+    provider_roots = [Path(p).resolve() for p in (provider_roots or [])]
+    if any(not root.is_dir() for root in provider_roots):
+        raise ValueError("Every --provider-root must be an existing directory")
     readelf = readelf or shutil.which("readelf")
     if not readelf:
         raise ValueError("readelf is required for ELF linkage audit")
@@ -37,6 +41,7 @@ def audit_roots(roots: list[Path], *, readelf: str | None = None) -> dict:
     sonames: dict[str, list[str]] = defaultdict(list)
     hazards: list[dict] = []
     dynamic_elf = []
+    provided_names: set[str] = set()
     for root in roots:
         for folder, dirnames, filenames in os.walk(root, followlinks=False):
             # Symlinked directories must also be checked.
@@ -51,10 +56,13 @@ def audit_roots(roots: list[Path], *, readelf: str | None = None) -> dict:
                     if not item.exists():
                         hazards.append({"kind": "dangling-symlink", "path": label,
                                         "target": target})
+                    elif item.is_file():
+                        provided_names.add(item.name)
                     continue
                 if not item.is_file():
                     continue
                 files += 1
+                provided_names.add(item.name)
                 total_bytes += item.stat().st_size
                 with item.open("rb") as fh:
                     if fh.read(4) != b"\x7fELF":
@@ -89,14 +97,28 @@ def audit_roots(roots: list[Path], *, readelf: str | None = None) -> dict:
         if len(paths) > 1:
             hazards.append({"kind": "duplicate-soname", "soname": name,
                             "paths": sorted(paths)})
-    # Don't assume all host libraries should reside inside /opt/rocm.
-    # Specifically flag unresolved ROCm ABI libraries, which must never be
-    # silently supplied by a different ROCm release on the host.
-    unresolved_rocm = sorted(
-        name for name in needed if ROCM_LIB.match(name) and name not in sonames
-    )
-    for name in unresolved_rocm:
-        hazards.append({"kind": "missing-rocm-soname", "soname": name,
+    # A packaged Nix runtime may explicitly carry dependency providers outside
+    # its selected /opt/rocm and venv roots (e.g. Nix glibc, libdrm).
+    # These must be DECLARED paths, never borrowed silently from /usr/lib.
+    for provider in provider_roots:
+        for folder, _, filenames in os.walk(provider, followlinks=False):
+            for filename in filenames:
+                item = Path(folder) / filename
+                if not item.is_file():
+                    continue
+                provided_names.add(filename)
+                with item.open("rb") as fd:
+                    if fd.read(4) != b"\\x7fELF":
+                        continue
+                proc = subprocess.run([readelf, "-d", str(item)], text=True,
+                                      capture_output=True, check=False)
+                if proc.returncode == 0:
+                    provided_names.update(parse_dynamic(proc.stdout).get("SONAME", []))
+    provided_names.update(sonames)
+    unresolved = sorted(name for name in needed if name not in provided_names)
+    for name in unresolved:
+        kind = "missing-rocm-soname" if ROCM_LIB.match(name) else "missing-dt-needed"
+        hazards.append({"kind": kind, "soname": name,
                         "consumers": sorted(needed[name])[:10]})
 
     return {
@@ -109,6 +131,8 @@ def audit_roots(roots: list[Path], *, readelf: str | None = None) -> dict:
         "total_file_bytes": total_bytes,
         "soname_count": len(sonames),
         "dt_needed_count": len(needed),
+        "unresolved_dt_needed_count": len(unresolved),
+        "provider_roots": [str(p) for p in provider_roots],
         "hazards": hazards,
         "passed_static_screen": len(hazards) == 0,
     }
@@ -120,8 +144,11 @@ def main() -> int:
                     help="Nix-imported ROCm/venv root (repeat to audit together)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--strict", action="store_true")
+    ap.add_argument("--provider-root", action="append", default=[],
+                    help="Explicit Nix dependency roots (e.g. glibc/libdrm), not host /usr/lib")
     args = ap.parse_args()
-    report = audit_roots([Path(r) for r in args.root])
+    report = audit_roots([Path(r) for r in args.root],
+                         provider_roots=[Path(p) for p in args.provider_root])
     path = Path(args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n",
