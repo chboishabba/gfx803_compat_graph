@@ -22,7 +22,10 @@ from pathlib import Path
 # Also works when invoked directly as python3 scripts/gfx803_capture.py.
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from scripts.gfx803_release import REQUIRED, OPTIONAL, AdmissionError, load, write
+try:
+    from scripts.gfx803_release import REQUIRED, OPTIONAL, AdmissionError, load, write
+except ModuleNotFoundError:
+    from gfx803_release import REQUIRED, OPTIONAL, AdmissionError, load, write
 
 
 def assess_diffusion_log(path: Path) -> tuple[bool, str]:
