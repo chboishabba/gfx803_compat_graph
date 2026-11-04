@@ -41,8 +41,10 @@ if [[ ! "$SOURCE_REV" =~ ^[0-9a-f]{40}$ ]]; then
   echo "A full pinned Schaka git commit is required." >&2
   exit 2
 fi
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-lock_path="$repo_root/nix/gfx803/upstream.json"
+repo_root="${GFX803_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+scripts_dir="${GFX803_SCRIPTS_DIR:-$repo_root/scripts}"
+lock_path="${GFX803_SOURCE_LOCK:-$repo_root/nix/gfx803/upstream.json}"
+export PYTHONPATH="$repo_root:$scripts_dir${PYTHONPATH:+:$PYTHONPATH}"
 [[ -f "$lock_path" ]] || { echo "Missing checked-in Schaka source lock" >&2; exit 2; }
 read -r locked_sha rocm_version locked_digest < <(python3 - "$lock_path" <<'PY'
 import json,sys
@@ -84,7 +86,10 @@ skopeo inspect --override-os linux --override-arch amd64 \
 PYTHONPATH="$repo_root" python3 - "$OUT/oci-inspect.json" "$SOURCE_REV" "$rocm_version" "$IMAGE" <<'PY'
 import json
 import sys
-from scripts.gfx803_component_graph import parse_pins
+try:
+    from scripts.gfx803_component_graph import parse_pins
+except ModuleNotFoundError:
+    from gfx803_component_graph import parse_pins
 
 payload = json.load(open(sys.argv[1]))
 labels = payload.get("Labels") or {}
@@ -119,14 +124,14 @@ root="$scratch/unpacked/rootfs"
 # /opt/rocm/core-10.1; copying /opt/rocm verbatim breaks these links.
 # Resolve ONLY aliases that terminate within the selected OCI tree.
 # External links remain a reported, unverified candidate liability.
-python3 "$repo_root/scripts/gfx803_oci_links.py" \
+python3 "$scripts_dir/gfx803_oci_links.py" \
   --rootfs "$root" --tree /opt/rocm --out "$scratch/staged-rocm" \
   --report "$OUT/rocm-links.json"
 rocm_store="$(nix store add-path "$scratch/staged-rocm")"
 venv_store=''
 if ((WITH_VENV)); then
   [[ -d "$root/opt/venv" ]] || { echo "No /opt/venv in image" >&2; exit 3; }
-  python3 "$repo_root/scripts/gfx803_oci_links.py" \
+  python3 "$scripts_dir/gfx803_oci_links.py" \
     --rootfs "$root" --tree /opt/venv --out "$scratch/staged-venv" \
     --report "$OUT/venv-links.json"
   venv_store="$(nix store add-path "$scratch/staged-venv")"
@@ -177,7 +182,7 @@ Path(os.environ["OUT_MANIFEST"]).write_text(
 )
 PY
 
-python3 "$repo_root/scripts/gfx803_component_graph.py" \
+python3 "$scripts_dir/gfx803_component_graph.py" \
   --candidate "$OUT/candidate.json" --out "$OUT/component-sources.json"
 echo "Imported into Nix store: $rocm_store"
 [[ -z "$venv_store" ]] || echo "Python environment: $venv_store"
