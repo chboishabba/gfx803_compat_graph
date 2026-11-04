@@ -73,6 +73,66 @@ add a **native Nix build SDK and modular source derivations**, plus verified
 automatic incremental releases. Do not require an application-specific
 ComfyUI or vLLM package for the core runtime to count as complete.
 
+## Historical first-party numerical and hang evidence — preserve, do not rediscover
+
+The earlier roadmap only indexed **third-party issue #43**. This repository
+already has **first-party measurement code, retained result summaries,
+failure-specific probes and incident reports**. Reuse those as the baseline
+against Schaka's patched ROCm 10.1 stack before creating redundant testers.
+
+| Date and origin | Retained evidence | Interpretation / qualification |
+| --- | --- | --- |
+| Aug 2025 community | [gfx803_rocm #43](https://github.com/robertrosenbusch/gfx803_rocm/issues/43) documents **RX570/580 ComfyUI image corruption in ROCm 6.4** while ROCm 5.7 produced working results on affected systems; [user's Aug 27 comment](https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-3226617434) engaged this exact comparison. | This is the **earlier externally reported cross-version image test**, not yet proven to be a first-party side-by-side ComfyUI image run. Record per-board/model/torch/driver details. |
+| 16 Mar 2026 first-party | [probe_diffusion.py](https://github.com/chboishabba/gfx803_compat_graph/blob/master/probe_diffusion.py) committed March 16. [CONTEXT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CONTEXT.md) and [out/known_knowns.json](https://github.com/chboishabba/gfx803_compat_graph/blob/master/out/known_knowns.json) record **6/7** diffusion probes passed; `repeated_inference_drift` failed on a same-input five-run MiniUNet test. A separately recorded stable-profile drift was **0.001410** on `itir:latest`, kernel `6.19.7-1-cachyos-bore`. | **Our own direct reproduction of a numerical correctness failure**, using a mini-UNet surrogate rather than a full rendered ComfyUI image. Individual FP32/FP16, mixed and 50-step checks passed, but that did not establish stable repeated outputs. |
+| Mar 2026 first-party bisection | [CONTEXT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CONTEXT.md), [check_drift_1x1.py](https://github.com/chboishabba/gfx803_compat_graph/blob/master/check_drift_1x1.py), [tests/drift_core.py](https://github.com/chboishabba/gfx803_compat_graph/blob/master/tests/drift_core.py), and [POLARIS_STABILITY_BLUEPRINT.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/POLARIS_STABILITY_BLUEPRINT.md): reported `GemmFwdRest` / GEMM-selected drift around **0.15**, direct-only zero drift in scoped repeated convolution, and 1×1 convolution differences approaching **0.98–1.0** after sustained kernel switches/context activity. | Solver-specific bisection is **existing first-party debugging**, not a hypothetical new test. Proposed Tensile YAML/register-reuse root cause and “state poisoning” mechanism are hypotheses, not independently proven kernel patch ownership. No scoped zero-drift convolution result implies full diffusion correctness. |
+| 20 Mar 2026 | [Ollama Mistral incident](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-20_OLLAMA_MISTRAL_KFD_RESET.md): output succeeded, then `init_user_pages` failures, compute-ring timeout, GPU reset, BACO, VRAM loss and compositor artifacts. | First-party **GPU reset** evidence on an older userspace lane, distinct from an import failure. |
+| 25 Mar 2026 | [Wayland incident](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-25_WAYLAND_GFX_TIMEOUT_RESET.md): repeated `ring gfx timeout`, BACO resets, VRAM loss and retained devcoredumps. | KWin was the named context, **not proven root cause**. This is not evidence that the fixed 2025 callback regression recurred. |
+| 27–30 Mar 2026 | [WhisperX transcribe incident](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-27_WHISPERX_TRANSCRIBE_RESET.md) and [March 30 trace](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md): confirmed active GPU work followed by `GPU Hang`, ring timeout, GPU reset and VRAM loss; later long-run sequence shows device-to-host copy → `Host active wait ... for -1 ns` → hang. `rocprofv3` sometimes altered survival and `HIP_LAUNCH_BLOCKING=1` yielded a summary-only exit 0. | **A substantial first-party hang/RCA programme**, including queue, VM/pinned-page and D2H hypotheses. The exposure point is observed; exact trigger/ownership and a durable successful long-run fix remain open. |
+| 21 Mar 2026 | [CHANGELOG.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/CHANGELOG.md) / [USER_GUIDE.md](https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/USER_GUIDE.md) record 6.4 early Leech `block0.q_raw` divergence; 5.7 later repeated-run attention-layout drift, with the **tensor-only** 5.7 layout test stabilized by `HIP_LAUNCH_BLOCKING=1`. | Separate first-party attention/model correctness comparison, **not** the same full ComfyUI image test, and not proof the whole Leech model was fixed. |
+
+### Why the fixed 2025 KFD callback patch does not close these later incidents
+
+[Linux commit 34659c1a1f4f](https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd)
+corrects the **specific missing gfx7/gfx8 SDMA reset callback** and
+credits the reporter. The March 2026 host records include kernel
+`6.19.7-1-cachyos-bore`, newer than the stable 6.15.7 backport; the
+kernel must still be identified from an exact build and configuration
+before claiming which patches were applied. The later trace of ring/
+VM/DMA/hang events does **not** automatically mean the historical
+callback regression remained unfixed; neither does the callback fix
+explain away or solve the later failures. Schaka's 2026 vLLM hangs,
+some tied in his documentation to out-of-spec VRAM clocking, are
+another workload/board-specific evidence line that must not be
+collapsed into the same mechanism without an equivalent reproducer.
+
+### Reuse as the first independent Schaka 10.1 acceptance suite
+
+1. Run the already-existing `tests/drift_core.py` and
+   `check_drift_1x1.py` solver/context probes on an otherwise
+   identical host/device; retain default, GEMM-selected and direct-only
+   controls, including forced failure paths.
+2. Run `probe_diffusion.py` on the 10.1 Nix candidate, preserving its
+   20/50-step and same-input five-run criteria. Compare with prior
+   `6.4` numeric receipts, rather than only checking NaN/Inf or import.
+3. Run the existing WhisperX and Ollama short workload and long-run
+   reset canaries on a fully documented kernel and within rated
+   VBIOS/VRAM clocks. Record stage markers, last D2H/host wait,
+   kernel `ring gfx timeout`, devcoredumps, and whether
+   `HIP_LAUNCH_BLOCKING=1` changes the result.
+4. Use Schaka's `tools/imgvalidate.sh`, `verify.py`, torch/GEMM/conv,
+   Triton and coherence checks first; add only needed differential
+   probes. Import and native Nix derivations must pass the same
+   acceptance contract before releasing.
+5. Treat a **real ComfyUI fixed-seed/model image comparison** as an
+   application-level downstream canary whose historical 2025
+   community reports provide expectations. Do not misrepresent the
+   mini-UNet surrogate as a full ComfyUI run.
+
+The outstanding work is **source-pinned ROCm 10.1 integration and
+re-execution of existing qualified tests**, not invention of a first
+GPU hang/debugging suite. Retain original test authorship and failed
+historical results.
+
 ## Phase A: reuse the existing successful binaries first
 
 The bootstrap imports an image **by OCI SHA256 digest**, via skopeo and rootless umoci; no Docker daemon is required. It adds only selected /opt/rocm and optional /opt/venv subtrees to the Nix store, not a full image tarball. It is an intentionally transitional **binary import**, not a native Nix compilation and not yet a minimal/runtime-relocated closure.
