@@ -711,6 +711,71 @@ See [the dated evidence and exact test-to-patch crosswalk](docs/NIX_GFX803_BINAR
 [hang-wayland]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-25_WAYLAND_GFX_TIMEOUT_RESET.md
 [hang-whisperx]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md
 
+### Modern ROCm 10.1 Nix factory — current source implementation
+
+The [Phase A/B/C/D roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md)
+distinguishes **reproducible tools**, **a real imported candidate**,
+**independently hardware-tested binaries**, **native-from-source Nix builds**
+and **stable published releases**. PR #5 currently contains the first
+category and prerequisite source code. An OCI digest has **not** yet been
+accepted into `nix/gfx803/upstream.json`, no 10.1 store tree has been
+imported on a real Nix runner, and no 10.1 hardware results or stable
+Cachix binary release are asserted.
+
+- [`gfx803-schaka-image-digest.yml`](.github/workflows/gfx803-schaka-image-digest.yml)
+  inspects only Schaka's public OCI manifest and proposes an immutable
+  source-to-image digest-lock PR. The manual hardware workflow requires
+  that committed digest; moving tags and conflicting digests are refused.
+- [`gfx803_oci_links.py`](scripts/gfx803_oci_links.py)
+  fixes container-internal `/etc/alternatives/rocm-*` symlinks before
+  Nix import, staging regular files with hardlinks where possible to
+  avoid duplicating multi-GB SDK data in scratch. External symlinks
+  remain explicitly unresolved until verified.
+- [`gfx803_component_graph.py`](scripts/gfx803_component_graph.py)
+  turns Schaka's original eight resolved component SHAs into a source
+  manifest and a precise downstream rebuild plan. It does not pretend
+  an entire ROCm compiler/runtime has already been natively compiled
+  under Nix.
+- [`gfx803_capture.py`](scripts/gfx803_capture.py) records **real command
+  execution** and SHA256 logs; a 6/7 mini-UNet `PARTIAL_PASS` cannot become
+  a green GPU gate just because the old probe exits 0.
+- [`gfx803_comfyui_images.py`](scripts/gfx803_comfyui_images.py)
+  independently replays the **already-performed first-party ComfyUI image
+  comparison** using actual 5.7-good, 6.4-corrupted, and 10.1-candidate
+  PNGs plus a matched model, workflow and seed. The evidence is a
+  narrowly scoped application test, **not** proof of universal numerical
+  correctness. No legacy images, thresholds, or output hashes are
+  fabricated here.
+- [`gfx803_release.py`](scripts/gfx803_release.py) and
+  [`publish-gfx803-accepted.sh`](scripts/publish-gfx803-accepted.sh)
+  require the committed image digest, real physical gfx803 test
+  receipts and the **original log bytes**, rehashed at promotion and
+  Cachix publication. Extra capability claims such as
+  `comfyui_images`, `whisperx_long_run` and `ollama_gpu` each require
+  their own additional passing hardware receipt.
+
+The comparison app is installed separately from the ROCm runtime and
+requires no Docker or GPU itself:
+
+```bash
+nix run .#gfx803-comfyui-images -- \
+  --reference57 path/to/actual-good-5.7.png \
+  --broken64 path/to/actual-corrupted-6.4.png \
+  --candidate101 path/to/actual-10.1-output.png \
+  --workflow path/to/actual-workflow.json \
+  --model path/to/actual-model.safetensors \
+  --seed 42 --max-rmse 0.05 \
+  --out out/comfyui/rocm101-comparison.json
+```
+
+`0.05` is **only an example tolerance**, not a threshold established
+by the original experiments. Set it deliberately from a matched
+baseline and preserve the original images, metadata and result log.
+To record this as an application-level release claim, execute it
+through `nix run .#gfx803-capture-evidence -- --gate comfyui_image ...`
+and set `claimed_capabilities: ["comfyui_images"]` in the candidate
+before admission; the policy will then require that receipt.
+
 ### All linked public issues and historical reports
 
 The 13 original user-supplied links are included **verbatim** below.
