@@ -41,6 +41,19 @@ if [[ ! "$SOURCE_REV" =~ ^[0-9a-f]{40}$ ]]; then
   echo "A full pinned Schaka git commit is required." >&2
   exit 2
 fi
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+lock_path="$repo_root/nix/gfx803/upstream.json"
+[[ -f "$lock_path" ]] || { echo "Missing checked-in Schaka source lock" >&2; exit 2; }
+read -r locked_sha rocm_version < <(python3 - "$lock_path" <<'PY'
+import json,sys
+lock=json.load(open(sys.argv[1]))
+print(lock["source_revision"], lock["rocm_version"])
+PY
+)
+[[ "$SOURCE_REV" == "$locked_sha" ]] || {
+  echo "Selected Schaka commit differs from checked-in source lock." >&2
+  exit 2
+}
 OUT="${OUT:-out/schaka-oci/${SOURCE_REV:0:12}}"
 if ((DRY_RUN)); then
   printf 'dry-run: pinned image=%s source=%s output=%s venv=%s\n' \
@@ -81,7 +94,7 @@ skopeo inspect --override-os linux --override-arch amd64 \
   "docker://$IMAGE" > "$OUT/oci-inspect.json"
 
 OCI_IMAGE="$IMAGE" SCHAKA_SOURCE_REV="$SOURCE_REV" \
-  ROCM_STORE="$rocm_store" VENV_STORE="$venv_store" \
+  ROCM_STORE="$rocm_store" VENV_STORE="$venv_store" ROCM_VERSION="$rocm_version" \
   OUT_MANIFEST="$OUT/candidate.json" python3 - <<'PY'
 import json
 import os
@@ -93,7 +106,7 @@ if os.environ["VENV_STORE"]:
 manifest = {
     "schema_version": 1,
     "upstream_revision": os.environ["SCHAKA_SOURCE_REV"],
-    "rocm_version": "10.1.0",
+    "rocm_version": os.environ["ROCM_VERSION"],
     "image_ref": os.environ["OCI_IMAGE"],
     "store_paths": store_paths,
     "state": "candidate",
