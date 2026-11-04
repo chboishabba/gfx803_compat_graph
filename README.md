@@ -4,6 +4,20 @@ This repository is the working area for getting AMD Polaris cards such as the RX
 
 If you are new here, start with [docs/USER_GUIDE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/USER_GUIDE.md). If you want the shorter repo-orientation version after that, read [docs/START_HERE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/START_HERE.md).
 
+## Nix build and binary distribution (candidate lane)
+
+The source-pinned Schaka ROCm 10.1 integration now has a separate Nix/Cachix
+bootstrap and fail-closed release surface. See
+[docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md).
+It is designed to deliver **both** pinned build environments and independently
+cacheable finished ROCm binaries without requiring Docker for consumers.
+The existing extracted 6.4 control is unchanged; no imported modern binary is
+declared stable until relocation and physical gfx803 correctness checks pass.
+
+`nix develop .#gfx803-oci-build` provides the new daemonless OCI/Nix tooling;
+`nix run .#gfx803-schaka-import -- --help` documents the digest-pinned importer.
+Native-from-source Nix derivations and accepted binary closures remain open.
+
 ## What this repo is for
 
 This repo currently combines four kinds of work in one place:
