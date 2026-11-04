@@ -50,6 +50,12 @@ def validate_lock(lock: dict) -> None:
         raise AdmissionError("source revision must be a full commit SHA")
     if lock.get("image_repository") != "ghcr.io/schaka/rocm-migraphx-ort-torch-builder":
         raise AdmissionError("unexpected OCI repository")
+    if not re.fullmatch(r"[0-9]+[.][0-9]+[.][0-9]+", str(lock.get("rocm_version", ""))):
+        raise AdmissionError("source lock requires full X.Y.Z ROCm version")
+    digest = lock.get("image_digest")
+    if digest is not None and not DIGEST.fullmatch(str(digest)):
+        raise AdmissionError("source lock image digest must be null or sha256")
+
 
 
 def update_lock(lock: dict, revision: str) -> bool:
