@@ -71,6 +71,38 @@ def update_lock(lock: dict, revision: str) -> bool:
     return changed
 
 
+def lock_image(lock: dict, digest: str, inspection: dict) -> bool:
+    """Bind the selected source revision to an independently inspected OCI digest.
+
+    The OCI labels are a publisher assertion, not reproducible-build proof.
+    Promotion separately requires actual provenance/hardware evidence.
+    """
+    validate_lock(lock)
+    if not DIGEST.fullmatch(digest):
+        raise AdmissionError("image digest must be sha256 of immutable OCI manifest")
+    if inspection.get("Digest") != digest:
+        raise AdmissionError("OCI inspect digest does not match selected image")
+    labels = inspection.get("Labels") or {}
+    mm = ".".join(lock["rocm_version"].split(".")[:2])
+    expected = {
+        "io.rocm.gfx803.source-rev": lock["source_revision"],
+        "io.rocm.gfx803.line": "rocm" + mm,
+        "io.rocm.gfx803.stage": "final",
+    }
+    for name, want in expected.items():
+        if labels.get(name) != want:
+            raise AdmissionError("OCI label mismatch: " + name)
+    if not str(labels.get("io.rocm.gfx803.pins", "")).strip() or \
+            labels["io.rocm.gfx803.pins"] == "unrecorded":
+        raise AdmissionError("OCI resolved component pins are absent")
+    old = lock.get("image_digest")
+    if old is not None and old != digest:
+        raise AdmissionError("source revision is already bound to a different image digest")
+    lock["image_digest"] = digest
+    lock["state"] = "source-and-image-pinned"
+    return old != digest
+
+
 def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = False,
                        *, evidence_root: Path | None = None) -> list[str]:
     validate_lock(lock)
@@ -86,6 +118,12 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
     if not (isinstance(ref, str) and ref.startswith(prefix)
             and DIGEST.fullmatch(ref[len(prefix):])):
         problems.append("image_ref must be immutable sha256 digest in selected GHCR repo")
+    selected_digest = lock.get("image_digest")
+    if selected_digest is not None and isinstance(ref, str) and \
+            ref != prefix + selected_digest:
+        problems.append("candidate image digest differs from checked-in lock")
+    if require_evidence and selected_digest is None:
+        problems.append("cannot promote with an unlocked OCI image digest")
     packages = candidate.get("store_paths", {})
     if not isinstance(packages, dict) or "rocm" not in packages:
         problems.append("store_paths.rocm missing")
@@ -162,6 +200,10 @@ def main() -> int:
     candidate = sub.add_parser("check-candidate", help="validate candidate fields")
     candidate.add_argument("--manifest", required=True)
     candidate.add_argument("--strict", action="store_true")
+    candidate.add_argument("--evidence-root", help="Required when --strict; real retained logs")
+    img = sub.add_parser("lock-image", help="bind release to an inspected immutable image")
+    img.add_argument("--digest", required=True, help="sha256 digest from skopeo inspect")
+    img.add_argument("--inspect", required=True, help="JSON from skopeo inspect")
     promotion = sub.add_parser("promote", help="write accepted release only after GPU receipts")
     promotion.add_argument("--manifest", required=True)
     promotion.add_argument("--out", required=True)
@@ -172,13 +214,22 @@ def main() -> int:
     try:
         lock = load(args.lock)
         validate_lock(lock)
-        if args.command == "update-source":
+        if args.command == "lock-image":
+            changed = lock_image(lock, args.digest, load(args.inspect))
+            if changed:
+                write(args.lock, lock)
+            print("image-digest-pinned" if changed else "image-digest-already-pinned")
+        elif args.command == "update-source":
             changed = update_lock(lock, args.revision)
             if changed:
                 write(args.lock, lock)
             print("changed" if changed else "unchanged")
         elif args.command == "check-candidate":
-            problems = validate_candidate(load(args.manifest), lock, args.strict)
+            if args.strict and not args.evidence_root:
+                raise AdmissionError("--strict requires --evidence-root for real log checks")
+            problems = validate_candidate(
+                load(args.manifest), lock, args.strict,
+                evidence_root=Path(args.evidence_root) if args.evidence_root else None)
             if problems:
                 raise AdmissionError("; ".join(problems))
             print("candidate schema accepted; GPU admission not implied")
