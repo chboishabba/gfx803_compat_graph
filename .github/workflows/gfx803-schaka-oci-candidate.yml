@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       image_digest:
-        description: "Immutable SHA256 digest of Schaka's combined gfx803 image"
-        required: true
+        description: "Optional expected sha256 digest; defaults to the checked-in lock and must match it"
+        required: false
+        default: ""
         type: string
       with_venv:
         description: "Also import upstream /opt/venv (larger payload)"
@@ -36,9 +37,14 @@ jobs:
           WITH_VENV: ${{ inputs.with_venv }}
         run: |
           set -euo pipefail
-          [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]] || {
-            echo "Input must be an OCI sha256 digest" >&2; exit 2;
+          locked="$(python3 -c 'import json; print(json.load(open("nix/gfx803/upstream.json")).get("image_digest") or "")')"
+          [[ "$locked" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+            echo "No immutable Schaka image digest locked on this branch. Merge reviewed digest-lock PR first." >&2; exit 2;
           }
+          if [[ -n "$IMAGE_DIGEST" && "$IMAGE_DIGEST" != "$locked" ]]; then
+            echo "Requested image digest differs from checked-in lock." >&2; exit 2
+          fi
+          IMAGE_DIGEST="$locked"
           repo=ghcr.io/schaka/rocm-migraphx-ort-torch-builder
           sha="$(python3 -c 'import json; print(json.load(open("nix/gfx803/upstream.json"))["source_revision"])')"
           flags=()
