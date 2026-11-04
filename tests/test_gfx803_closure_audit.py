@@ -29,7 +29,7 @@ class ClosureAuditTests(unittest.TestCase):
     def test_empty_root_has_no_hazards_but_no_admission(self):
         with tempfile.TemporaryDirectory() as tmp:
             report = audit_roots([Path(tmp)])
-            self.assertEqual(report["hazards"], [])
+            self.assertIn("no-elf-files", [h["kind"] for h in report["hazards"]])
             self.assertEqual(report["elf_count"], 0)
             self.assertNotEqual(report["admission"], "accepted")
 
