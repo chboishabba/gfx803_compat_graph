@@ -42,10 +42,18 @@ let
     '';
   };
 
+  auditor = pkgs.writeShellApplication {
+    name = "gfx803-audit-closure";
+    runtimeInputs = [ python pkgs.binutils ];
+    text = ''
+      exec ${python}/bin/python ${../../scripts/audit_gfx803_closure.py} "$@"
+    '';
+  };
+
   # Bootstrap tools only: do not accidentally mix contemporary Nixpkgs ROCm
   # device-libs/LLVM with Schaka's release-coherent ROCm compiler SDK.
   bootstrapTools = [
-    importer policy python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
+    importer policy auditor python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
     pkgs.binutils pkgs.skopeo pkgs.umoci pkgs.cachix pkgs.zstd
   ];
 
@@ -60,6 +68,26 @@ let
     '';
   };
 
+  # The accepted release also supplies an SDK shell. This is still an imported
+  # upstream SDK: the separate native-from-source derivations remain outstanding.
+  releaseShells = if acceptedManifest == null then {} else
+    let
+      mm = pkgs.lib.concatStringsSep "." (
+        pkgs.lib.take 2 (pkgs.lib.splitString "." upstream.rocm_version));
+      sdk = "${acceptedBinaries.gfx803-rocm-binary}/core-${mm}";
+    in {
+      gfx803-sdk = pkgs.mkShellNoCC {
+        packages = bootstrapTools;
+        shellHook = ''
+          export ROCM_PATH="${sdk}"
+          export HIP_PATH="$ROCM_PATH"
+          export PATH="$ROCM_PATH/bin:$PATH"
+          echo "Accepted Schaka gfx803 SDK: $ROCM_PATH"
+          echo "Runtime and compiler libraries must come from this same ROCm line."
+        '';
+      };
+    };
+
   # CI needs no GPU and no network to validate source/promotion contracts.
   policyCheck = pkgs.runCommand "gfx803-release-policy-tests" {
     nativeBuildInputs = [ python pkgs.bash ];
@@ -67,7 +95,8 @@ let
     export HOME="$TMPDIR"
     cd ${../..}
     ${python}/bin/python -m unittest \
-      tests.test_gfx803_release tests.test_gfx803_oci_import
+      tests.test_gfx803_release tests.test_gfx803_oci_import \
+      tests.test_gfx803_closure_audit
     touch "$out"
   '';
 in
@@ -76,10 +105,11 @@ in
     gfx803-schaka-upstream-lock = upstreamLock;
     gfx803-schaka-import = importer;
     gfx803-release-policy = policy;
+    gfx803-audit-closure = auditor;
   } // acceptedBinaries);
-  devShells = {
+  devShells = ({
     gfx803-oci-build = bootstrapShell;
-  };
+  } // releaseShells);
   checks = {
     gfx803-release-policy = policyCheck;
   };
@@ -91,6 +121,10 @@ in
     gfx803-release-policy = {
       type = "app";
       program = "${policy}/bin/gfx803-release-policy";
+    };
+    gfx803-audit-closure = {
+      type = "app";
+      program = "${auditor}/bin/gfx803-audit-closure";
     };
   };
 }
