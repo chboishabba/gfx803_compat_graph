@@ -18,110 +18,9 @@ declared stable until relocation and physical gfx803 correctness checks pass.
 `nix run .#gfx803-schaka-import -- --help` documents the digest-pinned importer.
 Native-from-source Nix derivations and accepted binary closures remain open.
 
-## Prior art, upstream fixes and attribution
-
-This project continues a community effort to run modern ROCm/HIP/OpenCL and
-frameworks on AMD GCN4/Polaris (`gfx803`, including RX 470/480/570/580)
-after official support was dropped. **This repository does not claim authorship
-of upstream kernel and ROCm fixes.** The focus here is to reuse those fixes,
-package reproducible **Nix build environments and finished binaries**, validate
-compatibility, and distribute accepted closures through Cachix.
-
-### The 2025 gfx7/gfx8 KFD regression was fixed upstream
-
-**Resolved upstream — not an open blocker in the current Nix roadmap.**
-The RX 580 compute-reset failure reported in [ROCm #4965][rocm-4965] and
-on the [Linux kernel mailing list][kfd-lkml] led to:
-
-- **[Upstream Linux commit `34659c1a1f4f`][kfd-upstream]:**
-  `drm/amdkfd: add hqd_sdma_get_doorbell callbacks for gfx7/8`,
-  authored by **Alex Deucher** in June 2025. The earlier reset
-  implementation called a missing gfx7/gfx8 callback. The fix adds
-  the required callback definitions and registers them.
-- **Explicit attribution in the accepted commit:** `Reported-by: Johl Brown`,
-  `Reviewed-by: Jonathan Kim`, `Signed-off-by: Alex Deucher`;
-  references ROCm #4965 and freedesktop issue #4304.
-- **[Backported to Linux 6.15.7][linux-6157].** Earlier suggestions
-  to revert suspect commits were historical troubleshooting workarounds,
-  not the final corrective patch.
-- Primary discussion and evidence: [July 2025 amd-gfx archive][kfd-amd-gfx],
-  [June 2025 LKML exchange][kfd-lkml] ([accessible mirror][kfd-lkml-mirror]),
-  [related ROCm issue #4919][rocm-4919], and [reported issue #4965][rocm-4965].
-
-**Do not relabel that specific 2025 KFD callback bug as outstanding.**
-Later hangs, DMA/VM problems or numerical failures are different observations
-and require independent reproduction. Nix pins userspace packages; it cannot
-itself certify the running host kernel, firmware, board or VBIOS configuration.
-
-### Provenance and reuse
-
-| Original contributor / source | Relevant established work | Integration boundary |
-| --- | --- | --- |
-| **AMD kernel maintainers** (Alex Deucher, Jonathan Kim) and **reporter Johl Brown** | The upstream gfx7/gfx8 KFD callback fix, mailing-list investigation and stable backport | Historical bug fixed; keep kernel/board metadata for any *new* regression |
-| **Luca Bruni** | [ROCm/clr #269][clr-269] isolated ROCm 7+ rejection of legacy `DoorbellType` 0/1; verified a TheRock restoration on RX 550 | Enumeration is distinct from GPU calculation correctness |
-| **Schaka** | [rocm-gfx803][schaka-repo] source/patch/build graph and real-board ROCm 10.x fixes for wave64, CLR/ROCr, rocBLAS, MIOpen, coherence and downstream frameworks | Pin and reuse original patches, source SHAs and test methods; do not reimplement or claim to have authored them |
-| **ROCm/TheRock and AMD component owners** | [RX580 upstream request #9118][therock-9118], [WX7100 request #9210][therock-9210], component build/target infrastructure | A community working build is not official AMD support |
-| **Robert Rosenbusch** | [gfx803_rocm][robert-repo] source builds, containers and framework bring-up (PyTorch, ComfyUI, WhisperX) | Retain useful reproducers, not whole containers in runtime closures |
-| **lamikr / rocm_sdk_builder contributors** | [rocm_sdk_builder][lamikr-repo] older multi-component build recipes and ABI/dependency debugging | Historical build evidence, not a second independent ROCm 10.1 patch fork |
-| **gfx803_compat_graph and community testers** | Nix/Cachix packaging, 5.7/6.4 baselines, compatibility graph and reproducible drift/stress probes | Separate source-written, imported binary, native Nix build, executed hardware test and accepted release claims |
-
-### All linked public issues and historical reports
-
-The 13 original user-supplied links are included **verbatim** below.
-These threads document history, community testing, prior fixes and remaining
-build lessons — their presence does not mean each issue is still unresolved.
-
-| Original link | Relevance |
-| --- | --- |
-| [ROCm/legacy-rocm-build #4919][rocm-4919] | Kernel/ROCm compatibility and reporter-provided KFD logs, bisect details and AMD discussion |
-| [ROCm/clr #269][clr-269] | Luca Bruni's ROCm 7+ legacy HSA/CLR doorbell analysis; Schaka's follow-up |
-| [lamikr/rocm_sdk_builder #259][sdk-259] | Eigen/ONNX Runtime source-download hash mismatch |
-| [OpenNMT/CTranslate2 #1072][ct2-1072] | ROCm backend and allocator discussions; numerical/runtime acceptance |
-| [ROCm/legacy-rocm-build #4965][rocm-4965] | User's RX580 KFD regression report — **fixed** by upstream Linux gfx7/8 callback commit |
-| [advanced-lvl-up gfx803/gfx900 #10][adv-10] | Output noise, kernel switching/context stress, ROCm 5.7/6.4 and Nix reproducibility |
-| [arlo-phoenix/CTranslate2-rocm #4][arlo-4] | Request for updated CTranslate2/legacy ROCm containers |
-| [lamikr/rocm_sdk_builder #173][sdk-173] | Original gfx803 support request, build logs, SONAME and segfault analysis |
-| [robertrosenbusch/gfx803_rocm #51][robert-51] | Distributed inference discussion; optional downstream consumer |
-| [ollama/ollama #2453 (timeline page 2)][ollama-2453] | Legacy gfx803 support request, subsequently closed as not planned; Vulkan alternative |
-| [lamikr/rocm_sdk_builder #220][sdk-220] | TorchVision heap-corruption and mixed-library ABI pitfalls |
-| [robertrosenbusch/gfx803_rocm #6][robert-6] | WhisperX framework integration and excessive container/build-disk overhead |
-| [robertrosenbusch/gfx803_rocm #5][robert-5] | ComfyUI, TorchAudio and Python-environment linkage |
-
-Related: [TheRock #9118][therock-9118], [TheRock #9210][therock-9210],
-[Schaka's repo][schaka-repo], [upstream KFD fix][kfd-upstream],
-[amd-gfx mailing-list link][kfd-amd-gfx],
-and [LKML follow-up][kfd-lkml].
-
-Evidence must remain ordered: exact sources/patches → build or import →
-runtime/ELF closure → GPU enumeration and dispatch → numerical and
-sustained-load checks → accepted Nix/Cachix release. Schaka's measured
-hardware results are invaluable prior art, but they are not a substitute
-for independent verification of this project's binaries. See
-[the Nix binary-factory roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md).
-
-[rocm-4919]: https://github.com/ROCm/legacy-rocm-build/issues/4919
-[clr-269]: https://github.com/ROCm/clr/issues/269
-[sdk-259]: https://github.com/lamikr/rocm_sdk_builder/issues/259
-[ct2-1072]: https://github.com/OpenNMT/CTranslate2/issues/1072
-[rocm-4965]: https://github.com/ROCm/legacy-rocm-build/issues/4965
-[adv-10]: https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/issues/10
-[arlo-4]: https://github.com/arlo-phoenix/CTranslate2-rocm/issues/4
-[sdk-173]: https://github.com/lamikr/rocm_sdk_builder/issues/173
-[robert-51]: https://github.com/robertrosenbusch/gfx803_rocm/issues/51
-[ollama-2453]: https://github.com/ollama/ollama/issues/2453?timeline_page=2
-[sdk-220]: https://github.com/lamikr/rocm_sdk_builder/issues/220
-[robert-6]: https://github.com/robertrosenbusch/gfx803_rocm/issues/6
-[robert-5]: https://github.com/robertrosenbusch/gfx803_rocm/issues/5
-[therock-9118]: https://github.com/ROCm/TheRock/issues/9118
-[therock-9210]: https://github.com/ROCm/TheRock/issues/9210
-[kfd-amd-gfx]: https://lists.freedesktop.org/archives/amd-gfx/2025-July/126884.html
-[kfd-lkml]: https://lkml.rescloud.iu.edu/2506.3/04182.html
-[kfd-lkml-mirror]: https://lkml.indiana.edu/hypermail/linux/kernel/2506.3/04182.html
-[kfd-upstream]: https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd
-[linux-6157]: https://www.opennet.ru/kernel/6.15.7.html
-[schaka-repo]: https://github.com/Schaka/rocm-gfx803
-[robert-repo]: https://github.com/robertrosenbusch/gfx803_rocm
-[lamikr-repo]: https://github.com/lamikr/rocm_sdk_builder
+For the complete contributor/patch lineage and the 2025 KFD fix (including
+all original issue and mailing-list references), see
+[prior art, upstream fixes and attribution](#prior-art-upstream-fixes-and-attribution).
 
 ## What this repo is for
 
@@ -686,3 +585,108 @@ To build a release manifest from benchmark results:
 ```bash
 python scripts/build_release_manifest.py   --results out/drift/benchmark-results.jsonl   --out out/drift/release-manifest.json   --stack-id rocm64_extracted_host   --release-id local-dev
 ```
+
+## Prior art, upstream fixes and attribution
+
+This project continues a community effort to run modern ROCm/HIP/OpenCL and
+frameworks on AMD GCN4/Polaris (`gfx803`, including RX 470/480/570/580)
+after official support was dropped. **This repository does not claim authorship
+of upstream kernel and ROCm fixes.** The focus here is to reuse those fixes,
+package reproducible **Nix build environments and finished binaries**, validate
+compatibility, and distribute accepted closures through Cachix.
+
+### The 2025 gfx7/gfx8 KFD regression was fixed upstream
+
+**Resolved upstream — not an open blocker in the current Nix roadmap.**
+The RX 580 compute-reset failure reported in [ROCm #4965][rocm-4965] and
+on the [Linux kernel mailing list][kfd-lkml] led to:
+
+- **[Upstream Linux commit `34659c1a1f4f`][kfd-upstream]:**
+  `drm/amdkfd: add hqd_sdma_get_doorbell callbacks for gfx7/8`,
+  authored by **Alex Deucher** in June 2025. The earlier reset
+  implementation called a missing gfx7/gfx8 callback. The fix adds
+  the required callback definitions and registers them.
+- **Explicit attribution in the accepted commit:** `Reported-by: Johl Brown`,
+  `Reviewed-by: Jonathan Kim`, `Signed-off-by: Alex Deucher`;
+  references ROCm #4965 and freedesktop issue #4304.
+- **[Backported to Linux 6.15.7][linux-6157].** Earlier suggestions
+  to revert suspect commits were historical troubleshooting workarounds,
+  not the final corrective patch.
+- Primary discussion and evidence: [July 2025 amd-gfx archive][kfd-amd-gfx],
+  [June 2025 LKML exchange][kfd-lkml] ([accessible mirror][kfd-lkml-mirror]),
+  [related ROCm issue #4919][rocm-4919], and [reported issue #4965][rocm-4965].
+
+**Do not relabel that specific 2025 KFD callback bug as outstanding.**
+Later hangs, DMA/VM problems or numerical failures are different observations
+and require independent reproduction. Nix pins userspace packages; it cannot
+itself certify the running host kernel, firmware, board or VBIOS configuration.
+
+### Provenance and reuse
+
+| Original contributor / source | Relevant established work | Integration boundary |
+| --- | --- | --- |
+| **AMD kernel maintainers** (Alex Deucher, Jonathan Kim) and **reporter Johl Brown** | The upstream gfx7/gfx8 KFD callback fix, mailing-list investigation and stable backport | Historical bug fixed; keep kernel/board metadata for any *new* regression |
+| **Luca Bruni** | [ROCm/clr #269][clr-269] isolated ROCm 7+ rejection of legacy `DoorbellType` 0/1; verified a TheRock restoration on RX 550 | Enumeration is distinct from GPU calculation correctness |
+| **Schaka** | [rocm-gfx803][schaka-repo] source/patch/build graph and real-board ROCm 10.x fixes for wave64, CLR/ROCr, rocBLAS, MIOpen, coherence and downstream frameworks | Pin and reuse original patches, source SHAs and test methods; do not reimplement or claim to have authored them |
+| **ROCm/TheRock and AMD component owners** | [RX580 upstream request #9118][therock-9118], [WX7100 request #9210][therock-9210], component build/target infrastructure | A community working build is not official AMD support |
+| **Robert Rosenbusch** | [gfx803_rocm][robert-repo] source builds, containers and framework bring-up (PyTorch, ComfyUI, WhisperX) | Retain useful reproducers, not whole containers in runtime closures |
+| **lamikr / rocm_sdk_builder contributors** | [rocm_sdk_builder][lamikr-repo] older multi-component build recipes and ABI/dependency debugging | Historical build evidence, not a second independent ROCm 10.1 patch fork |
+| **gfx803_compat_graph and community testers** | Nix/Cachix packaging, 5.7/6.4 baselines, compatibility graph and reproducible drift/stress probes | Separate source-written, imported binary, native Nix build, executed hardware test and accepted release claims |
+
+### All linked public issues and historical reports
+
+The 13 original user-supplied links are included **verbatim** below.
+These threads document history, community testing, prior fixes and remaining
+build lessons — their presence does not mean each issue is still unresolved.
+
+| Original link | Relevance |
+| --- | --- |
+| [ROCm/legacy-rocm-build #4919][rocm-4919] | Kernel/ROCm compatibility and reporter-provided KFD logs, bisect details and AMD discussion |
+| [ROCm/clr #269][clr-269] | Luca Bruni's ROCm 7+ legacy HSA/CLR doorbell analysis; Schaka's follow-up |
+| [lamikr/rocm_sdk_builder #259][sdk-259] | Eigen/ONNX Runtime source-download hash mismatch |
+| [OpenNMT/CTranslate2 #1072][ct2-1072] | ROCm backend and allocator discussions; numerical/runtime acceptance |
+| [ROCm/legacy-rocm-build #4965][rocm-4965] | User's RX580 KFD regression report — **fixed** by upstream Linux gfx7/8 callback commit |
+| [advanced-lvl-up gfx803/gfx900 #10][adv-10] | Output noise, kernel switching/context stress, ROCm 5.7/6.4 and Nix reproducibility |
+| [arlo-phoenix/CTranslate2-rocm #4][arlo-4] | Request for updated CTranslate2/legacy ROCm containers |
+| [lamikr/rocm_sdk_builder #173][sdk-173] | Original gfx803 support request, build logs, SONAME and segfault analysis |
+| [robertrosenbusch/gfx803_rocm #51][robert-51] | Distributed inference discussion; optional downstream consumer |
+| [ollama/ollama #2453 (timeline page 2)][ollama-2453] | Legacy gfx803 support request, subsequently closed as not planned; Vulkan alternative |
+| [lamikr/rocm_sdk_builder #220][sdk-220] | TorchVision heap-corruption and mixed-library ABI pitfalls |
+| [robertrosenbusch/gfx803_rocm #6][robert-6] | WhisperX framework integration and excessive container/build-disk overhead |
+| [robertrosenbusch/gfx803_rocm #5][robert-5] | ComfyUI, TorchAudio and Python-environment linkage |
+
+Related: [TheRock #9118][therock-9118], [TheRock #9210][therock-9210],
+[Schaka's repo][schaka-repo], [upstream KFD fix][kfd-upstream],
+[amd-gfx mailing-list link][kfd-amd-gfx],
+and [LKML follow-up][kfd-lkml].
+
+Evidence must remain ordered: exact sources/patches → build or import →
+runtime/ELF closure → GPU enumeration and dispatch → numerical and
+sustained-load checks → accepted Nix/Cachix release. Schaka's measured
+hardware results are invaluable prior art, but they are not a substitute
+for independent verification of this project's binaries. See
+[the Nix binary-factory roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md).
+
+[rocm-4919]: https://github.com/ROCm/legacy-rocm-build/issues/4919
+[clr-269]: https://github.com/ROCm/clr/issues/269
+[sdk-259]: https://github.com/lamikr/rocm_sdk_builder/issues/259
+[ct2-1072]: https://github.com/OpenNMT/CTranslate2/issues/1072
+[rocm-4965]: https://github.com/ROCm/legacy-rocm-build/issues/4965
+[adv-10]: https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/issues/10
+[arlo-4]: https://github.com/arlo-phoenix/CTranslate2-rocm/issues/4
+[sdk-173]: https://github.com/lamikr/rocm_sdk_builder/issues/173
+[robert-51]: https://github.com/robertrosenbusch/gfx803_rocm/issues/51
+[ollama-2453]: https://github.com/ollama/ollama/issues/2453?timeline_page=2
+[sdk-220]: https://github.com/lamikr/rocm_sdk_builder/issues/220
+[robert-6]: https://github.com/robertrosenbusch/gfx803_rocm/issues/6
+[robert-5]: https://github.com/robertrosenbusch/gfx803_rocm/issues/5
+[therock-9118]: https://github.com/ROCm/TheRock/issues/9118
+[therock-9210]: https://github.com/ROCm/TheRock/issues/9210
+[kfd-amd-gfx]: https://lists.freedesktop.org/archives/amd-gfx/2025-July/126884.html
+[kfd-lkml]: https://lkml.rescloud.iu.edu/2506.3/04182.html
+[kfd-lkml-mirror]: https://lkml.indiana.edu/hypermail/linux/kernel/2506.3/04182.html
+[kfd-upstream]: https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd
+[linux-6157]: https://www.opennet.ru/kernel/6.15.7.html
+[schaka-repo]: https://github.com/Schaka/rocm-gfx803
+[robert-repo]: https://github.com/robertrosenbusch/gfx803_rocm
+[lamikr-repo]: https://github.com/lamikr/rocm_sdk_builder
