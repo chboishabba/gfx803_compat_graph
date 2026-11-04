@@ -9,15 +9,15 @@ manifest="$1"
 dry_run="${2:-}"
 [[ -z "$dry_run" || "$dry_run" == "--dry-run" ]] || exit 2
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-lock="$repo_root/nix/gfx803/upstream.json"
 
 # Validate in a separate invocation with explicit PYTHONPATH and capture output.
-paths_json="$(PYTHONPATH="$repo_root" python3 - "$manifest" "$lock" <<'PY'
+paths_json="$(PYTHONPATH="$repo_root" python3 - "$manifest" <<'PY'
 import json
 import sys
 from scripts.gfx803_release import load, validate_candidate, AdmissionError
 
-manifest, lock = load(sys.argv[1]), load(sys.argv[2])
+manifest = load(sys.argv[1])
+lock = manifest.get("release_source_lock", {})
 if manifest.get("state") != "accepted":
     raise SystemExit("NOT ADMITTED: only accepted manifests may be published")
 if manifest.get("official_amd_support") is not False:
