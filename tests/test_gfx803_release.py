@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import tempfile
 import unittest
 from pathlib import Path
@@ -54,7 +55,7 @@ class ReleasePolicyTests(unittest.TestCase):
         candidate = copy.deepcopy(CANDIDATE)
         self.assertEqual(validate_candidate(candidate, LOCK), [])
         with self.assertRaises(AdmissionError):
-            promote(candidate, LOCK)
+            promote(candidate, LOCK, evidence_root=Path('.'))
 
     def test_drift_and_tag_refs_fail(self):
         candidate = copy.deepcopy(CANDIDATE)
@@ -68,14 +69,14 @@ class ReleasePolicyTests(unittest.TestCase):
         candidate["hardware"] = HARDWARE
         candidate["evidence"] = {name: RECEIPT for name in REQUIRED}
         with self.assertRaisesRegex(AdmissionError, "correspondence"):
-            promote(candidate, LOCK)
+            promote(candidate, LOCK, evidence_root=Path('.'))
 
     def test_partial_receipts_are_not_promoted(self):
         candidate = copy.deepcopy(CANDIDATE)
         candidate["hardware"] = HARDWARE
-        candidate["evidence"] = {name: RECEIPT for name in REQUIRED[:-1]}
+        candidate["evidence"] = {name: RECEIPT for name in REQUIRED if name != "runtime_linkage"}
         with self.assertRaisesRegex(AdmissionError, "runtime_linkage"):
-            promote(candidate, LOCK)
+            promote(candidate, LOCK, evidence_root=Path('.'))
 
     def test_passing_receipts_scoped(self):
         candidate = copy.deepcopy(CANDIDATE)
@@ -84,12 +85,26 @@ class ReleasePolicyTests(unittest.TestCase):
             "runtime_relocation": "verified",
         }
         candidate["hardware"] = HARDWARE
-        candidate["evidence"] = {name: copy.deepcopy(RECEIPT) for name in REQUIRED}
-        accepted = promote(candidate, LOCK)
-        self.assertEqual(accepted["state"], "accepted")
-        self.assertFalse(accepted["official_amd_support"])
-        self.assertEqual(accepted["release_source_lock"]["source_revision"], LOCK["source_revision"])
-        self.assertEqual(CANDIDATE["state"], "candidate")
+        with tempfile.TemporaryDirectory() as tmp:
+            logs = Path(tmp)
+            candidate["evidence"] = {}
+            for name in REQUIRED:
+                content = (name + ": passed on real device\\n").encode()
+                (logs / (name + ".log")).write_bytes(content)
+                candidate["evidence"][name] = {
+                    "status": "pass",
+                    "command": "actual executed command",
+                    "log_path": name + ".log",
+                    "log_sha256": hashlib.sha256(content).hexdigest(),
+                }
+            accepted = promote(candidate, LOCK, evidence_root=logs)
+            self.assertEqual(accepted["state"], "accepted")
+            self.assertFalse(accepted["official_amd_support"])
+            self.assertEqual(accepted["release_source_lock"]["source_revision"], LOCK["source_revision"])
+            self.assertEqual(CANDIDATE["state"], "candidate")
+            candidate["evidence"]["gpu_enumeration"]["log_sha256"] = "f" * 64
+            with self.assertRaisesRegex(AdmissionError, "sha256 mismatch"):
+                promote(candidate, LOCK, evidence_root=logs)
 
     def test_read_write(self):
         with tempfile.TemporaryDirectory() as tmp:
