@@ -17,6 +17,7 @@ STORE = re.compile(r"^/nix/store/[0-9a-z]{32}-[A-Za-z0-9+._?=-]+$")
 REQUIRED = (
     "gpu_enumeration", "kernel_dispatch", "numerical_correctness",
     "repeatability", "sustained_load", "runtime_linkage",
+    "source_provenance",
 )
 
 
@@ -83,6 +84,13 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
     elif any(not STORE.fullmatch(str(value)) for value in packages.values()):
         problems.append("all store paths must be canonical /nix/store paths")
     if require_evidence:
+        provenance = candidate.get("provenance", {})
+        if not isinstance(provenance, dict):
+            provenance = {}
+        if provenance.get("upstream_commit_correspondence") != "verified":
+            problems.append("source revision vs image correspondence not verified")
+        if provenance.get("runtime_relocation") != "verified":
+            problems.append("imported runtime relocation not verified")
         hardware = candidate.get("hardware", {})
         if not isinstance(hardware, dict) or hardware.get("arch") != "gfx803":
             problems.append("hardware.arch must be gfx803")
