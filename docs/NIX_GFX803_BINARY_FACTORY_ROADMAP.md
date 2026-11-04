@@ -38,6 +38,41 @@ The **root flake** is the new canonical interface; gfx803_flake_v1 continues to 
 
 The latter use experimental `builtins.fetchClosure`, and current input-addressed paths require the configured Cachix trust key. Eventually use `nix store make-content-addressed` and record rewritten hashes to remove that dependency.
 
+## Phase and deliverable accounting — concrete exit gates
+
+The release factory has **two consumer deliverables** plus the retained
+compatibility qualification receipts: **(1) a reproducible native build
+environment/SDK** and **(2) minimal patched ROCm and framework binaries
+distributed through Nix/Cachix**. A binary import is the fast bootstrap, not
+a substitute for a source-built Nix derivation.
+
+| Phase | Artifact/deliverable | Status on PR #5 | Exact exit criterion |
+| --- | --- | --- | --- |
+| 0 — Retain measured controls | Existing Nix 6.4 direct-only lane, prior 5.7 comparison and drift/stress receipts | **Retained** | No changed behavior or relabeling of previously accepted/failed baselines |
+| A — Pinned import tooling | Schaka 10.1 source lock, OCI digest/label verifier, rootless importer, Nix bootstrap shell, manifest, ELF auditor | **Source-written only; actual OCI import not executed** | One real immutable Schaka image resolves to the pinned component SHAs, imports cleanly into the Nix store, and is audited for relocation/ELF/ABI conflicts |
+| B — First Nix-distributed modern binary | Cachix-published, scoped ROCm 10.1 runtime and optional framework output, with independent GPU admission receipt | **Open: no imported accepted binary or Nix/Cachix release** | Clean Nix client substitutes working packages; numeric/repeated/stress tests pass on stated host/card; exact logs and acceptance manifest are retained |
+| C — Native reproducible source builds | Separate derivations for matched ROCm compiler/headers, ROCR/CLR, rocBLAS, MIOpen, rocSOLVER, MIGraphX, PyTorch and optional ORT/Triton | **Open; not provided by the OCI bootstrap shell** | Clean Nix builder reproducibly compiles from immutable Schaka/ROCm sources and patches, caches component closures and passes matching GPU acceptance tests |
+| D — Automatic candidate → stable lifecycle | Upstream change monitor, dependency-based incremental rebuild, self-hosted Polaris gates, release pin/promotion and rollback | **Source monitor and manual import workflow written; no branch workflow runs or native rebuild/promotion proven** | Changing one component triggers only the derivation DAG dependents, test evidence distinguishes candidates from accepted release, and a previous stable closure can be restored |
+| E — Upstream contributions (parallel) | Small attributed patches/reproducers proposed to TheRock and responsible AMD component owners | **Existing issue and separate PR #4; not a gate for Nix binary distribution** | Maintainer-reviewed targeted changes only after independent reproduction; no duplication of Schaka's patch suite |
+
+**Current phase:** retained historical controls and a **source-written
+Phase A bootstrap**, **not yet Phase B** (a usable/tested/published
+ROCm 10.1 Nix binary) and **not yet Phase C** (native Nix source builds).
+No new kernel patch development is on the critical path for the already
+resolved 2025 KFD callback regression.
+
+**Short critical path:** pin real OCI digest → check its published source
+and resolved component SHAs → import and relocate selected Nix store paths
+→ independent GPU dispatch/numerical/long-run tests → Cachix publish an
+accepted first ROCm 10.1 binary → translate the same component graph into
+native cacheable Nix builds → automate upgrades after hardware gates.
+
+The first practical deliverable is **a small substitutable modern binary
+closure and a validated package manifest**. The final project deliverables
+add a **native Nix build SDK and modular source derivations**, plus verified
+automatic incremental releases. Do not require an application-specific
+ComfyUI or vLLM package for the core runtime to count as complete.
+
 ## Phase A: reuse the existing successful binaries first
 
 The bootstrap imports an image **by OCI SHA256 digest**, via skopeo and rootless umoci; no Docker daemon is required. It adds only selected /opt/rocm and optional /opt/venv subtrees to the Nix store, not a full image tarball. It is an intentionally transitional **binary import**, not a native Nix compilation and not yet a minimal/runtime-relocated closure.
@@ -97,11 +132,12 @@ Retain hardware, kernel, ROCm and test-scope qualifiers for independent later re
 
 | Issue | Source-derived observation | Build/release implication |
 |---|---|---|
-| [ROCm/TheRock#9118](https://github.com/ROCm/TheRock/issues/9118) | Existing RX580 restoration request. Schaka explicitly asks contributors not to duplicate his ROCm 7.14/10.x build and patch work and reports ROCm 10.1 working on his card, with vLLM/system-hang qualifications. | Use as upstream coordination issue; native Nix should reuse source and patches rather than reimplementing kernel fixes. |
+| [ROCm/TheRock#9118](https://github.com/ROCm/TheRock/issues/9118) | Existing RX580 restoration request. Schaka reports ROCm 10.1 on his RX470 and qualified intermittent vLLM hangs in [his August 28 comment](https://github.com/ROCm/TheRock/issues/9118#issuecomment-6211403475); subsequent documentation attributes some hangs/VM faults to out-of-spec VRAM clocks. His README reports 202/202 PyTorch operations and 27/27 FP16 GEMM/convolution cases passing on ROCm 10.1, but says current-pin vLLM validation is open. | Reuse Schaka's source/patches and qualified receipts, but independently test our Nix binary on stated host/board before promotion; do not misattribute later VRAM/hang issues to the **fixed** 2025 KFD callback. |
 | [ROCm/clr#269](https://github.com/ROCm/clr/issues/269) | Luca Bruni isolated ROCm 7+ rejection of gfx803 legacy DoorbellType 0/1, causing HSA_STATUS_ERROR before enumeration, and verified a restoration on RX550; Schaka confirmed his patches worked. The user's September 2026 reply tagged Schaka with the compat graph. | Pin and attribute Luca's ROCR/CLR restoration; require an actual enumeration gate rather than treating its build as proof of support. |
 | [ROCm/legacy-rocm-build#4965](https://github.com/ROCm/legacy-rocm-build/issues/4965) and [#4919](https://github.com/ROCm/legacy-rocm-build/issues/4919) | **FIXED upstream**: user-reported 2025 gfx7/gfx8 KFD queue-reset regression led to [Linux commit 34659c1a1f4f](https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd), adding missing `hqd_sdma_get_doorbell` callbacks. Authored by Alex Deucher, reviewed by Jonathan Kim, explicitly `Reported-by: Johl Brown`; backported to Linux 6.15.7. See the original [amd-gfx July mailing-list link](https://lists.freedesktop.org/archives/amd-gfx/2025-July/126884.html) and [June LKML exchange](https://lkml.rescloud.iu.edu/2506.3/04182.html). #4919 holds the related reporter's bisect/log evidence. | Do **not** list this historical KFD bug as an open build blocker. Retain kernel/firmware metadata and validate any *distinct* later reset or compute failure separately. Nix controls userspace, not host amdgpu/KFD. |
 | [lamikr/rocm_sdk_builder#173](https://github.com/lamikr/rocm_sdk_builder/issues/173), [#220](https://github.com/lamikr/rocm_sdk_builder/issues/220) and [#259](https://github.com/lamikr/rocm_sdk_builder/issues/259) | The user requested gfx803 support in Nov 2024 and documented builds, exact SONAME/ROCm-SMI/ICU link errors and runtime crashes. Later reports cover Python heap corruption and an Eigen download hash mismatch. | Immutable source/pin and FOD hashes; never fake SONAME compatibility via copied libraries; coherent SDK/ABI and independent build vs load vs on-card tests. |
 | [OpenNMT/CTranslate2#1072](https://github.com/OpenNMT/CTranslate2/issues/1072) and [arlo-phoenix/CTranslate2-rocm#4](https://github.com/arlo-phoenix/CTranslate2-rocm/issues/4) | The user commented extensively on ROCm acceleration, async allocator/device issues, and requested newer legacy ROCm builds in Oct 2024. Schaka reports wrong values for some CTranslate2/ORT workloads if his fixes are omitted. | Correctness probes must check outputs, not merely library import or GPU discovery. CTranslate2 is a useful optional representative integration fixture, not a mandatory application in the core runtime closure. |
+| [robertrosenbusch/gfx803_rocm#43](https://github.com/robertrosenbusch/gfx803_rocm/issues/43) ([Schaka, October](https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-6519100882), [Schaka, 3 November](https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-6594618560)) | Users reported RX 570/580 ComfyUI corruption on some ROCm 6.4 builds even with `--lowvram` or attempted FP32 fallback, while ROCm 5.7 worked in those comparisons. Schaka specifically directs them to newer PyTorch kernel patches; original Nix 6.4 packages alone do not integrate them. This is a distinct **userspace numerical** concern, not evidence that the fixed 2025 KFD callback bug persists. | An optional negative/positive numerical canary comparing same inputs, model and hardware across 5.7 / 6.4 / patched 10.1; preserve actual output and version/provenance. Do not depend on ComfyUI to ship the core Nix SDK/runtime. |
 | [advanced-lvl-up#10](https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/issues/10) | User's Mar–Apr 2026 real-hardware reports on diffusion output noise, repeatability, context/kernel-switch poisoning, Nix-run alternatives and reset boundaries. They explicitly reported isolated pass alongside repeated-inference failure. | Preserve failure receipts and use stress/context-switch tests. Do not promote an isolated deterministic kernel to universal stack correctness. |
 | [robertrosenbusch/gfx803_rocm#5](https://github.com/robertrosenbusch/gfx803_rocm/issues/5), [#6](https://github.com/robertrosenbusch/gfx803_rocm/issues/6), and [#51](https://github.com/robertrosenbusch/gfx803_rocm/issues/51) | Existing community containers and framework build/debugging lessons (TorchAudio, WhisperX, ComfyUI), plus later distributed-compute discussion. The user documented large images and repeated rebuild/storage cost. | Keep matched wheel outputs separate from runtime SDK; avoid recompiling apps' shared dependencies and require only relevant app fixtures on a given release. Distributed inference remains out of build-factory scope. |
 | [ollama/ollama#2453](https://github.com/ollama/ollama/issues/2453) | Official Ollama older gfx803 ROCm binary support closed as not planned in July 2026; maintainers pointed to Vulkan as a possible route. User linked the compat graph on July 24. | Do not promise official Ollama ROCm gfx803 support. Build family should permit ROCm and Vulkan backends as independent consumers rather than forcing a monolithic package. |
