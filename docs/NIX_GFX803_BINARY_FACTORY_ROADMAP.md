@@ -53,7 +53,7 @@ gfx803-import-schaka --image "$repo@$digest" --source-revision "$rev" \
   --with-venv --out out/schaka-oci/rocm10.1
 ```
 
-This has NOT run here. It produces an unvalidated candidate manifest and Nix store paths. Its source-commit-to-image correspondence and runtime relocatability remain unverified until supported by actual receipts.
+This has NOT run here. It produces an unvalidated candidate manifest and Nix store paths. Before large image download, the importer checks Schaka's published OCI labels for exact source SHA, release line, final stage and resolved component pins. A label mismatch fails closed. Label agreement is publisher metadata evidence, not an independent reproducible-build attestation; runtime relocatability and on-card correctness still need real receipts.
 
 ## Phase B: close the first accepted binary release
 
