@@ -26,6 +26,14 @@ REQUIRED = (
     "repeatability", "sustained_load", "runtime_linkage",
     "source_provenance",
 )
+# Application/workload support must never be inferred from a passing core SDK.
+# Claiming an additional capability makes its on-device log gate mandatory.
+CAPABILITY_GATES = {
+    "comfyui_images": ("comfyui_image",),
+    "whisperx_long_run": ("async_hang_regression",),
+    "ollama_gpu": ("ollama_gpu_inference",),
+}
+OPTIONAL = tuple(x for values in CAPABILITY_GATES.values() for x in values)
 
 
 class AdmissionError(ValueError):
@@ -153,7 +161,17 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
         evidence = candidate.get("evidence", {})
         if not isinstance(evidence, dict):
             evidence = {}
-        for check in REQUIRED:
+        capabilities = candidate.get("claimed_capabilities", [])
+        if (not isinstance(capabilities, list)
+                or any(not isinstance(x, str) or x not in CAPABILITY_GATES
+                       for x in capabilities)
+                or len(capabilities) != len(set(capabilities))):
+            problems.append("claimed_capabilities must be a unique list of supported names")
+            capabilities = []
+        required_receipts = list(REQUIRED)
+        for claim in capabilities:
+            required_receipts.extend(CAPABILITY_GATES[claim])
+        for check in required_receipts:
             receipt = evidence.get(check, {})
             if not isinstance(receipt, dict) or receipt.get("status") != "pass":
                 problems.append(check + ": no passing receipt")
