@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -220,7 +221,8 @@ def promote(candidate: dict, lock: dict, *, evidence_root: Path) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--lock", default="nix/gfx803/upstream.json")
+    ap.add_argument("--lock", default=os.environ.get(
+        "GFX803_SOURCE_LOCK", "nix/gfx803/upstream.json"))
     sub = ap.add_subparsers(dest="command", required=True)
 
     up = sub.add_parser("update-source", help="propose new Schaka commit, invalidate old digest")
