@@ -120,6 +120,9 @@ def promote(candidate: dict, lock: dict) -> dict:
         raise AdmissionError("; ".join(problems))
     result = dict(candidate)
     result["state"] = "accepted"
+    # Freeze the full source lock with each accepted release. Later candidate
+    # updates must not invalidate rollback or re-publication of this release.
+    result["release_source_lock"] = dict(lock)
     result["admission_scope"] = "tested-gfx803-hardware-and-declared-checks"
     # No automatic official-AMD-support or universal-correctness claim.
     result["official_amd_support"] = False
