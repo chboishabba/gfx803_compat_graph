@@ -39,6 +39,7 @@ class OciImportContractTests(unittest.TestCase):
         import json
         import os
         import shutil
+        import shlex
         import tempfile
         with tempfile.TemporaryDirectory() as td:
             p = Path(td)
@@ -47,8 +48,14 @@ class OciImportContractTests(unittest.TestCase):
             # Reproduce the skopeo -> umoci -> nix-store command boundaries
             # without downloads, GPU access, root privileges or a Nix daemon.
             shell = "#!" + shutil.which("bash") + "\n"
+            image_labels = json.dumps({"Labels": {
+                "io.rocm.gfx803.source-rev": SHA,
+                "io.rocm.gfx803.line": "rocm10.1",
+                "io.rocm.gfx803.stage": "final",
+                "io.rocm.gfx803.pins": "ROCM_SYSTEMS_REF=deadbeef",
+            }})
             scripts = {
-                "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then echo \'{"Labels":{}}\'; fi\n',
+                "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then printf "%s\n" ' + shlex.quote(image_labels) + '; fi\n',
                 "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm" "$last/rootfs/opt/venv"\n',
                 "nix": shell + 'echo "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
             }
@@ -69,6 +76,7 @@ class OciImportContractTests(unittest.TestCase):
             self.assertEqual(candidate["state"], "candidate")
             self.assertEqual(candidate["upstream_revision"], SHA)
             self.assertFalse(candidate["provenance"]["native_nix_build"])
+            self.assertEqual(candidate["provenance"]["upstream_commit_correspondence"], "publisher-oci-labels-matched")
             self.assertEqual(set(candidate["store_paths"]), {"rocm", "venv"})
 
 
