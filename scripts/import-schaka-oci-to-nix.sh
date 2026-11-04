@@ -81,9 +81,10 @@ mkdir -p "$scratch/layout" "$OUT"
 # and resolved upstream dependency pins. Check them BEFORE pulling the layers.
 skopeo inspect --override-os linux --override-arch amd64 \
   "docker://$IMAGE" > "$OUT/oci-inspect.json"
-python3 - "$OUT/oci-inspect.json" "$SOURCE_REV" "$rocm_version" "$IMAGE" <<'PY'
+PYTHONPATH="$repo_root" python3 - "$OUT/oci-inspect.json" "$SOURCE_REV" "$rocm_version" "$IMAGE" <<'PY'
 import json
 import sys
+from scripts.gfx803_component_graph import parse_pins
 
 payload = json.load(open(sys.argv[1]))
 labels = payload.get("Labels") or {}
@@ -100,9 +101,11 @@ expected = {
 for name, value in expected.items():
     if labels.get(name) != value:
         raise SystemExit("OCI LABEL MISMATCH: " + name + ": " + repr(labels.get(name)))
-if not labels.get("io.rocm.gfx803.pins") or labels["io.rocm.gfx803.pins"] == "unrecorded":
-    raise SystemExit("OCI LABEL MISMATCH: resolved component pins missing")
-print("Source, release, final-stage and component pin labels match")
+try:
+    parse_pins(labels.get("io.rocm.gfx803.pins"))
+except ValueError as exc:
+    raise SystemExit("OCI LABEL MISMATCH: incomplete source pin graph: " + str(exc))
+print("Source, release, final-stage and all eight source pins match")
 PY
 
 echo "Fetching immutable, matching OCI image digest: $IMAGE"
@@ -174,6 +177,8 @@ Path(os.environ["OUT_MANIFEST"]).write_text(
 )
 PY
 
+python3 "$repo_root/scripts/gfx803_component_graph.py" \
+  --candidate "$OUT/candidate.json" --out "$OUT/component-sources.json"
 echo "Imported into Nix store: $rocm_store"
 [[ -z "$venv_store" ]] || echo "Python environment: $venv_store"
 echo "Candidate manifest: $OUT/candidate.json"
