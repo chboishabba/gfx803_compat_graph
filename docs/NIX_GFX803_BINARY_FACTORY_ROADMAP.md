@@ -15,12 +15,12 @@ The product is **both a reproducible build environment and independently install
 |---|---|---|
 | Extracted ROCm 6.4 control | Existing measured direct_only pass, plus retained negative results | PRESERVED |
 | Pinned Schaka revision | nix/gfx803/upstream.json names full 40-byte SHA and release | SOURCE-WRITTEN |
-| Nix bootstrap tools | Root flake exports daemonless OCI tool shell, importer, policy, checks | SOURCE-WRITTEN |
-| Digest-pinned upstream image import | skopeo + umoci -> Nix store paths + candidate.json | SOURCE-WRITTEN, not run |
-| GPU numerical/reset admission | Seven required receipt types, exact hardware/provenance | OPEN |
-| Accepted cached binary packages | Optional fetchClosure flake outputs after accepted manifest | DEFINED, no accepted release |
-| Native, source-built ROCm Nix derivations | Patched runtime, math, compiler, frameworks in separate outputs | OPEN |
-| Upstream change discovery | Scheduled weekly source update PR | SOURCE-WRITTEN, not run on default branch |
+| Nix bootstrap tools | Root flake exports daemonless OCI shell, digest-lock policy, evidence capture, importer, closure audit and checks | SOURCE-WRITTEN; Nix evaluation not run |
+| Digest-pinned image import | skopeo digest+8-SHA pin verification; rootless umoci; image-root-based /etc/alternatives symlink staging; Nix store candidate plus link and component-source reports | SOURCE-WRITTEN, not run on a real image |
+| GPU numerical/reset admission | Seven required receipt types plus retained log hashes; receipt recorder rejects 6/7 diffusion PARTIAL_PASS despite process exit 0 | LOGIC SOURCE-WRITTEN; actual hardware gates OPEN |
+| Accepted cached binaries | Optional fetchClosure outputs; publication re-hashes retained original evidence, requires locked image digest | DEFINED, no accepted release |
+| Native, source-built ROCm Nix derivations | Exact 8-SHA upstream component source graph and transitive rebuild plan emitted; actual native Nix compilation still absent | SOURCE GRAPH WRITTEN; COMPILATION OPEN |
+| Upstream change discovery | Weekly Schaka source SHA and independently inspected OCI image digest PR workflows | SOURCE-WRITTEN, not run on default branch |
 | Automatic native build/publish | DAG changes, CI, hardware gate and release promotion | OPEN |
 
 SOURCE-WRITTEN is **not** built, run, hardware validated or production ready.
@@ -31,7 +31,8 @@ The **root flake** is the new canonical interface; gfx803_flake_v1 continues to 
 
 - `nix develop .#gfx803-oci-build`: reproducible OCI/Nix tooling with NO unrelated Nixpkgs ROCm shared-library injection.
 - `nix run .#gfx803-schaka-import -- --help`: import immutable image parts to Nix store (candidate only).
-- `nix run .#gfx803-release-policy -- --help`: inspect source and evidence policy.
+- `nix run .#gfx803-release-policy -- --help`: inspect source, lock an independently inspected OCI image, and review admission policy.
+- `nix run .#gfx803-capture-evidence -- --help`: run commands, retain hash-backed original logs and reject partial diffusion reports.
 - `nix build .#gfx803-schaka-upstream-lock`: source pin artifact.
 - `nix build .#checks.x86_64-linux.gfx803-release-policy`: offline mock-import and policy tests.
 - Only with a committed hardware-accepted release manifest: `nix build .#gfx803-rocm-binary` (and optional `gfx803-venv-binary`), fetched from gfx803-rocm.cachix.org.
@@ -61,7 +62,7 @@ ROCm 10.1 Nix binary) and **not yet Phase C** (native Nix source builds).
 No new kernel patch development is on the critical path for the already
 resolved 2025 KFD callback regression.
 
-**Short critical path:** pin real OCI digest → check its published source
+**Short critical path:** resolve actual image digest via the hosted inspect-only PR workflow (with all eight component SHAs validated) → merge reviewed lock → run real import on Nix/Polaris hardware → check staging/audit reports and runtime linkage → execute historic ComfyUI, GEMM/WGM8, diffusion, WhisperX and Schaka correctness suites → rehash evidence, admit and publish → test clean Nix client → implement native source derivations. The original, narrower plan was: pin real OCI digest → check its published source
 and resolved component SHAs → import and relocate selected Nix store paths
 → independent GPU dispatch/numerical/long-run tests → Cachix publish an
 accepted first ROCm 10.1 binary → translate the same component graph into
@@ -174,6 +175,49 @@ re-execution of existing qualified tests**, not invention of a first
 GPU hang/debugging suite. Retain original test authorship and failed
 historical results.
 
+### Offline-first source admission tools implemented on this branch
+
+- `scripts/gfx803_component_graph.py` parses Schaka's **eight exact 40-byte
+  resolved component SHAs**, rejects moving refs and computes the transitive
+  rebuild set from the actual published upstream build DAG. It writes
+  `component-sources.json` for the Nix-native phase. The graph is **not**
+  a compilation or a content-addressed input derivation.
+- `scripts/gfx803_oci_links.py` stages `/opt/rocm` and optional `/opt/venv`,
+  resolving OCI-internal `/etc/alternatives/rocm-*` chains to relative
+  in-tree links. It reports missing and outside-tree aliases instead of
+  pretending those dependencies are present. ELF and wheel relocation
+  remains separate.
+- `scripts/gfx803_release.py lock-image` binds only a publisher-inspected
+  image SHA256 to the exact source lock and its eight resolved commit SHAs.
+  Promotion refuses a missing/mismatched digest, even with green receipts.
+- `scripts/gfx803_capture.py` runs real commands and saves their original
+  logs with hashes. An explicit `--expect-diffusion-all-pass` checks
+  `PROBE_JSON` so the historic `6/7` outcome cannot be promoted merely
+  because the probe exits 0.
+- `scripts/publish-gfx803-accepted.sh` now requires `--evidence-root` and
+  reopens/hashes all original logs **at publication time**. A committed
+  accepted JSON with missing/tampered logs cannot publish.
+- `.github/workflows/gfx803-schaka-image-digest.yml` resolves the tag
+  to a reviewed immutable digest candidate, and the GPU import workflow
+  requires that digest already be committed. Neither workflow claims GPU
+  correctness or creates accepted binaries without the physical tests.
+
+Record an actual diffusion gate (after creating a candidate manifest from
+the real imported release), for example:
+
+```bash
+nix run .#gfx803-capture-evidence -- \
+  --candidate out/schaka-oci/rocm10.1/candidate.json \
+  --evidence-root out/schaka-oci/rocm10.1/logs \
+  --gate numerical_correctness --expect-diffusion-all-pass \
+  -- bash scripts/host-docker-python.sh probe_diffusion.py
+```
+
+The command must run against the **candidate 10.1 runtime**, not silently
+against the legacy extracted 6.4 control. Replace that example launcher
+with the verified candidate environment wrapper when relocation is ready.
+A failed/partial run leaves a retained `fail` receipt and cannot promote.
+
 ## Phase A: reuse the existing successful binaries first
 
 The bootstrap imports an image **by OCI SHA256 digest**, via skopeo and rootless umoci; no Docker daemon is required. It adds only selected /opt/rocm and optional /opt/venv subtrees to the Nix store, not a full image tarball. It is an intentionally transitional **binary import**, not a native Nix compilation and not yet a minimal/runtime-relocated closure.
@@ -205,8 +249,10 @@ python3 scripts/gfx803_release.py promote \
   --manifest out/schaka-oci/rocm10.1/candidate.json \
   --out nix/gfx803/accepted-release.json \
   --evidence-root out/schaka-oci/rocm10.1/logs
-bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json --dry-run
-bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json
+bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json \
+  --evidence-root out/schaka-oci/rocm10.1/logs --dry-run
+bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json \
+  --evidence-root out/schaka-oci/rocm10.1/logs
 ```
 
 The promoter is deliberately fail-closed: importing, compiling or enumerating a GPU is insufficient. Acceptance does not assert universal gfx803 correctness or official AMD support.
@@ -223,7 +269,7 @@ Separate runtime, development, device-code, tools and Python wheel outputs; avoi
 
 ## Phase D: automatic source/update/build/release
 
-The weekly upstream-watch workflow *only* proposes changed source revisions. It never asserts a successful new GPU build. Once native derivations exist, CI should rebuild precisely the derivations invalidated by their hashes, re-run hosted source checks, then run physical gfx803 checks on a self-hosted runner. Candidate Cachix artifacts and receipts should be separate from accepted stable closures. Promotion is explicit and evidence-dependent; retain earlier accepted manifests and Nix store closures for rollback.
+The weekly upstream-watch workflow *only* proposes changed source revisions. The separate `gfx803-schaka-image-digest.yml` checks the OCI manifest digest and all eight resolved source pins without downloading its layers, and proposes a reviewable source-to-image lock PR. It never asserts a successful new GPU build. Once native derivations exist, CI should rebuild precisely the derivations invalidated by their hashes, re-run hosted source checks, then run physical gfx803 checks on a self-hosted runner. Candidate Cachix artifacts and receipts should be separate from accepted stable closures. Promotion is explicit and evidence-dependent; retain earlier accepted manifests and Nix store closures for rollback.
 
 ## Existing public issue lineage and no-duplication policy
 
