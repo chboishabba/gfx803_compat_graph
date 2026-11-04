@@ -42,6 +42,14 @@ let
     '';
   };
 
+  recorder = pkgs.writeShellApplication {
+    name = "gfx803-capture-evidence";
+    runtimeInputs = [ python ];
+    text = ''
+      exec ${python}/bin/python ${../../scripts/gfx803_capture.py} "$@"
+    '';
+  };
+
   auditor = pkgs.writeShellApplication {
     name = "gfx803-audit-closure";
     runtimeInputs = [ python pkgs.binutils ];
@@ -53,7 +61,7 @@ let
   # Bootstrap tools only: do not accidentally mix contemporary Nixpkgs ROCm
   # device-libs/LLVM with Schaka's release-coherent ROCm compiler SDK.
   bootstrapTools = [
-    importer policy auditor python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
+    importer policy recorder auditor python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
     pkgs.binutils pkgs.skopeo pkgs.umoci pkgs.cachix pkgs.zstd
   ];
 
@@ -103,6 +111,7 @@ in
     gfx803-schaka-upstream-lock = upstreamLock;
     gfx803-schaka-import = importer;
     gfx803-release-policy = policy;
+    gfx803-capture-evidence = recorder;
     gfx803-audit-closure = auditor;
   } // acceptedBinaries);
   devShells = ({
@@ -119,6 +128,10 @@ in
     gfx803-release-policy = {
       type = "app";
       program = "${policy}/bin/gfx803-release-policy";
+    };
+    gfx803-capture-evidence = {
+      type = "app";
+      program = "${recorder}/bin/gfx803-capture-evidence";
     };
     gfx803-audit-closure = {
       type = "app";
