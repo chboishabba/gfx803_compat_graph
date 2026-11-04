@@ -151,6 +151,25 @@ class ReleasePolicyTests(unittest.TestCase):
         self.assertTrue(any("digest differs" in e for e in
                             validate_candidate(candidate, LOCK)))
 
+    def test_comfyui_capability_claim_requires_real_image_receipt(self):
+        candidate = copy.deepcopy(CANDIDATE)
+        candidate["claimed_capabilities"] = ["comfyui_images"]
+        problems = validate_candidate(candidate, LOCK, require_evidence=True)
+        self.assertTrue(any("comfyui_image: no passing receipt" in e
+                            for e in problems))
+        candidate["evidence"] = {"comfyui_image": RECEIPT}
+        problems = validate_candidate(candidate, LOCK, require_evidence=True)
+        self.assertFalse(any("comfyui_image: no passing receipt" in e
+                             for e in problems))
+
+    def test_unknown_and_duplicate_capability_claims_fail(self):
+        for claims in (["comfyui_images", "comfyui_images"], ["faster-than-h100"],
+                       "comfyui_images"):
+            candidate = copy.deepcopy(CANDIDATE)
+            candidate["claimed_capabilities"] = claims
+            problems = validate_candidate(candidate, LOCK, require_evidence=True)
+            self.assertTrue(any("claimed_capabilities" in e for e in problems))
+
 
 if __name__ == "__main__":
     unittest.main()
