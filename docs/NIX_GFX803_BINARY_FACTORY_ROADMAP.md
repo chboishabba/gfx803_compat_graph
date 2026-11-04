@@ -33,6 +33,7 @@ The **root flake** is the new canonical interface; gfx803_flake_v1 continues to 
 - `nix run .#gfx803-schaka-import -- --help`: import immutable image parts to Nix store (candidate only).
 - `nix run .#gfx803-release-policy -- --help`: inspect source, lock an independently inspected OCI image, and review admission policy.
 - `nix run .#gfx803-capture-evidence -- --help`: run commands, retain hash-backed original logs and reject partial diffusion reports.
+- `nix run .#gfx803-comfyui-images -- --help`: compare original real 5.7-good / 6.4-bad and candidate 10.1 images, requiring hashes of the workflow and model, explicit thresholds, and a fixed seed.
 - `nix build .#gfx803-schaka-upstream-lock`: source pin artifact.
 - `nix build .#checks.x86_64-linux.gfx803-release-policy`: offline mock-import and policy tests.
 - Only with a committed hardware-accepted release manifest: `nix build .#gfx803-rocm-binary` (and optional `gfx803-venv-binary`), fetched from gfx803-rocm.cachix.org.
@@ -194,6 +195,10 @@ historical results.
   logs with hashes. An explicit `--expect-diffusion-all-pass` checks
   `PROBE_JSON` so the historic `6/7` outcome cannot be promoted merely
   because the probe exits 0.
+- `scripts/gfx803_comfyui_images.py` scores **actual** ComfyUI output PNGs
+  against the original first-party 5.7-good/6.4-bad comparison, requiring
+  matching model/workflow/seed and explicit tolerances. It is an optional
+  downstream application canary; no historical PNGs are invented.
 - `scripts/publish-gfx803-accepted.sh` now requires `--evidence-root` and
   reopens/hashes all original logs **at publication time**. A committed
   accepted JSON with missing/tampered logs cannot publish.
@@ -201,6 +206,13 @@ historical results.
   to a reviewed immutable digest candidate, and the GPU import workflow
   requires that digest already be committed. Neither workflow claims GPU
   correctness or creates accepted binaries without the physical tests.
+
+A core candidate has seven mandatory receipts. If the manifest also claims
+`claimed_capabilities: ["comfyui_images"]`,
+`["whisperx_long_run"]` or `["ollama_gpu"]`, admission additionally requires
+respectively `comfyui_image`, `async_hang_regression` or
+`ollama_gpu_inference` passing hash-backed logs. No generic GPU
+smoke proves those workload-level claims.
 
 Record an actual diffusion gate (after creating a candidate manifest from
 the real imported release), for example:
@@ -212,6 +224,11 @@ nix run .#gfx803-capture-evidence -- \
   --gate numerical_correctness --expect-diffusion-all-pass \
   -- bash scripts/host-docker-python.sh probe_diffusion.py
 ```
+
+The ComfyUI comparison app requires real PNGs from matched executions and
+its deliberately selected `--max-rmse` must be justified by the workflow's
+baseline variance. This tool does not itself run the ComfyUI image-generation
+pipeline or claim access to the earlier output files.
 
 The command must run against the **candidate 10.1 runtime**, not silently
 against the legacy extracted 6.4 control. Replace that example launcher
@@ -255,7 +272,7 @@ bash scripts/publish-gfx803-accepted.sh nix/gfx803/accepted-release.json \
   --evidence-root out/schaka-oci/rocm10.1/logs
 ```
 
-The promoter is deliberately fail-closed: importing, compiling or enumerating a GPU is insufficient. Acceptance does not assert universal gfx803 correctness or official AMD support.
+The promoter is deliberately fail-closed: importing, compiling or enumerating a GPU is insufficient. The separate publisher re-opens the same `--evidence-root` and hashes all receipt logs again; it also refuses a candidate without a reviewed immutable image digest. Acceptance does not assert universal gfx803 correctness or official AMD support.
 
 ## Phase C: native, modular Nix source builds
 
