@@ -711,6 +711,33 @@ See [the dated evidence and exact test-to-patch crosswalk](docs/NIX_GFX803_BINAR
 [hang-wayland]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-25_WAYLAND_GFX_TIMEOUT_RESET.md
 [hang-whisperx]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md
 
+### LeechTransformer same-runtime admission — November 2026
+
+The [4 November physical Leech C2 GPU receipt](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/receipts/gfx803_control_leech_c2_rejected_20261104.json)
+(SHA-256 `1e3b5640995eaf7ca93517a19cad7f85639926d1e9b817c8b6c0b296e516aa79`)
+**correctly rejected** ROCm 6.4: dense CPU↔gfx803 logits differ
+by **28.5573**, layer-1 normalized input by **2.3884**, and
+same-GPU repeated inference by **0.2023/0.2371**. Training was **not
+launched**. The receipt uses this repository's original
+`scripts/host-docker-python.sh`, which **already defaults** to
+`MIOPEN_DEBUG_CONV_DIRECT=1`, `MIOPEN_DEBUG_CONV_GEMM=0`,
+`MIOPEN_DEBUG_CONV_WINOGRAD=0`, FFT/determinism/cache mitigations,
+and `TORCH_BLAS_PREFER_HIPBLASLT=0`. The old receipt did **not**
+record all effective MIOpen values, so a caller's explicit overrides
+cannot be ruled out. Even exact matching of the convolution-safe
+settings cannot establish transformer GEMM/attention correctness.
+
+[LeechTransformer PR #4](https://github.com/chboishabba/LeechTransformer/pull/4)
+adds an effective-profile/mapped-library diagnostic and an optional,
+diagnostic-only deterministic PyTorch test. The dynamic linker may
+select libraries influenced by Nix shell search paths, so **actual
+mapped rocBLAS/HIP/MIOpen paths**, not merely the shell label or
+Python import success, belong in subsequent receipts. A mixed runtime
+remains a hypothesis until measured. The early layer diagnostic must
+also check whether its hooks change the uninstrumented GPU result
+before attributing a failure to Schaka's assembly WGM patch.
+See the [exact evidence and runtime-selection cut](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md#5-nov-2026-leech-failed-despite-legacy-default-safe-profile).
+
 ### Modern ROCm 10.1 Nix factory — current source implementation
 
 The [Phase A/B/C/D roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md)
