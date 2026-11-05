@@ -130,6 +130,45 @@ WGM8 differential test** under the existing drift probe with Schaka's
 actual patch applied. Preserve original 2026 profiler/test authorship,
 Schaka's later root-cause proof and his upstream patch provenance.
 
+### 5 Nov 2026: Leech failed despite legacy *default* safe profile
+
+The uploaded original [Leech GPU gate receipt](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/receipts/gfx803_control_leech_c2_rejected_20261104.json)
+(SHA-256 `1e3b5640995eaf7ca93517a19cad7f85639926d1e9b817c8b6c0b296e516aa79`)
+reports **no GPU admission** on
+`torch 2.6.0+gitdae14f9`, HIP `6.4.43483-a187df25c`,
+Linux `7.3.0-2-cachyos-bore`, batch 2, 64 tokens and an
+actual 8 GiB `gfx803` device. Failures precede focused C2 computation:
+dense logits max abs **28.5573**, layer-1 normalized input **2.3884**,
+FFN output **1.1904**, and same-GPU repeats **0.2023/0.2371**.
+
+**Important correction to causal ordering:** the
+[original extracted-runtime launcher](https://github.com/chboishabba/gfx803_compat_graph/blob/master/scripts/host-docker-python.sh)
+already **defaults** to the proven MIOpen convolution direct-only flags:
+`DIRECT=1`, `GEMM=0`, `WINOGRAD=0`, `FFT=0`,
+determinism/cache controls, `TORCH_BLAS_PREFER_HIPBLASLT=0` and
+`CUBLAS_WORKSPACE_CONFIG=:4096:8`. The Nix Leech launcher uses that
+original wrapper. The uploaded old receipt did not capture individual
+MIOpen values, so inherited explicit overrides remain possible, but
+there is **no basis to conclude the safe launcher was omitted**.
+
+The legacy safe flags act on **MIOpen convolutions**, not every
+rocBLAS GEMM, attention/materialization, QKV, FP32 layer normalization,
+or positional embedding operation. They cannot establish same-input
+transformer correctness. The original `gfx803_flake_v1` shell also
+contains broader ROCm dev inputs and the wrapper preserves some
+inherited library search paths: a **mixed actual dynamic-library
+selection** is another measurable hypothesis, **not a proven cause**.
+
+[LeechTransformer PR #4](https://github.com/chboishabba/LeechTransformer/pull/4)
+now includes `scripts/gfx803_runtime_attestation.py` and propagates
+its read-only **effective environment + actually mapped HIP/rocBLAS**
+snapshot into subsequent gate and operator-boundary receipts, plus an
+opt-in diagnostic-only PyTorch deterministic-algorithms run. Source-written;
+**no new physical execution reported**. Preserve the original negative
+receipt unchanged. This diagnostic precedes attributing any Leech
+failure to Schaka's WGM!=1 class; the selected actual QKV/Tensile solution
+and the first unperturbed failing Leech module remain unmeasured.
+
 ### Why the fixed 2025 KFD callback patch does not close these later incidents
 
 [Linux commit 34659c1a1f4f](https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd)
