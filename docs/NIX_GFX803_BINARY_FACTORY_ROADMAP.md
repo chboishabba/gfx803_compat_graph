@@ -807,3 +807,45 @@ numeric-only diagnostics, **not** a traced shim mechanism or a release gate.
 The real image/digest, matching 10.1 profiler existence, ELF relocation and
 physical zero-mismatch results remain to be established by the operator.
 This is a stricter source gate, not an additional hardware success.
+
+
+## 6 November — original LILA two-lane repair integration (not hardware acceptance)
+
+LeechTransformer PR #4 now has the original-model dual-lane runner
+`scripts/run_gfx803_lila_repair_gate.sh` and source contracts.
+
+- **A / 6.4-cpu-linear:** retains the original extracted Nix 6.4 runtime but
+  replaces GPU `nn.Linear` FP32 GEMMs through explicitly differentiable CPU
+  GEMMs. It measures whether non-GEMM GPU operators, full dense forward,
+  focused C2 backwards and optimizer step still diverge. This is a CPU/GPU
+  **hybrid diagnostic**, NOT a demonstrated WGM1 in-place GPU dispatch fix,
+  full GPU numerical correctness, training speedup or training admission.
+  Source gate fails closed and refuses actual training promotion.
+- **B / 10.1-schaka:** passes the original Schaka FP32 SGEMM shim as the
+  *sole* preload to exact selected Nix runtime Python; before and after model
+  execution the Leech gate checks actual mapped shim, HIP, rocBLAS, root
+  identity and HIP 10.1 ABI. It reuses the checkpoint-bound original
+  dense/C2 CPU/GPU forward, repeated forwards, gradients and AdamW update.
+  **Still requires** immutable digest/OCI import, Schaka ON/OFF original
+  QKV profiler evidence, physical model parity and sustained stress.
+- **Independent evidence consumer:** this repository now contains
+  `scripts/gfx803_lila_two_lane_receipts.py` with fail-closed offline
+  adjudication and synthetic negative tests. It forbids hybrid promotion;
+  for B it joins original source/checkpoint SHA with profiled ON/OFF shim
+  traces, matching mapped roots, and original model parity. Even a positive
+  B *candidate* never alone authorizes long-run training or a Nix/Cachix
+  release. Command:
+
+```bash
+python3 scripts/gfx803_lila_two_lane_receipts.py \
+  --lane 10.1-schaka \
+  --gate-receipt /path/to/gfx803_lila_101_shim_new.json \
+  --shim-ab-dir /path/to/original_qkv_shim_ab \
+  --out /path/to/new_lila_101_adjudication.json
+```
+
+For A, omit `--shim-ab-dir` and choose `--lane 6.4-cpu-linear`.
+Operator commands and limitations are in LeechTransformer
+`docs/GFX803_LILA_DUAL_REPAIR_RUNBOOK_20261106.md`.
+No new hardware, ROCm 10.1 image digest, native WGM1 dispatch route, or
+numerically drift-free LILA installation is claimed by these changes.
