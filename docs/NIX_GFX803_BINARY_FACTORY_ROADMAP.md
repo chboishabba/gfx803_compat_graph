@@ -847,5 +847,13 @@ python3 scripts/gfx803_lila_two_lane_receipts.py \
 For A, omit `--shim-ab-dir` and choose `--lane 6.4-cpu-linear`.
 Operator commands and limitations are in LeechTransformer
 `docs/GFX803_LILA_DUAL_REPAIR_RUNBOOK_20261106.md`.
-No new hardware, ROCm 10.1 image digest, native WGM1 dispatch route, or
-numerically drift-free LILA installation is claimed by these changes.
+Additional **6.4-wgm1-qkv** diagnostic: LeechTransformer now reuses an
+actual kernel-attributed correct WGM1 100-repeat original-QKV join, checks
+the identical checkpoint and loaded rocBLAS SHA, and issues the selected
+`rocblas_gemm_ex` kernel through an autograd-aware PyTorch forward wrapper.
+All other GPU FP32 linear operations and that QKV's gradient GEMMs remain
+CPU based. The independent adjudicator recognizes this as a third
+**diagnostic mode** and still refuses native-GPU or training promotion.
+The original `rocblas_sgemm` dispatcher is not modified.
+No new hardware, ROCm 10.1 image digest, full native WGM1 dispatcher,
+or numerically drift-free LILA installation is claimed by these changes.
