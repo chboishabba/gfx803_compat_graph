@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.gfx803_component_graph import PIN_SOURCES
+from scripts.gfx803_oci_runtime_contract import REQUIRED_IMAGE_ENV
 from scripts.gfx803_release import (
     AdmissionError, REQUIRED, promote, update_lock, lock_image, validate_candidate,
     validate_lock, write, load,
@@ -86,6 +87,8 @@ class ReleasePolicyTests(unittest.TestCase):
         candidate["provenance"] = {
             "upstream_commit_correspondence": "verified",
             "runtime_relocation": "verified",
+            "required_sgemm_shim_preload": candidate["store_paths"]["rocm"] + "/lib/libgfx803_sgemm_shim.so",
+            "sgemm_shim_loaded_and_correct": "verified",
         }
         candidate["hardware"] = HARDWARE
         with tempfile.TemporaryDirectory() as tmp:
@@ -120,7 +123,8 @@ class ReleasePolicyTests(unittest.TestCase):
                       "Labels": {"io.rocm.gfx803.source-rev": LOCK["source_revision"],
                                  "io.rocm.gfx803.line": "rocm10.1",
                                  "io.rocm.gfx803.stage": "final",
-                                 "io.rocm.gfx803.pins": PINS}}
+                                 "io.rocm.gfx803.pins": PINS},
+                      "Env": [key + "=" + val for key, val in REQUIRED_IMAGE_ENV.items()]}
         unlocked = copy.deepcopy(LOCK)
         unlocked["image_digest"] = None
         with self.assertRaisesRegex(AdmissionError, "inspect digest"):
