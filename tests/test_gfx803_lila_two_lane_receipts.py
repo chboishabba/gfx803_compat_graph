@@ -5,7 +5,7 @@ from scripts.gfx803_lila_two_lane_receipts import adjudicate
 
 
 def common_gate(hip="10.1"):
-    return {
+    gate = {
         "gpu": {"gcn_arch_name": "gfx803"},
         "torch_hip": hip,
         "source_sha256": {"teacher": "a"*64, "student": "b"*64, "train": "c"*64},
@@ -16,6 +16,16 @@ def common_gate(hip="10.1"):
                 "post_optimizer_step_logits": {"passed": True}}},
         "admitted": True,
     }
+    if hip == "10.1":
+        result=gate["checks_result"]
+        result["stability_steps_requested"]=20
+        result["stability_steps_completed"]=20
+        result["stability_trajectory"]=[{"step":i} for i in range(2,21)]
+        for i in range(2,21):
+            for kind in ("stability_loss_step","stability_gradients_step",
+                         "stability_post_step_logits","stability_gpu_repeat"):
+                result["checks"][f"{kind}_{i}"]={"passed":True}
+    return gate
 
 
 def shim_evidence(gate):
@@ -110,6 +120,13 @@ class DualLaneAdjudicationTests(unittest.TestCase):
         gate=common_gate()
         summary,on,off=shim_evidence(gate)
         got=adjudicate("10.1-schaka",gate,summary=None,on=on,off=off)
+        self.assertFalse(got["numerical_candidate_supported"])
+
+    def test_101_rejects_short_stability_trajectory(self):
+        gate=common_gate()
+        gate["checks_result"]["stability_steps_completed"]=3
+        summary,on,off=shim_evidence(gate)
+        got=adjudicate("10.1-schaka",gate,summary=summary,on=on,off=off)
         self.assertFalse(got["numerical_candidate_supported"])
 
     def test_101_rejects_missing_optimizer_evidence(self):
