@@ -1,0 +1,640 @@
+{
+  "fixtures": [
+    {
+      "name": "simple",
+      "category": "simple",
+      "description": "Direct assistant completion with plain text path and no tools.",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Say hello."
+          }
+        ],
+        "tools": [],
+        "tool_choice": "none"
+      },
+      "non_stream": {
+        "endpoint": "/api/v2/chat",
+        "status": 200,
+        "envelope": {
+          "id": "chatcmpl-simple-001",
+          "object": "chat.completion",
+          "created": 1710000001,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hello, world."
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 3,
+            "completion_tokens": 3,
+            "total_tokens": 6
+          }
+        },
+        "decision_packet": {
+          "route": "assistant",
+          "decision": "allow",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      },
+      "stream": {
+        "endpoint": "/api/v2/chat/stream",
+        "status": 200,
+        "chunks": [
+          {
+            "index": 0,
+            "payload": {
+              "id": "chatcmpl-simple-001",
+              "object": "chat.completion.chunk",
+              "created": 1710000001,
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {
+                    "content": "Hello"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "index": 1,
+            "payload": {
+              "id": "chatcmpl-simple-001",
+              "object": "chat.completion.chunk",
+              "created": 1710000001,
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {
+                    "content": ", world."
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "index": 2,
+            "payload": {
+              "id": "chatcmpl-simple-001",
+              "object": "chat.completion.chunk",
+              "created": 1710000001,
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {},
+                  "finish_reason": "stop"
+                }
+              ]
+            }
+          }
+        ],
+        "final_envelope": {
+          "id": "chatcmpl-simple-001",
+          "object": "chat.completion",
+          "created": 1710000001,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hello, world."
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 3,
+            "completion_tokens": 3,
+            "total_tokens": 6
+          }
+        },
+        "decision_packet": {
+          "route": "assistant",
+          "decision": "allow",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      }
+    },
+    {
+      "name": "tool-disabled",
+      "category": "tool-disabled",
+      "description": "Tool-use disabled globally; both routes should reject tool usage while returning assistant text.",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Look up weather and then answer."
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "lookup_weather",
+            "description": "Example weather tool"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "non_stream": {
+        "endpoint": "/api/v2/chat",
+        "status": 200,
+        "envelope": {
+          "id": "chatcmpl-tooldis-001",
+          "object": "chat.completion",
+          "created": 1710000002,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Tools are disabled for this request."
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 10,
+            "completion_tokens": 11,
+            "total_tokens": 21
+          }
+        },
+        "decision_packet": {
+          "route": "assistant",
+          "decision": "allow",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": true,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      },
+      "stream": {
+        "endpoint": "/api/v2/chat/stream",
+        "status": 200,
+        "chunks": [
+          {
+            "index": 0,
+            "payload": {
+              "id": "chatcmpl-tooldis-001",
+              "object": "chat.completion.chunk",
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {
+                    "content": "Tools"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "index": 1,
+            "payload": {
+              "id": "chatcmpl-tooldis-001",
+              "object": "chat.completion.chunk",
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {
+                    "content": " are disabled for this request."
+                  },
+                  "finish_reason": "stop"
+                }
+              ]
+            }
+          }
+        ],
+        "final_envelope": {
+          "id": "chatcmpl-tooldis-001",
+          "object": "chat.completion",
+          "created": 1710000002,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Tools are disabled for this request."
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 10,
+            "completion_tokens": 11,
+            "total_tokens": 21
+          }
+        },
+        "decision_packet": {
+          "route": "assistant",
+          "decision": "allow",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": true,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      }
+    },
+    {
+      "name": "ambiguous",
+      "category": "ambiguous",
+      "description": "Prompt is ambiguous; tool path can be used and should remain consistent across endpoints.",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Check the latest update and summarize it."
+          }
+        ],
+        "tools": [
+          {
+            "type": "function",
+            "name": "fetch_updates",
+            "description": "Example lookup tool"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "non_stream": {
+        "endpoint": "/api/v2/chat",
+        "status": 200,
+        "envelope": {
+          "id": "chatcmpl-ambig-001",
+          "object": "chat.completion",
+          "created": 1710000003,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "tool_calls": [
+                  {
+                    "id": "tool-01",
+                    "type": "function",
+                    "function": {
+                      "name": "fetch_updates",
+                      "arguments": "{\"topic\":\"latest\"}"
+                    }
+                  }
+                ]
+              },
+              "finish_reason": "tool_calls"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 8,
+            "completion_tokens": 8,
+            "total_tokens": 16
+          }
+        },
+        "decision_packet": {
+          "route": "tool",
+          "decision": "tool_selected",
+          "tool_allowed": true,
+          "tool_calls_requested": 1
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": true,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      },
+      "stream": {
+        "endpoint": "/api/v2/chat/stream",
+        "status": 200,
+        "chunks": [
+          {
+            "index": 0,
+            "payload": {
+              "id": "chatcmpl-ambig-001",
+              "object": "chat.completion.chunk",
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {
+                    "tool_calls": [
+                      {
+                        "index": 0,
+                        "id": "tool-01",
+                        "type": "function",
+                        "function": {
+                          "name": "fetch_updates",
+                          "arguments": "{\"topic\":\"latest\"}"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "index": 1,
+            "payload": {
+              "id": "chatcmpl-ambig-001",
+              "object": "chat.completion.chunk",
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {},
+                  "finish_reason": "tool_calls"
+                }
+              ]
+            }
+          }
+        ],
+        "final_envelope": {
+          "id": "chatcmpl-ambig-001",
+          "object": "chat.completion",
+          "created": 1710000003,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "tool_calls": [
+                  {
+                    "id": "tool-01",
+                    "type": "function",
+                    "function": {
+                      "name": "fetch_updates",
+                      "arguments": "{\"topic\":\"latest\"}"
+                    }
+                  }
+                ]
+              },
+              "finish_reason": "tool_calls"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 8,
+            "completion_tokens": 8,
+            "total_tokens": 16
+          }
+        },
+        "decision_packet": {
+          "route": "tool",
+          "decision": "tool_selected",
+          "tool_allowed": true,
+          "tool_calls_requested": 1
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": true,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      }
+    },
+    {
+      "name": "rejection",
+      "category": "rejection",
+      "description": "Bad model config should be rejected consistently in both transport modes.",
+      "request": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "This should be rejected because temperature is out of range."
+          }
+        ],
+        "temperature": 4.2
+      },
+      "non_stream": {
+        "endpoint": "/api/v2/chat",
+        "status": 400,
+        "envelope": {
+          "error": {
+            "type": "invalid_request_error",
+            "message": "`temperature` must be between 0 and 2."
+          }
+        },
+        "decision_packet": {
+          "route": "reject",
+          "decision": "reject",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      },
+      "stream": {
+        "endpoint": "/api/v2/chat/stream",
+        "status": 400,
+        "chunks": [
+          {
+            "index": 0,
+            "payload": {
+              "error": {
+                "type": "invalid_request_error",
+                "message": "`temperature` must be between 0 and 2."
+              }
+            }
+          }
+        ],
+        "final_envelope": {
+          "error": {
+            "type": "invalid_request_error",
+            "message": "`temperature` must be between 0 and 2."
+          }
+        },
+        "decision_packet": {
+          "route": "reject",
+          "decision": "reject",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      }
+    },
+    {
+      "name": "edge",
+      "category": "edge",
+      "description": "Boundary envelope shape with empty assistant text and explicit end markers.",
+      "request": {
+        "messages": [
+          {
+            "role": "system",
+            "content": "Return a JSON-only completion."
+          },
+          {
+            "role": "user",
+            "content": "{}"
+          }
+        ]
+      },
+      "non_stream": {
+        "endpoint": "/api/v2/chat",
+        "status": 200,
+        "envelope": {
+          "id": "chatcmpl-edge-001",
+          "object": "chat.completion",
+          "created": 1710000005,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "{}"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 12,
+            "completion_tokens": 1,
+            "total_tokens": 13
+          }
+        },
+        "decision_packet": {
+          "route": "assistant",
+          "decision": "allow",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      },
+      "stream": {
+        "endpoint": "/api/v2/chat/stream",
+        "status": 200,
+        "chunks": [
+          {
+            "index": 0,
+            "payload": {
+              "id": "chatcmpl-edge-001",
+              "object": "chat.completion.chunk",
+              "model": "parity-mini",
+              "choices": [
+                {
+                  "index": 0,
+                  "delta": {
+                    "content": ""
+                  },
+                  "finish_reason": "stop"
+                }
+              ]
+            }
+          }
+        ],
+        "final_envelope": {
+          "id": "chatcmpl-edge-001",
+          "object": "chat.completion",
+          "created": 1710000005,
+          "model": "parity-mini",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "{}"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 12,
+            "completion_tokens": 1,
+            "total_tokens": 13
+          }
+        },
+        "decision_packet": {
+          "route": "assistant",
+          "decision": "allow",
+          "tool_allowed": false,
+          "tool_calls_requested": 0
+        },
+        "tool_usage": {
+          "tool_calls_disabled": false,
+          "tool_calls_requested": false,
+          "tool_calls_executed": false
+        },
+        "execute_context": {
+          "orchestrator": "chat_orchestrator",
+          "execute_context": "decision_context_v1"
+        }
+      }
+    }
+  ]
+}

@@ -39,6 +39,17 @@
         "vram_loss"
       ]
     },
+    "failure_class": {
+      "type": "string",
+      "enum": [
+        "AUTHORITY",
+        "CONTRACT",
+        "PARITY",
+        "TOOL",
+        "EVIDENCE"
+      ],
+      "description": "Monotone failure-class assignment for lane failures."
+    },
     "surface": {
       "type": "string",
       "minLength": 1

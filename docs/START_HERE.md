@@ -4,6 +4,20 @@ This page is for someone who has just opened the project and wants the shortest 
 
 If you need one document to send to another person, start with [docs/USER_GUIDE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/USER_GUIDE.md).
 
+## RCA tracks
+
+This repo tracks three distinct RCA tracks:
+
+- `RCA_TRACK_1`: runtime-boundary
+  - Goal: make ROCm userspace coherent on `gfx803`
+  - Status: resolved enough for `PATCHER_RULE_V1`
+- `RCA_TRACK_2`: workload-correctness
+  - Goal: ensure numerically correct outputs with no drift, noise, or corruption
+  - Status: open
+- `RCA_TRACK_3`: load/stability
+  - Goal: prevent GPU hangs, resets, and host instability under load
+  - Status: open
+
 ## What problem this project is solving
 
 AMD Polaris cards such as the RX 580 use `gfx803`. Modern ROCm releases no longer treat that hardware as a normal supported target, so getting useful ML workloads running means combining:
@@ -28,6 +42,17 @@ This repo is where those pieces are being tested and documented.
 - The `5.7` payload artifacts are now extracted into `artifacts/rocm57/` and are usable as a standalone host artifact path via `scripts/host-rocm57-python.sh`
 - A separate `ROCm 7+` experiment lane now writes into `artifacts/rocm-latest/` so newer-runtime tests do not overwrite the `6.4` or `5.7` baselines
 - The repo now has initial CI validation scaffolding, but not a finished publish pipeline yet
+- The archive-backed older `ROCm RX580 noise issue` thread is now classified:
+  treat it as historical evidence for ComfyUI noise, solver flapping, and
+  stateful drift; do not over-read its small `bf16` / `bfloat16` mentions as a
+  primary unresolved RCA lane
+- There are multiple RCA questions in this repo:
+  - `RCA_TRACK_1`: how to keep ROCm userspace coherent enough for `rocminfo`
+    and torch GPU visibility on `gfx803`
+  - `RCA_TRACK_2`: why some real workloads can still drift, corrupt, or
+    produce noisy outputs even after the runtime boundary is made coherent
+  - `RCA_TRACK_3`: why some workloads can still hang, reset, or destabilize
+    the host under load even after the runtime boundary is made coherent
 
 ## If you only do one thing
 
@@ -40,6 +65,11 @@ verify-gfx803-host
 ```
 
 That tells you whether the machine can see the GPU and ROCm stack at all.
+
+If you need the first explicit patcher rule after that, read
+[docs/PATCHER_RULE_V1.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/PATCHER_RULE_V1.md)
+and use
+[`scripts/apply-gfx803-patcher-v1.sh`](/home/c/Documents/code/__OTHER/gfx803_compat_graph/scripts/apply-gfx803-patcher-v1.sh).
 
 ## The three practical paths
 
@@ -56,6 +86,8 @@ source scripts/polaris-env.sh
 This path now defaults to the zero-drift `direct_only` solver profile.
 It also covers the currently validated host-side torch and ComfyUI surfaces.
 WhisperX is available for RCA on the same runtime, but it is not yet promoted as a stable host GPU workflow.
+That means Path A is the answer to the runtime-boundary problem, but it is not
+by itself a blanket correctness proof for every GPU workload.
 
 ### Path B: Use the Nix entrypoints
 

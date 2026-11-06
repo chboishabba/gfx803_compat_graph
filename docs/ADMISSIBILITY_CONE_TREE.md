@@ -209,6 +209,8 @@ That principle now maps to a repo-local execution-path registry too:
   - `schemas/execution_path_claim.schema.json`
 - example records:
   - `artifacts/execution_path_claims/examples/`
+- failure-class mapping policy:
+  - `docs/FAILURE_CLASSIFICATION.md`
 - userspace-debug RCA and GPU-reset RCA remain separate fields inside each
   record rather than one blended crash verdict
 

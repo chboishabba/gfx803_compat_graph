@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.gfx803-compat-graph/schemas/tool_evidence.schema.json",
+  "title": "ToolEvidence",
+  "description": "Passive MCP/observability-tool evidence packet. Inputs only; never used for control or routing decisions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "timestamp",
+    "payload",
+    "confidence"
+  ],
+  "properties": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tool identifier, e.g. `amdgpu_devcoredump`, `rocprofv3`, `whisperx_harness`, `mcp_watchdog`."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "mcp",
+            "script",
+            "probe",
+            "manual"
+          ]
+        },
+        "endpoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "Monotone identity for the evidence source. Do not include control channels."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp in UTC offset or Z form."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Raw evidence payload from the source. Consumed as input-only context."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Per-source evidence confidence in [0,1]."
+    }
+  },
+  "examples": [
+    {
+      "source": {
+        "name": "amdgpu_devcoredump",
+        "type": "probe",
+        "endpoint": "journalctl:amdgpu",
+        "schema_version": "2026-01"
+      },
+      "timestamp": "2026-03-25T21:42:41+10:00",
+      "payload": {
+        "event": "gpu_reset",
+        "gpu": "gfx803",
+        "reset_reason": "ring gfx timeout",
+        "vram_lost": true,
+        "artifact_paths": [
+          "out/crashlogs/2026-03-25T21-42-41/kernel-journal.txt"
+        ]
+      },
+      "confidence": 0.96
+    },
+    {
+      "source": {
+        "name": "rocprofv3",
+        "type": "probe",
+        "endpoint": "rocprofv3:run",
+        "schema_version": "2026-01"
+      },
+      "timestamp": "2026-03-30T01:13:28+10:00",
+      "payload": {
+        "recorded_kernels": 18,
+        "queue_stall": true,
+        "phase": "whisperx_align"
+      },
+      "confidence": 0.74
+    },
+    {
+      "source": {
+        "name": "mcp_tool",
+        "type": "mcp",
+        "endpoint": "browser.console",
+        "schema_version": "2026-01"
+      },
+      "timestamp": "2026-03-30T01:13:29+10:00",
+      "payload": {
+        "tool": "browser_console_messages",
+        "level": "error",
+        "samples": [
+          "compute queue rejected due to GPU hang"
+        ]
+      },
+      "confidence": 0.61
+    }
+  ]
+}

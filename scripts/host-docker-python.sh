@@ -15,9 +15,24 @@ CONDA_ENV_PYTHON="$VENV_DIR/conda-python/envs/py_3.10/bin/python"
 CONDA_ROOT_PYTHON="$VENV_DIR/conda-python/bin/python"
 CONDA_PYTHONHOME="$VENV_DIR/conda-python"
 CONDA_ENV_LIB="$VENV_DIR/conda-python/envs/py_3.10/lib"
+VENV_SITE_PACKAGES=""
+
+# Cached extracted environments may retain an absolute venv interpreter link
+# from the checkout that created them.  The packages are still valid after a
+# checkout move, so pair the bundled Conda interpreter with that venv's
+# site-packages instead of silently falling through to bare Conda Python.
+for candidate in "$VENV_DIR"/venv/lib/python*/site-packages; do
+    if [ -d "$candidate/torch" ]; then
+        VENV_SITE_PACKAGES="$candidate"
+        break
+    fi
+done
 
 if [ -x "$VENV_PYTHON" ]; then
     PYTHON_BIN="$VENV_PYTHON"
+    PYTHON_HOME_CANDIDATE="$CONDA_PYTHONHOME"
+elif [ -n "$VENV_SITE_PACKAGES" ] && [ -x "$CONDA_ROOT_PYTHON" ]; then
+    PYTHON_BIN="$CONDA_ROOT_PYTHON"
     PYTHON_HOME_CANDIDATE="$CONDA_PYTHONHOME"
 elif [ -x "$CONDA_ENV_PYTHON" ]; then
     PYTHON_BIN="$CONDA_ENV_PYTHON"
@@ -63,6 +78,9 @@ export MIOPEN_DEBUG_DISABLE_FIND_DB="${MIOPEN_DEBUG_DISABLE_FIND_DB:-1}"
 export MIOPEN_FIND_ENFORCE="${MIOPEN_FIND_ENFORCE:-3}"
 export CUBLAS_WORKSPACE_CONFIG="${CUBLAS_WORKSPACE_CONFIG:-:4096:8}"
 export PATH="$VENV_DIR/venv/bin:$VENV_DIR/conda-python/bin:$VENV_DIR/conda-python/envs/py_3.10/bin:$PATH"
+if [ -n "$VENV_SITE_PACKAGES" ]; then
+  export PYTHONPATH="$VENV_SITE_PACKAGES${PYTHONPATH:+:$PYTHONPATH}"
+fi
 if [ -n "$PYTHON_HOME_CANDIDATE" ] && [ -d "$PYTHON_HOME_CANDIDATE" ]; then
   export PYTHONHOME="$PYTHON_HOME_CANDIDATE"
 fi

@@ -1,0 +1,119 @@
+{
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "status": "PASS",
+  "fixtures": [
+    {
+      "name": "simple",
+      "category": "simple",
+      "result": "PASS",
+      "reasons": [],
+      "checks": {
+        "envelope_match": true,
+        "decision_match": true,
+        "tool_match": true,
+        "context_match": true,
+        "status_match": true
+      },
+      "path": {
+        "non_stream": "/api/v2/chat",
+        "stream": "/api/v2/chat/stream"
+      }
+    },
+    {
+      "name": "tool-disabled",
+      "category": "tool-disabled",
+      "result": "PASS",
+      "reasons": [],
+      "checks": {
+        "envelope_match": true,
+        "decision_match": true,
+        "tool_match": true,
+        "context_match": true,
+        "status_match": true
+      },
+      "path": {
+        "non_stream": "/api/v2/chat",
+        "stream": "/api/v2/chat/stream"
+      }
+    },
+    {
+      "name": "ambiguous",
+      "category": "ambiguous",
+      "result": "PASS",
+      "reasons": [],
+      "checks": {
+        "envelope_match": true,
+        "decision_match": true,
+        "tool_match": true,
+        "context_match": true,
+        "status_match": true
+      },
+      "path": {
+        "non_stream": "/api/v2/chat",
+        "stream": "/api/v2/chat/stream"
+      }
+    },
+    {
+      "name": "rejection",
+      "category": "rejection",
+      "result": "PASS",
+      "reasons": [],
+      "checks": {
+        "envelope_match": true,
+        "decision_match": true,
+        "tool_match": true,
+        "context_match": true,
+        "status_match": true
+      },
+      "path": {
+        "non_stream": "/api/v2/chat",
+        "stream": "/api/v2/chat/stream"
+      }
+    },
+    {
+      "name": "edge",
+      "category": "edge",
+      "result": "PASS",
+      "reasons": [],
+      "checks": {
+        "envelope_match": true,
+        "decision_match": true,
+        "tool_match": true,
+        "context_match": true,
+        "status_match": true
+      },
+      "path": {
+        "non_stream": "/api/v2/chat",
+        "stream": "/api/v2/chat/stream"
+      }
+    }
+  ],
+  "compared_fields": {
+    "envelope": [
+      "id",
+      "object",
+      "model",
+      "created",
+      "choices",
+      "usage",
+      "error"
+    ],
+    "decision": [
+      "route",
+      "decision",
+      "tool_allowed",
+      "tool_calls_requested"
+    ],
+    "tool_usage": [
+      "tool_calls_disabled",
+      "tool_calls_requested",
+      "tool_calls_executed"
+    ],
+    "execute_context": [
+      "orchestrator",
+      "execute_context"
+    ]
+  }
+}
