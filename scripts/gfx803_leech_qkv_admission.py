@@ -13,6 +13,7 @@ chboishabba/gfx803_compat_graph and LeechTransformer.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import math
@@ -34,6 +35,8 @@ FILES = (
     "on/first-output.f32", "on/profile-output.f32",
     "off/unprofiled.json", "off/profiled.json", "off/trace_join.json",
     "off/first-output.f32", "off/profile-output.f32",
+    "on/unprofiled.log", "on/profiled.log", "on/rocprofv3.exitcode",
+    "off/unprofiled.log", "off/profiled.log", "off/rocprofv3.exitcode",
 )
 
 
@@ -76,6 +79,34 @@ def fp32_compare(reference: Path, output: Path, *, atol: float, rtol: float) -> 
             "gpu_output_sha256": digest(output)}
 
 
+def actual_profiler_kernels(folder: Path, arm: str) -> set[str]:
+    label = "leech:qkv:sgemm-shim:" + arm
+    ranges = set()
+    for csv_path in folder.rglob("*marker_api_trace.csv"):
+        with csv_path.open(newline="", errors="replace") as stream:
+            for row in csv.DictReader(stream):
+                if row.get("Function") == label:
+                    lo, hi = int(row["Start_Timestamp"]), int(row["End_Timestamp"])
+                    if lo < hi:
+                        ranges.add((lo, hi))
+    if len(ranges) != 1:
+        raise QKVAdmissionError("missing/ambiguous genuine shim ROCTX range: " + arm)
+    low, high = next(iter(ranges))
+    observed = set()
+    for csv_path in folder.rglob("*kernel_trace.csv"):
+        with csv_path.open(newline="", errors="replace") as stream:
+            for row in csv.DictReader(stream):
+                name = row.get("Kernel_Name", "")
+                if not name or name.startswith("__amd_rocclr_fill"):
+                    continue
+                start, end = int(row["Start_Timestamp"]), int(row["End_Timestamp"])
+                if low <= start <= end <= high:
+                    observed.add(name)
+    if not observed:
+        raise QKVAdmissionError("no actual original QKV GPU kernels in shim ROCTX range: " + arm)
+    return observed
+
+
 def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
                   exact_teacher: bool = True) -> dict:
     bundle = Path(bundle)
@@ -110,6 +141,9 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
     joined = {}
     receipts = {}
     for arm in ("on", "off"):
+        if (bundle / arm / "rocprofv3.exitcode").read_text().strip() != "0":
+            raise QKVAdmissionError("rocprofv3 did not succeed for original shim arm: " + arm)
+        real_kernels = actual_profiler_kernels(bundle / arm / "profiler", arm)
         r = load_json(bundle / arm / "unprofiled.json")
         p = load_json(bundle / arm / "profiled.json")
         j = load_json(bundle / arm / "trace_join.json")
@@ -131,6 +165,9 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
             q = Path(r[path_field])
             if not q.is_file() or digest(q) != r.get(sha_field):
                 raise QKVAdmissionError("actual library SHA mismatch: " + path_field)
+        reported_kernels = {x.get("name") for x in j.get("trace", {}).get("kernels", [])}
+        if not reported_kernels or not reported_kernels.issubset(real_kernels):
+            raise QKVAdmissionError("reported kernel name not in original profiler CSV: " + arm)
         if j.get("attribution_complete") is not True or j.get("profiler_observer_effect_absent") is not True:
             raise QKVAdmissionError("no actual observer-free original GPU kernel trace: " + arm)
         if j.get("unprofiled_status") != r.get("status"):
@@ -199,6 +236,19 @@ def stage_original_evidence(source: Path, fixture: Path, dest: Path):
         out = dest / name
         out.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, out)
+    for arm in ("on", "off"):
+        original_profiler = source / arm / "profiler"
+        if not original_profiler.is_dir():
+            raise QKVAdmissionError("missing original rocprofv3 trace directory: " + arm)
+        copied = 0
+        for old_csv in original_profiler.rglob("*.csv"):
+            rel = old_csv.relative_to(original_profiler)
+            new_csv = dest / arm / "profiler" / rel
+            new_csv.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(old_csv, new_csv)
+            copied += 1
+        if not copied:
+            raise QKVAdmissionError("no original profiler CSVs for " + arm)
     if (fixture/"bias.f32").is_file():
         shutil.copy2(fixture/"bias.f32", dest/"fixture/bias.f32")
 
@@ -242,7 +292,9 @@ def main() -> int:
             capabilities = candidate.setdefault("claimed_capabilities", [])
             if "leech_qkv" not in capabilities:
                 capabilities.append("leech_qkv")
-            relative = report.relative_to(args.evidence_root.resolve())
+            if args.evidence_root is None:
+                raise QKVAdmissionError("--candidate also requires --evidence-root")
+            relative = report.resolve().relative_to(args.evidence_root.resolve())
             candidate.setdefault("evidence", {})["leech_qkv_original"] = {
                 "status": "pass", "command": "gfx803_leech_qkv_admission --original-output-verify",
                 "log_path": str(relative), "log_sha256": digest(report),
