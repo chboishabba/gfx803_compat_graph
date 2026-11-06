@@ -98,7 +98,10 @@ def actual_profiler_kernels(folder: Path, arm: str) -> set[str]:
         with csv_path.open(newline="", errors="replace") as stream:
             for row in csv.DictReader(stream):
                 name = row.get("Kernel_Name", "")
-                if not name or name.startswith("__amd_rocclr_fill"):
+                if not name or not any(k in name for k in (
+                        "Cijk", "Tensile", "gfx803_sgemm_kernel")):
+                    # Marker-only renames, memsets and unrelated kernels are not
+                    # physical proof of Schaka's FP32 GEMM replacement.
                     continue
                 start, end = int(row["Start_Timestamp"]), int(row["End_Timestamp"])
                 if low <= start <= end <= high:
@@ -169,16 +172,31 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
         reported_kernels = {x.get("name") for x in j.get("trace", {}).get("kernels", [])}
         if not reported_kernels or not reported_kernels.issubset(real_kernels):
             raise QKVAdmissionError("reported kernel name not in original profiler CSV: " + arm)
+        if j.get("schema_version") != 2 or j.get("arm") != arm:
+            raise QKVAdmissionError("original shim trace is not the bound v2 arm receipt")
+        actual_shim_kernel = any("gfx803_sgemm_kernel" in k for k in real_kernels)
+        if actual_shim_kernel != (arm == "on"):
+            raise QKVAdmissionError("Schaka replacement kernel not separated from stock rocBLAS: " + arm)
+        if j.get("interposer_kernel_identified") != (arm == "on"):
+            raise QKVAdmissionError("joined interposer kernel contract disagrees with physical profiler: " + arm)
         if j.get("attribution_complete") is not True or j.get("profiler_observer_effect_absent") is not True:
             raise QKVAdmissionError("no actual observer-free original GPU kernel trace: " + arm)
         if j.get("unprofiled_status") != r.get("status"):
             raise QKVAdmissionError("trace and unprofiled numerical statuses disagree")
         if (j.get("rocblas_sha256") != r.get("rocblas_sha256") or
                 j.get("shim_sha256") != r.get("shim_sha256") or
+                any(j.get(k) != r.get(k) for k in (
+                    "teacher_sha256", "input_sha256", "weight_sha256",
+                    "rocblas_realpath", "shim_realpath", "required_image_root",
+                    "torch_hip", "gpu_arch", "gpu_device", "threshold")) or
                 j.get("fixture_manifest_sha256") != digest(bundle / "fixture/manifest.json")):
             raise QKVAdmissionError("trace not same original QKV bytes/runtime")
         reps = r.get("repeat_metrics", [])
-        if len(reps) < MIN_REPEATS or len(r.get("output_sha256_by_repeat", [])) != len(reps):
+        if (len(reps) < MIN_REPEATS or
+                r.get("repeats_requested") != len(reps) or
+                r.get("repeats_completed") != len(reps) or
+                j.get("unprofiled_repeats_completed") != len(reps) or
+                len(r.get("output_sha256_by_repeat", [])) != len(reps)):
             raise QKVAdmissionError("fewer than 100 real QKV repeats: " + arm)
         if not all(str(x) and len(x)==64 for x in r["output_sha256_by_repeat"]):
             raise QKVAdmissionError("invalid output hashes")
@@ -206,8 +224,11 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
                 raise QKVAdmissionError("stock shim QKV repeated inference changed outputs")
         receipts[arm], joined[arm] = (r, comparison), j
     on, off = receipts["on"][0], receipts["off"][0]
-    if any(on.get(k) != off.get(k) for k in ("rocblas_sha256","shim_sha256",
-                                            "fixture_manifest_sha256","teacher_sha256")):
+    if any(on.get(k) != off.get(k) for k in (
+            "rocblas_sha256", "rocblas_realpath", "shim_sha256",
+            "shim_realpath", "required_image_root", "fixture_manifest_sha256",
+            "teacher_sha256", "input_sha256", "weight_sha256",
+            "torch_hip", "gpu_arch", "gpu_device", "threshold")):
         raise QKVAdmissionError("shim arms used different libraries or original model")
     if on["fixture_manifest_sha256"] != digest(bundle / "fixture/manifest.json"):
         raise QKVAdmissionError("original fixture has changed since GPU execution")
