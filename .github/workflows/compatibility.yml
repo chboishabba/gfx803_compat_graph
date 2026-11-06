@@ -22,6 +22,7 @@ jobs:
             scripts/gfx803_release.py \
             scripts/gfx803_component_graph.py \
             scripts/gfx803_oci_links.py \
+            scripts/gfx803_oci_runtime_contract.py \
             scripts/gfx803_capture.py \
             scripts/gfx803_comfyui_images.py \
             scripts/audit_gfx803_closure.py
