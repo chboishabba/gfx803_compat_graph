@@ -644,3 +644,119 @@ Upstream authorship and independently produced observations are tracked explicit
    native component derivations remain separate physical deliverables.
 
 **New physical execution is now reported for the ROCm 6.4 CPU-copy QKV control only**, via LeechTransformer commit `469bf00`; the gfx803 Nix PR did not itself execute that test. **No WGM1 causal repair test, patched ROCm 10.1 hardware execution, training admission or native ROCm 10.1 binary release is claimed.** See the [typed upstream and first-party evidence ledger](GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md) for original authorship and validation limits.
+
+
+## 6 November: original-QKV causal A/B source implementation complete — physical runs pending
+
+The source-level Leech A/B implementation has been pushed to
+[LeechTransformer PR #4](https://github.com/chboishabba/LeechTransformer/pull/4).
+The user has already physically executed and reported the **exact-byte
+CPU-copy QKV negative control** in commit
+[`469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79):
+FP32 QKV input SHA256 identical across CPU and GPU; **4.1276249886**
+output error persists; GPU repeats 0.0/0.0; `ISA803_KLA...WGM8`
+dispatch persists. The earlier LN1 input difference is thus *not*
+the cause of that isolated original QKV failure.
+
+### Implemented runnable operator path
+
+- [`scripts/export_gfx803_qkv_fixture.py`](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/scripts/export_gfx803_qkv_fixture.py)
+  uses the **actual dense model checkpoint** and original token IDs to
+  freeze CPU-produced LN1 QKV input, original QKV weights/bias,
+  float32 and float64 CPU GEMM references as little-endian FP32 binary,
+  with byte lengths, SHA-256, model/token/config identity and
+  a fail-closed expected-input SHA check. No synthesized data.
+- [`scripts/gfx803_qkv_solution_ab.py`](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/scripts/gfx803_qkv_solution_ab.py)
+  binds the **actual mapped 6.4 librocblas** from the existing
+  `lib-compat`, implements the beta
+  `rocblas_gemm_ex_get_solutions` / forced
+  `rocblas_gemm_ex` calls on original T,N 1152×128×384 operands,
+  checks real API statuses and each repeated GPU output, and
+  refuses solution IDs from another library SHA.
+  This is an adaptation of **Schaka's original existing scanner**,
+  not an independently discovered upstream ROCm fix.
+- [`scripts/run_gfx803_qkv_solution_ab_nix.sh`](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/scripts/run_gfx803_qkv_solution_ab_nix.sh)
+  reuses the **preserved** extracted 6.4 Nix control, runs every
+  library-local solution in its own timeout-bounded process (100
+  repetitions default) and profiles the named `leech:qkv:solution:ID`
+  ROCTX marker. Source locks, original output bytes, hashes,
+  failures and tool logs are retained. It is resumable, not a
+  replacement for the actual user runtime.
+- [`scripts/parse_gfx803_qkv_solution_ab.py`](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/scripts/parse_gfx803_qkv_solution_ab.py)
+  joins only actual profiler symbols inside the range; requires
+  matching profiled/unprofiled first GPU output hash, same library
+  and frozen fixture. **Do not** infer WGM1 from solution IDs or
+  confuse `rocblas_gemm_ex` with the original PyTorch
+  `rocblas_sgemm` path. Same-shape output differences support
+  a mapping hypothesis, **not** complete patch validation.
+- [`scripts/run_gfx803_qkv_shim_ab.sh`](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/scripts/run_gfx803_qkv_shim_ab.sh)
+  requires a **coherent real 10.1 Nix ROCm/Python/shim tuple**,
+  uses the stock Schaka shim with `GFX803_SGEMM_SHIM_DISABLE=0`
+  versus `1` in **separate processes** on the same QKV fixture;
+  records 100 repeats, first actual GPU FP32 output bytes,
+  actual mapped ROCm/shim paths and ROCTX profiler traces.
+  It refuses to splice the 10.1 shim into the legacy 6.4 control.
+- [`scripts/parse_gfx803_qkv_shim_ab.py`](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/scripts/parse_gfx803_qkv_shim_ab.py)
+  requires the real **on/off** marker-to-kernel joins and no
+  profiler observer-effect before comparing the two arms. An
+  unprofiled success or `LD_PRELOAD` declaration alone cannot
+  establish a patched runtime or original Leech correctness.
+
+### New binary-factory consumer and acceptance boundary
+
+This gfx803 repository now contains
+[`scripts/gfx803_leech_qkv_admission.py`](../scripts/gfx803_leech_qkv_admission.py)
+and a Nix application:
+
+```bash
+nix run .#gfx803-verify-leech-qkv -- \
+  --source /path/to/LeechTransformer/artifacts/gfx803_qkv_shim_101 \
+  --fixture /path/to/LeechTransformer/artifacts/gfx803_qkv_wgm_ab/fixture \
+  --runtime-root /nix/store/EXACT-ROCM101-ROCM \
+  --evidence-root /path/to/gfx803-release-evidence \
+  --candidate /path/to/imported-candidate.json \
+  --lock nix/gfx803/upstream.json
+```
+
+**Only after the real 10.1 run and digest lock exist**:
+the verifier copies *original bytes* atomically into an immutable
+`evidence-root/leech_qkv` bundle, reopens actual `rocprofv3` marker and
+kernel CSVs and exit codes, checks original model/input identities,
+recomputes all FP32 output errors from the retained CPU reference
+versus GPU tensor, requires **100 repeated on/off executions** and
+exact SHA matches for the loaded rocBLAS and Schaka preload shim.
+It can then attach **only the optional** `claimed_capabilities:
+["leech_qkv"]` receipt to the still-unaccepted candidate.
+
+The release/publish policy re-executes this **same raw-byte verifier**
+whenever a manifest claims the optional `leech_qkv` capability;
+a self-asserted green JSON or manually typed
+`sgemm_shim_loaded_and_correct="verified"` does not suffice for that
+claim. The independent seven required core gates, runtime relocation,
+physical sustained-load, ComfyUI claims, digest pin and clean-client
+Cachix promotion are still required as applicable. **A scoped QKV pass
+does not admit C2 training, universal math kernels or a system-wide
+no-reset guarantee.**
+
+### Provenance and exact status
+
+All original WGM and SGEMM investigations and patches remain **Schaka's**.
+The user owns their independent kernel trace, CPU-copy control and
+future on-card runs; this repo owns Nix integration/acceptance
+infrastructure. See
+[`GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md`](GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md).
+
+| Gate | Current evidence |
+| --- | --- |
+| Original isolated QKV WGM8 identified | **Reported physical proof complete** |
+| Exact CPU-derived input control | **Reported physical proof complete**, QKV still wrong |
+| Same-library WGM1-versus-WGM8 forcing | **Source-implemented; not run** |
+| Original 10.1 stock SGEMM shim on/off | **Source-implemented; no imported 10.1 runtime/physical execution** |
+| Leech-specific source/trace/numeric evidence to Nix release | **Source-implemented, optional gate; not run** |
+| Full dense, C2, sustained stable and downloadable binary release | **Open** |
+
+CPU-only tests (not GPU proof):
+`python -m unittest discover -s tests -p 'test_gfx803_leech_qkv_admission.py' -v`
+and the Leech-side
+`python -m unittest discover -s tests -p 'test_gfx803_qkv_*ab.py' -v`.
+Both existing PRs remain draft pending real physical receipts.
