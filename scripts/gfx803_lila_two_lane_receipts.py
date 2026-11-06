@@ -90,6 +90,28 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
             "training_admitted": False, "release_accepted": False,
             "errors": errors,
         }
+    # One AdamW update is an initial parity gate, NOT a C2 training
+    # stability certificate. Require a matched 20-step CPU/HIP trajectory
+    # (loss, gradient, post-step logits and same-GPU repeat at every step).
+    result=gate.get("checks_result") or {}
+    evidence=result.get("checks") or {}
+    trajectory=result.get("stability_trajectory") or []
+    stability_complete=(
+        isinstance(result.get("stability_steps_requested"),int) and
+        result["stability_steps_requested"]>=20 and
+        isinstance(result.get("stability_steps_completed"),int) and
+        result["stability_steps_completed"]>=20 and
+        isinstance(trajectory,list) and len(trajectory)>=19 and
+        all(isinstance(t,dict) and t.get("step")==i for i,t in
+            enumerate(trajectory[:19],start=2)) and
+        all((isinstance(evidence.get(f"{kind}_{i}"),dict) and
+              evidence[f"{kind}_{i}"].get("passed") is True)
+            for i in range(2,21)
+            for kind in ("stability_loss_step","stability_gradients_step",
+                         "stability_post_step_logits","stability_gpu_repeat"))
+    )
+    if not stability_complete:
+        errors.append("20-step matched C2 optimizer drift trajectory absent or failed")
     before = gate.get("shim_runtime_before") or {}
     after = gate.get("shim_runtime_after") or {}
     same_shim = (before.get("shim_mapped") is True and
