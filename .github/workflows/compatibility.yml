@@ -39,6 +39,7 @@ jobs:
           scripts/polaris-env.sh
           scripts/run-drift-matrix
           scripts/import-schaka-oci-to-nix.sh
+          scripts/bootstrap-schaka-101-candidate.sh
           scripts/publish-gfx803-accepted.sh
 
   nix-eval:
