@@ -68,6 +68,15 @@ let
     '';
   };
 
+  leechQkvVerifier = pkgs.writeShellApplication {
+    name = "gfx803-verify-leech-qkv";
+    runtimeInputs = [ python ];
+    text = ''
+      export PYTHONPATH="${sourceScripts}"
+      exec ${python}/bin/python ${sourceScripts}/gfx803_leech_qkv_admission.py "$@"
+    '';
+  };
+
   auditor = pkgs.writeShellApplication {
     name = "gfx803-audit-closure";
     runtimeInputs = [ python pkgs.binutils ];
@@ -79,7 +88,7 @@ let
   # Bootstrap tools only: do not accidentally mix contemporary Nixpkgs ROCm
   # device-libs/LLVM with Schaka's release-coherent ROCm compiler SDK.
   bootstrapTools = [
-    importer policy recorder auditor python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
+    importer policy recorder auditor leechQkvVerifier python pkgs.git pkgs.jq pkgs.patchelf pkgs.file
     pkgs.binutils pkgs.skopeo pkgs.umoci pkgs.cachix pkgs.zstd
   ];
 
@@ -141,6 +150,7 @@ in
     gfx803-schaka-upstream-lock = upstreamLock;
     gfx803-schaka-import = importer;
     gfx803-release-policy = policy;
+    gfx803-verify-leech-qkv = leechQkvVerifier;
     gfx803-capture-evidence = recorder;
     gfx803-comfyui-images = comfyuiImages;
     gfx803-audit-closure = auditor;
@@ -159,6 +169,10 @@ in
     gfx803-release-policy = {
       type = "app";
       program = "${policy}/bin/gfx803-release-policy";
+    };
+    gfx803-verify-leech-qkv = {
+      type = "app";
+      program = "${leechQkvVerifier}/bin/gfx803-verify-leech-qkv";
     };
     gfx803-capture-evidence = {
       type = "app";
