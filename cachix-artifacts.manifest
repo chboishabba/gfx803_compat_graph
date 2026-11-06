@@ -2,7 +2,11 @@
 # cache_url=https://gfx803-rocm.cachix.org
 # public_key=gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=
 lib-compat	/nix/store/ji0b1hqsbq037xlcj36z02yhrsac3hwd-lib-compat
-docker-venv	/nix/store/wfrbf90xkvwgpf375qjxzwdx92nsj6km-docker-venv
+docker-venv	/nix/store/rba6dg9s5rpy0b3sr56j5axq2qk1hwwj-docker-venv
+artifacts/rocm64-upgrade	/nix/store/83x33f3xbfz4pyl66qqjppf56yj7r4vf-rocm64-upgrade
+artifacts/rocm64-upgrade-oldabi	/nix/store/snvcrqgqfm2mvr3dkd6l70rh7ip99fki-rocm64-upgrade-oldabi
+artifacts/rocm64-oldabi-sdk	/nix/store/1mkdcvhxvp2p0qlnqkc5ylahgz2di6zm-rocm64-oldabi-sdk
+artifacts/rocm64-upgrade-safe-support	/nix/store/xiczdykl8vscfzvykwxa5q3sifjj1125-rocm64-upgrade-safe-support
 artifacts/ollama_reference	/nix/store/56dq7v2i7dfsjhqn8r3dgzn41a55kkw3-ollama_reference
 artifacts/rocm57	/nix/store/rq8n2cvy72wscqqmzm0fh7lajjxfvpn8-rocm57
-artifacts/rocm-latest	/nix/store/lm87myh6cfaiyp1l1rsjzs8janbi8fhl-rocm-latest
+artifacts/rocm-latest	/nix/store/6yi96gh21idxajg57hx7a8akk1a1lxkg-rocm-latest
