@@ -30,6 +30,8 @@ class StandaloneNixToolWiringTests(unittest.TestCase):
         self.assertIn('GFX803_SOURCE_LOCK="${sourceLockFile}"', nix)
         self.assertIn('GFX803_SCRIPTS_DIR="${sourceScripts}"', nix)
         self.assertIn('PYTHONPATH="${sourceScripts}"', nix)
+        self.assertIn('export LD_PRELOAD="${shim}"', nix)
+        self.assertIn("export GFX803_SGEMM_SHIM_DISABLE=0", nix)
         self.assertNotIn("${../../scripts/gfx803_release.py}", nix)
         self.assertNotIn("${../../scripts/gfx803_capture.py}", nix)
         self.assertNotIn("${../../scripts/import-schaka-oci-to-nix.sh}", nix)
