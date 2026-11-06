@@ -21,6 +21,10 @@ try:
     from scripts.gfx803_component_graph import parse_pins
 except ModuleNotFoundError:
     from gfx803_component_graph import parse_pins
+try:
+    from scripts.gfx803_oci_runtime_contract import inspect_runtime
+except ModuleNotFoundError:
+    from gfx803_oci_runtime_contract import inspect_runtime
 
 SHA = re.compile(r"^[0-9a-f]{40}$")
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -114,6 +118,10 @@ def lock_image(lock: dict, digest: str, inspection: dict) -> bool:
         parse_pins(labels.get("io.rocm.gfx803.pins", ""))
     except ValueError as exc:
         raise AdmissionError("OCI component pins are not complete source SHAs: " + str(exc)) from exc
+    try:
+        inspect_runtime(inspection)
+    except ValueError as exc:
+        raise AdmissionError("OCI runtime shim preload contract missing: " + str(exc)) from exc
     old = lock.get("image_digest")
     if old is not None and old != digest:
         raise AdmissionError("source revision is already bound to a different image digest")
@@ -156,6 +164,12 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
             problems.append("source revision vs image correspondence not verified")
         if provenance.get("runtime_relocation") != "verified":
             problems.append("imported runtime relocation not verified")
+        if isinstance(packages, dict) and isinstance(packages.get("rocm"), str):
+            expected_shim = packages["rocm"] + "/lib/libgfx803_sgemm_shim.so"
+            if provenance.get("required_sgemm_shim_preload") != expected_shim:
+                problems.append("Schaka FP32 SGEMM preload absent or points outside this ROCm closure")
+            if provenance.get("sgemm_shim_loaded_and_correct") != "verified":
+                problems.append("real SGEMM shim preload/compute evidence not verified")
         hardware = candidate.get("hardware", {})
         if not isinstance(hardware, dict) or hardware.get("arch") != "gfx803":
             problems.append("hardware.arch must be gfx803")
