@@ -101,6 +101,7 @@ let
       mm = pkgs.lib.concatStringsSep "." (
         pkgs.lib.take 2 (pkgs.lib.splitString "." acceptedManifest.rocm_version));
       sdk = "${acceptedBinaries.gfx803-rocm-binary}/core-${mm}";
+      shim = "${acceptedBinaries.gfx803-rocm-binary}/lib/libgfx803_sgemm_shim.so";
     in {
       gfx803-sdk = pkgs.mkShellNoCC {
         packages = bootstrapTools;
@@ -108,6 +109,17 @@ let
           export ROCM_PATH="${sdk}"
           export HIP_PATH="$ROCM_PATH"
           export PATH="$ROCM_PATH/bin:$PATH"
+          # The original Schaka image REQUIRES this FP32 SGEMM shim. A raw
+          # copied rocBLAS tree with WGM1 alone is not runtime equivalent.
+          if [[ ! -f "${shim}" ]]; then
+            echo "gfx803: accepted ROCm closure missing required FP32 SGEMM shim" >&2
+            return 2
+          fi
+          export HSA_OVERRIDE_GFX_VERSION=8.0.3
+          export ROC_ENABLE_PRE_VEGA=1
+          export TORCH_BLAS_PREFER_HIPBLASLT=0
+          export GFX803_SGEMM_SHIM_DISABLE=0
+          export LD_PRELOAD="${shim}"
           echo "Accepted Schaka gfx803 SDK: $ROCM_PATH"
           echo "Runtime and compiler libraries must come from this same ROCm line."
         '';
