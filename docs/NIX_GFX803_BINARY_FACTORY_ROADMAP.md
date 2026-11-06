@@ -560,3 +560,93 @@ hardware compatibility evidence to a mathematical or
 vendor-guaranteed truth. The existing `GPUCompatibilityObservationExact`
 and `GFX803CompatibilityReceiptExact` separate
 visibility, numerical correctness and sustained reset safety.
+
+
+## 6 Nov 2026: Leech QKV WGM8 trace and mandatory SGEMM preload
+
+**Real, user-supplied hardware receipts** (not assistant GPU execution):
+the [Leech PR #4 attribution receipt](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/receipts/gfx803_qkv_wgm8_attribution_20261106.json)
+records the **unrenamed** kernel trace tar SHA256
+`20abfb4c72b2cde0da42e5a1e1792ece80a162911bc59d9119a5fade22c3d9aa`.
+In the `leech:block0:qkv` ROCTX interval a real rocBLAS
+`sgemm(T,N,M=1152,N=128,K=384)` dispatch ran
+`Cijk_Alik_Bljk_...ISA803_K1_KLA...WGM8`.
+The exact original isolated QKV CUDA/HIP parity error was **4.1276249886**
+with byte-identical profiled and unprofiled GPU output hashes and zero
+same-GPU QKV repeat drift. The other uploaded tar has its kernel-name
+field overwritten by profiler marker labels; its empty candidate list is
+not a contradictory kernel observation.
+
+This is now **G0 kernel-attribution CLOSED** for that observed QKV
+dispatch. It is **not** yet a causal *fix* or proof of full dense/C2
+numerical parity. Notably, the CPU and GPU **QKV input bytes differed**
+even though native LayerNorm1 previously passed at tolerance. The
+Leech profiler now offers `--input-source cpu-copy` to isolate the
+GEMM under truly identical input bytes. **No GPU replay of that new
+mode is yet recorded.**
+
+### Schaka repair classes are distinct
+
+- [WGM swizzle patch](https://github.com/Schaka/rocm-gfx803/blob/main/patches/rocblas/wgm-miscompute-source.patch)
+  gates assembly `ISA803` solutions to `WorkGroupMapping=1`.
+  Schaka's original same-ABI candidate scan recorded WGM8 assembly
+  **0/14** correct and WGM1 assembly **39/39** correct.
+- A **second FP32 SGEMM corruption mechanism** survived WGM repair in
+  Schaka's historical 6.4.4 research and motivated
+  [`gfx803_sgemm` and the preload shim](https://github.com/Schaka/rocm-gfx803/blob/main/patches/rocblas/sgemm-shim/sgemm_shim.cpp).
+  His published final ROCm 10.1 image explicitly declares
+  `LD_PRELOAD=/opt/rocm/lib/libgfx803_sgemm_shim.so`. It is an
+  **essential part of his tested runtime contract**, not an optional
+  user flag that Nix may discard while importing `/opt/rocm`.
+- Existing [`rocm6.4.4/tools/rocblas_solution_scan.cpp`](https://github.com/Schaka/rocm-gfx803/blob/main/rocm6.4.4/tools/rocblas_solution_scan.cpp)
+  uses the beta `rocblas_gemm_ex_get_solutions` API to enumerate
+  same-library solution indices. Adapt its T,N dimensions and actual
+  checkpoint data; do not copy solution indices across ROCm versions.
+
+### New source-written release guard — not yet physically tested
+
+- `scripts/gfx803_oci_runtime_contract.py` now rejects OCI manifests
+  lacking Schaka's required `LD_PRELOAD`, `HSA_OVERRIDE_GFX_VERSION`,
+  `ROC_ENABLE_PRE_VEGA` and `TORCH_BLAS_PREFER_HIPBLASLT`; it checks
+  that the shim actually exists **inside the staged ROCm tree**, and
+  records the equivalent relocated Nix preload path.
+- The importer writes `runtime-env.json` and a **candidate-only**
+  `required_sgemm_shim_preload`. The image digest-lock command also
+  refuses a published image whose runtime environment fails the
+  contract.
+- The accepted `gfx803-sdk` Nix shell requires the relocated shim,
+  exports the original Polaris/HIPBLAS settings, enables the shim and
+  sets its store-backed `LD_PRELOAD`. This has **not** been Nix-evaluated
+  or executed on a GPU in this environment.
+- Promotion now requires a separate
+  `sgemm_shim_loaded_and_correct="verified"` producer in addition to
+  exact-path provenance, actual ELF relocation, and hash-backed
+  numerical/device evidence. **Neither the importer nor this change
+  manufactures that producer.**
+- Tests cover absent/disabled/escaping preload library and rejection
+  when an otherwise green candidate has no verified shim. Code
+  committed; GH Actions run receipts remain outstanding.
+
+### Decisive remaining targeted max-cut
+
+1. **G1** replay the same original QKV with native versus
+   `--input-source cpu-copy`, maintaining original checkpoint,
+   actual tensor, matrix dimensions and ABI. Capture the selected
+   dispatch and original output hashes for both processes.
+2. **G2** execute WGM8-versus-WGM1 **same-library** candidate
+   comparisons using Schaka's existing 6.4.4 solution scan, with
+   exact T,N 1152×128×384, saved operands, 100+ repetitions and
+   explicit rocBLAS status/trace receipts. Do not directly mix
+   6.4/10.1 device libraries or assume WGM1 cures the other FP32 bug.
+3. **G3** import reviewed, digest-pinned Schaka 10.1 into the Nix
+   candidate; run QKV with the **stock shim enabled** and separately
+   `GFX803_SGEMM_SHIM_DISABLE=1` as a same-image negative control,
+   verifying the actual loaded preload and dispatch. No training.
+4. **G4** re-run uninstrumented full teacher CPU↔GPU parity
+   and repeated inference; only after its approval run strict C2
+   gradient/AdamW gate. Then long-run hang/no-reset controls,
+   ComfyUI original image regression, accepted Cachix release and
+   native component derivations remain separate physical deliverables.
+
+No new **gfx803 hardware execution** or native ROCm 10.1 binary release is
+claimed by this source-level roadmap update.
