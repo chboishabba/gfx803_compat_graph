@@ -78,10 +78,26 @@ As of `2026-03-22`, the repo state is:
   - `hsa_init()` itself returns `4096` before agent enumeration starts
   - the retained artifact is `out/rocminfo-gdb/2026-03-29T21-59-30/gdb-hsa-flow.txt`
 - the practical next target is therefore to preserve the old HSA/HIP ABI where needed and upgrade around it deliberately, not to assume a simple `latest HIP on old HSA` hybrid will work
+- the first patcher rule is now explicit too:
+  - for `gfx803`, preserve the full extracted control `6.4` island in `lib-compat/` by default
+  - do not mix newer HIP-dependent ROCm userspace libraries into that path unless a boundary probe explicitly validates them
+  - require both `rocminfo` success and `torch.cuda.is_available() == True` as the runtime validation contract
+- the repo should now be read as carrying two separate RCA tracks:
+  - runtime-boundary RCA: why modern ROCm userspace stops working on `gfx803`;
+    this is the track summarized by `PATCHER_RULE_V1`
+  - workload-correctness RCA: why some GPU workloads can still produce drift,
+    noise, or corruption even when the runtime is coherent and torch sees the
+    GPU
 - the `rocmNative-franken` shell still needs follow-up after the standalone `5.7` host artifact work; the next active experiments are incremental newer-component swaps into the `6.4`-upgrade lane, with pure `ROCm 7+` extraction treated as a component source rather than the main runtime target
 - the repo now includes an initial GitHub Actions workflow for shell checks, unit tests, Nix evaluation, and an optional self-hosted GPU benchmark lane; full publish automation still remains future work
 - the default user-facing extracted `6.4` host wrapper is now the zero-drift `direct_only` path
 - the current extracted-runtime torch build has no Vulkan backend (`torch.backends.vulkan -> None`), so Vulkan is not a usable fallback path for Leech under the present PyTorch runtime
+- the older archive-backed `ROCm RX580 noise issue` thread is now clearer too:
+  its dominant historical RCA is ComfyUI noise, stateful drift, solver
+  flapping, and first-corrupted-tensor localization, while `bf16` / `bfloat16`
+  appeared only as minor side leads rather than the main unresolved story
+  - in other words: that thread mostly belongs to the workload-correctness RCA,
+    not the runtime-boundary RCA
 
 ## Start here
 
@@ -99,6 +115,8 @@ Choose the path that matches what you need:
   Read [POLARIS_STABILITY_BLUEPRINT.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/POLARIS_STABILITY_BLUEPRINT.md)
 - I want the immediate work queue:
   Read [TODO.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/TODO.md)
+- I want the current practical patcher rule:
+  Read [docs/PATCHER_RULE_V1.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/PATCHER_RULE_V1.md)
 
 ## Canonical benchmark outputs
 

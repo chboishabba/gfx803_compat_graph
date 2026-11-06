@@ -425,6 +425,18 @@ What is not yet true:
 
 ## Vulkan Note
 
+Adjacent non-PyTorch Vulkan/SPIR-V workloads can still use the host RADV ICD directly. A recent dashiCFD 3D truth-generator smoke used the vendored dashiCORE SPV/vkFFT lane successfully with:
+
+```bash
+cd /home/c/Documents/code/dashiCFD
+VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/radeon_icd.json \
+  python3 -u scripts/make_truth_3d.py --backend gpu --fft-backend vkfft-vulkan \
+  --N 16 --steps 2 --save-every 1 --dt 0.0005 --nu0 0.001 \
+  --out /tmp/smoke_truth3d_gpu_steps_icd.npz
+```
+
+Expected audit prints include `backend=gpu active`, `fft_plan_backend=vulkan`, and `AMD Radeon RX 580 Series (RADV POLARIS10)`. If Vulkan enumeration fails, verify the host first with `cd gfx803_flake_v1 && nix develop .#base && verify-gfx803-host`; if the Python Vulkan/vkFFT stack is missing or mixed with incompatible runtime libraries, use the maintained flake/extracted-runtime lanes rather than ad hoc host package mixing.
+
 The current extracted-runtime PyTorch build used in this repo does not expose a Vulkan backend:
 
 - `torch 2.6.0+gitdae14f9`

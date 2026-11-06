@@ -1,0 +1,8 @@
+probe	overlay	base_order	rocminfo_status	torch_visible	whisperx_status	first_failure_signature	result	notes
+exp1-hsa-only	overlay-hsa-only	old-first					latest HSA only on top of control-6.4
+exp2-old-core-hsa	overlay-old-core-hsa	new-first					old HSA cluster on top of latest lane
+exp2-old-core-hsa-hip	overlay-old-core-hsa-hip	new-first					old HSA plus HIP cluster on top of latest lane
+exp3-new-miopen	overlay-new-miopen	old-first					reintroduce new MIOpen class only
+exp3-new-rocblas	overlay-new-rocblas	old-first					reintroduce new rocBLAS class only
+exp4-loader-truth	overlay-candidate-boundary	old-first					verify loader honors chosen boundary
+exp5-whisperx	overlay-candidate-boundary	old-first					opt-in minimal WhisperX repro only

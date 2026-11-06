@@ -7,6 +7,7 @@ CACHE_NAME="${CACHIX_CACHE:-gfx803-rocm}"
 CACHE_URL="${CACHIX_URL:-https://${CACHE_NAME}.cachix.org}"
 CACHE_PUBLIC_KEY="${CACHIX_PUBLIC_KEY:-gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=}"
 MANIFEST_PATH="${CACHIX_MANIFEST_PATH:-$REPO_ROOT/cachix-artifacts.manifest}"
+PIN_AFTER_PUSH="${PIN_AFTER_PUSH:-1}"
 
 usage() {
   cat <<USAGE
@@ -95,6 +96,9 @@ fi
 
 if [ "${WRITE_MANIFEST_ONLY:-0}" != "1" ]; then
   cachix push "$CACHE_NAME" "${TO_UPLOAD[@]}"
+  if [ "$PIN_AFTER_PUSH" = "1" ]; then
+    "$SCRIPT_DIR/pin-cachix-artifacts.sh"
+  fi
   echo "Done. Uploaded ${#TO_UPLOAD[@]} path(s) to Cachix cache '$CACHE_NAME'."
 else
   echo "Done. Refreshed manifest only at $MANIFEST_PATH."
