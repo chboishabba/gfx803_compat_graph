@@ -1,5 +1,13 @@
 # Devlog
 
+## 2026-11-06 — Leech QKV hardware attribution and independent upstream fixes
+
+- The LeechTransformer first-party CPU-copy experiment at [commit `469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79) demonstrates **identical CPU/GPU QKV inputs** (SHA-256 `6e33dd589ce2fdc69f953fe1e195016076b883a7948f72a002de05fb49056cb5`), yet **4.127624988555908** max CPU↔GPU error on the original block-0 QKV. Repeats are 0.0; profiler again selects `ISA803_KLA...WGM8`. This resolves the previous LN1-input-confounder question for this isolated run; it does not prove WGM8 is the only issue.
+- Attribution is **not interchangeable**: **Schaka's** original WGM8 assembly discovery/WorkGroupMapping=1 patch and **his independent pervasive FP32 SGEMM failure**/correctness-first interposer are separate upstream contributions. Original source, measured 0/14 vs 39/39 WGM count, pinned Schaka patch links, first-party observation producer and non-promotion rules are preserved in [the ledger](docs/GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md).
+- This repo's contribution is Nix/OCI source tracking, runtime-contract integration, static/dependency checks and future independent numerical acceptance. The 10.1 source-locked factory remains a draft candidate; **no successful patched 10.1 QKV, accepted C2 training or binary release** is claimed.
+- Next decisive run: same-ABI, same-original-input WGM1-vs-WGM8 candidate enumeration (reuse Schaka's existing solution scanner), then 10.1 SGEMM-shim ON versus OFF in isolated processes; only afterward consider original dense/C2 admission. Retain historical ComfyUI, 5.7/6.4 and GPU-reset data as separate first-party observations.
+
+
 ## 2026-03-23
 
 - Started the long-running old-ABI framework rebuild loop.
