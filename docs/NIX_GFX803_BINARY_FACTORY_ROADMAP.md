@@ -852,7 +852,18 @@ actual kernel-attributed correct WGM1 100-repeat original-QKV join, checks
 the identical checkpoint and loaded rocBLAS SHA, and issues the selected
 `rocblas_gemm_ex` kernel through an autograd-aware PyTorch forward wrapper.
 All other GPU FP32 linear operations and that QKV's gradient GEMMs remain
-CPU based. The independent adjudicator recognizes this as a third
+CPU based. The release-side verifier now **reopens the exact prior 100-repeat
+`trace_join.json`** and verifies its SHA against the model-process receipt,
+rather than trusting a claimed WGM1 kernel label. Run this additional
+diagnostic adjudication with:
+
+```bash
+python3 scripts/gfx803_lila_two_lane_receipts.py \
+  --lane 6.4-wgm1-qkv \
+  --gate-receipt /path/to/gfx803_lila_64_wgm1_new.json \
+  --wgm-join /path/to/100_repeat_WGM1/trace_join.json \
+  --out /path/to/new_lila_wgm1_adjudication.json
+``` The independent adjudicator recognizes this as a third
 **diagnostic mode** and still refuses native-GPU or training promotion.
 The original `rocblas_sgemm` dispatcher is not modified.
 No new hardware, ROCm 10.1 image digest, full native WGM1 dispatcher,
