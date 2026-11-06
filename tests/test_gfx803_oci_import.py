@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from scripts.gfx803_component_graph import PIN_SOURCES
+from scripts.gfx803_oci_runtime_contract import REQUIRED_IMAGE_ENV
 
 PINS = " ".join(name + "=" + ("a" * 40) for name in PIN_SOURCES)
 
@@ -57,10 +58,10 @@ class OciImportContractTests(unittest.TestCase):
                 "io.rocm.gfx803.line": "rocm10.1",
                 "io.rocm.gfx803.stage": "final",
                 "io.rocm.gfx803.pins": PINS,
-            }})
+            }, "Env": [k + "=" + v for k, v in REQUIRED_IMAGE_ENV.items()]})
             scripts = {
                 "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then printf "%s\n" ' + shlex.quote(image_labels) + '; fi\n',
-                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm" "$last/rootfs/opt/venv"\n',
+                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm/lib" "$last/rootfs/opt/venv"\\necho shim > "$last/rootfs/opt/rocm/lib/libgfx803_sgemm_shim.so"\n',
                 "nix": shell + 'echo "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
             }
             for name, contents in scripts.items():
@@ -99,7 +100,7 @@ class OciImportContractTests(unittest.TestCase):
                 "io.rocm.gfx803.line": "rocm10.1",
                 "io.rocm.gfx803.stage": "final",
                 "io.rocm.gfx803.pins": PINS,
-            }})
+            }, "Env": [k + "=" + v for k, v in REQUIRED_IMAGE_ENV.items()]})
             skopeo = bin_dir / "skopeo"
             skopeo.write_text(shell + 'printf "%s\\n" ' + shlex.quote(payload) + '\n')
             skopeo.chmod(0o755)
