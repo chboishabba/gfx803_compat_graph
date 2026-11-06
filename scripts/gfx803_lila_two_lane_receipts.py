@@ -23,7 +23,9 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
               all(isinstance(value, dict) and value.get("passed") is True
                   for value in checks.values()) and
               gate.get("checks_result", {}).get("stage") == "complete")
-    source = gate.get("source_sha256") or {}
+    source = gate.get("source_sha256")
+    if not isinstance(source, dict):
+        source = {}
     source_complete = (isinstance(source, dict) and
                        all(isinstance(source.get(key), str) and
                            len(source[key]) == 64
