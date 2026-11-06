@@ -171,6 +171,23 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
                 p["repeats_completed"] < 1 or
                 len(p.get("output_sha256_by_repeat", [])) != p["repeats_completed"]):
             raise QKVAdmissionError("incomplete profiled original-QKV repetitions")
+        for one_receipt in (r, p):
+            loaded = one_receipt.get("coherent_mapped_rocm_libraries")
+            if (not isinstance(loaded, dict) or
+                    not all(isinstance(loaded.get(k), list) and loaded[k]
+                            for k in ("librocblas.so", "libamdhip64.so"))):
+                raise QKVAdmissionError("missing actual HIP/rocBLAS mapped runtime attestation")
+            for component, paths in loaded.items():
+                if not isinstance(component, str) or not isinstance(paths, list) or not paths:
+                    raise QKVAdmissionError("malformed mapped ROCm library attestation")
+                for value in paths:
+                    if not isinstance(value, str):
+                        raise QKVAdmissionError("malformed mapped ROCm library path")
+                    actual = Path(value).resolve()
+                    if not actual.is_relative_to(root) or not actual.is_file():
+                        raise QKVAdmissionError("foreign or missing mapped ROCm library: " + str(value))
+        if j.get("coherent_mapped_rocm_libraries") != r["coherent_mapped_rocm_libraries"]:
+            raise QKVAdmissionError("joined QKV library mapping differs from original unprofiled process")
         if not str(r.get("torch_hip", "")).startswith("10.1"):
             raise QKVAdmissionError("wrong torch HIP version for claimed 10.1")
         if Path(r.get("required_image_root", "")).resolve() != root:
