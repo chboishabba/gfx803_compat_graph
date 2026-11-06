@@ -766,3 +766,29 @@ Both existing PRs remain draft pending real physical receipts.
 The [Leech original-operand A/B runbook](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/GFX803_QKV_WGM_SHIM_AB_RUNBOOK_20261106.md) and [Leech PR #4](https://github.com/chboishabba/LeechTransformer/pull/4) contain the source-written QKV fixture exporter, same-6.4-rocBLAS `rocblas_gemm_ex_get_solutions` candidate runner, ROCTX/rocprofv3 index-to-actual-WGM join and separate **coherent** Schaka 10.1 SGEMM shim ON/OFF runner. Each operates on the real original teacher's QKV operands and produces SHA-backed diagnostic receipts, not a training admission.
 
 **Phase distinction:** QKV input identity was physically established by commit `469bf00`; **same-build WGM1-vs-WGM8, actual Schaka 10.1 import/shim-on-off, full dense parity and physical C2 are still open**. The Nix factory image digest is still awaiting review. Tests/CI are source-written and not yet verified on Actions. Schaka originated the WGM investigation/source patch and separate SGEMM correctness-first replacement; the local work is *independent first-party instrumentation and packaging*. See [contributor attribution ledger](GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md).
+
+## 6 November — Leech original-input WGM/shim hardening (no physical promotion)
+
+Leech PR #4 now supplies stricter operator-ready 6.4 WGM8/WGM1 and imported
+10.1 shim ON/OFF probes. Its source verifier requires >=100 complete
+unprofiled repeats, source/runtime/tolerance and original-QKV hash binding,
+real traced GEMM kernels and absence of profiler observer effects. The
+standalone release-side consumer `scripts/gfx803_leech_qkv_admission.py`
+checks the new **v2 joined trace-arm receipts**, independently rehashes
+original output tensor bytes and requires actual `gfx803_sgemm_kernel`
+in the ON control and its absence in OFF. The tests exercise rejection,
+not physical success. Credit for the WGM fix and distinct FP32/GSU
+correctness-first shim remains with Schaka.
+
+| Evidence cut | Source implementation | Actual required next event |
+| --- | --- | --- |
+| A. Original ROCm 6.4 WGM8-vs-WGM1 | Leech solution scanner, fresh-run guard, repeated exact operands, traced kernel join | Run both mappings on hardware, check no observer effect, preserve raw hashes and failed cases |
+| B. Schaka 10.1 image pin | Digest source lock, rootless OCI importer, relocated Nix preload contract | Obtain **real immutable image digest**, inspect labels, import coherent runtime |
+| C. Same-image SGEMM-shim ON/OFF | Separate-process experiment and independent release-side byte verifier | Run both arms with genuine 10.1 Python/Torch and actual attached interposer |
+| D. Physical application admission | Existing dense/C2 gates, original ComfyUI controls, kernel/reset and watchdog probes | Recheck actual bare dense parity, C2 gradients, long-run stability |
+| E. Binary publication | Nix/Cachix manifest and closure policy source-written | Full accepted upstream/candidate evidence + independent clean-client install |
+
+The first three source interfaces exist; the five **physical/digest/release
+acceptance cuts are open**. A scoped QKV correction cannot authorize GPU
+training or an accepted distro binary by itself. No new GitHub Actions or
+Nix evaluation success is asserted.
