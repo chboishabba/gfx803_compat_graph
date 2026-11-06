@@ -74,11 +74,20 @@ for tool in skopeo umoci nix python3 mktemp; do
   }
 done
 
-# The original container layers may be large. Only selected extracted subtrees
-# enter Nix's store; no image/OCI archive is retained in the consumer closure.
-scratch="$(mktemp -d)"
+# The original container layers may be large.  The OCI layout may be kept on
+# NAS (GFX803_OCI_LAYOUT_DIR) for retry/reuse, but umoci itself must unpack on
+# a local xattr-capable filesystem: NFS rejects its OCI xattr cleanup.  Only
+# selected extracted subtrees enter Nix's store; no OCI archive is a consumer
+# runtime dependency.
+local_scratch_root="${GFX803_LOCAL_SCRATCH:-/var/tmp}"
+[[ -d "$local_scratch_root" && -w "$local_scratch_root" ]] || {
+  echo "GFX803_LOCAL_SCRATCH must be a writable local filesystem directory" >&2
+  exit 2
+}
+scratch="$(mktemp -d "$local_scratch_root/gfx803-schaka-oci.XXXXXX")"
 trap 'rm -rf "$scratch"' EXIT
-mkdir -p "$scratch/layout" "$OUT"
+mkdir -p "$OUT"
+oci_layout="${GFX803_OCI_LAYOUT_DIR:-$OUT/oci-layout}"
 # Schaka stamps the final image with build-line, component, upstream revision
 # and resolved upstream dependency pins. Check them BEFORE pulling the layers.
 skopeo inspect --override-os linux --override-arch amd64 \
@@ -126,8 +135,27 @@ echo "Fetching immutable, matching OCI image digest: $IMAGE"
 # still fail-closed here: IMAGE is an already re-inspected sha256 reference and
 # the earlier manifest check requires that exact digest.  This bypasses only a
 # missing local signature-policy configuration, not the immutable content pin.
-skopeo copy --insecure-policy --override-os linux --override-arch amd64 \
-  "docker://$IMAGE" "oci:$scratch/layout:locked"
+if [[ -e "$oci_layout/index.json" ]]; then
+  cached_digest="$(skopeo inspect --override-os linux --override-arch amd64 \
+    "oci:$oci_layout:locked" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("Digest", ""))')"
+  [[ "$cached_digest" == "${IMAGE#*@}" ]] || {
+    echo "Existing OCI layout does not match the requested immutable digest: $oci_layout" >&2
+    exit 2
+  }
+  echo "Reusing verified OCI layout: $oci_layout"
+else
+  [[ ! -e "$oci_layout" ]] || {
+    echo "OCI layout directory exists without index.json; choose a fresh layout path" >&2
+    exit 2
+  }
+  mkdir -p "$oci_layout"
+  skopeo copy --insecure-policy --override-os linux --override-arch amd64 \
+    "docker://$IMAGE" "oci:$oci_layout:locked"
+fi
+# OCI blobs are ordinary files, so copy the retained NAS layout into local
+# scratch before umoci performs xattr-sensitive rootfs extraction.
+mkdir -p "$scratch/layout"
+cp -R "$oci_layout/." "$scratch/layout/"
 umoci unpack --rootless --image "$scratch/layout:locked" "$scratch/unpacked"
 
 root="$scratch/unpacked/rootfs"
