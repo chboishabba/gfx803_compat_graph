@@ -52,7 +52,8 @@ def image_resolve(rootfs: Path, container_path: str, limit: int = 64) -> str:
     raise ImageLinkError("symlink resolution exceeded hop limit")
 
 
-def stage_tree(rootfs: Path, tree: str, destination: Path) -> dict:
+def stage_tree(rootfs: Path, tree: str, destination: Path,
+               relocate_external: dict[str, str] | None = None) -> dict:
     if tree not in ("/opt/rocm", "/opt/venv"):
         raise ValueError("refuse non-allowlisted OCI subtree " + tree)
     rootfs = Path(rootfs).resolve(strict=True)
@@ -75,6 +76,23 @@ def stage_tree(rootfs: Path, tree: str, destination: Path) -> dict:
 
     shutil.copytree(source, destination, symlinks=True,
                     copy_function=hardlink_or_copy)
+    external = relocate_external or {}
+    staged_external: dict[str, Path] = {}
+    for container_tree, relative_destination in external.items():
+        if tree != "/opt/venv" or container_tree != "/root/.local/share/uv/python":
+            raise ValueError("refuse non-allowlisted external OCI tree " + container_tree)
+        rel = PurePosixPath(relative_destination)
+        if rel.is_absolute() or ".." in rel.parts or relative_destination in ("", "."):
+            raise ValueError("unsafe external relocation destination " + relative_destination)
+        external_source = rootfs / container_tree.lstrip("/")
+        if not external_source.is_dir() or external_source.is_symlink():
+            raise ValueError("missing real external OCI tree: " + str(external_source))
+        external_destination = destination / relative_destination
+        if external_destination.exists() or external_destination.is_symlink():
+            raise ValueError("refuse to overwrite external stage " + str(external_destination))
+        shutil.copytree(external_source, external_destination, symlinks=True,
+                        copy_function=hardlink_or_copy)
+        staged_external[container_tree] = external_destination
     replaced, retained, unresolved = [], [], []
     for folder, dirnames, filenames in os.walk(destination, followlinks=False):
         for name in sorted(dirnames + filenames):
@@ -109,11 +127,28 @@ def stage_tree(rootfs: Path, tree: str, destination: Path) -> dict:
                 else:
                     retained.append(relative)
             else:
-                unresolved.append({"link": relative, "target": original,
-                                   "resolved": resolved, "reason": "outside-selected-tree"})
+                external_target = next(
+                    ((root_path, staged) for root_path, staged in staged_external.items()
+                     if resolved == root_path or resolved.startswith(root_path + "/")), None)
+                if external_target is None:
+                    unresolved.append({"link": relative, "target": original,
+                                       "resolved": resolved, "reason": "outside-selected-tree"})
+                    continue
+                root_path, staged = external_target
+                relocated_target = staged / posixpath.relpath(resolved, root_path)
+                if not relocated_target.exists():
+                    unresolved.append({"link": relative, "target": original,
+                                       "resolved": resolved, "reason": "missing-external-stage-target"})
+                    continue
+                new_target = os.path.relpath(relocated_target, start=link.parent)
+                link.unlink()
+                link.symlink_to(new_target, target_is_directory=relocated_target.is_dir())
+                replaced.append({"link": relative, "from": original, "to": new_target,
+                                 "external_source": root_path})
     return {"schema_version": 1, "source": tree,
             "stage": str(destination), "rewritten": replaced,
             "retained_relative": retained, "unresolved": unresolved,
+            "relocated_external_trees": sorted(staged_external),
             "all_links_relocated": len(unresolved) == 0,
             "elf_relocation": "not-verified",
             "runtime_linkage": "not-verified"}
@@ -125,10 +160,18 @@ def main() -> int:
     p.add_argument("--tree", choices=("/opt/rocm", "/opt/venv"), required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--report", required=True)
+    p.add_argument("--relocate-external", action="append", default=[], metavar="SOURCE=DEST",
+                   help="allowlisted in-image external tree to copy and rewrite")
     p.add_argument("--strict", action="store_true",
                    help="fail if any OCI links escape selected subtree or dangle")
     args = p.parse_args()
-    report = stage_tree(Path(args.rootfs), args.tree, Path(args.out))
+    mappings = {}
+    for item in args.relocate_external:
+        if item.count("=") != 1:
+            p.error("--relocate-external requires SOURCE=DEST")
+        source, destination = item.split("=", 1)
+        mappings[source] = destination
+    report = stage_tree(Path(args.rootfs), args.tree, Path(args.out), mappings)
     target = Path(args.report)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",

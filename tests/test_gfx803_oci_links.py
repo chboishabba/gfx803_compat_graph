@@ -99,6 +99,26 @@ class OciSymlinkStagingTests(unittest.TestCase):
             self.assertTrue(report["all_links_relocated"])
             self.assertTrue((parent / "venv/bin/activate").is_file())
 
+    def test_venv_relocates_allowlisted_image_uv_python(self):
+        with tempfile.TemporaryDirectory() as td:
+            parent = Path(td)
+            root = self.make_root(parent)
+            (root / "opt/venv/bin").mkdir(parents=True)
+            interpreter = root / "root/.local/share/uv/python/cpython/bin/python3.12"
+            interpreter.parent.mkdir(parents=True)
+            interpreter.write_bytes(b"python-fixture")
+            (root / "opt/venv/bin/python").symlink_to(
+                "/root/.local/share/uv/python/cpython/bin/python3.12")
+            report = stage_tree(
+                root, "/opt/venv", parent / "venv",
+                {"/root/.local/share/uv/python": "uv-python"},
+            )
+            staged_python = parent / "venv/bin/python"
+            self.assertTrue(report["all_links_relocated"])
+            self.assertIn("/root/.local/share/uv/python", report["relocated_external_trees"])
+            self.assertFalse(os.readlink(staged_python).startswith("/"))
+            self.assertEqual(staged_python.read_bytes(), b"python-fixture")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -176,6 +176,7 @@ if ((WITH_VENV)); then
   [[ -d "$root/opt/venv" ]] || { echo "No /opt/venv in image" >&2; exit 3; }
   python3 "$scripts_dir/gfx803_oci_links.py" \
     --rootfs "$root" --tree /opt/venv --out "$scratch/staged-venv" \
+    --relocate-external /root/.local/share/uv/python=uv-python \
     --report "$OUT/venv-links.json"
   venv_store="$(nix store add-path "$scratch/staged-venv")"
 fi
