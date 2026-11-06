@@ -61,7 +61,7 @@ class OciImportContractTests(unittest.TestCase):
             }, "Env": [k + "=" + v for k, v in REQUIRED_IMAGE_ENV.items()]})
             scripts = {
                 "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then printf "%s\n" ' + shlex.quote(image_labels) + '; fi\n',
-                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm/lib" "$last/rootfs/opt/venv"\\necho shim > "$last/rootfs/opt/rocm/lib/libgfx803_sgemm_shim.so"\n',
+                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm/lib" "$last/rootfs/opt/venv"\necho shim > "$last/rootfs/opt/rocm/lib/libgfx803_sgemm_shim.so"\n',
                 "nix": shell + 'echo "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
             }
             for name, contents in scripts.items():
