@@ -40,6 +40,7 @@ CAPABILITY_GATES = {
     "comfyui_images": ("comfyui_image",),
     "whisperx_long_run": ("async_hang_regression",),
     "ollama_gpu": ("ollama_gpu_inference",),
+    "leech_qkv": ("leech_qkv_original",),
 }
 OPTIONAL = tuple(x for values in CAPABILITY_GATES.values() for x in values)
 
@@ -189,6 +190,24 @@ def validate_candidate(candidate: dict, lock: dict, require_evidence: bool = Fal
         required_receipts = list(REQUIRED)
         for claim in capabilities:
             required_receipts.extend(CAPABILITY_GATES[claim])
+        if "leech_qkv" in capabilities:
+            if evidence_root is None:
+                problems.append("leech_qkv: strict release requires real original evidence directory")
+            elif not isinstance(packages, dict) or not isinstance(packages.get("rocm"), str):
+                problems.append("leech_qkv: missing selected imported ROCm store path")
+            else:
+                try:
+                    try:
+                        from scripts.gfx803_leech_qkv_admission import verify_bundle
+                    except ModuleNotFoundError:
+                        from gfx803_leech_qkv_admission import verify_bundle
+                    checked = verify_bundle(
+                        Path(evidence_root) / "leech_qkv",
+                        expected_rocm_root=Path(packages["rocm"]))
+                    if checked.get("passed") is not True:
+                        problems.append("leech_qkv: original tensor/trace verification failed")
+                except (ValueError, OSError, TypeError, KeyError) as exc:
+                    problems.append("leech_qkv: source byte or profiler verification failed: " + str(exc))
         for check in required_receipts:
             receipt = evidence.get(check, {})
             if not isinstance(receipt, dict) or receipt.get("status") != "pass":
