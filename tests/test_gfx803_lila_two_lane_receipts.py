@@ -69,11 +69,26 @@ class DualLaneAdjudicationTests(unittest.TestCase):
                          "source_join_sha256":"d"*64,
                          "torch_default_rocblas_sgemm_fixed":False,
                          "gpu_backward":False,"admission":"denied"}}
-        got=adjudicate("6.4-wgm1-qkv",gate)
+        trace_kernel="Cijk_verified_WGM1"
+        gate["linear_repair"]["wgm1_qkv"]["reported_kernel"]=trace_kernel
+        gate["linear_repair"]["wgm1_qkv"]["rocblas_sha256"]="e"*64
+        gate["linear_repair"]["wgm1_qkv"]["original_input_sha256"]="f"*64
+        join={"schema_version":2,"teacher_sha256":"a"*64,
+              "rocblas_sha256":"e"*64,"input_sha256":"f"*64,
+              "gpu_arch":"gfx803","torch_hip":"6.4",
+              "attribution_complete":True,
+              "profile_observer_effect_absent_for_first_output":True,
+              "no_training_admission":True,
+              "unprofiled_repeats_completed":100,
+              "unprofiled_numerics":"correct-at-tested-shape",
+              "trace":{"status":"identified","wgm":1,
+                       "unique_kernel_names":[trace_kernel]}}
+        got=adjudicate("6.4-wgm1-qkv",gate,wgm_join=join,wgm_join_sha="d"*64)
         self.assertTrue(got["numerical_hybrid_diagnostic_passed"])
         self.assertFalse(got["training_admitted"])
         gate["linear_repair"]["wgm1_qkv"]["forced_qkv_gpu_forward_calls"]=0
-        self.assertFalse(adjudicate("6.4-wgm1-qkv",gate)
+        self.assertFalse(adjudicate("6.4-wgm1-qkv",gate,
+                                         wgm_join=join,wgm_join_sha="d"*64)
                          ["numerical_hybrid_diagnostic_passed"])
 
     def test_101_candidate_still_not_release(self):
