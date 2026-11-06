@@ -24,6 +24,7 @@ jobs:
             scripts/gfx803_oci_links.py \
             scripts/gfx803_oci_runtime_contract.py \
             scripts/gfx803_leech_qkv_admission.py \
+            scripts/gfx803_lila_two_lane_receipts.py \
             scripts/gfx803_capture.py \
             scripts/gfx803_comfyui_images.py \
             scripts/audit_gfx803_closure.py
