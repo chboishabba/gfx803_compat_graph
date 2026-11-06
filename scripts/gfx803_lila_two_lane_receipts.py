@@ -14,7 +14,7 @@ from pathlib import Path
 
 def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
                on: dict | None = None, off: dict | None = None) -> dict:
-    if lane not in ("6.4-cpu-linear", "10.1-schaka"):
+    if lane not in ("6.4-cpu-linear", "6.4-wgm1-qkv", "10.1-schaka"):
         raise ValueError("unsupported LILA repair lane")
     checks = gate.get("checks_result", {}).get("checks")
     passed = (isinstance(checks, dict) and bool(checks) and
@@ -32,7 +32,7 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
     if not source_complete: errors.append("source SHA evidence incomplete")
     if not real_gpu: errors.append("no attested physical gfx803")
     if not passed: errors.append("full dense/C2 forward-backward-step numerical parity failed")
-    if lane == "6.4-cpu-linear":
+    if lane in ("6.4-cpu-linear", "6.4-wgm1-qkv"):
         repair = gate.get("linear_repair") or {}
         valid_hybrid = (
             repair.get("kind") == "cpu-fp32-linear-diagnostic" and
@@ -46,9 +46,20 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
             str(gate.get("torch_hip", "")).startswith("6.4")
         )
         if not valid_hybrid: errors.append("no valid 6.4 hybrid/denied receipt")
+        if lane == "6.4-wgm1-qkv":
+            qkv=repair.get("wgm1_qkv") or {}
+            valid_wgm1=(isinstance(qkv.get("forced_qkv_gpu_forward_calls"),int) and
+                        qkv["forced_qkv_gpu_forward_calls"]>0 and
+                        qkv.get("torch_default_rocblas_sgemm_fixed") is False and
+                        qkv.get("gpu_backward") is False and
+                        qkv.get("admission")=="denied" and
+                        isinstance(qkv.get("source_join_sha256"),str) and
+                        len(qkv["source_join_sha256"])==64)
+            if not valid_wgm1:
+                errors.append("no genuine WGM1 QKV dispatch receipt")
         return {
             "lane": lane, "numerical_hybrid_diagnostic_passed":
-                bool(passed and source_complete and real_gpu and valid_hybrid),
+                bool(passed and source_complete and real_gpu and valid_hybrid and not errors),
             "gpu_native_correctness": "not-established",
             "training_admitted": False, "release_accepted": False,
             "errors": errors,
@@ -98,7 +109,7 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
 
 def main() -> int:
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--lane", choices=["6.4-cpu-linear", "10.1-schaka"], required=True)
+    p.add_argument("--lane", choices=["6.4-cpu-linear", "6.4-wgm1-qkv", "10.1-schaka"], required=True)
     p.add_argument("--gate-receipt", type=Path, required=True)
     p.add_argument("--shim-ab-dir", type=Path,
                    help="Required for 10.1: directory with summary and per-arm trace joins")
@@ -122,7 +133,7 @@ def main() -> int:
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2,sort_keys=True)+"\n")
     print(json.dumps(result,sort_keys=True))
-    key=("numerical_hybrid_diagnostic_passed" if a.lane=="6.4-cpu-linear"
+    key=("numerical_hybrid_diagnostic_passed" if a.lane.startswith("6.4-")
          else "numerical_candidate_supported")
     return 0 if result.get(key) is True else 3
 
