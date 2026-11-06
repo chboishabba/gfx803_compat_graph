@@ -760,3 +760,9 @@ CPU-only tests (not GPU proof):
 and the Leech-side
 `python -m unittest discover -s tests -p 'test_gfx803_qkv_*ab.py' -v`.
 Both existing PRs remain draft pending real physical receipts.
+
+### 6 November — Leech QKV causal A/B now operator-ready, not hardware-accepted
+
+The [Leech original-operand A/B runbook](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/GFX803_QKV_WGM_SHIM_AB_RUNBOOK_20261106.md) and [Leech PR #4](https://github.com/chboishabba/LeechTransformer/pull/4) contain the source-written QKV fixture exporter, same-6.4-rocBLAS `rocblas_gemm_ex_get_solutions` candidate runner, ROCTX/rocprofv3 index-to-actual-WGM join and separate **coherent** Schaka 10.1 SGEMM shim ON/OFF runner. Each operates on the real original teacher's QKV operands and produces SHA-backed diagnostic receipts, not a training admission.
+
+**Phase distinction:** QKV input identity was physically established by commit `469bf00`; **same-build WGM1-vs-WGM8, actual Schaka 10.1 import/shim-on-off, full dense parity and physical C2 are still open**. The Nix factory image digest is still awaiting review. Tests/CI are source-written and not yet verified on Actions. Schaka originated the WGM investigation/source patch and separate SGEMM correctness-first replacement; the local work is *independent first-party instrumentation and packaging*. See [contributor attribution ledger](GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md).
