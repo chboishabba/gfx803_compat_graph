@@ -174,6 +174,19 @@ class ReleasePolicyTests(unittest.TestCase):
             problems = validate_candidate(candidate, LOCK, require_evidence=True)
             self.assertTrue(any("claimed_capabilities" in e for e in problems))
 
+    def test_apparent_green_gpu_cannot_promote_without_proven_sgemm_preload(self):
+        candidate = copy.deepcopy(CANDIDATE)
+        candidate["provenance"] = {"upstream_commit_correspondence": "verified",
+                                   "runtime_relocation": "verified"}
+        problems = validate_candidate(candidate, LOCK, require_evidence=True)
+        self.assertTrue(any("SGEMM preload absent" in p for p in problems))
+        self.assertTrue(any("SGEMM shim preload/compute evidence" in p for p in problems))
+        candidate["provenance"]["required_sgemm_shim_preload"] = (
+            candidate["store_paths"]["rocm"] + "/lib/libgfx803_sgemm_shim.so")
+        problems = validate_candidate(candidate, LOCK, require_evidence=True)
+        self.assertFalse(any("SGEMM preload absent" in p for p in problems))
+        self.assertTrue(any("SGEMM shim preload/compute evidence" in p for p in problems))
+
 
 if __name__ == "__main__":
     unittest.main()
