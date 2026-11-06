@@ -153,8 +153,24 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
         j = load_json(bundle / arm / "trace_join.json")
         if any(r.get("arm") != arm or p.get("arm") != arm for _ in (0,)):
             raise QKVAdmissionError("shim arm label mismatch")
-        if r.get("mode") != "shim" or not r.get("shim_actually_mapped"):
-            raise QKVAdmissionError("stock Schaka shim not actually mapped into original QKV process")
+        if (r.get("mode") != "shim" or p.get("mode") != "shim" or
+                r.get("shim_actually_mapped") is not True or
+                p.get("shim_actually_mapped") is not True):
+            raise QKVAdmissionError("stock Schaka shim not actually mapped into both QKV processes")
+        if r.get("admission") != "denied" or p.get("admission") != "denied":
+            raise QKVAdmissionError("unexpected Leech training admission in diagnostic receipts")
+        for field in ("arm", "mode", "rocblas_sha256", "rocblas_realpath",
+                      "shim_sha256", "shim_realpath", "required_image_root",
+                      "fixture_manifest_sha256", "teacher_sha256", "input_sha256",
+                      "weight_sha256", "torch_hip", "gpu_arch", "gpu_device",
+                      "threshold"):
+            if field not in r or field not in p or r[field] != p[field]:
+                raise QKVAdmissionError("profiled/unprofiled original QKV identity mismatch: " + field)
+        if (p.get("repeats_completed") != p.get("repeats_requested") or
+                not isinstance(p.get("repeats_completed"), int) or
+                p["repeats_completed"] < 1 or
+                len(p.get("output_sha256_by_repeat", [])) != p["repeats_completed"]):
+            raise QKVAdmissionError("incomplete profiled original-QKV repetitions")
         if not str(r.get("torch_hip", "")).startswith("10.1"):
             raise QKVAdmissionError("wrong torch HIP version for claimed 10.1")
         if Path(r.get("required_image_root", "")).resolve() != root:
@@ -170,8 +186,8 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
             if not q.is_file() or digest(q) != r.get(sha_field):
                 raise QKVAdmissionError("actual library SHA mismatch: " + path_field)
         reported_kernels = {x.get("name") for x in j.get("trace", {}).get("kernels", [])}
-        if not reported_kernels or not reported_kernels.issubset(real_kernels):
-            raise QKVAdmissionError("reported kernel name not in original profiler CSV: " + arm)
+        if not reported_kernels or reported_kernels != real_kernels:
+            raise QKVAdmissionError("joined kernel set differs from actual profiler CSV: " + arm)
         if j.get("schema_version") != 2 or j.get("arm") != arm:
             raise QKVAdmissionError("original shim trace is not the bound v2 arm receipt")
         actual_shim_kernel = any("gfx803_sgemm_kernel" in k for k in real_kernels)
@@ -181,8 +197,10 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
             raise QKVAdmissionError("joined interposer kernel contract disagrees with physical profiler: " + arm)
         if j.get("attribution_complete") is not True or j.get("profiler_observer_effect_absent") is not True:
             raise QKVAdmissionError("no actual observer-free original GPU kernel trace: " + arm)
-        if j.get("unprofiled_status") != r.get("status"):
-            raise QKVAdmissionError("trace and unprofiled numerical statuses disagree")
+        if (j.get("unprofiled_status") != r.get("status") or
+                j.get("profiled_status") != p.get("status") or
+                r.get("status") != p.get("status")):
+            raise QKVAdmissionError("profiled/unprofiled trace numerical status disagreement")
         if (j.get("rocblas_sha256") != r.get("rocblas_sha256") or
                 j.get("shim_sha256") != r.get("shim_sha256") or
                 any(j.get(k) != r.get(k) for k in (
