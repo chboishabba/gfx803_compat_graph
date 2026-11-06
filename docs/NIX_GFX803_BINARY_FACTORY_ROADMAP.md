@@ -579,11 +579,9 @@ not a contradictory kernel observation.
 
 This is now **G0 kernel-attribution CLOSED** for that observed QKV
 dispatch. It is **not** yet a causal *fix* or proof of full dense/C2
-numerical parity. Notably, the CPU and GPU **QKV input bytes differed**
-even though native LayerNorm1 previously passed at tolerance. The
-Leech profiler now offers `--input-source cpu-copy` to isolate the
-GEMM under truly identical input bytes. **No GPU replay of that new
-mode is yet recorded.**
+numerical parity. In the **original native-input profile**, CPU and GPU QKV input bytes differed, despite native LayerNorm1 passing numerical tolerance. The **new physical CPU-copy control has now executed** and reports identical FP32 input bytes (SHA-256 `6e33dd589ce2fdc69f953fe1e195016076b883a7948f72a002de05fb49056cb5`, input max error **0.0**). With the same checkpoint and QKV, the output error persisted at **4.127624988555908**, repeats remained **0.0/0.0**, and the same `ISA803_KLA...WGM8` dispatched. The CPU-copy profiled/unprofiled GPU output SHA-256 is `5cf48cfd8c88fc29fbe4f10131232f7a6c245a5291039debada0e5f5349a1607`. This is a **first-party measurement reported in [commit `469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79)**; full raw archives remain local at `artifacts/gfx803_qkv_cpu_copy/` and have not been independently rehashed from this branch. LN1 input mismatch is ruled out for the *isolated* QKV failure; WGM8 as the *sole cause* remains unproved.
+
+Upstream authorship and independently produced observations are tracked explicitly in the [attribution/evidence ledger](GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md): *Schaka's measured 0/14 vs 39/39 WGM assembly scan and source patch* ≠ *Schaka's independently discovered pervasive FP32 SGEMM failure and replacement* ≠ *this project's real QKV WGM8 dispatch and CPU-copy measurement* ≠ *future causal repair*.
 
 ### Schaka repair classes are distinct
 
@@ -629,11 +627,8 @@ mode is yet recorded.**
 
 ### Decisive remaining targeted max-cut
 
-1. **G1** replay the same original QKV with native versus
-   `--input-source cpu-copy`, maintaining original checkpoint,
-   actual tensor, matrix dimensions and ABI. Capture the selected
-   dispatch and original output hashes for both processes.
-2. **G2** execute WGM8-versus-WGM1 **same-library** candidate
+1. **G1 — COMPLETED (first-party reported physical control):** native vs `--input-source cpu-copy` QKV compared at the same checkpoint/shapes; identical copied input bytes, error still 4.127624988555908, `WGM8` dispatch persists and profile/no-profile hash matches. Raw CPU-copy output receipts remain **local**, so this status is not an independently rehashed release acceptance receipt.
+2. **G2 — OPEN:** execute WGM8-versus-WGM1 **same-library** candidate
    comparisons using Schaka's existing 6.4.4 solution scan, with
    exact T,N 1152×128×384, saved operands, 100+ repetitions and
    explicit rocBLAS status/trace receipts. Do not directly mix
@@ -648,5 +643,4 @@ mode is yet recorded.**
    ComfyUI original image regression, accepted Cachix release and
    native component derivations remain separate physical deliverables.
 
-No new **gfx803 hardware execution** or native ROCm 10.1 binary release is
-claimed by this source-level roadmap update.
+**New physical execution is now reported for the ROCm 6.4 CPU-copy QKV control only**, via LeechTransformer commit `469bf00`; the gfx803 Nix PR did not itself execute that test. **No WGM1 causal repair test, patched ROCm 10.1 hardware execution, training admission or native ROCm 10.1 binary release is claimed.** See the [typed upstream and first-party evidence ledger](GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md) for original authorship and validation limits.
