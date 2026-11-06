@@ -627,7 +627,9 @@ itself certify the running host kernel, firmware, board or VBIOS configuration.
 | --- | --- | --- |
 | **AMD kernel maintainers** (Alex Deucher, Jonathan Kim) and **reporter Johl Brown** | The upstream gfx7/gfx8 KFD callback fix, mailing-list investigation and stable backport | Historical bug fixed; keep kernel/board metadata for any *new* regression |
 | **Luca Bruni** | [ROCm/clr #269][clr-269] isolated ROCm 7+ rejection of legacy `DoorbellType` 0/1; verified a TheRock restoration on RX 550 | Enumeration is distinct from GPU calculation correctness |
-| **Schaka** | [rocm-gfx803][schaka-repo] source/patch/build graph and real-board ROCm 10.x fixes for wave64, CLR/ROCr, rocBLAS, MIOpen, coherence and downstream frameworks | Pin and reuse original patches, source SHAs and test methods; do not reimplement or claim to have authored them |
+| **Schaka — assembly WGM defect** | [Original gfx803 WGM solution scan][schaka-wgm-scan] (**0/14 WGM8 assembly pass; 39/39 WGM1 pass; 2/2 WGM8 source pass**) and [his WorkGroupMapping=1 source patch][schaka-wgm] | **Schaka owns the investigation and repair.** First-party QKV WGM8 identification is a separate observation, not credit for the patch nor causal proof of this Leech failure. |
+| **Schaka — independent FP32 SGEMM defect** | [His separate 6.4.4 kernel research][schaka-kernel-bugs], [replacement SGEMM][schaka-sgemm-code] and [LD_PRELOAD dispatch shim][schaka-sgemm-shim], carried into [his final ROCm image][schaka-final] | **Schaka owns this second root-cause investigation and shim.** Do not collapse it into WGM1, or claim Nix wrapping independently fixes FP32 GEMM. |
+| **Schaka — other ROCm 10.x work** | [rocm-gfx803][schaka-repo] builds, wave64, CLR/ROCr, MIOpen, coherence and frameworks | Pin exact sources, preserve upstream patch ownership and independently check local execution. |
 | **ROCm/TheRock and AMD component owners** | [RX580 upstream request #9118][therock-9118], [WX7100 request #9210][therock-9210], component build/target infrastructure | A community working build is not official AMD support |
 | **Robert Rosenbusch** | [gfx803_rocm][robert-repo] source builds, containers and framework bring-up (PyTorch, ComfyUI, WhisperX) | Retain useful reproducers, not whole containers in runtime closures |
 | **lamikr / rocm_sdk_builder contributors** | [rocm_sdk_builder][lamikr-repo] older multi-component build recipes and ABI/dependency debugging | Historical build evidence, not a second independent ROCm 10.1 patch fork |
@@ -706,7 +708,12 @@ kernels) must remain scoped to measured circumstances.
 
 See [the dated evidence and exact test-to-patch crosswalk](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md#historical-first-party-numerical-and-hang-evidence--preserve-do-not-rediscover).
 
-[schaka-wgm]: https://github.com/Schaka/rocm-gfx803/blob/main/patches/rocblas/wgm-miscompute-source.patch
+[schaka-wgm]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/wgm-miscompute-source.patch
+[schaka-wgm-scan]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/wgm-miscompute.sh
+[schaka-kernel-bugs]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/rocm6.4.4/KERNEL_BUGS.md
+[schaka-sgemm-code]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/sgemm-shim/gfx803_sgemm.h
+[schaka-sgemm-shim]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/sgemm-shim/sgemm_shim.cpp
+[schaka-final]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/docker/final.Dockerfile
 [hang-ollama]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-20_OLLAMA_MISTRAL_KFD_RESET.md
 [hang-wayland]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-25_WAYLAND_GFX_TIMEOUT_RESET.md
 [hang-whisperx]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md
@@ -748,9 +755,7 @@ CPU↔GPU error. The original unrenamed tar archive SHA-256 is
 `20abfb4c72b2cde0da42e5a1e1792ece80a162911bc59d9119a5fade22c3d9aa`.
 Profiled/unprofiled output hashes match, and isolated GPU QKV repeats
 show zero drift. The QKV input hashes differ slightly between CPU and
-native GPU LayerNorm1; the Leech probe now has a separate
-`--input-source cpu-copy` counterfactual to remove that remaining
-input-identity ambiguity. **That counterfactual has not been run.**
+native GPU LayerNorm1 in the first profile. The **6 November physical CPU-copy control has since run**: both input SHA-256 values were **`6e33dd589ce2fdc69f953fe1e195016076b883a7948f72a002de05fb49056cb5`**, input max error **0.0**, but output max error remained **4.127624988555908**, repeats **0.0/0.0**, and the selected dispatch was still **`ISA803_KLA...WGM8`**. The profiled/unprofiled GPU output SHA-256 values also matched (**`5cf48cfd8c88fc29fbe4f10131232f7a6c245a5291039debada0e5f5349a1607`**). See [first-party commit `469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79). The local raw CPU-copy trace is not yet committed, so this is an attributed reported result rather than our independent byte-level rehash.
 
 Schaka's WGM assembly patch is directly relevant, **but a second
 FP32 SGEMM bug persists independently of WGM mapping** in his
@@ -770,12 +775,14 @@ release promotion. The accepted SDK shell exports the relocated
 shim, not the obsolete `/opt/rocm` path. The code and mock
 negative tests are committed; real Nix/GPU execution remains open.
 
-Next: same-byte QKV input control → WGM1/WGM8 solution A/B from
+Next: **same-byte QKV input control complete** → WGM1/WGM8 solution A/B from
 the **same rocBLAS build** (reuse
 [Schaka's 6.4.4 enumerator](https://github.com/Schaka/rocm-gfx803/blob/main/rocm6.4.4/tools/rocblas_solution_scan.cpp))
 → pinned 10.1 shim-on/shim-off test → entire dense-model parity →
 focused C2 training gate. The shim-off arm is *only* a negative
 control; GPU training remains blocked.
+
+The [6 November upstream-author / first-party evidence ledger](docs/GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md) assigns the two Schaka fixes, QKV source observations, original KFD ownership, and unpublished Nix work to their respective producers. The specific **WGM1-versus-WGM8 same-build solution A/B remains unexecuted**; do not promote this measured dispatch into a proven causal fix or training clearance.
 
 ### Modern ROCm 10.1 Nix factory — current source implementation
 
