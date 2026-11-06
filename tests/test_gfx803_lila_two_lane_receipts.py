@@ -57,6 +57,25 @@ class DualLaneAdjudicationTests(unittest.TestCase):
         self.assertFalse(adjudicate("6.4-cpu-linear",gate)
                          ["numerical_hybrid_diagnostic_passed"])
 
+    def test_64_real_wgm1_gpu_qkv_still_not_training_admitted(self):
+        gate=common_gate("6.4")
+        gate["admitted"]=False
+        gate["gate_only_hybrid"]=True
+        gate["linear_repair"]={
+            "kind":"cpu-fp32-linear-diagnostic","installed":True,
+            "gpu_linear_calls_repaired":17,
+            "training_admission":"denied","full_gpu_execution":False,
+            "wgm1_qkv":{"forced_qkv_gpu_forward_calls":3,
+                         "source_join_sha256":"d"*64,
+                         "torch_default_rocblas_sgemm_fixed":False,
+                         "gpu_backward":False,"admission":"denied"}}
+        got=adjudicate("6.4-wgm1-qkv",gate)
+        self.assertTrue(got["numerical_hybrid_diagnostic_passed"])
+        self.assertFalse(got["training_admitted"])
+        gate["linear_repair"]["wgm1_qkv"]["forced_qkv_gpu_forward_calls"]=0
+        self.assertFalse(adjudicate("6.4-wgm1-qkv",gate)
+                         ["numerical_hybrid_diagnostic_passed"])
+
     def test_101_candidate_still_not_release(self):
         gate=common_gate()
         summary,on,off=shim_evidence(gate)
