@@ -738,6 +738,45 @@ also check whether its hooks change the uninstrumented GPU result
 before attributing a failure to Schaka's assembly WGM patch.
 See the [exact evidence and runtime-selection cut](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md#5-nov-2026-leech-failed-despite-legacy-default-safe-profile).
 
+### Exact Leech QKV WGM8 dispatch and Schaka SGEMM preload — 6 November
+
+The real, unrenamed
+[Leech QKV profiler receipt](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/receipts/gfx803_qkv_wgm8_attribution_20261106.json)
+confirms `ISA803_KLA...WGM8` for the genuine block-0 QKV
+`rocblas_sgemm(T,N,1152,128,384)`, with **4.127625** maximum
+CPU↔GPU error. The original unrenamed tar archive SHA-256 is
+`20abfb4c72b2cde0da42e5a1e1792ece80a162911bc59d9119a5fade22c3d9aa`.
+Profiled/unprofiled output hashes match, and isolated GPU QKV repeats
+show zero drift. The QKV input hashes differ slightly between CPU and
+native GPU LayerNorm1; the Leech probe now has a separate
+`--input-source cpu-copy` counterfactual to remove that remaining
+input-identity ambiguity. **That counterfactual has not been run.**
+
+Schaka's WGM assembly patch is directly relevant, **but a second
+FP32 SGEMM bug persists independently of WGM mapping** in his
+historical same-ABI research. His
+[final Dockerfile](https://github.com/Schaka/rocm-gfx803/blob/main/docker/final.Dockerfile)
+therefore explicitly sets
+`LD_PRELOAD=/opt/rocm/lib/libgfx803_sgemm_shim.so`. A Nix binary
+import that carries only the patched ROCm files and silently drops
+the image's essential preload environment is **not functionally
+equivalent to the validated Schaka image**.
+
+This branch now checks the published OCI environment and the
+staged shim (`gfx803_oci_runtime_contract.py`), writes its
+relocated Nix path into the candidate, and requires both the
+exact preload and separate physical proof of its execution before
+release promotion. The accepted SDK shell exports the relocated
+shim, not the obsolete `/opt/rocm` path. The code and mock
+negative tests are committed; real Nix/GPU execution remains open.
+
+Next: same-byte QKV input control → WGM1/WGM8 solution A/B from
+the **same rocBLAS build** (reuse
+[Schaka's 6.4.4 enumerator](https://github.com/Schaka/rocm-gfx803/blob/main/rocm6.4.4/tools/rocblas_solution_scan.cpp))
+→ pinned 10.1 shim-on/shim-off test → entire dense-model parity →
+focused C2 training gate. The shim-off arm is *only* a negative
+control; GPU training remains blocked.
+
 ### Modern ROCm 10.1 Nix factory — current source implementation
 
 The [Phase A/B/C/D roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md)
