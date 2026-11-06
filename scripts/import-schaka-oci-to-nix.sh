@@ -90,6 +90,10 @@ try:
     from scripts.gfx803_component_graph import parse_pins
 except ModuleNotFoundError:
     from gfx803_component_graph import parse_pins
+try:
+    from scripts.gfx803_oci_runtime_contract import inspect_runtime
+except ModuleNotFoundError:
+    from gfx803_oci_runtime_contract import inspect_runtime
 
 payload = json.load(open(sys.argv[1]))
 labels = payload.get("Labels") or {}
@@ -110,7 +114,11 @@ try:
     parse_pins(labels.get("io.rocm.gfx803.pins"))
 except ValueError as exc:
     raise SystemExit("OCI LABEL MISMATCH: incomplete source pin graph: " + str(exc))
-print("Source, release, final-stage and all eight source pins match")
+try:
+    inspect_runtime(payload)
+except ValueError as exc:
+    raise SystemExit("OCI RUNTIME ENV MISMATCH: " + str(exc))
+print("Source, release, final-stage, eight source pins and SGEMM shim runtime contract match")
 PY
 
 echo "Fetching immutable, matching OCI image digest: $IMAGE"
@@ -128,6 +136,9 @@ python3 "$scripts_dir/gfx803_oci_links.py" \
   --rootfs "$root" --tree /opt/rocm --out "$scratch/staged-rocm" \
   --report "$OUT/rocm-links.json"
 rocm_store="$(nix store add-path "$scratch/staged-rocm")"
+python3 "$scripts_dir/gfx803_oci_runtime_contract.py" \
+  --inspect "$OUT/oci-inspect.json" --stage "$scratch/staged-rocm" \
+  --store "$rocm_store" --out "$OUT/runtime-env.json"
 venv_store=''
 if ((WITH_VENV)); then
   [[ -d "$root/opt/venv" ]] || { echo "No /opt/venv in image" >&2; exit 3; }
@@ -169,6 +180,9 @@ manifest = {
         "published_release_line": labels["io.rocm.gfx803.line"],
         "published_component_pins": labels["io.rocm.gfx803.pins"],
         "runtime_relocation": "unverified",
+        "original_runtime_env_contract": "runtime-env.json",
+        "required_sgemm_shim_preload": os.environ["ROCM_STORE"] + "/lib/libgfx803_sgemm_shim.so",
+        "sgemm_shim_loaded_and_correct": "unverified",
         "rocm_symlink_relocation_report": "rocm-links.json",
         "rocm_unresolved_symlinks": len(link_report["unresolved"]),
         "venv_symlink_relocation_report": ("venv-links.json" if venv_report else None),
@@ -187,4 +201,4 @@ python3 "$scripts_dir/gfx803_component_graph.py" \
 echo "Imported into Nix store: $rocm_store"
 [[ -z "$venv_store" ]] || echo "Python environment: $venv_store"
 echo "Candidate manifest: $OUT/candidate.json"
-echo "NOT PROMOTED. Reported symlinks are staged; ELF/venv relocation and runtime correctness remain unverified."
+echo "NOT PROMOTED. Runtime shim captured structurally; ELF/venv relocation, preload execution, and GPU correctness remain unverified."
