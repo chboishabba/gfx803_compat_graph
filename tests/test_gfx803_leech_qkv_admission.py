@@ -45,7 +45,7 @@ class QKVRawEvidenceContractTests(unittest.TestCase):
             with self.assertRaisesRegex(QKVAdmissionError,"nonfinite"):
                 fp32_compare(ref,gpu,atol=.001,rtol=.0001)
 
-    def make_trace(self, base, arm="on", symbol="gfx803_sgemm_gfx803"):
+    def make_trace(self, base, arm="on", symbol="gfx803_sgemm_kernel"):
         p=base/arm/"profiler"
         p.mkdir(parents=True)
         with (p/"demo_marker_api_trace.csv").open("w",newline="") as f:
@@ -64,9 +64,21 @@ class QKVRawEvidenceContractTests(unittest.TestCase):
             root=Path(td)
             self.make_trace(root)
             self.assertEqual(actual_profiler_kernels(root/"on/profiler","on"),
-                             {"gfx803_sgemm_gfx803"})
+                             {"gfx803_sgemm_kernel"})
             with self.assertRaisesRegex(QKVAdmissionError,"ROCTX"):
                 actual_profiler_kernels(root/"on/profiler","off")
+
+    def test_marker_or_memset_name_cannot_replace_actual_gemm_kernel(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.make_trace(root, symbol="leech:qkv:sgemm-shim:on")
+            with self.assertRaisesRegex(QKVAdmissionError, "no actual"):
+                actual_profiler_kernels(root / "on/profiler", "on")
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self.make_trace(root, symbol="__amd_rocclr_fill")
+            with self.assertRaisesRegex(QKVAdmissionError, "no actual"):
+                actual_profiler_kernels(root / "on/profiler", "on")
 
     def test_reported_kernel_without_CSV_is_not_proof(self):
         with tempfile.TemporaryDirectory() as td:
