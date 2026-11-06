@@ -8,12 +8,14 @@ or native Nix release acceptance. No GPU executes in this script.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 
 def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
-               on: dict | None = None, off: dict | None = None) -> dict:
+               on: dict | None = None, off: dict | None = None,
+               wgm_join: dict | None = None, wgm_join_sha: str | None = None) -> dict:
     if lane not in ("6.4-cpu-linear", "6.4-wgm1-qkv", "10.1-schaka"):
         raise ValueError("unsupported LILA repair lane")
     checks = gate.get("checks_result", {}).get("checks")
@@ -57,6 +59,28 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
                         len(qkv["source_join_sha256"])==64)
             if not valid_wgm1:
                 errors.append("no genuine WGM1 QKV dispatch receipt")
+            trace=(wgm_join or {}).get("trace") or {}
+            join_valid=(
+                isinstance(wgm_join,dict) and
+                isinstance(wgm_join_sha,str) and
+                wgm_join_sha==qkv.get("source_join_sha256") and
+                wgm_join.get("schema_version")==2 and
+                wgm_join.get("teacher_sha256")==source.get("teacher") and
+                wgm_join.get("rocblas_sha256")==qkv.get("rocblas_sha256") and
+                wgm_join.get("input_sha256")==qkv.get("original_input_sha256") and
+                wgm_join.get("gpu_arch")==arch and
+                wgm_join.get("torch_hip")==gate.get("torch_hip") and
+                wgm_join.get("attribution_complete") is True and
+                wgm_join.get("profile_observer_effect_absent_for_first_output") is True and
+                wgm_join.get("no_training_admission") is True and
+                isinstance(wgm_join.get("unprofiled_repeats_completed"),int) and
+                wgm_join["unprofiled_repeats_completed"]>=100 and
+                wgm_join.get("unprofiled_numerics")=="correct-at-tested-shape" and
+                trace.get("status")=="identified" and trace.get("wgm")==1 and
+                trace.get("unique_kernel_names")==[qkv.get("reported_kernel")]
+            )
+            if not join_valid:
+                errors.append("retained 100-repeat same-source WGM1 join unavailable or inconsistent")
         return {
             "lane": lane, "numerical_hybrid_diagnostic_passed":
                 bool(passed and source_complete and real_gpu and valid_hybrid and not errors),
@@ -111,22 +135,31 @@ def main() -> int:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--lane", choices=["6.4-cpu-linear", "6.4-wgm1-qkv", "10.1-schaka"], required=True)
     p.add_argument("--gate-receipt", type=Path, required=True)
+    p.add_argument("--wgm-join", type=Path,
+                   help="Required for 6.4-wgm1-qkv: original 100-repeat trace_join.json")
     p.add_argument("--shim-ab-dir", type=Path,
                    help="Required for 10.1: directory with summary and per-arm trace joins")
     p.add_argument("--out", type=Path, required=True)
     a=p.parse_args()
     if a.out.exists():
         p.error("refuse to overwrite pre-existing evidence")
+    if a.lane == "6.4-wgm1-qkv" and a.wgm_join is None:
+        p.error("WGM1 needs the original retained 100-repeat trace_join.json")
     if a.lane == "10.1-schaka" and a.shim_ab_dir is None:
         p.error("10.1 requires separately profiled original QKV shim ON/OFF")
     try:
         gate=json.loads(a.gate_receipt.read_text())
-        summary=on=off=None
+        summary=on=off=wgm_join=wgm_join_sha=None
+        if a.wgm_join:
+            raw=a.wgm_join.read_bytes()
+            wgm_join_sha=hashlib.sha256(raw).hexdigest()
+            wgm_join=json.loads(raw)
         if a.shim_ab_dir:
             summary=json.loads((a.shim_ab_dir/"shim_ab_summary.json").read_text())
             on=json.loads((a.shim_ab_dir/"on/trace_join.json").read_text())
             off=json.loads((a.shim_ab_dir/"off/trace_join.json").read_text())
-        result=adjudicate(a.lane,gate,summary=summary,on=on,off=off)
+        result=adjudicate(a.lane,gate,summary=summary,on=on,off=off,
+                          wgm_join=wgm_join,wgm_join_sha=wgm_join_sha)
     except (OSError, ValueError, KeyError, TypeError) as exc:
         result={"lane":a.lane,"training_admitted":False,
                 "release_accepted":False,"errors":[str(exc)]}
