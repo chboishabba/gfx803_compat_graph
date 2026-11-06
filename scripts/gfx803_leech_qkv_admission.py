@@ -20,6 +20,7 @@ import math
 import os
 import shutil
 import struct
+import tempfile
 from pathlib import Path
 
 ORIGINAL_INPUT = "6e33dd589ce2fdc69f953fe1e195016076b883a7948f72a002de05fb49056cb5"
@@ -225,32 +226,42 @@ def verify_bundle(bundle: Path, *, expected_rocm_root: Path,
 
 
 def stage_original_evidence(source: Path, fixture: Path, dest: Path):
+    """Publish only a COMPLETE immutable copy of every original GPU receipt."""
     source, fixture = Path(source).resolve(), Path(fixture).resolve()
     dest = Path(dest)
-    if dest.exists() and any(dest.iterdir()):
-        raise QKVAdmissionError("refuse overwrite of an existing release QKV evidence bundle")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if dest.exists():
+        raise QKVAdmissionError("refuse overwrite of existing release QKV evidence bundle")
+    # Preflight all required source bytes before creating a destination.
     for name in FILES:
         src = fixture / name.split("/", 1)[1] if name.startswith("fixture/") else source / name
         if not src.is_file():
             raise QKVAdmissionError("cannot stage unretained original evidence: " + name)
-        out = dest / name
-        out.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, out)
     for arm in ("on", "off"):
-        original_profiler = source / arm / "profiler"
-        if not original_profiler.is_dir():
-            raise QKVAdmissionError("missing original rocprofv3 trace directory: " + arm)
-        copied = 0
-        for old_csv in original_profiler.rglob("*.csv"):
-            rel = old_csv.relative_to(original_profiler)
-            new_csv = dest / arm / "profiler" / rel
-            new_csv.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(old_csv, new_csv)
-            copied += 1
-        if not copied:
-            raise QKVAdmissionError("no original profiler CSVs for " + arm)
-    if (fixture/"bias.f32").is_file():
-        shutil.copy2(fixture/"bias.f32", dest/"fixture/bias.f32")
+        if not list((source / arm / "profiler").rglob("*.csv")):
+            raise QKVAdmissionError("no original rocprofv3 CSVs for " + arm)
+    temp = Path(tempfile.mkdtemp(prefix=".leech-qkv-evidence-", dir=dest.parent))
+    try:
+        for name in FILES:
+            src = fixture / name.split("/", 1)[1] if name.startswith("fixture/") else source / name
+            target = temp / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, target)
+        for arm in ("on", "off"):
+            original_profiler = source / arm / "profiler"
+            for old_csv in original_profiler.rglob("*.csv"):
+                rel = old_csv.relative_to(original_profiler)
+                new_csv = temp / arm / "profiler" / rel
+                new_csv.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(old_csv, new_csv)
+        if (fixture / "bias.f32").is_file():
+            shutil.copy2(fixture / "bias.f32", temp / "fixture/bias.f32")
+        if dest.exists():
+            raise QKVAdmissionError("release evidence destination changed during staging")
+        os.replace(temp, dest)
+    finally:
+        if temp.exists():
+            shutil.rmtree(temp)
 
 
 def main() -> int:
