@@ -792,3 +792,18 @@ The first three source interfaces exist; the five **physical/digest/release
 acceptance cuts are open**. A scoped QKV correction cannot authorize GPU
 training or an accepted distro binary by itself. No new GitHub Actions or
 Nix evaluation success is asserted.
+
+### 10.1 profiling/runtime coherence addition
+
+The original-QKV shim operator no longer lets a legacy system profiler or
+an inherited interposer enter the 10.1 supervisor: the profiler executable
+must be under the **selected imported ROCm Nix root**. The HIP process
+captures actually mapped ROCm libraries and refuses foreign HIP/HSA/BLAS
+components; the source parser and independent release-side verifier require
+the mapping record and check its file paths under the selected root. A
+candidate without an accessible same-runtime profiler can still obtain
+numeric-only diagnostics, **not** a traced shim mechanism or a release gate.
+
+The real image/digest, matching 10.1 profiler existence, ELF relocation and
+physical zero-mismatch results remain to be established by the operator.
+This is a stricter source gate, not an additional hardware success.
