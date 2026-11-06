@@ -24,3 +24,32 @@ This is a **typed source/claim ownership record**, not a credit transfer or proo
 3. **Consumer acceptance (open):** repeat original bare Leech dense CPU↔GPU parity and GPU repeats; only if admitted test C2 gradients/AdamW and long-run reset safety. A core Nix/Cachix release separately needs complete closure, host-driver/runtime coherence, and clean independent installation.
 
 **Current state:** first-party QKV **input identity and kernel identity verified by the reported physical tests**; *repair effectiveness, general numerical correctness, C2 training and accepted ROCm 10.1 binaries remain unproved*. Treat local-artifact-only measurements as reported until original bytes or independently reproducible receipts are available.
+
+## Source-method and current consumer integration — 6 November
+
+The Leech PR #4 implementation now binds the WGM experiment to 100+ complete
+per-solution runs, one properly attributed profiled dispatch and the same
+original teacher, CPU-copy input/weights, runtime SHA, tolerances and GEMM
+geometry. Its 10.1 shim path requires source-identical separate-process
+ON/OFF arms; the independent verifier in this repository reopened the raw
+FP32 tensor and profiler CSV rather than trusting an asserted JSON pass.
+
+**Additional original Schaka finding (attributed, not reproduced here):**
+the [pinned shim source](https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/sgemm-shim/sgemm_shim.cpp)
+records Schaka's diagnosis of the broader standard-path FP32 problem:
+rocBLAS's device memory pool may reuse GlobalSplitU scratch without zeroing,
+while the gfx803 GSU reduction assumes zero-initialized accumulation.
+Schaka compared workspace-zeroing with his handwritten replacement and
+reported the latter faster on tested shapes. This upstream mechanism claim
+must remain distinct from (i) his separately measured WGM8 assembly-mapping
+defect, (ii) the first-party Leech QKV observation, and (iii) an independent
+kernel-level causal reproduction on this user's physical card. The actual
+replacement kernel is `gfx803_sgemm_kernel` from his pinned header; merely
+seeing `LD_PRELOAD` in the environment is not proof it dispatched.
+
+**No unearned promotion:** the new source validators deliberately refuse
+stale output directory reuse, truncated repeats, mismatched numeric
+thresholds, replaced original bytes, profiler-renamed marker symbols and
+foreign runtime hashes. The code remains source-written until its
+regressions and both physical A/B arms have executed. The Nix digest,
+full-model/C2 gates, reset endurance and Cachix publication remain OPEN.
