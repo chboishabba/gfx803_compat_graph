@@ -866,5 +866,16 @@ python3 scripts/gfx803_lila_two_lane_receipts.py \
 ``` The independent adjudicator recognizes this as a third
 **diagnostic mode** and still refuses native-GPU or training promotion.
 The original `rocblas_sgemm` dispatcher is not modified.
+
+**10.1 bounded C2 stability gate:** the Leech original-model gate additionally
+supports `--stability-steps 20`; it repeatedly computes matched CPU/real-HIP
+focused-C2 loss and gradients, applies 20 in-memory AdamW updates and records
+each post-step CPU/GPU logit residual and same-GPU repeat. The independent
+`10.1-schaka` verdict requires all 20 steps, the full original CPU/GPU
+forward gate, and actual separately profiled Schaka shim ON/OFF kernel identity.
+One successful AdamW update, 3 repeated forwards, or a mere mapped interposer
+cannot satisfy that numerical candidate. This remains *bounded stability*;
+long-run driver hang/reset, full native-batch/shape coverage and reproducible
+Nix binary distribution still require physical acceptance.
 No new hardware, ROCm 10.1 image digest, full native WGM1 dispatcher,
 or numerically drift-free LILA installation is claimed by these changes.
