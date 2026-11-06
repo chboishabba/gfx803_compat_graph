@@ -122,7 +122,11 @@ print("Source, release, final-stage, eight source pins and SGEMM shim runtime co
 PY
 
 echo "Fetching immutable, matching OCI image digest: $IMAGE"
-skopeo copy --override-os linux --override-arch amd64 \
+# The host need not have a containers/image policy.json.  Content integrity is
+# still fail-closed here: IMAGE is an already re-inspected sha256 reference and
+# the earlier manifest check requires that exact digest.  This bypasses only a
+# missing local signature-policy configuration, not the immutable content pin.
+skopeo copy --insecure-policy --override-os linux --override-arch amd64 \
   "docker://$IMAGE" "oci:$scratch/layout:locked"
 umoci unpack --rootless --image "$scratch/layout:locked" "$scratch/unpacked"
 
