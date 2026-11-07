@@ -1,0 +1,47 @@
+name: gfx803 Schaka source watch
+
+# Watch source revisions, not floating container tags. A new revision opens a
+# candidate PR; it never auto-promotes binaries or asserts gfx803 GPU health.
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  propose-source-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve upstream Schaka main to immutable SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git ls-remote https://github.com/Schaka/rocm-gfx803.git refs/heads/main | awk '{print $1}')"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'Cannot resolve Schaka revision' >&2; exit 1; }
+          python scripts/gfx803_release.py update-source --revision "$sha"
+      - name: Admission and importer contract tests
+        run: |
+          python -m unittest discover -s tests -p 'test_gfx803_*.py'
+      - name: Propose source candidate (never stable release)
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: nix/gfx803/upstream.json
+          branch: automation/gfx803-schaka-source-update
+          title: "gfx803 candidate: updated Schaka source revision"
+          commit-message: "Track Schaka gfx803 upstream commit (candidate only)"
+          body: |
+            Automatic source revision candidate. This does **not** imply that
+            any ROCm package rebuilt, an OCI image was digest pinned, or a
+            gfx803 GPU correctness check passed. Source revision changes
+            intentionally invalidate any previous image digest.
+
+            Before release: pin OCI digest, build/import Nix outputs, audit
+            relocation, run on-card compatibility gates, and record evidence.
+          delete-branch: true

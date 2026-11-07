@@ -1,0 +1,64 @@
+name: gfx803 Schaka immutable image digest watch
+
+# Source lock and OCI digest are independent inputs. This hosted job only
+# inspects a public release image and proposes a digest update, never
+# imports large layers, runs GPU workloads, or publishes to Cachix.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 3 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  propose-immutable-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install OCI inspection tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends skopeo jq
+      - name: Resolve and verify selected final image digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo=ghcr.io/schaka/rocm-migraphx-ort-torch-builder
+          line="$(python3 -c 'import json; v=json.load(open("nix/gfx803/upstream.json"))["rocm_version"]; print(".".join(v.split(".")[:2]))')"
+          mkdir -p out/gfx803-digest
+          skopeo inspect --retry-times 3 --override-os linux --override-arch amd64 \
+            "docker://$repo:rocm$line-gfx803" > out/gfx803-digest/inspect.json
+          digest="$(jq -er '.Digest | select(test("^sha256:[0-9a-f]{64}$"))' out/gfx803-digest/inspect.json)"
+          python3 scripts/gfx803_release.py lock-image \
+            --digest "$digest" --inspect out/gfx803-digest/inspect.json
+          python3 -m unittest discover -s tests -p 'test_gfx803_*.py'
+      - name: Propose lock update (never GPU admission)
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: nix/gfx803/upstream.json
+          branch: automation/gfx803-schaka-image-digest
+          title: "gfx803 candidate: lock inspected Schaka 10.1 OCI digest"
+          commit-message: "Lock Schaka gfx803 published OCI digest for pinned source"
+          body: |
+            Proposed immutable OCI digest for the source SHA already selected in
+            nix/gfx803/upstream.json. The inspected manifest reports matching
+            source revision, ROCm line, final stage and resolved component pins.
+
+            **This is publisher-reported provenance, not reproduction proof.**
+            No ROCm payload was imported, relocated, run on gfx803, accepted
+            or published to Cachix. A changed image under the SAME source pin
+            fails closed: review and explicitly update the source/release lane.
+          delete-branch: true
+      - name: Preserve inspection report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gfx803-immutable-image-inspection
+          path: out/gfx803-digest/inspect.json
+          if-no-files-found: warn
