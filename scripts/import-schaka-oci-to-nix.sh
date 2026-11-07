@@ -167,6 +167,17 @@ root="$scratch/unpacked/rootfs"
 python3 "$scripts_dir/gfx803_oci_links.py" \
   --rootfs "$root" --tree /opt/rocm --out "$scratch/staged-rocm" \
   --report "$OUT/rocm-links.json"
+# The published Torch build requests the generic OpenBLAS SONAME while this
+# OCI ships its compatible implementation as librocm-openblas.  Add only this
+# in-tree compatibility alias; it is recorded as source-written packaging and
+# is not evidence of runtime or numerical acceptance.
+openblas_target="$scratch/staged-rocm/lib/host-math/lib/librocm-openblas.so.0.3"
+openblas_alias="$scratch/staged-rocm/lib/libopenblas.so.0"
+[[ -f "$openblas_target" && ! -e "$openblas_alias" && ! -L "$openblas_alias" ]] || {
+  echo "Expected fresh in-tree ROCm OpenBLAS target/alias path is unavailable" >&2
+  exit 3
+}
+ln -s "host-math/lib/librocm-openblas.so.0.3" "$openblas_alias"
 rocm_store="$(nix store add-path "$scratch/staged-rocm")"
 python3 "$scripts_dir/gfx803_oci_runtime_contract.py" \
   --inspect "$OUT/oci-inspect.json" --stage "$scratch/staged-rocm" \

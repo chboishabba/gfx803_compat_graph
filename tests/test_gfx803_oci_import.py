@@ -61,7 +61,7 @@ class OciImportContractTests(unittest.TestCase):
             }, "Env": [k + "=" + v for k, v in REQUIRED_IMAGE_ENV.items()]})
             scripts = {
                 "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then printf "%s\n" ' + shlex.quote(image_labels) + '; fi\n',
-                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm/lib" "$last/rootfs/opt/venv/bin" "$last/rootfs/root/.local/share/uv/python/cpython/bin"\necho shim > "$last/rootfs/opt/rocm/lib/libgfx803_sgemm_shim.so"\necho python > "$last/rootfs/root/.local/share/uv/python/cpython/bin/python3.12"\nln -s /root/.local/share/uv/python/cpython/bin/python3.12 "$last/rootfs/opt/venv/bin/python"\n',
+                "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm/lib/host-math/lib" "$last/rootfs/opt/venv/bin" "$last/rootfs/root/.local/share/uv/python/cpython/bin"\necho shim > "$last/rootfs/opt/rocm/lib/libgfx803_sgemm_shim.so"\necho openblas > "$last/rootfs/opt/rocm/lib/host-math/lib/librocm-openblas.so.0.3"\necho python > "$last/rootfs/root/.local/share/uv/python/cpython/bin/python3.12"\nln -s /root/.local/share/uv/python/cpython/bin/python3.12 "$last/rootfs/opt/venv/bin/python"\n',
                 "nix": shell + 'echo "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
             }
             for name, contents in scripts.items():

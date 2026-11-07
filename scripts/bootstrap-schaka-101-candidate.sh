@@ -114,6 +114,12 @@ if not shim.is_file():
 candidates=[venv/"bin/python",venv/"bin/python3",venv/"venv/bin/python",
             venv/"venv/bin/python3"]
 selection=[str(x) for x in candidates if x.is_file() and x.stat().st_mode & 0o111]
+canonical={str(Path(x).resolve()) for x in selection}
+chosen=selection[0] if len(canonical)==1 and selection else None
+rocblas=rocm/"lib/librocblas.so.5"
+openblas=rocm/"lib/libopenblas.so.0"
+if not rocblas.is_file() or not openblas.is_file():
+    raise SystemExit("Candidate lacks required in-tree rocBLAS/OpenBLAS runtime paths")
 report={
     "state":"candidate-not-admitted",
     "immutable_image":data["image_ref"],
@@ -122,7 +128,9 @@ report={
     "venv_root":str(venv),
     "shim":str(shim),
     "python_candidates":selection,
-    "chosen_python":selection[0] if len(selection)==1 else None,
+    "chosen_python":chosen,
+    "required_ld_library_path":[str(rocm/"lib"),str(rocm/"core-10.1/lib")],
+    "required_ld_preload":[str(rocblas),str(shim)],
     "runtime_execution_verified":False,
     "gpu_parity_verified":False,
     "note":"Select one real Python, run ABI and mapped-library probe before any LILA GPU work."

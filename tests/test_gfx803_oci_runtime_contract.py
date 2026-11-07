@@ -20,6 +20,8 @@ class OciRuntimeContractTests(unittest.TestCase):
             shim = root / "lib/libgfx803_sgemm_shim.so"
             shim.parent.mkdir()
             shim.write_bytes(b"fixture")
+            (root / "lib/librocm-openblas.so.0.3").write_bytes(b"fixture")
+            (root / "lib/libopenblas.so.0").symlink_to("librocm-openblas.so.0.3")
             report = inspect_runtime(image(), rocm_stage=root,
                                      rocm_store="/nix/store/" + "a"*32 + "-rocm")
             self.assertEqual(

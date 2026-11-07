@@ -57,11 +57,14 @@ def inspect_runtime(inspection: dict, *, rocm_stage: Path | None = None,
     if rocm_stage is not None:
         stage = Path(rocm_stage)
         shim = stage / "lib/libgfx803_sgemm_shim.so"
+        openblas_alias = stage / "lib/libopenblas.so.0"
         # This test deliberately follows only the selected staged Nix subtree.
         if not shim.is_file():
             raise RuntimeEnvironmentError("staged ROCm tree lacks the SGEMM preload library")
         if not shim.resolve().is_relative_to(stage.resolve()):
             raise RuntimeEnvironmentError("SGEMM preload escapes selected staged ROCm tree")
+        if not openblas_alias.is_file() or not openblas_alias.resolve().is_relative_to(stage.resolve()):
+            raise RuntimeEnvironmentError("staged ROCm tree lacks in-tree OpenBLAS compatibility alias")
     if rocm_store is not None and not rocm_store.startswith("/nix/store/"):
         raise RuntimeEnvironmentError("expected canonical Nix store runtime root")
     nix_shim = f"{rocm_store}/lib/libgfx803_sgemm_shim.so" if rocm_store else None
@@ -73,12 +76,15 @@ def inspect_runtime(inspection: dict, *, rocm_stage: Path | None = None,
         "shim_container_path": SHIM_OCI,
         "shim_nix_preload_path": nix_shim,
         "shim_staged_file_observed": rocm_stage is not None,
+        "openblas_compatibility_alias": (
+            f"{rocm_store}/lib/libopenblas.so.0" if rocm_store else None),
         "runtime_relocation": "unverified",
         "runtime_preload_execution": "unverified",
         "gpu_numerical_parity": "unverified",
         "notes": [
             "WGM8 assembly miscompute and pervasive FP32 SGEMM miscompute are distinct.",
             "A Nix consumer must preload the relocated shim, not the original /opt path.",
+            "Preload candidate rocBLAS before the shim to prevent its /opt RUNPATH selecting host ROCm.",
             "Do not append arbitrary foreign LD_PRELOAD libraries to the accepted runtime.",
             "GFX803_SGEMM_SHIM_DISABLE=1 is for isolated negative-control tests only.",
         ],
