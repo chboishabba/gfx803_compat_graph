@@ -21,10 +21,18 @@ is separate evidence from the runtime fault.
 
 ## Candidate patch
 
-`patches/pytorch/gfx803-disable-warptopk.patch` checks the runtime
-`gcnArchName`.  Only `gfx803` declines the ROCm warp-merge top-k route.  The
-existing `launch_gather_topk_kernel` control flow then uses `sbtopk`; no model
-code needs to select `sort`, and no other ROCm architecture changes route.
+The first candidate, `patches/pytorch/gfx803-disable-warptopk.patch`, checks
+the runtime `gcnArchName` and makes only `gfx803` decline the ROCm warp-merge
+TopK route. Hardware evidence showed that its `sbtopk` fallback also faults
+for the authentic router operand. It is retained as a mechanism record, not
+as a successful repair.
+
+The replacement candidate,
+`patches/pytorch/gfx803-topk-sort-fallback.patch`, makes only non-Boolean
+`gfx803` tensors take PyTorch's existing GPU sort-backed TopK path before the
+normal size heuristic. This is the same implementation family as the working
+model-level `torch.sort` control, but still requires on-card API semantic and
+C2 validation.
 
 The guard deliberately checks the architecture token boundary because HIP may
 report a suffix such as `gfx803:xnack-`.
@@ -44,8 +52,8 @@ The verifier only runs `git apply --check`; it does not touch that checkout.
    revision used by the imported candidate.
 2. Apply the candidate patch in a separate, writable source worktree.
 3. Build the wheel for `gfx803` with **`TENSOR_TOPK_OPT_LEVEL=-O0`** and record
-   both this patch SHA-256 and the compiler wrapper/command in the build
-   receipt.  Do not infer that flag from the image revision.
+   both patch SHA-256 values and the compiler wrapper/command in the build
+   receipt. Do not infer that flag from the image revision.
 4. Run the authentic `[2,4]`, `k=2` top-k probe before the full model.  Require
    no GPU fault; compare values and indices with CPU for non-ties, ties, NaNs,
    both `largest` directions, and both sorted modes.
@@ -55,10 +63,9 @@ The verifier only runs `git apply --check`; it does not touch that checkout.
 6. Preserve mapped-library, kernel-name, dmesg/KFD, and receipt hashes before
    considering Cachix publication.
 
-If `sbtopk` also faults or fails the semantic matrix, stop.  A separate
-fallback would need to be designed and validated as an implementation of
-`torch.topk`, including its documented non-stable tie-index behaviour; do not
-promote the model-level `sort` workaround as a general PyTorch substitute.
+The previous `sbtopk` failure is the reason this sort-backed candidate exists.
+Do not promote either candidate, or the model-level sort control, until the
+semantic matrix and native C2 trajectory pass on card.
 
 ## Non-goals
 
