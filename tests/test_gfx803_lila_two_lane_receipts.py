@@ -4,7 +4,7 @@ import unittest
 from scripts.gfx803_lila_two_lane_receipts import adjudicate
 
 
-def common_gate(hip="10.1"):
+def common_gate(hip="7.16.26385"):
     gate = {
         "gpu": {"gcn_arch_name": "gfx803"},
         "torch_hip": hip,
@@ -16,7 +16,7 @@ def common_gate(hip="10.1"):
                 "post_optimizer_step_logits": {"passed": True}}},
         "admitted": True,
     }
-    if hip == "10.1":
+    if hip == "7.16.26385":
         result=gate["checks_result"]
         result["stability_steps_requested"]=20
         result["stability_steps_completed"]=20
@@ -31,7 +31,8 @@ def common_gate(hip="10.1"):
 def shim_evidence(gate):
     meta={"shim_mapped":True,"shim_enabled":True,"shim_sha256":"d"*64,
           "shim_path":"/nix/store/abc-rocm/lib/libgfx803_sgemm_shim.so",
-          "selected_rocm_root":"/nix/store/abc-rocm"}
+          "selected_rocm_root":"/nix/store/abc-rocm",
+          "rocblas_preload":"/nix/store/abc-rocm/lib/librocblas.so.5"}
     gate["shim_runtime_before"]=meta
     gate["shim_runtime_after"]=meta.copy()
     summary={"status":"supports-scoped-interposer-effect",
@@ -41,7 +42,7 @@ def shim_evidence(gate):
              "same_library_shim_fixture_and_numeric_identity":True}
     arm={"teacher_sha256":"a"*64,"shim_sha256":"d"*64,
          "shim_realpath":meta["shim_path"],
-         "required_image_root":meta["selected_rocm_root"],"torch_hip":"10.1"}
+         "required_image_root":meta["selected_rocm_root"],"torch_hip":"7.16.26385"}
     return summary, arm, arm.copy()
 
 
