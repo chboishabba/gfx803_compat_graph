@@ -134,9 +134,16 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
             before.get("rocblas_preload", "")).startswith(
                 str(before.get("selected_rocm_root", "")) + "/lib/"):
         errors.append("missing or mismatched exact same-root rocBLAS preload")
+    # Successful original QKV ON and OFF is valid evidence of a good
+    # patched runtime, but NOT evidence that the shim is causally necessary.
+    # Require both profiler joins to distinguish the shim kernel, regardless
+    # of whether both arms have correct numerics.
     if not (isinstance(summary, dict) and
-            summary.get("status") == "supports-scoped-interposer-effect" and
-            summary.get("shim_effect_at_original_QKV_shape") is True and
+            summary.get("status") in (
+                "supports-scoped-interposer-effect",
+                "both-arms-correct-no-interposer-necessity") and
+            (summary.get("shim_effect_at_original_QKV_shape") is True or
+             summary.get("both_shim_arms_correct_at_tested_QKV_shape") is True) and
             summary.get("both_traces_complete_and_observer_effect_free") is True and
             summary.get("actual_interposer_kernel_discrimination") is True and
             summary.get("same_library_shim_fixture_and_numeric_identity") is True):
