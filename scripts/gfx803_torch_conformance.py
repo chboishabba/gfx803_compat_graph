@@ -81,29 +81,33 @@ def exercise(name: str, torch) -> dict:
     torch.manual_seed(803)
     def rand(*shape):
         return torch.randn(*shape, dtype=torch.float32)
+    leaves = []
+    def track(tensor):
+        leaves.append(tensor)
+        return tensor
     def run(device):
         if name == "tensor_copy":
-            x = rand(2, 64, 384).to(device).requires_grad_()
+            x = track(rand(2, 64, 384).to(device).requires_grad_())
             return x.contiguous().transpose(1, 2).contiguous().square().sum()
         if name == "layernorm_2x64x384":
-            x = rand(2, 64, 384).to(device).requires_grad_()
+            x = track(rand(2, 64, 384).to(device).requires_grad_())
             return torch.nn.functional.layer_norm(x, (384,)).square().mean()
         if name == "softmax_2x4":
-            x = rand(2, 4).to(device).requires_grad_()
+            x = track(rand(2, 4).to(device).requires_grad_())
             return torch.softmax(x, -1).square().sum()
         if name == "matmul_128x384x1152":
-            x = rand(128, 384).to(device).requires_grad_()
+            x = track(rand(128, 384).to(device).requires_grad_())
             w = rand(384, 1152).to(device)
             return (x @ w).square().mean()
         if name == "batched_matmul_2x64x384":
-            x = rand(2, 64, 384).to(device).requires_grad_()
+            x = track(rand(2, 64, 384).to(device).requires_grad_())
             y = rand(2, 384, 64).to(device)
             return torch.bmm(x, y).square().mean()
         if name in ("sort_2x4", "topk_2x4_k2"):
             # Deliberately unequal values: topk tie-order is not specified.
-            x = torch.tensor([[0.1, 0.4, -0.2, 0.7],
+            x = track(torch.tensor([[0.1, 0.4, -0.2, 0.7],
                               [0.9, -0.6, 0.3, 0.2]], dtype=torch.float32,
-                             device=device).requires_grad_()
+                             device=device).requires_grad_())
             if name == "sort_2x4":
                 y, idx = torch.sort(x, dim=-1, descending=True)
                 values = y[:, :2]
@@ -112,23 +116,23 @@ def exercise(name: str, torch) -> dict:
                 values, indices = torch.topk(x, 2, dim=-1)
             return values.square().sum(), indices
         if name == "gather_2x4":
-            x = rand(2, 4).to(device).requires_grad_()
+            x = track(rand(2, 4).to(device).requires_grad_())
             idx = torch.tensor([[3, 1], [0, 2]], device=device)
             return torch.gather(x, 1, idx).square().sum()
         if name == "scatter_add_2x4":
-            x = rand(2, 4).to(device).requires_grad_()
+            x = track(rand(2, 4).to(device).requires_grad_())
             idx = torch.tensor([[0, 1, 0, 1], [1, 0, 1, 0]], device=device)
             return torch.zeros_like(x).scatter_add(1, idx, x).square().sum()
         if name == "embedding_64x384":
-            weight = rand(64, 384).to(device).requires_grad_()
+            weight = track(rand(64, 384).to(device).requires_grad_())
             idx = torch.tensor([1, 7, 2, 7], dtype=torch.long, device=device)
             return torch.nn.functional.embedding(idx, weight).square().sum()
         if name == "conv2d_small":
-            x = rand(1, 2, 8, 8).to(device).requires_grad_()
+            x = track(rand(1, 2, 8, 8).to(device).requires_grad_())
             w = rand(4, 2, 3, 3).to(device)
             return torch.nn.functional.conv2d(x, w, padding=1).square().mean()
         if name == "adamw_384":
-            x = rand(384).to(device).requires_grad_()
+            x = track(rand(384).to(device).requires_grad_())
             opt = torch.optim.AdamW([x], lr=1e-3, foreach=False)
             loss = x.square().sum()
             loss.backward()
@@ -138,6 +142,7 @@ def exercise(name: str, torch) -> dict:
         raise ValueError("Unknown case: " + name)
 
     def once(device):
+        leaves.clear()
         out = run(device)
         if name == "adamw_384":
             return {"forward": out[0], "grad": out[1]}
@@ -149,7 +154,10 @@ def exercise(name: str, torch) -> dict:
         # a hook rather than searching for an inaccessible local tensor.
         # Separate independent backward operator assay is below.
         scalar.backward()
-        return {"forward": scalar.detach(), "indices": idx}
+        if len(leaves) != 1 or leaves[0].grad is None:
+            raise RuntimeError("expected exactly one differentiable input leaf")
+        return {"forward": scalar.detach(), "indices": idx,
+                "grad": leaves[0].grad.detach().clone()}
 
     cpu = once("cpu")
     gpu = once("cuda")
@@ -162,12 +170,7 @@ def exercise(name: str, torch) -> dict:
     if "indices" in cpu:
         idx_equal = bool(torch.equal(cpu["indices"].cpu(), gpu["indices"].cpu()))
         result["indices_equal"] = idx_equal
-    if "grad" in cpu:
-        result["gradient"] = compare(cpu["grad"], gpu["grad"], torch)
-    # Autograd success alone does not imply gradient parity for other cases;
-    # register those as a distinct unassayed component until compared.
-    if "grad" not in cpu:
-        result["gradient_parity_assayed"] = False
+    result["gradient"] = compare(cpu["grad"], gpu["grad"], torch)
     result["passed"] = all(x["passed"] for x in (fwd, rep)) and (
         result.get("indices_equal", True)) and result.get("gradient", {"passed": True})["passed"]
     return result
