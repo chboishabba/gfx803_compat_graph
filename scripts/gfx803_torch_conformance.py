@@ -142,6 +142,8 @@ def exercise(name: str, torch) -> dict:
         raise ValueError("Unknown case: " + name)
 
     def once(device):
+        # Frozen identical inputs across CPU, GPU, and GPU-repeat calls.
+        torch.manual_seed(803)
         leaves.clear()
         out = run(device)
         if name == "adamw_384":
@@ -150,8 +152,7 @@ def exercise(name: str, torch) -> dict:
             scalar, idx = out
         else:
             scalar, idx = out, None
-        # Run generates a fresh x, so inspect gradients of all new leaves via
-        # a hook rather than searching for an inaccessible local tensor.
+        # The paired run returns the first watched differentiable leaf gradient.
         # Separate independent backward operator assay is below.
         scalar.backward()
         if len(leaves) != 1 or leaves[0].grad is None:
