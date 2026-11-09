@@ -67,7 +67,7 @@ if ((DRY_RUN)); then
   exit 0
 fi
 
-for tool in skopeo umoci nix python3 mktemp; do
+for tool in skopeo umoci nix python3 mktemp patchelf nm sha256sum; do
   command -v "$tool" >/dev/null || {
     echo "Missing $tool (use nix develop .#gfx803-oci-build)" >&2
     exit 2
@@ -178,6 +178,53 @@ openblas_alias="$scratch/staged-rocm/lib/libopenblas.so.0"
   exit 3
 }
 ln -s "host-math/lib/librocm-openblas.so.0.3" "$openblas_alias"
+
+# Schaka's published shim is built for /opt/rocm and consequently carries an
+# absolute DT_RPATH.  Do not hide that host dependency with preload order in a
+# purported Nix candidate.  Keep prior imported candidates untouched, patch
+# only this fresh writable staging tree, and retain a byte/hash/dynamic-tag
+# receipt before it becomes a separate content-addressed store path.
+shim_stage="$scratch/staged-rocm/lib/libgfx803_sgemm_shim.so"
+expected_old_rpath='/opt/rocm/lib:/opt/rocm/core-10.1/lib'
+replacement_rpath='$ORIGIN:$ORIGIN/../core-10.1/lib'
+old_rpath="$(patchelf --print-rpath "$shim_stage")"
+[[ "$old_rpath" == "$expected_old_rpath" ]] || {
+  echo "Refusing unexpected upstream shim RPATH: $old_rpath" >&2; exit 3; }
+old_sha="$(sha256sum "$shim_stage" | awk '{print $1}')"
+mapfile -t old_needed < <(patchelf --print-needed "$shim_stage")
+for required in librocblas.so.5 libamdhip64.so.7; do
+  printf '%s\n' "${old_needed[@]}" | grep -Fxq "$required" || {
+    echo "Shim is missing expected DT_NEEDED entry: $required" >&2; exit 3; }
+done
+nm -D --defined-only "$shim_stage" | grep -Eq '[[:space:]]rocblas_sgemm$' || {
+  echo "Shim is missing its rocblas_sgemm interposer symbol" >&2; exit 3; }
+patchelf --force-rpath --set-rpath "$replacement_rpath" "$shim_stage"
+new_rpath="$(patchelf --print-rpath "$shim_stage")"
+[[ "$new_rpath" == "$replacement_rpath" && "$new_rpath" != *'/opt/rocm'* ]] || {
+  echo "Shim relocation left a foreign ROCm RPATH: $new_rpath" >&2; exit 3; }
+mapfile -t new_needed < <(patchelf --print-needed "$shim_stage")
+[[ "${old_needed[*]}" == "${new_needed[*]}" ]] || {
+  echo "Shim relocation unexpectedly changed DT_NEEDED" >&2; exit 3; }
+nm -D --defined-only "$shim_stage" | grep -Eq '[[:space:]]rocblas_sgemm$' || {
+  echo "Shim relocation lost its rocblas_sgemm interposer symbol" >&2; exit 3; }
+SHIM_STAGE="$shim_stage" OLD_RPATH="$old_rpath" NEW_RPATH="$new_rpath" \
+OLD_SHA="$old_sha" OUT_RELOCATION="$OUT/shim-rpath-relocation.json" python3 - <<'PY'
+import hashlib,json,os
+from pathlib import Path
+shim=Path(os.environ["SHIM_STAGE"])
+Path(os.environ["OUT_RELOCATION"]).write_text(json.dumps({
+    "scope":"fresh writable staging copy; prior imported candidates unchanged",
+    "path_in_staged_rocm":"lib/libgfx803_sgemm_shim.so",
+    "original_sha256":os.environ["OLD_SHA"],
+    "relocated_sha256":hashlib.sha256(shim.read_bytes()).hexdigest(),
+    "original_rpath":os.environ["OLD_RPATH"],
+    "relocated_rpath":os.environ["NEW_RPATH"],
+    "foreign_opt_rocm_path_remaining":False,
+    "interposer_symbol_verified":"rocblas_sgemm",
+    "dt_needed_preserved":True,
+    "hardware_or_numerical_acceptance":False,
+},indent=2,sort_keys=True)+"\n")
+PY
 rocm_store="$(nix store add-path "$scratch/staged-rocm")"
 python3 "$scripts_dir/gfx803_oci_runtime_contract.py" \
   --inspect "$OUT/oci-inspect.json" --stage "$scratch/staged-rocm" \
@@ -195,6 +242,7 @@ fi
 OCI_IMAGE="$IMAGE" SCHAKA_SOURCE_REV="$SOURCE_REV" \
   ROCM_STORE="$rocm_store" VENV_STORE="$venv_store" ROCM_VERSION="$rocm_version" \
   OCI_INSPECT="$OUT/oci-inspect.json" OCI_LINKS="$OUT/rocm-links.json" \
+  SHIM_RELOCATION="$OUT/shim-rpath-relocation.json" \
   VENV_LINKS="$OUT/venv-links.json" \
   OUT_MANIFEST="$OUT/candidate.json" python3 - <<'PY'
 import json
@@ -203,6 +251,7 @@ from pathlib import Path
 
 labels = json.loads(Path(os.environ["OCI_INSPECT"]).read_text())["Labels"]
 link_report = json.loads(Path(os.environ["OCI_LINKS"]).read_text())
+shim_relocation = json.loads(Path(os.environ["SHIM_RELOCATION"]).read_text())
 venv_report = (json.loads(Path(os.environ["VENV_LINKS"]).read_text())
                if Path(os.environ["VENV_LINKS"]).is_file() else None)
 store_paths = {"rocm": os.environ["ROCM_STORE"]}
@@ -223,7 +272,10 @@ manifest = {
         "published_source_revision": labels["io.rocm.gfx803.source-rev"],
         "published_release_line": labels["io.rocm.gfx803.line"],
         "published_component_pins": labels["io.rocm.gfx803.pins"],
-        "runtime_relocation": "unverified",
+        "runtime_relocation": "shim-rpath-relocated-and-statically-verified",
+        "shim_rpath_relocation_report": "shim-rpath-relocation.json",
+        "shim_original_sha256": shim_relocation["original_sha256"],
+        "shim_relocated_sha256": shim_relocation["relocated_sha256"],
         "original_runtime_env_contract": "runtime-env.json",
         "required_sgemm_shim_preload": os.environ["ROCM_STORE"] + "/lib/libgfx803_sgemm_shim.so",
         "sgemm_shim_loaded_and_correct": "unverified",

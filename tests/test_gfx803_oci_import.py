@@ -63,6 +63,8 @@ class OciImportContractTests(unittest.TestCase):
                 "skopeo": shell + 'if [[ "$1" == "inspect" ]]; then printf "%s\n" ' + shlex.quote(image_labels) + '; fi\n',
                 "umoci": shell + 'for last; do :; done\nmkdir -p "$last/rootfs/opt/rocm/lib/host-math/lib" "$last/rootfs/opt/venv/bin" "$last/rootfs/root/.local/share/uv/python/cpython/bin"\necho shim > "$last/rootfs/opt/rocm/lib/libgfx803_sgemm_shim.so"\necho openblas > "$last/rootfs/opt/rocm/lib/host-math/lib/librocm-openblas.so.0.3"\necho python > "$last/rootfs/root/.local/share/uv/python/cpython/bin/python3.12"\nln -s /root/.local/share/uv/python/cpython/bin/python3.12 "$last/rootfs/opt/venv/bin/python"\n',
                 "nix": shell + 'echo "/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-mock-gfx803"\n',
+                "patchelf": shell + 'if [[ "$1" == "--print-rpath" ]]; then state="${2}.rpath"; [[ -f "$state" ]] && cat "$state" || printf "/opt/rocm/lib:/opt/rocm/core-10.1/lib\\n"; elif [[ "$1" == "--print-needed" ]]; then printf "librocblas.so.5\\nlibamdhip64.so.7\\n"; else for last; do :; done; printf "%s" "$3" > "${last}.rpath"; fi\n',
+                "nm": shell + 'printf "00000000 T rocblas_sgemm\\n"\n',
             }
             for name, contents in scripts.items():
                 tool = bin_dir / name
@@ -104,7 +106,7 @@ class OciImportContractTests(unittest.TestCase):
             skopeo = bin_dir / "skopeo"
             skopeo.write_text(shell + 'printf "%s\\n" ' + shlex.quote(payload) + '\n')
             skopeo.chmod(0o755)
-            for name in ("umoci", "nix"):
+            for name in ("umoci", "nix", "patchelf", "nm"):
                 stub = bin_dir / name
                 stub.write_text(shell + "exit 99\n")
                 stub.chmod(0o755)

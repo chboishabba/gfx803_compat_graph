@@ -84,7 +84,7 @@ def inspect_runtime(inspection: dict, *, rocm_stage: Path | None = None,
         "notes": [
             "WGM8 assembly miscompute and pervasive FP32 SGEMM miscompute are distinct.",
             "A Nix consumer must preload the relocated shim, not the original /opt path.",
-            "Preload candidate rocBLAS before the shim to prevent its /opt RUNPATH selecting host ROCm.",
+            "A relocated candidate may still preload its own rocBLAS for interposition order; it must not rely on /opt/rocm RPATH resolution.",
             "Do not append arbitrary foreign LD_PRELOAD libraries to the accepted runtime.",
             "GFX803_SGEMM_SHIM_DISABLE=1 is for isolated negative-control tests only.",
         ],
