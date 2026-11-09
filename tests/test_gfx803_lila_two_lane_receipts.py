@@ -110,6 +110,19 @@ class DualLaneAdjudicationTests(unittest.TestCase):
         self.assertFalse(got["training_admitted"])
         self.assertFalse(got["release_accepted"])
 
+    def test_101_accepts_both_correct_qkv_as_noncausal_only(self):
+        gate=common_gate()
+        summary,on,off=shim_evidence(gate)
+        summary["status"]="both-arms-correct-no-interposer-necessity"
+        summary["shim_effect_at_original_QKV_shape"]=False
+        summary["both_shim_arms_correct_at_tested_QKV_shape"]=True
+        got=adjudicate("10.1-schaka",gate,summary=summary,on=on,off=off)
+        self.assertTrue(got["numerical_candidate_supported"])
+        self.assertFalse(got["training_admitted"])
+        summary["both_traces_complete_and_observer_effect_free"]=False
+        self.assertFalse(adjudicate("10.1-schaka",gate,summary=summary,on=on,off=off)
+                         ["numerical_candidate_supported"])
+
     def test_101_rejects_wrong_teacher(self):
         gate=common_gate()
         summary,on,off=shim_evidence(gate)
