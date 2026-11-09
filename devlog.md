@@ -1,5 +1,18 @@
 # Devlog
 
+## 2026-11-09 — Schaka 10.1 shim RPATH relocation
+
+- Preserved the original imported candidate and created a separate
+  content-addressed candidate from the same digest-pinned OCI image.
+- Replaced only the SGEMM shim's verified upstream RPATH
+  `/opt/rocm/lib:/opt/rocm/core-10.1/lib` with
+  `$ORIGIN:$ORIGIN/../core-10.1/lib` in writable staging before Nix import.
+- Verified the relocated shim retains `librocblas.so.5` and `libamdhip64.so.7`
+  DT_NEEDED entries and its `rocblas_sgemm` interposer symbol. A shim-only
+  preload probe mapped candidate ROCm libraries and no `/opt/rocm` library.
+- The result fixes a closure-packaging defect. It does not explain or repair
+  the prior C2 GPU memory fault; numerical model acceptance remains open.
+
 ## 2026-11-06 — Leech QKV hardware attribution and independent upstream fixes
 
 - The LeechTransformer first-party CPU-copy experiment at [commit `469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79) demonstrates **identical CPU/GPU QKV inputs** (SHA-256 `6e33dd589ce2fdc69f953fe1e195016076b883a7948f72a002de05fb49056cb5`), yet **4.127624988555908** max CPU↔GPU error on the original block-0 QKV. Repeats are 0.0; profiler again selects `ISA803_KLA...WGM8`. This resolves the previous LN1-input-confounder question for this isolated run; it does not prove WGM8 is the only issue.
