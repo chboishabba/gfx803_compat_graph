@@ -124,8 +124,16 @@ def adjudicate(lane: str, gate: dict, *, summary: dict | None = None,
                     after.get("selected_rocm_root") and
                  str(before.get("selected_rocm_root", "")).startswith("/nix/store/"))
     if not same_shim: errors.append("same-process shim/root provenance incomplete")
-    if not str(gate.get("torch_hip", "")).startswith("10.1"):
-        errors.append("wrong PyTorch HIP ABI")
+    # The pinned Schaka ROCm 10.1 image reports torch.version.hip
+    # '7.16.26385'; it is a Torch build identifier, not the ROCm tree's
+    # /core-10.1 directory name. Match the actually measured ABI and
+    # selected immutable runtime, not a made-up 10.1 prefix.
+    if gate.get("torch_hip") != "7.16.26385":
+        errors.append("wrong selected Schaka Torch HIP build identifier")
+    if before.get("rocblas_preload") != after.get("rocblas_preload") or not str(
+            before.get("rocblas_preload", "")).startswith(
+                str(before.get("selected_rocm_root", "")) + "/lib/"):
+        errors.append("missing or mismatched exact same-root rocBLAS preload")
     if not (isinstance(summary, dict) and
             summary.get("status") == "supports-scoped-interposer-effect" and
             summary.get("shim_effect_at_original_QKV_shape") is True and
