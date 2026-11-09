@@ -1,5 +1,24 @@
 # Devlog
 
+## 2026-11-09 — gfx803 TensorTopK runtime-dispatch candidate
+
+- The relocated Schaka ROCm 10.1 candidate now has first-party successful
+  frozen-QKV and dense-LILA CPU/GPU parity evidence.  The remaining C2 fault
+  is localized by a preserved GDB trace to
+  `warptopk::warpMergeSortTopK<2,2,64,1,float,unsigned int,true,64>` on the
+  authentic router `[2,4]`, `k=2` invocation.
+- Added a separately attributable, minimal PyTorch source-patch candidate:
+  only runtime `gfx803` declines the ROCm warp-merge TopK route, falling
+  through to upstream `sbtopk`.  The patch applies cleanly to the exact
+  candidate PyTorch revision `d70fd61bab718a3d49b053efa8058efc0566b2b0`.
+- Added a non-mutating exact-revision patch verifier and an operator runbook.
+  The prospective wheel must record both the patch hash and Schaka's distinct
+  `TENSOR_TOPK_OPT_LEVEL=-O0` build setting.  No source wheel was built and no
+  new physical GPU result is claimed here.
+- Repair acceptance remains: full top-k semantic matrix, fault-free authentic
+  probe, C2 forward/backward/update parity and bounded stability.  The
+  model-level `sort` selector remains a diagnostic control only.
+
 ## 2026-11-09 — Schaka 10.1 shim RPATH relocation
 
 - Preserved the original imported candidate and created a separate

@@ -11,8 +11,8 @@ class StandaloneNixToolWiringTests(unittest.TestCase):
     def test_policy_and_recorder_run_from_isolated_script_store(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
-            for name in ("gfx803_component_graph.py", "gfx803_release.py",
-                         "gfx803_capture.py"):
+            for name in ("gfx803_component_graph.py", "gfx803_oci_runtime_contract.py",
+                         "gfx803_release.py", "gfx803_capture.py"):
                 shutil.copy2(Path("scripts") / name, root / name)
             env = os.environ.copy()
             env["PYTHONPATH"] = str(root)

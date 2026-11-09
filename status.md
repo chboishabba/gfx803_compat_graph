@@ -1,8 +1,11 @@
 # Status
 
-- Phase: old-ABI framework rebuild bring-up
-- Milestone: 1 in progress
+- Phase: Schaka ROCm 10.1 gfx803 C2 admission, candidate PyTorch repair
 - Control lane: preserved and untouched
-- Upgrade lane: materialized
-- SDK root: extracted
-- Current blocker: the previous `CMAKE_HIP_FLAGS` injection was malformed at the CMake command line; the workaround is now being passed via `CMAKE_ARGS` as a single HIP flag value before the next rerun
+- Runtime baseline: relocated Schaka candidate passes frozen-QKV and dense-LILA
+  CPU/GPU parity; it is not yet an accepted release
+- Current blocker: `torch.topk` faults in gfx803 `warptopk` for the authentic
+  C2 `[2, 4]`, `k=2` router input
+- Candidate: architecture-scoped TensorTopK dispatch guard that falls through
+  to the existing `sbtopk` route; source build and physical semantic/C2 gates
+  remain open
