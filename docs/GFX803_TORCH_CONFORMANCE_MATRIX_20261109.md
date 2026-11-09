@@ -32,8 +32,12 @@ cd /mnt/truenas/comet-net/gfx803_compat_graph
 PY101=/nix/store/ACTUAL-101-VENV/bin/python
 ROCM101=/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm
 
-# Safe first pass: the already-faulting topk case stays UNASSAYED.
-env -u LD_PRELOAD "$PY101" scripts/gfx803_torch_conformance.py \
+# Safe first pass: the already-faulting topk case stays UNASSAYED.  The
+# imported Python does not embed the ROCm shared-library locations, so bind it
+# only to the selected candidate tree; do not inherit a host /opt/rocm path.
+env -u LD_PRELOAD \
+  LD_LIBRARY_PATH="$ROCM101/lib:$ROCM101/core-10.1/lib" \
+  "$PY101" scripts/gfx803_torch_conformance.py \
   --rocm-root "$ROCM101" \
   --timeout 60 \
   --out out/gfx803-101-conformance-first
@@ -41,7 +45,9 @@ env -u LD_PRELOAD "$PY101" scripts/gfx803_torch_conformance.py \
 # Deliberate topk experiment ONLY after updating to a patched PyTorch wheel,
 # on a controlled machine with kernel/GPU fault logging. Use a fresh output.
 # It can fault or wedge the device; never run this as routine CI.
-env -u LD_PRELOAD "$PY101" scripts/gfx803_torch_conformance.py \
+env -u LD_PRELOAD \
+  LD_LIBRARY_PATH="$ROCM101/lib:$ROCM101/core-10.1/lib" \
+  "$PY101" scripts/gfx803_torch_conformance.py \
   --rocm-root "$ROCM101" \
   --timeout 60 --include-known-faults \
   --out out/gfx803-101-conformance-patched-topk

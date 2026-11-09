@@ -168,7 +168,10 @@ def exercise(name: str, torch) -> dict:
     fwd = compare(cpu["forward"], gpu["forward"], torch)
     rep = compare(gpu["forward"], gpu_repeat["forward"], torch, atol=1e-6, rtol=1e-6)
     result = {"forward": fwd, "repeat": rep}
-    if "indices" in cpu:
+    # Non-selector cases deliberately return ``None`` for indices.  Checking
+    # only key presence would turn every such otherwise-valid assay into a
+    # supervisor fault before its numerical result could be recorded.
+    if cpu.get("indices") is not None:
         idx_equal = bool(torch.equal(cpu["indices"].cpu(), gpu["indices"].cpu()))
         result["indices_equal"] = idx_equal
     result["gradient"] = compare(cpu["grad"], gpu["grad"], torch)
