@@ -135,7 +135,7 @@ def main(argv=None):
     result["counts"]={k:statuses.count(k) for k in
                       ("pass","fail","unsupported","fault","timeout","unassayed")}
     result["status"]="completed" if all(k=="pass" for k in statuses) else "incomplete-or-failed"
-    result["gpu_validated"]=result["status"]=="completed"
+    result["selected_test_nodes_passed"]=result["status"]=="completed"\n    # A finite selected OpInfo subset cannot validate an entire device/backend.\n    result["gpu_validated"]=False
     persist(out/"matrix.json",result)
     return 0 if result["status"]=="completed" else 2
 if __name__=="__main__":sys.exit(main())
