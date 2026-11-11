@@ -19,6 +19,14 @@ import subprocess
 import sys
 import time
 
+# The runner is also loaded directly by offline contract tests.  In that
+# context Python does not add this file's directory to ``sys.path`` as it does
+# when the script is invoked by pathname, so make the sibling assay helpers
+# discoverable in both supported entry modes.
+_SCRIPT_DIR = str(Path(__file__).resolve().parent)
+if _SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPT_DIR)
+
 from gfx803_upstream_assay import check_source, check_runtime, classify, clean_env, persist
 
 STATES=("pass","fail","unsupported","fault","timeout","unassayed","interrupted")
