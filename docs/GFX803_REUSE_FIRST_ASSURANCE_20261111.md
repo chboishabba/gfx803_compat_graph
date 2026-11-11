@@ -8,7 +8,7 @@ software revision, tensor signature, and host environment.
 
 ## Existing assets: run upstream, do not rewrite
 
-- **PyTorch OpInfo:** at pinned `d70fd61bab718a3d49b053efa8058efc0566b2b0`, `test/test_ops.py`, `torch/testing/_internal/common_methods_invocations.py` and `common_device_type.py`. Start with `test_compare_cpu` and `test_variant_consistency_eager` generated **CUDA** tests (HIP uses the CUDA device type in torch). Existing OpInfo tolerances, dtype filters, reference definitions and expected skips remain upstream. Use `scripts/gfx803_upstream_assay.py` to collect and execute actual generated pytest nodes on the exact source, one subprocess per case; retain output and process status. `pytest` and original PyTorch test dependencies must be available in the selected candidate Python; absence is an environment failure, not an unsupported GPU operation.
+- **PyTorch OpInfo:** at pinned `d70fd61bab718a3d49b053efa8058efc0566b2b0`, `test/test_ops.py`, `torch/testing/_internal/common_methods_invocations.py` and `common_device_type.py`. Start with `test_compare_cpu` and `test_variant_consistency_eager` generated **CUDA** tests (HIP uses the CUDA device type in torch). Existing OpInfo tolerances, dtype filters, reference definitions and expected skips remain upstream. Use `scripts/gfx803_upstream_assay.py` to collect and execute actual generated pytest nodes on the exact source, one subprocess per case; retain output and process status. The composed candidate supplies `gfx803-schaka101-pytest-python`: it retains the qualified imported interpreter and Torch wheel while adding pinned Nix pytest/test-support modules. Do not install pytest into the imported venv.
 - **Schaka image validation:** `tools/imgvalidate.sh`, `verify.py`, `tools/correctness-suite/torch_op_suite.py`, `fp16_gemm_sweep.py`, `triton_dot_probe.py` and `tools/tc-staleness/` already exercise coherence, GPU-only execution, GEMM, convolution, Triton and kernel logs with negative controls. `imgvalidate.sh` is written for Podman and `/opt/rocm` in an OCI image; do not claim it has been ported to a native Nix closure just by finding it. Run its constituent scripts with properly translated runtime paths where supported, preserving their original source pins and log interpretation.
 - **Schaka direct MIOpen tests:** `tools/correctness-suite/build.sh` and `run_all.sh` target solver `IsApplicable` boundaries, not merely common tensor shapes. Reuse these first for MIOpen before inventing any new sweeps. The original suite has documented exclusions (e.g., complex MHA Find2.0, specific training-only operations); classify those as **unassayed**.
 - **TheRock/ROCm:** use TheRock's pinned packaging/build graph and its upstream component tests for HIP/ROCr, rocBLAS/rocSOLVER, and compiler functionality. This is a *future separate adapter* until its specific revision and test entrypoints are pinned and verified; do not invent a runner command or silently substitute ROCm 10.1 for another line. Cross-device comparisons should use **separate, immutable device profiles**.
@@ -29,7 +29,7 @@ COMPOSED=/nix/store/ACTUAL-COMPOSED-CANDIDATE
 ROCM=/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm
 python3 scripts/gfx803_upstream_assay.py \
   --source /path/to/pytorch-at-d70fd61 \
-  --python-wrapper "$COMPOSED/bin/gfx803-schaka101-python" \
+  --python-wrapper "$COMPOSED/bin/gfx803-schaka101-pytest-python" \
   --rocm-root "$ROCM" \
   --out out/gfx803-opinfo-collected-20261111
 ```
@@ -40,7 +40,7 @@ bounded subset under the same wrapper (fresh out required):
 ```bash
 python3 scripts/gfx803_upstream_assay.py \
   --source /path/to/pytorch-at-d70fd61 \
-  --python-wrapper "$COMPOSED/bin/gfx803-schaka101-python" \
+  --python-wrapper "$COMPOSED/bin/gfx803-schaka101-pytest-python" \
   --rocm-root "$ROCM" \
   --out out/gfx803-opinfo-execute-20261111 \
   --execute --max-cases 20 --timeout 180

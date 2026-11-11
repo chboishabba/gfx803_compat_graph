@@ -15,6 +15,22 @@ let
   wheel = assertStore wheelStore;
   expectedWheel =
     "/nix/store/0l9bysk6xfx9dsndx9diwqf44x0h6zf2-torch-2.14.0-gfx803-topk-sort-fallback-20261110";
+  # Keep test tooling outside the imported virtual environment.  The latter
+  # is an immutable upstream artifact and deliberately contains only its
+  # shipped runtime dependencies.  This interpreter provides the upstream
+  # PyTorch test harness while loading Torch from the pinned candidate wheel.
+  testPython = pkgs.python312.withPackages (ps: with ps; [
+    pytest
+    expecttest
+    hypothesis
+    numpy
+    filelock
+    ps."typing-extensions"
+    sympy
+    networkx
+    jinja2
+    fsspec
+  ]);
 in
 assert wheelStore == expectedWheel;
 pkgs.runCommand "gfx803-schaka101-torch-candidate-overlay" {
@@ -54,5 +70,18 @@ export LD_PRELOAD="${rocm}/lib/libgfx803_sgemm_shim.so"
 exec "${venv}/bin/python" "\$@"
 EOF
   chmod 0555 "$out/bin/gfx803-schaka101-python"
+  cat > "$out/bin/gfx803-schaka101-pytest-python" <<EOF
+#!${pkgs.bash}/bin/bash
+set -euo pipefail
+export PYTHONNOUSERSITE=1
+export PYTHONPATH="$out/torch-site:${testPython}/lib/python3.12/site-packages"
+export LD_LIBRARY_PATH="${rocm}/lib:${rocm}/core-10.1/lib"
+export LD_PRELOAD="${rocm}/lib/libgfx803_sgemm_shim.so"
+# Keep the imported interpreter: it is the one against which the wheel's
+# compiled extension modules were qualified.  testPython contributes only the
+# pinned pytest/test-support modules through PYTHONPATH.
+exec "${venv}/bin/python" "\$@"
+EOF
+  chmod 0555 "$out/bin/gfx803-schaka101-pytest-python"
   printf '%s\n' 'CANDIDATE ONLY — NOT ADMITTED FOR CACHIX RELEASE OR UNRESTRICTED TRAINING' > "$out/share/gfx803/ADMISSION"
 ''
