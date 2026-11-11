@@ -1,3 +1,5 @@
+import json
+import os
 import subprocess
 import unittest
 from pathlib import Path
@@ -14,10 +16,24 @@ SHA = "8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78"
 
 
 class OciImportContractTests(unittest.TestCase):
-    def call(self, *args):
+    def call(self, *args, env=None):
         return subprocess.run(
-            ["bash", str(SCRIPT), *args], capture_output=True, text=True, check=False
+            ["bash", str(SCRIPT), *args], capture_output=True, text=True,
+            check=False, env=env
         )
+
+    @staticmethod
+    def locked_env(root, digest):
+        """Give each OCI test an isolated, matching source lock."""
+        lock = root / "upstream.json"
+        lock.write_text(json.dumps({
+            "source_revision": SHA,
+            "rocm_version": "10.1.0",
+            "image_digest": "sha256:" + digest,
+        }))
+        env = os.environ.copy()
+        env["GFX803_SOURCE_LOCK"] = str(lock)
+        return env
 
     def test_shell_parses(self):
         subprocess.run(["bash", "-n", str(SCRIPT)], check=True)
@@ -34,15 +50,16 @@ class OciImportContractTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
 
     def test_digest_pinned_dry_run_no_network(self):
-        result = self.call("--image", PREFIX + "a" * 64,
-                           "--source-revision", SHA, "--dry-run")
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("dry-run: pinned image=", result.stdout)
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            result = self.call("--image", PREFIX + "a" * 64,
+                               "--source-revision", SHA, "--dry-run",
+                               env=self.locked_env(Path(td), "a" * 64))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("dry-run: pinned image=", result.stdout)
 
 
     def test_offline_mock_import_writes_unpromoted_manifest(self):
-        import json
-        import os
         import shutil
         import shlex
         import tempfile
@@ -72,6 +89,7 @@ class OciImportContractTests(unittest.TestCase):
                 tool.chmod(0o755)
             env = os.environ.copy()
             env["PATH"] = str(bin_dir) + os.pathsep + env["PATH"]
+            env["GFX803_SOURCE_LOCK"] = self.locked_env(p, "a" * 64)["GFX803_SOURCE_LOCK"]
             out = p / "candidate"
             run = subprocess.run(
                 ["bash", str(SCRIPT), "--image", PREFIX + "a" * 64,
@@ -87,8 +105,6 @@ class OciImportContractTests(unittest.TestCase):
             self.assertEqual(set(candidate["store_paths"]), {"rocm", "venv"})
 
     def test_rejects_inspect_digest_mismatch_before_layer_download(self):
-        import json
-        import os
         import shutil
         import shlex
         import tempfile
@@ -112,6 +128,7 @@ class OciImportContractTests(unittest.TestCase):
                 stub.chmod(0o755)
             env = os.environ.copy()
             env["PATH"] = str(bin_dir) + os.pathsep + env["PATH"]
+            env["GFX803_SOURCE_LOCK"] = self.locked_env(p, "a" * 64)["GFX803_SOURCE_LOCK"]
             run = subprocess.run(
                 ["bash", str(SCRIPT), "--image", PREFIX + "a" * 64,
                  "--source-revision", SHA, "--out", str(p / "candidate")],
