@@ -90,6 +90,12 @@ def run_one(node,number,source,wrapper,root,timeout,output):
             os.killpg(proc.pid,signal.SIGKILL)
             proc.wait()
             exitcode=None
+        except BaseException:
+            # An interrupted supervisor must not orphan a live GPU tenant.
+            if proc.poll() is None:
+                os.killpg(proc.pid,signal.SIGKILL)
+                proc.wait()
+            raise
     evidence=(stdout.read_bytes()+b"\n"+stderr.read_bytes()).decode("utf-8","replace")
     outcome="timeout" if exitcode is None else classify(exitcode,evidence)
     return {"status":outcome,"returncode":exitcode,
