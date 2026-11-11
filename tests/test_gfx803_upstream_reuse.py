@@ -30,7 +30,10 @@ class UpstreamReuseTests(unittest.TestCase):
         self.assertEqual(ops.classify(-6,""),"fault")
         self.assertEqual(ops.classify(137,""),"fault")
         self.assertEqual(ops.classify(1,"1 failed"),"fail")
-        self.assertEqual(ops.classify(1,"1 skipped"),"unsupported")
+        self.assertEqual(ops.classify(0,"1 skipped"),"unsupported")
+        self.assertEqual(ops.classify(0,"1 xfailed"),"unsupported")
+        self.assertEqual(ops.classify(0,"1 xpassed"),"unsupported")
+        self.assertEqual(ops.classify(1,"1 skipped"),"fail")
 
     def test_refuse_missing_source(self):
         with tempfile.TemporaryDirectory() as d:
