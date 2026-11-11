@@ -69,3 +69,40 @@ instead of translating them into novel local test logic.
    "all legacy Radeon compute" remain **unproven**, even with green matrices.
 
 No new GPU or Cachix acceptance result is asserted by this source change.
+
+## Device-indexed capability atlas
+
+The test runner collects generated CUDA OpInfo nodes; these nodes give a
+self-enumerating baseline. Record results in a **separate profile per actual
+card and driver/firmware/kernel combination**. The ledger normalizes
+receipts; it never invents results for untested cases or platforms.
+
+Create a reviewed, explicit JSON profile describing the measured host (fill
+real values; do not copy RX 580 metadata to another card):
+
+```json
+{
+  "architecture": "gfx803",
+  "board": "AMD Radeon RX 580 Series",
+  "kernel": "ACTUAL-RUNNING-KERNEL",
+  "driver": "ACTUAL-DRIVER-BUILD",
+  "rocm_store": "/nix/store/ACTUAL-ROCM-CLOSURE",
+  "torch_wheel_sha256": "0968548982ba69858d2dfe4ec0090ef1ce41ed610f0f9b3b9f38aebe0f0319eb",
+  "source_revision": "8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78"
+}
+```
+
+Then use the **existing** original matrix receipts, never a hand-authored
+"passed" summary:
+
+```bash
+python3 scripts/gfx803_capability_atlas.py \
+  --profile out/gfx803-reviewed-host-profile.json \
+  --receipt topk=out/gfx803-101-topk-semantics-20261111/matrix.json \
+  --receipt opinfo=out/gfx803-opinfo-execute-20261111/matrix.json \
+  --out out/gfx803-capability-atlas-20261111.json
+```
+
+Do not include the optional `opinfo` argument until that matrix actually
+exists. The output remains evidence-only and explicitly denies global compute
+compatibility or release admission.
