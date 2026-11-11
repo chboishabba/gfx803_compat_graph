@@ -106,3 +106,19 @@ python3 scripts/gfx803_capability_atlas.py \
 Do not include the optional `opinfo` argument until that matrix actually
 exists. The output remains evidence-only and explicitly denies global compute
 compatibility or release admission.
+
+
+## TheRock reuse seam (confirmed upstream, not yet a local gfx803 test run)
+
+TheRock is the modular HIP/ROCm build-and-test superproject, not a
+drop-in proof of gfx803 support. Its documented `ctest --test-dir build`
+runs the configured component tests when `BUILD_TESTING` is enabled.
+`build_tools/install_rocm_from_artifacts.py` explicitly supports retrieving
+test artifacts by categories including `hip_tests`, `rocrtst`, `kfdtest`,
+`blas`, `solver` and `miopen`. These are the **upstream entrypoints**
+for expanding below PyTorch, especially streams, memory, events, queues,
+and driver-facing KFD behaviour. Pin a TheRock source and exact matching
+runtime line before running them. Do not copy tests into this repository
+or claim a current 10.1 Schaka runtime automatically matches TheRock main.
+
+TheRock source: https://github.com/ROCm/TheRock
