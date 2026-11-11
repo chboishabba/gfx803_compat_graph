@@ -53,10 +53,13 @@ def ids_from_collection(output):
                       and any(t in line for t in TEMPLATES)))
 
 def classify(rc,output):
-    if rc==0:return "pass"
+    # pytest returns zero even when a case was wholly skipped or xfailed.
+    # Do not confuse those outcomes with an actual GPU numerical pass.
     if rc<0 or rc>=128:return "fault"
-    if re.search(r"\bskipped\b",output,re.I) and "FAILED" not in output:
-        return "unsupported"
+    if re.search(r"\\b(?:skipped|xfailed|xpassed)\\b",output,re.I):
+        return "unsupported" if rc==0 else "fail"
+    if rc==0 and re.search(r"\\bpassed\\b",output,re.I):
+        return "pass"
     return "fail"
 
 def persist(path,data):
