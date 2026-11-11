@@ -22,12 +22,19 @@ pkgs.runCommand "gfx803-schaka101-torch-candidate-overlay" {
 } ''
   set -euo pipefail
   mkdir -p "$out/torch-site" "$out/bin" "$out/share/gfx803"
-  find "${wheel}" -type f -name '*.whl' > "$TMPDIR/wheel-list"
-  test "$(wc -l < "$TMPDIR/wheel-list")" -eq 1 || {
-    echo "require exactly one wheel in the pinned wheel store" >&2
-    exit 1
-  }
-  wheelFile="$(cat "$TMPDIR/wheel-list")"
+  # Cachix restores this fixed-output wheel as a single Nix store file,
+  # whereas a local build artifact is a directory containing the .whl.  Both
+  # forms are content-addressed by wheelStore; normalize only the lookup.
+  if test -f "${wheel}"; then
+    wheelFile="${wheel}"
+  else
+    find "${wheel}" -type f -name '*.whl' > "$TMPDIR/wheel-list"
+    test "$(wc -l < "$TMPDIR/wheel-list")" -eq 1 || {
+      echo "require one wheel file in the pinned wheel store" >&2
+      exit 1
+    }
+    wheelFile="$(cat "$TMPDIR/wheel-list")"
+  fi
   printf '%s  %s\n' '0968548982ba69858d2dfe4ec0090ef1ce41ed610f0f9b3b9f38aebe0f0319eb' "$wheelFile" | sha256sum -c -
   unzip -q "$wheelFile" -d "$out/torch-site"
   test -f "$out/torch-site/torch/__init__.py"
@@ -48,4 +55,4 @@ exec "${venv}/bin/python" "\$@"
 EOF
   chmod 0555 "$out/bin/gfx803-schaka101-python"
   printf '%s\n' 'CANDIDATE ONLY — NOT ADMITTED FOR CACHIX RELEASE OR UNRESTRICTED TRAINING' > "$out/share/gfx803/ADMISSION"
-'';
+''

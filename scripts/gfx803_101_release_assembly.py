@@ -47,7 +47,11 @@ def validate_selector(s, wheel_store=WHEEL_STORE):
                              "strict-original-evidence-promotion"]}
 
 def inspect_wheel(path):
-    wheels=sorted(path.rglob("*.whl")) if path.is_dir() else ([path] if path.suffix==".whl" else [])
+    # A fixed-output Nix store path restored by Cachix is a regular file with
+    # its store name, not necessarily a filename ending in .whl.  A directory
+    # is still accepted for the local builder layout.  Zip validation below
+    # remains the format/identity authority in either case.
+    wheels=sorted(path.rglob("*.whl")) if path.is_dir() else ([path] if path.is_file() else [])
     if len(wheels)!=1:
         raise ValueError("require exactly one published wheel")
     wheel=wheels[0]
@@ -55,7 +59,11 @@ def inspect_wheel(path):
     if digest!=WHEEL_SHA256:
         raise ValueError("wheel SHA256 differs from upstream PR #8 validated artifact")
     with zipfile.ZipFile(wheel) as z:
-        if not wheel.name.startswith("torch-2.14.0") or sum(n.endswith(".dist-info/WHEEL") for n in z.namelist())!=1:
+        metadata=[n for n in z.namelist() if n.endswith(".dist-info/METADATA")]
+        if len(metadata)!=1 or sum(n.endswith(".dist-info/WHEEL") for n in z.namelist())!=1:
+            raise ValueError("wrong wheel identity")
+        text=z.read(metadata[0]).decode("utf-8",errors="strict")
+        if "Name: torch\n" not in text or "Version: 2.14.0+gitd70fd61\n" not in text:
             raise ValueError("wrong wheel identity")
     return {"file":str(wheel),"sha256":digest,"bytes":wheel.stat().st_size}
 

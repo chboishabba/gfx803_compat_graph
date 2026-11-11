@@ -1,10 +1,13 @@
 """Offline source/attestation contracts for Schaka 10.1 candidate release + TopK assay."""
 import importlib.util
+import hashlib
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
+import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -45,6 +48,20 @@ class CandidateOnlyContracts(unittest.TestCase):
     def test_unpinned_wheel_path_denied(self):
         with self.assertRaises(ValueError):
             assembly.validate_selector(self.selector(),"/tmp/torch.whl")
+
+    def test_fixed_output_wheel_file_is_a_valid_wheel_container(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            wheel=Path(tmp)/"cached-wheel-without-extension"
+            # Cachix fixed-output paths need not end with .whl.  The content
+            # and metadata, not the store-file suffix, decide wheel identity.
+            with zipfile.ZipFile(wheel,"w") as z:
+                z.writestr("torch-2.14.0.dist-info/WHEEL","Wheel-Version: 1.0\n")
+                z.writestr("torch-2.14.0.dist-info/METADATA",
+                           "Name: torch\nVersion: 2.14.0+gitd70fd61\n")
+            with mock.patch.object(assembly,"WHEEL_SHA256",
+                                   hashlib.sha256(wheel.read_bytes()).hexdigest()):
+                result=assembly.inspect_wheel(wheel)
+            self.assertEqual(result["file"],str(wheel))
 
     def test_topk_matrix_has_120_unique_cases_and_authentic_shape(self):
         self.assertEqual(len(topk.CASES),120)

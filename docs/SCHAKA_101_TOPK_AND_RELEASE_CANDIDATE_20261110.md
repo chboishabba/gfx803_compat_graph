@@ -66,6 +66,7 @@ VENV=$(python3 -c 'import json;print(json.load(open("out/schaka-oci/import-101/c
 WHEEL=/nix/store/0l9bysk6xfx9dsndx9diwqf44x0h6zf2-torch-2.14.0-gfx803-topk-sort-fallback-20261110
 
 nix-build nix/gfx803/schaka101-composed-candidate.nix \
+  --arg pkgs "(import $(nix flake archive --json . | jq -r '.inputs.nixpkgs.path') { system = \"x86_64-linux\"; })" \
   --argstr rocmStore "$ROCM" \
   --argstr venvStore "$VENV" \
   --argstr wheelStore "$WHEEL" \
