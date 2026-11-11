@@ -1,0 +1,117 @@
+{
+  "admitted": false,
+  "workload": "LeechTransformer focused C2 training",
+  "scope": "same-source CPU vs gfx803 HIP forward, repeat, backward and update",
+  "torch_version": "2.6.0+gitdae14f9",
+  "torch_hip": "6.4.43483-a187df25c",
+  "platform": "Linux-7.3.0-2-cachyos-bore-x86_64-with-glibc2.44",
+  "python": "3.12.11",
+  "hip_launch_blocking": "1",
+  "hsa_override_gfx_version": "8.0.3",
+  "stack_id": "gfx803_pytorch_stack_control",
+  "runtime_family": "rocm64_extracted_control",
+  "torch_python": "/mnt/truenas/comet-net/gfx803_compat_graph/scripts/host-docker-python.sh",
+  "checked_train_rows": 2,
+  "source_sha256": {
+    "teacher": "581fdc3b4b6d169a03e2b06896e10d454fd4f819b40a2836c1d5b76849e4c674",
+    "student": "f26a5d9246bd0e1f89330b4864124835e3df82bb86e4d1da23fdf5fb3c09224c",
+    "train": "d3d7ba68d4316fccad9ae15b4b96a0b184071833927315d182c9237d72659160"
+  },
+  "gpu": {
+    "name": "AMD Radeon Graphics",
+    "gcn_arch_name": "gfx803",
+    "total_memory": 8589934592,
+    "gfx803_attested_by_torch": true
+  },
+  "probe_indices": [
+    0,
+    1
+  ],
+  "full_token_window_length": 64,
+  "checks_result": {
+    "checks": {
+      "dense_cpu_gpu_logits": {
+        "passed": false,
+        "finite": true,
+        "shape": [
+          2,
+          64,
+          2048
+        ],
+        "max_abs_diff": 28.557292938232422,
+        "max_allowed_error": 0.016468225046992302,
+        "fail_count": 262036,
+        "max_reference_abs": 15.468225479125977,
+        "atol": 0.001,
+        "rtol": 0.001
+      },
+      "teacher_layer_input": {
+        "passed": false,
+        "finite": true,
+        "shape": [
+          2,
+          64,
+          384
+        ],
+        "max_abs_diff": 2.3883841037750244,
+        "max_allowed_error": 0.003003655467182398,
+        "fail_count": 49062,
+        "max_reference_abs": 2.003655195236206,
+        "atol": 0.001,
+        "rtol": 0.001
+      },
+      "teacher_layer_ffn": {
+        "passed": false,
+        "finite": true,
+        "shape": [
+          2,
+          64,
+          384
+        ],
+        "max_abs_diff": 1.1904456615447998,
+        "max_allowed_error": 0.0016195476055145264,
+        "fail_count": 49032,
+        "max_reference_abs": 0.6195475459098816,
+        "atol": 0.001,
+        "rtol": 0.001
+      },
+      "dense_gpu_repeat_1": {
+        "passed": false,
+        "finite": true,
+        "shape": [
+          2,
+          64,
+          2048
+        ],
+        "max_abs_diff": 0.20234298706054688,
+        "max_allowed_error": 0.00016274218796752393,
+        "fail_count": 46912,
+        "max_reference_abs": 15.274218559265137,
+        "atol": 1e-05,
+        "rtol": 1e-05
+      },
+      "dense_gpu_repeat_2": {
+        "passed": false,
+        "finite": true,
+        "shape": [
+          2,
+          64,
+          2048
+        ],
+        "max_abs_diff": 0.23707842826843262,
+        "max_allowed_error": 0.00016274218796752393,
+        "fail_count": 46784,
+        "max_reference_abs": 15.274218559265137,
+        "atol": 1e-05,
+        "rtol": 1e-05
+      }
+    },
+    "shape": [
+      2,
+      64
+    ],
+    "layer": 1,
+    "admitted": false,
+    "stage": "teacher numerical parity"
+  }
+}

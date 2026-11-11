@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source_repository": "Schaka/rocm-gfx803",
+  "source_branch": "main",
+  "source_revision": "8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78",
+  "rocm_version": "10.1.0",
+  "image_repository": "ghcr.io/schaka/rocm-migraphx-ort-torch-builder",
+  "image_digest": "sha256:60ac8963d7d43899d242973e1a346233f350816971419f423883a46609b116ca",
+  "state": "source-and-image-pinned",
+  "attribution": "Schaka's original source-level fixes and build implementation; local Nix packaging is independent."
+}

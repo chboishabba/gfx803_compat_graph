@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: gfx803 compatibility graph <noreply@example.invalid>
+Date: Sun, 9 Nov 2026 00:00:00 +0000
+Subject: [PATCH] ROCm: avoid warp-merge TopK on gfx803
+
+The RX 580 C2 router reproduces a GPU VM fault in
+warptopk::warpMergeSortTopK<2,2,64,1,float,unsigned int,true,64> for
+torch.topk on an authentic [2, 4] score tensor.  A model-level
+torch.sort-based selector completes the same 20-step parity/stability
+gate, so this patch changes only the unsafe top-k kernel selection.
+
+On gfx803, retain public torch.topk semantics but choose PyTorch's
+existing sbtopk path instead of warptopk.  Do not apply this to other
+ROCm architectures.  This is a candidate workaround; it needs an
+on-card top-k semantic probe and the C2 gate before promotion.
+
+Upstream context: Schaka's ROCm 10.1 gfx803 build already treats
+TensorTopK specially by compiling it at -O0.  That build workaround is
+separate from this runtime dispatch guard and must remain recorded in
+the resulting build provenance.
+---
+ aten/src/ATen/native/cuda/TensorTopK.cu | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/aten/src/ATen/native/cuda/TensorTopK.cu b/aten/src/ATen/native/cuda/TensorTopK.cu
+index eb47c716c7c..a84c7a3bbfe 100644
+--- a/aten/src/ATen/native/cuda/TensorTopK.cu
++++ b/aten/src/ATen/native/cuda/TensorTopK.cu
+@@ -5,6 +5,7 @@
+ #include <ATen/Dispatch.h>
+ #include <c10/macros/Macros.h>
+ #include <ATen/cuda/CUDAContext.h>
++#include <cstring>
+ #include <ATen/cuda/detail/TensorInfo.cuh>
+ #include <ATen/cuda/detail/OffsetCalculator.cuh>
+ #include <ATen/cuda/ScanUtils.cuh>
+@@ -1489,3 +1490,20 @@ bool should_use_warp_topk(int64_t slice_size, int64_t k) {
++#if defined(USE_ROCM)
++  // gfx803 is wave64, but the ROCm 10.1 WarpMergeSortTopK specialization
++  // faults on the real LILA router shape [2, 4], k=2.  Do not choose that
++  // specialization on this exact architecture; the normal caller falls
++  // through to sbtopk and preserves the public topk API.
++  //
++  // gcnArchName can carry feature suffixes, e.g. "gfx803:xnack-", so match
++  // the architecture token rather than assuming a NUL-terminated prefix.
++  const auto* properties = at::cuda::getCurrentDeviceProperties();
++  constexpr char gfx803[] = "gfx803";
++  if (properties != nullptr &&
++      std::strncmp(properties->gcnArchName, gfx803, sizeof(gfx803) - 1) == 0 &&
++      (properties->gcnArchName[sizeof(gfx803) - 1] == '\0' ||
++       properties->gcnArchName[sizeof(gfx803) - 1] == ':')) {
++    return false;
++  }
++#endif
+ #if !defined(USE_ROCM) || !HAS_WARP_MERGE_SORT()
+   return false;
+ #else

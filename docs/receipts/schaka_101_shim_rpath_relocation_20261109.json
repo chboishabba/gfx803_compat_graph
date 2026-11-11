@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-09",
+  "scope": "Schaka SGEMM-shim packaging relocation; not LILA numerical or training acceptance",
+  "immutable_image": "ghcr.io/schaka/rocm-migraphx-ort-torch-builder@sha256:60ac8963d7d43899d242973e1a346233f350816971419f423883a46609b116ca",
+  "upstream_source_revision": "8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78",
+  "original_candidate_rocm_root": "/nix/store/p60hh8kqz90hpwnnl9pw5az5lhgx7mb0-staged-rocm",
+  "relocated_candidate_rocm_root": "/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm",
+  "shim": {
+    "original_sha256": "df90d4710fdf93ae896425098adb71b8790ef9bbb6f4df6f03ef4935a9e382bd",
+    "relocated_sha256": "0f0739216ec66a561e2c4ee453ac1a9beb27526912d32f04f1ec528f4045c059",
+    "original_rpath": "/opt/rocm/lib:/opt/rocm/core-10.1/lib",
+    "relocated_rpath": "$ORIGIN:$ORIGIN/../core-10.1/lib",
+    "dt_needed_preserved": true,
+    "rocblas_sgemm_symbol_preserved": true
+  },
+  "runtime_probe": {
+    "preload": "relocated shim only",
+    "torch_hip": "7.16.26385",
+    "gpu": "AMD Radeon RX 580 Series",
+    "mapped_rocblas": "/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm/core-10.1/lib/librocblas.so.5.7",
+    "mapped_hip": "/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm/core-10.1/lib/libamdhip64.so.7.16.26385-7da43026e4",
+    "mapped_opt_rocm_library_count": 0
+  },
+  "not_established": [
+    "isolated QKV numerical parity on relocated candidate",
+    "full dense LILA parity",
+    "C2 execution stability",
+    "GPU training admission"
+  ]
+}

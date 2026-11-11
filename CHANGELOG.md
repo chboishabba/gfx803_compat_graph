@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-06 — gfx803 QKV same-input control and upstream credit ledger (PR #5)
+
+- **Attribution firewall / primary sources:** added [the QKV evidence and authorship ledger](docs/GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md). Separately and explicitly credit **Schaka** for (a) the gfx803 assembly WGM!=1 swizzle miscompute, original measured 0/14 WGM8 vs 39/39 WGM1 solutions, and his WGM1 source patch; and (b) the independent, pervasive FP32 standard-path GEMM miscompute and his correctness-first `gfx803_sgemm`/LD_PRELOAD shim. Include source-commit-permalinks and original hardware methodology rather than claiming these patches as our own.
+- **Independent first-party evidence:** [LeechTransformer commit `469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79) reports exact CPU-copy QKV input SHA-256 on CPU and GPU, zero input error, still-broken **4.127624988555908** CPU↔GPU QKV output, zero isolated GPU repeat drift, and the same profiled **ISA803...WGM8** dispatch with unchanged profiled/unprofiled GPU hash. This excludes the prior native LN1 difference as the isolated QKV failure explanation, **not** WGM1 or SGEMM as yet proven fixes.
+- **Release-policy boundary:** the Schaka 10.1 Nix importer and SDK must preserve the original image's `libgfx803_sgemm_shim.so` preload; branch code fail-closes missing/misplaced shim but remains **source-written**, with no accepted OCI digest, executed 10.1 GPU parity, stable binaries, native source rebuild or Cachix release.
+- **Unpaid gates:** original same-build WGM8/WGM1 solution A/B with exact inputs, independent same-image 10.1 shim-on/shim-off control, bare dense parity, strict C2 training admission, sustained reset testing and clean-client Nix release. The CPU-copy raw traces live locally; the linked commit is a reported evidence summary, not an independently rehashed archive.
+
+
 ## 2026-03-30
 
 - added a reduced WhisperX crash-capture mode to the `rocprofv3` wrapper so crashy runs can prefer marker trace plus kernel trace with CSV-only output instead of the heavier default trace set

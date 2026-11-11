@@ -4,6 +4,24 @@ This repository is the working area for getting AMD Polaris cards such as the RX
 
 If you are new here, start with [docs/USER_GUIDE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/USER_GUIDE.md). If you want the shorter repo-orientation version after that, read [docs/START_HERE.md](/home/c/Documents/code/__OTHER/gfx803_compat_graph/docs/START_HERE.md).
 
+## Nix build and binary distribution (candidate lane)
+
+The source-pinned Schaka ROCm 10.1 integration now has a separate Nix/Cachix
+bootstrap and fail-closed release surface. See
+[docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md).
+It is designed to deliver **both** pinned build environments and independently
+cacheable finished ROCm binaries without requiring Docker for consumers.
+The existing extracted 6.4 control is unchanged; no imported modern binary is
+declared stable until relocation and physical gfx803 correctness checks pass.
+
+`nix develop .#gfx803-oci-build` provides the new daemonless OCI/Nix tooling;
+`nix run .#gfx803-schaka-import -- --help` documents the digest-pinned importer.
+Native-from-source Nix derivations and accepted binary closures remain open.
+
+For the complete contributor/patch lineage and the 2025 KFD fix (including
+all original issue and mailing-list references), see
+[prior art, upstream fixes and attribution](#prior-art-upstream-fixes-and-attribution).
+
 ## What this repo is for
 
 This repo currently combines four kinds of work in one place:
@@ -585,3 +603,329 @@ To build a release manifest from benchmark results:
 ```bash
 python scripts/build_release_manifest.py   --results out/drift/benchmark-results.jsonl   --out out/drift/release-manifest.json   --stack-id rocm64_extracted_host   --release-id local-dev
 ```
+
+## Prior art, upstream fixes and attribution
+
+This project continues a community effort to run modern ROCm/HIP/OpenCL and
+frameworks on AMD GCN4/Polaris (`gfx803`, including RX 470/480/570/580)
+after official support was dropped. **This repository does not claim authorship
+of upstream kernel and ROCm fixes.** The focus here is to reuse those fixes,
+package reproducible **Nix build environments and finished binaries**, validate
+compatibility, and distribute accepted closures through Cachix.
+
+### The 2025 gfx7/gfx8 KFD regression was fixed upstream
+
+**Resolved upstream — not an open blocker in the current Nix roadmap.**
+The RX 580 compute-reset failure reported in [ROCm #4965][rocm-4965] and
+on the [Linux kernel mailing list][kfd-lkml] led to:
+
+- **[Upstream Linux commit `34659c1a1f4f`][kfd-upstream]:**
+  `drm/amdkfd: add hqd_sdma_get_doorbell callbacks for gfx7/8`,
+  authored by **Alex Deucher** in June 2025. The earlier reset
+  implementation called a missing gfx7/gfx8 callback. The fix adds
+  the required callback definitions and registers them.
+- **Explicit attribution in the accepted commit:** `Reported-by: Johl Brown`,
+  `Reviewed-by: Jonathan Kim`, `Signed-off-by: Alex Deucher`;
+  references ROCm #4965 and freedesktop issue #4304.
+- **[Backported to Linux 6.15.7][linux-6157].** Earlier suggestions
+  to revert suspect commits were historical troubleshooting workarounds,
+  not the final corrective patch.
+- Primary discussion and evidence: [July 2025 amd-gfx archive][kfd-amd-gfx],
+  [June 2025 LKML exchange][kfd-lkml] ([accessible mirror][kfd-lkml-mirror]),
+  [related ROCm issue #4919][rocm-4919], and [reported issue #4965][rocm-4965].
+
+**Do not relabel that specific 2025 KFD callback bug as outstanding.**
+Later hangs, DMA/VM problems or numerical failures are different observations
+and require independent reproduction. Nix pins userspace packages; it cannot
+itself certify the running host kernel, firmware, board or VBIOS configuration.
+
+### Provenance and reuse
+
+| Original contributor / source | Relevant established work | Integration boundary |
+| --- | --- | --- |
+| **AMD kernel maintainers** (Alex Deucher, Jonathan Kim) and **reporter Johl Brown** | The upstream gfx7/gfx8 KFD callback fix, mailing-list investigation and stable backport | Historical bug fixed; keep kernel/board metadata for any *new* regression |
+| **Luca Bruni** | [ROCm/clr #269][clr-269] isolated ROCm 7+ rejection of legacy `DoorbellType` 0/1; verified a TheRock restoration on RX 550 | Enumeration is distinct from GPU calculation correctness |
+| **Schaka — assembly WGM defect** | [Original gfx803 WGM solution scan][schaka-wgm-scan] (**0/14 WGM8 assembly pass; 39/39 WGM1 pass; 2/2 WGM8 source pass**) and [his WorkGroupMapping=1 source patch][schaka-wgm] | **Schaka owns the investigation and repair.** First-party QKV WGM8 identification is a separate observation, not credit for the patch nor causal proof of this Leech failure. |
+| **Schaka — independent FP32 SGEMM defect** | [His separate 6.4.4 kernel research][schaka-kernel-bugs], [replacement SGEMM][schaka-sgemm-code] and [LD_PRELOAD dispatch shim][schaka-sgemm-shim], carried into [his final ROCm image][schaka-final] | **Schaka owns this second root-cause investigation and shim.** Do not collapse it into WGM1, or claim Nix wrapping independently fixes FP32 GEMM. |
+| **Schaka — other ROCm 10.x work** | [rocm-gfx803][schaka-repo] builds, wave64, CLR/ROCr, MIOpen, coherence and frameworks | Pin exact sources, preserve upstream patch ownership and independently check local execution. |
+| **ROCm/TheRock and AMD component owners** | [RX580 upstream request #9118][therock-9118], [WX7100 request #9210][therock-9210], component build/target infrastructure | A community working build is not official AMD support |
+| **Robert Rosenbusch** | [gfx803_rocm][robert-repo] source builds, containers and framework bring-up (PyTorch, ComfyUI, WhisperX) | Retain useful reproducers, not whole containers in runtime closures |
+| **lamikr / rocm_sdk_builder contributors** | [rocm_sdk_builder][lamikr-repo] older multi-component build recipes and ABI/dependency debugging | Historical build evidence, not a second independent ROCm 10.1 patch fork |
+| **gfx803_compat_graph and community testers** | Nix/Cachix packaging, 5.7/6.4 baselines, compatibility graph and reproducible drift/stress probes | Separate source-written, imported binary, native Nix build, executed hardware test and accepted release claims |
+
+### Distinguish the fixed KFD callback bug from later numerical regressions
+
+The [ComfyUI corruption thread #43][robert-43] is a particularly useful
+negative control for **ROCm userspace numerical correctness**, not evidence
+that the historical 2025 kernel callback fix failed. Users on RX 570/580
+reported that ROCm 6.4 image generation could yield corrupted results even
+with `--lowvram`; one also reported `--force-fp32` did not restore correct
+output, while ROCm 5.7 worked in their comparisons. These observations are
+specific to those images, boards, models and installations; they do not prove
+a universal ROCm 6.4 failure. In [October 2026][schaka-43-patches], Schaka
+pointed users toward his source-level PyTorch patches rather than another
+unmodified 6.4 image. In [November 2026][schaka-43], he accurately noted that
+the original Nix 6.4 compatibility environment alone does not supply those
+modern PyTorch/ROCm fixes.
+
+This is **not the same issue** as the fixed Linux SDMA reset callback, nor
+the ROCm 7+ userspace legacy-doorbell enumeration check. Maintain independent
+build/ABI, GPU enumeration, kernel dispatch, numerical and repeated-run
+acceptance gates. Schaka's [28 August 2026 report][schaka-aug28] noted
+intermittent vLLM hangs and subsequent evidence of VRAM instability; his
+later README identifies out-of-spec VRAM clocks as a cause of some observed
+VM faults and hangs. Those findings should be tested and scoped independently
+of the already-fixed KFD callback regression.
+
+### Our original test programme (not just community issue reports)
+
+The repository itself already investigated the **same problem family** in
+March 2026, as preserved in [CONTEXT.md](CONTEXT.md),
+[CHANGELOG.md](CHANGELOG.md), [probe_diffusion.py](probe_diffusion.py),
+[tests/drift_core.py](tests/drift_core.py), and
+[POLARIS_STABILITY_BLUEPRINT.md](POLARIS_STABILITY_BLUEPRINT.md).
+The `probe_diffusion.py` source was first committed on **16 March 2026**.
+That same-input mini-UNet test suite recorded **6/7 passes** and a
+`repeated_inference_drift` failure; the retained `itir:latest`
+stable-profile record shows max difference **0.001410** on
+`6.19.7-1-cachyos-bore`. Older GEMM-selection work also recorded
+`GemmFwdRest` drift ~0.15 versus scoped zero drift with the direct-only
+convolution profile. **The project also explicitly tested real ComfyUI
+image generation on gfx803**, including a 5.7-versus-6.4 comparison:
+5.7 generated correct images in the reported tests, whereas 6.4 produced
+corrupted or gradient-like output in the affected setup. The user also
+ran the `direct_only` solver and extracted-runtime ComfyUI paths.
+These application tests must not be reduced to the later MiniUNet surrogate.
+The earlier [ComfyUI issue #43][robert-43] preserves independent community
+image comparisons and the user's participation in that investigation.
+[CHANGELOG.md](CHANGELOG.md) separately records that the extracted 6.4
+host runtime covered ComfyUI, not merely a torch import. The exact
+historical full ComfyUI workflow JSON, model hash, output-image hashes,
+and per-run logs are not all indexed in this GitHub repository; keep that
+**receipt-completeness question separate from whether tests were run**.
+
+Our earlier selected Tensile kernel was `ISA803` assembly ending in
+`WGM8`; see the directly relevant **independently validated upstream
+patch class** in [Schaka's gfx803 WorkGroupMapping repair][schaka-wgm].
+It changes invalid nonidentity assembly workgroup mappings to
+`WorkGroupMapping=1` and is an immediate differential validation target
+on the modern Nix build—not an invitation to independently rewrite
+Schaka's fix.
+
+The repository also **directly reproduced GPU hangs and resets**:
+[20 March Ollama/Mistral compute-ring timeout][hang-ollama],
+[25 March Wayland-visible repeated gfx timeouts][hang-wayland], and
+[27–30 March WhisperX GPU hangs][hang-whisperx], including a
+device-to-host copy/host-wait exposure point, BACO reset and VRAM loss.
+The repo's March 30 `HIP_LAUNCH_BLOCKING=1` run has a recorded
+exit-code-zero summary but lacks a retained complete success trace.
+These are newer evidence surfaces, **not a claim that the already-fixed
+2025 gfx7/gfx8 callback regression persisted**. Trigger attribution
+(VRAM clocks, queue scheduling, GPU VM, pinned pages, DMA or selected
+kernels) must remain scoped to measured circumstances.
+
+See [the dated evidence and exact test-to-patch crosswalk](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md#historical-first-party-numerical-and-hang-evidence--preserve-do-not-rediscover).
+
+[schaka-wgm]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/wgm-miscompute-source.patch
+[schaka-wgm-scan]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/wgm-miscompute.sh
+[schaka-kernel-bugs]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/rocm6.4.4/KERNEL_BUGS.md
+[schaka-sgemm-code]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/sgemm-shim/gfx803_sgemm.h
+[schaka-sgemm-shim]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/patches/rocblas/sgemm-shim/sgemm_shim.cpp
+[schaka-final]: https://github.com/Schaka/rocm-gfx803/blob/8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78/docker/final.Dockerfile
+[hang-ollama]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-20_OLLAMA_MISTRAL_KFD_RESET.md
+[hang-wayland]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-25_WAYLAND_GFX_TIMEOUT_RESET.md
+[hang-whisperx]: https://github.com/chboishabba/gfx803_compat_graph/blob/master/docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md
+
+### LeechTransformer same-runtime admission — November 2026
+
+The [4 November physical Leech C2 GPU receipt](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/receipts/gfx803_control_leech_c2_rejected_20261104.json)
+(SHA-256 `1e3b5640995eaf7ca93517a19cad7f85639926d1e9b817c8b6c0b296e516aa79`)
+**correctly rejected** ROCm 6.4: dense CPU↔gfx803 logits differ
+by **28.5573**, layer-1 normalized input by **2.3884**, and
+same-GPU repeated inference by **0.2023/0.2371**. Training was **not
+launched**. The receipt uses this repository's original
+`scripts/host-docker-python.sh`, which **already defaults** to
+`MIOPEN_DEBUG_CONV_DIRECT=1`, `MIOPEN_DEBUG_CONV_GEMM=0`,
+`MIOPEN_DEBUG_CONV_WINOGRAD=0`, FFT/determinism/cache mitigations,
+and `TORCH_BLAS_PREFER_HIPBLASLT=0`. The old receipt did **not**
+record all effective MIOpen values, so a caller's explicit overrides
+cannot be ruled out. Even exact matching of the convolution-safe
+settings cannot establish transformer GEMM/attention correctness.
+
+[LeechTransformer PR #4](https://github.com/chboishabba/LeechTransformer/pull/4)
+adds an effective-profile/mapped-library diagnostic and an optional,
+diagnostic-only deterministic PyTorch test. The dynamic linker may
+select libraries influenced by Nix shell search paths, so **actual
+mapped rocBLAS/HIP/MIOpen paths**, not merely the shell label or
+Python import success, belong in subsequent receipts. A mixed runtime
+remains a hypothesis until measured. The early layer diagnostic must
+also check whether its hooks change the uninstrumented GPU result
+before attributing a failure to Schaka's assembly WGM patch.
+See the [exact evidence and runtime-selection cut](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md#5-nov-2026-leech-failed-despite-legacy-default-safe-profile).
+
+### Exact Leech QKV WGM8 dispatch and Schaka SGEMM preload — 6 November
+
+The real, unrenamed
+[Leech QKV profiler receipt](https://github.com/chboishabba/LeechTransformer/blob/experiment/consumer-preserving-multiscale-codec-20261031/docs/receipts/gfx803_qkv_wgm8_attribution_20261106.json)
+confirms `ISA803_KLA...WGM8` for the genuine block-0 QKV
+`rocblas_sgemm(T,N,1152,128,384)`, with **4.127625** maximum
+CPU↔GPU error. The original unrenamed tar archive SHA-256 is
+`20abfb4c72b2cde0da42e5a1e1792ece80a162911bc59d9119a5fade22c3d9aa`.
+Profiled/unprofiled output hashes match, and isolated GPU QKV repeats
+show zero drift. The QKV input hashes differ slightly between CPU and
+native GPU LayerNorm1 in the first profile. The **6 November physical CPU-copy control has since run**: both input SHA-256 values were **`6e33dd589ce2fdc69f953fe1e195016076b883a7948f72a002de05fb49056cb5`**, input max error **0.0**, but output max error remained **4.127624988555908**, repeats **0.0/0.0**, and the selected dispatch was still **`ISA803_KLA...WGM8`**. The profiled/unprofiled GPU output SHA-256 values also matched (**`5cf48cfd8c88fc29fbe4f10131232f7a6c245a5291039debada0e5f5349a1607`**). See [first-party commit `469bf00`](https://github.com/chboishabba/LeechTransformer/commit/469bf0026a05bb4ed57271a9aa1b9d038128dd79). The local raw CPU-copy trace is not yet committed, so this is an attributed reported result rather than our independent byte-level rehash.
+
+Schaka's WGM assembly patch is directly relevant, **but a second
+FP32 SGEMM bug persists independently of WGM mapping** in his
+historical same-ABI research. His
+[final Dockerfile](https://github.com/Schaka/rocm-gfx803/blob/main/docker/final.Dockerfile)
+therefore explicitly sets
+`LD_PRELOAD=/opt/rocm/lib/libgfx803_sgemm_shim.so`. A Nix binary
+import that carries only the patched ROCm files and silently drops
+the image's essential preload environment is **not functionally
+equivalent to the validated Schaka image**.
+
+This branch now checks the published OCI environment and the
+staged shim (`gfx803_oci_runtime_contract.py`), writes its
+relocated Nix path into the candidate, and requires both the
+exact preload and separate physical proof of its execution before
+release promotion. The accepted SDK shell exports the relocated
+shim, not the obsolete `/opt/rocm` path. The code and mock
+negative tests are committed; real Nix/GPU execution remains open.
+
+Next: **same-byte QKV input control complete** → WGM1/WGM8 solution A/B from
+the **same rocBLAS build** (reuse
+[Schaka's 6.4.4 enumerator](https://github.com/Schaka/rocm-gfx803/blob/main/rocm6.4.4/tools/rocblas_solution_scan.cpp))
+→ pinned 10.1 shim-on/shim-off test → entire dense-model parity →
+focused C2 training gate. The shim-off arm is *only* a negative
+control; GPU training remains blocked.
+
+The [6 November upstream-author / first-party evidence ledger](docs/GFX803_QKV_ATTRIBUTION_LEDGER_20261106.md) assigns the two Schaka fixes, QKV source observations, original KFD ownership, and unpublished Nix work to their respective producers. The specific **WGM1-versus-WGM8 same-build solution A/B remains unexecuted**; do not promote this measured dispatch into a proven causal fix or training clearance.
+
+### Modern ROCm 10.1 Nix factory — current source implementation
+
+The [Phase A/B/C/D roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md)
+distinguishes **reproducible tools**, **a real imported candidate**,
+**independently hardware-tested binaries**, **native-from-source Nix builds**
+and **stable published releases**. PR #5 currently contains the first
+category and prerequisite source code. An OCI digest has **not** yet been
+accepted into `nix/gfx803/upstream.json`, no 10.1 store tree has been
+imported on a real Nix runner, and no 10.1 hardware results or stable
+Cachix binary release are asserted.
+
+- [`gfx803-schaka-image-digest.yml`](.github/workflows/gfx803-schaka-image-digest.yml)
+  inspects only Schaka's public OCI manifest and proposes an immutable
+  source-to-image digest-lock PR. The manual hardware workflow requires
+  that committed digest; moving tags and conflicting digests are refused.
+- [`gfx803_oci_links.py`](scripts/gfx803_oci_links.py)
+  fixes container-internal `/etc/alternatives/rocm-*` symlinks before
+  Nix import, staging regular files with hardlinks where possible to
+  avoid duplicating multi-GB SDK data in scratch. External symlinks
+  remain explicitly unresolved until verified.
+- [`gfx803_component_graph.py`](scripts/gfx803_component_graph.py)
+  turns Schaka's original eight resolved component SHAs into a source
+  manifest and a precise downstream rebuild plan. It does not pretend
+  an entire ROCm compiler/runtime has already been natively compiled
+  under Nix.
+- [`gfx803_capture.py`](scripts/gfx803_capture.py) records **real command
+  execution** and SHA256 logs; a 6/7 mini-UNet `PARTIAL_PASS` cannot become
+  a green GPU gate just because the old probe exits 0.
+- [`gfx803_comfyui_images.py`](scripts/gfx803_comfyui_images.py)
+  independently replays the **already-performed first-party ComfyUI image
+  comparison** using actual 5.7-good, 6.4-corrupted, and 10.1-candidate
+  PNGs plus a matched model, workflow and seed. The evidence is a
+  narrowly scoped application test, **not** proof of universal numerical
+  correctness. No legacy images, thresholds, or output hashes are
+  fabricated here.
+- [`gfx803_release.py`](scripts/gfx803_release.py) and
+  [`publish-gfx803-accepted.sh`](scripts/publish-gfx803-accepted.sh)
+  require the committed image digest, real physical gfx803 test
+  receipts and the **original log bytes**, rehashed at promotion and
+  Cachix publication. Extra capability claims such as
+  `comfyui_images`, `whisperx_long_run` and `ollama_gpu` each require
+  their own additional passing hardware receipt.
+
+The comparison app is installed separately from the ROCm runtime and
+requires no Docker or GPU itself:
+
+```bash
+nix run .#gfx803-comfyui-images -- \
+  --reference57 path/to/actual-good-5.7.png \
+  --broken64 path/to/actual-corrupted-6.4.png \
+  --candidate101 path/to/actual-10.1-output.png \
+  --workflow path/to/actual-workflow.json \
+  --model path/to/actual-model.safetensors \
+  --seed 42 --max-rmse 0.05 \
+  --out out/comfyui/rocm101-comparison.json
+```
+
+`0.05` is **only an example tolerance**, not a threshold established
+by the original experiments. Set it deliberately from a matched
+baseline and preserve the original images, metadata and result log.
+To record this as an application-level release claim, execute it
+through `nix run .#gfx803-capture-evidence -- --gate comfyui_image ...`
+and set `claimed_capabilities: ["comfyui_images"]` in the candidate
+before admission; the policy will then require that receipt.
+
+### All linked public issues and historical reports
+
+The 13 original user-supplied links are included **verbatim** below.
+These threads document history, community testing, prior fixes and remaining
+build lessons — their presence does not mean each issue is still unresolved.
+
+| Original link | Relevance |
+| --- | --- |
+| [ROCm/legacy-rocm-build #4919][rocm-4919] | Kernel/ROCm compatibility and reporter-provided KFD logs, bisect details and AMD discussion |
+| [ROCm/clr #269][clr-269] | Luca Bruni's ROCm 7+ legacy HSA/CLR doorbell analysis; Schaka's follow-up |
+| [lamikr/rocm_sdk_builder #259][sdk-259] | Eigen/ONNX Runtime source-download hash mismatch |
+| [OpenNMT/CTranslate2 #1072][ct2-1072] | ROCm backend and allocator discussions; numerical/runtime acceptance |
+| [ROCm/legacy-rocm-build #4965][rocm-4965] | User's RX580 KFD regression report — **fixed** by upstream Linux gfx7/8 callback commit |
+| [advanced-lvl-up gfx803/gfx900 #10][adv-10] | Output noise, kernel switching/context stress, ROCm 5.7/6.4 and Nix reproducibility |
+| [arlo-phoenix/CTranslate2-rocm #4][arlo-4] | Request for updated CTranslate2/legacy ROCm containers |
+| [lamikr/rocm_sdk_builder #173][sdk-173] | Original gfx803 support request, build logs, SONAME and segfault analysis |
+| [robertrosenbusch/gfx803_rocm #51][robert-51] | Distributed inference discussion; optional downstream consumer |
+| [ollama/ollama #2453 (timeline page 2)][ollama-2453] | Legacy gfx803 support request, subsequently closed as not planned; Vulkan alternative |
+| [lamikr/rocm_sdk_builder #220][sdk-220] | TorchVision heap-corruption and mixed-library ABI pitfalls |
+| [robertrosenbusch/gfx803_rocm #6][robert-6] | WhisperX framework integration and excessive container/build-disk overhead |
+| [robertrosenbusch/gfx803_rocm #5][robert-5] | ComfyUI, TorchAudio and Python-environment linkage |
+| [robertrosenbusch/gfx803_rocm #43][robert-43] | RX 570/580 ComfyUI output corruption on some ROCm 6.4 configurations while 5.7 worked; a concrete negative numerical regression, not the already-fixed 2025 KFD callback bug |
+
+Related: [TheRock #9118][therock-9118], [TheRock #9210][therock-9210],
+[Schaka's repo][schaka-repo], [upstream KFD fix][kfd-upstream],
+[amd-gfx mailing-list link][kfd-amd-gfx],
+and [LKML follow-up][kfd-lkml].
+
+Evidence must remain ordered: exact sources/patches → build or import →
+runtime/ELF closure → GPU enumeration and dispatch → numerical and
+sustained-load checks → accepted Nix/Cachix release. Schaka's measured
+hardware results are invaluable prior art, but they are not a substitute
+for independent verification of this project's binaries. See
+[the Nix binary-factory roadmap](docs/NIX_GFX803_BINARY_FACTORY_ROADMAP.md).
+
+[rocm-4919]: https://github.com/ROCm/legacy-rocm-build/issues/4919
+[clr-269]: https://github.com/ROCm/clr/issues/269
+[sdk-259]: https://github.com/lamikr/rocm_sdk_builder/issues/259
+[ct2-1072]: https://github.com/OpenNMT/CTranslate2/issues/1072
+[rocm-4965]: https://github.com/ROCm/legacy-rocm-build/issues/4965
+[adv-10]: https://github.com/advanced-lvl-up/Rx470-Vega10-Rx580-gfx803-gfx900-fix-AMD-GPU/issues/10
+[arlo-4]: https://github.com/arlo-phoenix/CTranslate2-rocm/issues/4
+[sdk-173]: https://github.com/lamikr/rocm_sdk_builder/issues/173
+[robert-51]: https://github.com/robertrosenbusch/gfx803_rocm/issues/51
+[ollama-2453]: https://github.com/ollama/ollama/issues/2453?timeline_page=2
+[sdk-220]: https://github.com/lamikr/rocm_sdk_builder/issues/220
+[robert-6]: https://github.com/robertrosenbusch/gfx803_rocm/issues/6
+[robert-5]: https://github.com/robertrosenbusch/gfx803_rocm/issues/5
+[robert-43]: https://github.com/robertrosenbusch/gfx803_rocm/issues/43
+[schaka-43]: https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-6594618560
+[schaka-43-patches]: https://github.com/robertrosenbusch/gfx803_rocm/issues/43#issuecomment-6519100882
+[schaka-aug28]: https://github.com/ROCm/TheRock/issues/9118#issuecomment-6211403475
+[therock-9118]: https://github.com/ROCm/TheRock/issues/9118
+[therock-9210]: https://github.com/ROCm/TheRock/issues/9210
+[kfd-amd-gfx]: https://lists.freedesktop.org/archives/amd-gfx/2025-July/126884.html
+[kfd-lkml]: https://lkml.rescloud.iu.edu/2506.3/04182.html
+[kfd-lkml-mirror]: https://lkml.indiana.edu/hypermail/linux/kernel/2506.3/04182.html
+[kfd-upstream]: https://github.com/torvalds/linux/commit/34659c1a1f4fd4c148ab13e13b11fd64df01ffcd
+[linux-6157]: https://www.opennet.ru/kernel/6.15.7.html
+[schaka-repo]: https://github.com/Schaka/rocm-gfx803
+[robert-repo]: https://github.com/robertrosenbusch/gfx803_rocm
+[lamikr-repo]: https://github.com/lamikr/rocm_sdk_builder

@@ -4,6 +4,8 @@
   nixConfig = {
     extra-substituters = [ "https://gfx803-rocm.cachix.org" ];
     extra-trusted-public-keys = [ "gfx803-rocm.cachix.org-1:UTaIREqPZa9yjY7hiMBYG556OrGR6WEhWPjqX4Us3us=" ];
+    # Required only for accepted binary outputs retrieved with fetchClosure.
+    extra-experimental-features = [ "fetch-closure" ];
   };
 
   inputs = {
@@ -21,6 +23,8 @@
         rocmSupport = true;
       };
     };
+
+    gfx803Nix = import ./nix/gfx803/default.nix { inherit pkgs; };
 
     # Polaris compatibility environment
     gfx803Env = ''
@@ -140,8 +144,10 @@
     };
 
   in {
+    packages.${system} = gfx803Nix.packages;
+    checks.${system} = gfx803Nix.checks;
 
-    devShells.${system} = {
+    devShells.${system} = ({
 
       # ----------------------------------------
       # ROCm base environment
@@ -289,9 +295,9 @@ EOF
           echo "Verify runtime:     verify-whisperx-webui-gfx803-runtime"
         '';
       };
-    };
+    } // gfx803Nix.devShells);
 
-    apps.${system} = {
+    apps.${system} = ({
       drift-matrix = {
         type = "app";
         program = "${pkgs.writeShellScript "drift-matrix" ''
@@ -315,7 +321,7 @@ EOF
         type = "app";
         program = "${verifyWhisperxWebuiRuntime}/bin/verify-whisperx-webui-gfx803-runtime";
       };
-    };
+    } // gfx803Nix.apps);
 
   };
 }
