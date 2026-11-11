@@ -83,6 +83,20 @@ def counts(state):
     statuses=[row["status"] for row in state["cases"].values()]
     return {k:statuses.count(k) for k in STATES}
 
+def unacknowledged_hazards(state):
+    """Return hazardous nodes not covered by a prior explicit recovery.
+
+    A recovery acknowledgement is bound to the exact fault/timeout/interrupted
+    node set seen at the time of inspection.  It must never implicitly bless a
+    later hazardous result merely because a long-running supervisor resumes.
+    """
+    acknowledged=state.get("recovery_acknowledged_hazards",[])
+    if not isinstance(acknowledged,list) or not all(isinstance(node,str) for node in acknowledged):
+        raise ValueError("corrupt recovery acknowledgement")
+    acknowledged=set(acknowledged)
+    return [node for node in state["selected"]
+            if state["cases"][node]["status"] in HALT and node not in acknowledged]
+
 def run_one(node,number,source,wrapper,root,timeout,output):
     stdout=output/f"{number:06d}.stdout"
     stderr=output/f"{number:06d}.stderr"
@@ -154,14 +168,15 @@ def main(argv=None):
             print(json.dumps({"ready":True,"remaining":counts(state)["unassayed"],
                               "execution":False}))
             return 0
-        pending_hazards=[node for node in state["selected"]
-                         if state["cases"][node]["status"] in HALT]
+        pending_hazards=unacknowledged_hazards(state)
         if pending_hazards and not a.recover_after_fault:
             p.error("prior fault/timeout/interruption; inspect GPU health before --recover-after-fault")
         if pending_hazards:
             # Never rerun a faulting node automatically. Preserve its receipt;
             # return to remaining unassayed nodes only after human review.
-            state["manual_recovery_acknowledged"]=True
+            state["recovery_acknowledged_hazards"]=sorted(
+                set(state.get("recovery_acknowledged_hazards",[])) | set(pending_hazards)
+            )
         count=0
         for i,node in enumerate(state["selected"]):
             if state["cases"][node]["status"]!="unassayed":continue

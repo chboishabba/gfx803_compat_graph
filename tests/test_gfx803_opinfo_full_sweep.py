@@ -58,6 +58,17 @@ class FullOpInfoSweepContractTests(unittest.TestCase):
         self.assertEqual(counts["pass"],1)
         self.assertEqual(counts["unassayed"],1772)
 
+    def test_recovery_acknowledgement_is_bound_to_existing_hazard(self):
+        d=self.fixture()
+        state=mod.new_matrix(d,json.dumps(d).encode())
+        first,second=state["selected"][:2]
+        state["cases"][first]={"status":"interrupted"}
+        self.assertEqual(mod.unacknowledged_hazards(state),[first])
+        state["recovery_acknowledged_hazards"]=[first]
+        self.assertEqual(mod.unacknowledged_hazards(state),[])
+        state["cases"][second]={"status":"fault"}
+        self.assertEqual(mod.unacknowledged_hazards(state),[second])
+
     def test_code_compiles(self):
         file=SCRIPTS/"gfx803_opinfo_full_sweep.py"
         compile(file.read_text(),str(file),"exec")
