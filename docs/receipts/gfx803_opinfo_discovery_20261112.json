@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "kind": "reported-hardware-discovery-summary",
+  "raw_matrix": "/mnt/truenas/comet-net/experiments/gfx803_opinfo_full_20261111/matrix.json",
+  "raw_matrix_sha256": "47c7ed58d7b549abfc038b534faaaa9ecaf6ee2fc18b3ba55addebeed02b7e36",
+  "pytorch_source": "d70fd61bab718a3d49b053efa8058efc0566b2b0",
+  "counts": {"pass": 1583, "unsupported": 183, "fail": 3, "fault": 4, "interrupted": 1, "unassayed": 0},
+  "fault_candidates": [
+    "test_variant_consistency_eager_acos_cuda_complex64",
+    "test_variant_consistency_eager_acosh_cuda_complex64",
+    "test_variant_consistency_eager_asin_cuda_complex64",
+    "test_variant_consistency_eager_asinh_cuda_complex64"
+  ],
+  "kernel_signature": "amdgpu VM_CONTEXT1_PROTECTION_FAULT_STATUS 0x1004800C; address 0x0; read from TC4",
+  "interpretation": "All four candidates are complex64 inverse-trigonometric or inverse-hyperbolic operations. This is a correlation from discovery receipts, not yet isolated causal attribution.",
+  "ordinary_failures": [
+    "test_compare_cpu_sparse_sampled_addmm_cuda_float32",
+    "test_compare_cpu_topk_cuda_float32",
+    "test_variant_consistency_eager_topk_cuda_float32"
+  ],
+  "release_admitted": false
+}
