@@ -212,3 +212,41 @@ This adds only the exact tested cases to their original layer; it
 does not mark untested BLAS signatures, compiler options, Triton
 programs or ROCm APIs as supported. Direct-suite and CTest receipts
 can later be joined without changing any original matrix.
+
+
+## P0b: static ROCm library ABI inventory (no GPU calls)
+
+`scripts/gfx803_rocm_abi_inventory.py` inventories actual shared-object
+candidates inside the selected Nix ROCm closure. It detects missing
+libraries, ambiguous ABI revisions and the set of exported ELF
+symbols using an immutable Nix `llvm-nm`/GNU `nm` executable. Unlike
+OpInfo or CTest, this is an **availability surface**, not correctness
+validation. Exported dynamic symbols include private implementation
+details and do **not** enumerate every public API declaration.
+Header-only rocPRIM/hipCUB/rocThrust, compiler-generated kernels,
+Triton JIT and Python interfaces require other inventories.
+
+```bash
+cd /mnt/truenas/comet-net/gfx803_compat_graph
+python3 scripts/gfx803_rocm_abi_inventory.py \
+  --rocm-root /nix/store/ACTUAL-SELECTED-ROCM-CLOSURE \
+  --nm /nix/store/ACTUAL-BINUTILS-PACKAGE/bin/nm \
+  --out /mnt/truenas/comet-net/experiments/gfx803_rocm_abi_20261112 \
+  --symbols
+```
+
+Each library receives a candidate list and, if unambiguous,
+symbol inventory file, binary SHA-256 and inventory SHA-256.
+No GPU operations are executed. A missing shared object, symbol
+or library is a hypothesis about closure contents, **not** a
+measured device functionality failure. API header inventory and
+symbol→test traceability remain additional open gates.
+
+## CTest build-to-source binding
+
+The CTest adapter also requires a `CTestTestfile.cmake` and nearby
+`CMakeCache.txt` with `CMAKE_HOME_DIRECTORY:INTERNAL` matching the
+exact pinned source checkout. It records SHA-256 for both metadata
+files and rejects mismatched CMake homes. That still does not prove
+the process loaded the selected runtime libraries during GPU
+execution: a separate mapped-library/loader receipt is required.
