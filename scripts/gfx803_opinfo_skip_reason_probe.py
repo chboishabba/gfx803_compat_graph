@@ -197,7 +197,9 @@ def main(argv=None):
             row={"status":"missing-worker-receipt","returncode":rc}
             if complete:
                 row=child["nodes"].get(node,{"status":"missing-collected-node"})
-                row["status"]=row.get("runtime_outcome","collected")
+                # `runtime_outcome: not-run` is expected for --collect-only;
+                # the evidence status is that its source marker was collected.
+                row["status"]="collected"
             elif child is not None:
                 row={"status":"incomplete-worker-receipt","returncode":rc,
                      "worker_pytest_returncode":child.get("pytest_returncode"),

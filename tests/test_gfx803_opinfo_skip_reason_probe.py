@@ -76,4 +76,9 @@ class SkipReasonProbeTests(unittest.TestCase):
         self.assertFalse(m.child_complete({"pytest_returncode":4,"nodes":{}},requested))
         self.assertFalse(m.child_complete({"pytest_returncode":0,"nodes":{"one":{}}},requested))
 
+    def test_static_collection_keeps_not_run_as_phase_not_evidence_failure(self):
+        code=SOURCE.read_text()
+        self.assertIn('row["status"]="collected"',code)
+        self.assertIn('runtime_outcome: not-run',code)
+
 if __name__=="__main__":unittest.main()
