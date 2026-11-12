@@ -84,6 +84,14 @@ class Capture:
         for item in items:
             self.rows[item.nodeid]={"markers":marker_record(item),
                                     "runtime_outcome":"not-run"}
+            if self.mode=="setup":
+                # Replace the actual test body, rather than depending only on
+                # pytest_runtest_call hook ordering. Setup and fixture hooks
+                # remain intact; no original operator test body may execute.
+                def blocked_original_body():
+                    import pytest
+                    pytest.skip(GUARD)
+                item.runtest=blocked_original_body
     def pytest_runtest_call(self,item):
         import pytest
         # Even when upstream skip policy disappears, never run the op body.
