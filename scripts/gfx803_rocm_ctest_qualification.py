@@ -117,7 +117,8 @@ def validate_build_source(source:Path,testdir:Path)->dict:
 def initial(layer,source,source_sha,runtime,testdir,ctest,ctest_hash,names,catalog_hash,build_provenance=None):
     return {"schema":1,"layer":layer,"source":source,"source_sha":source_sha,
             "rocm_root":runtime,"test_dir":testdir,"ctest":ctest,
-            "ctest_sha256":ctest_hash,"discovery_sha256":catalog_hash,\n            "build_provenance":build_provenance,
+            "ctest_sha256":ctest_hash,"discovery_sha256":catalog_hash,
+            "build_provenance":build_provenance,
             "all_discovered_tests":names,
             "cases":{n:{"status":"unassayed"} for n in names},
             "status":"planned","gpu_validated":False,"release_admitted":False,

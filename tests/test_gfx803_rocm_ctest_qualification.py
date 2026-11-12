@@ -77,12 +77,12 @@ class ROCmQualificationTests(unittest.TestCase):
             build.mkdir()
             (build/"CTestTestfile.cmake").write_text("add_test(one /bin/true)")
             (build/"CMakeCache.txt").write_text(
-                "CMAKE_HOME_DIRECTORY:INTERNAL="+str(source)+"\\n")
+                "CMAKE_HOME_DIRECTORY:INTERNAL="+str(source)+"\n")
             row=m.validate_build_source(source,build)
             self.assertEqual(row["cmake_home"],str(source))
             self.assertEqual(len(row["ctestfile_sha256"]),64)
             (build/"CMakeCache.txt").write_text(
-                "CMAKE_HOME_DIRECTORY:INTERNAL=/unrelated/source\\n")
+                "CMAKE_HOME_DIRECTORY:INTERNAL=/unrelated/source\n")
             with self.assertRaises(ValueError):
                 m.validate_build_source(source,build)
 

@@ -141,7 +141,9 @@ def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--receipt",action="append",default=[],
                    help="layer-id=/exact/path/to/original/matrix.json")
-    p.add_argument("--schaka-receipt",action="append",default=[],\n                   help="fp16-gemm|triton-dot=/exact/original/matrix.json")\n    p.add_argument("--out",required=True,type=Path)
+    p.add_argument("--schaka-receipt",action="append",default=[],
+                   help="fp16-gemm|triton-dot=/exact/original/matrix.json")
+    p.add_argument("--out",required=True,type=Path)
     a=p.parse_args(argv)
     if a.out.exists():p.error("refuse overwriting aggregate report")
     try:
