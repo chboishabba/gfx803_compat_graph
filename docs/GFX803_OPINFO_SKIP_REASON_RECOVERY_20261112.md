@@ -22,6 +22,9 @@ execute test setup or test bodies. A static `skipif` condition is **not**
 automatically equivalent to a condition evaluated true on gfx803.
 Some runtime skip reasons remain unknown after this phase.
 
+The static child explicitly hides CUDA, HIP and ROCR devices before pytest
+imports PyTorch. It is a source-marker collection step, not a GPU assay.
+
 ```bash
 cd /mnt/truenas/comet-net/gfx803_compat_graph
 AUDIT=/mnt/truenas/comet-net/experiments/gfx803_opinfo_unsupported_audit_20261112.json

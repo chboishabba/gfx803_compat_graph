@@ -21,6 +21,14 @@ import time
 SOURCE_PIN="d70fd61bab718a3d49b053efa8058efc0566b2b0"
 MATRIX_SHA="47c7ed58d7b549abfc038b534faaaa9ecaf6ee2fc18b3ba55addebeed02b7e36"
 GUARD="GFX803_SKIP_REASON_PROBE_BLOCKED_TEST_BODY"
+# Collection imports PyTorch's test configuration. Hiding every device in the
+# child process makes static mode genuinely non-GPU: it can inspect collected
+# markers but cannot create a HIP context.
+STATIC_DEVICE_HIDE_ENV={
+    "CUDA_VISIBLE_DEVICES":"",
+    "HIP_VISIBLE_DEVICES":"",
+    "ROCR_VISIBLE_DEVICES":"",
+}
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
@@ -100,6 +108,8 @@ class Capture:
         return self.rows
 
 def worker(mode,source,nodeids,out):
+    if mode=="static":
+        os.environ.update(STATIC_DEVICE_HIDE_ENV)
     import pytest
     cap=Capture(mode)
     args=["-q"]
@@ -108,7 +118,8 @@ def worker(mode,source,nodeids,out):
     rc=pytest.main(args,plugins=[cap])
     result={"schema":1,"phase":mode,"pytest_returncode":int(rc),
             "nodes":cap.finished(),"release_admitted":False,
-            "gpu_body_executed":False}
+            "gpu_body_executed":False,
+            "device_environment":(STATIC_DEVICE_HIDE_ENV if mode=="static" else None)}
     persist(out,result)
     return 0 if int(rc)==0 and set(result["nodes"])==set(nodeids) else 2
 

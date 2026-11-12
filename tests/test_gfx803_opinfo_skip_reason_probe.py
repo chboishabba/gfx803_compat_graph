@@ -69,4 +69,15 @@ class SkipReasonProbeTests(unittest.TestCase):
         self.assertIn("release_admitted",code)
         compile(code,str(SOURCE),"exec")
 
+    def test_static_worker_hides_every_gpu_before_pytest_import(self):
+        self.assertEqual(m.STATIC_DEVICE_HIDE_ENV,{
+            "CUDA_VISIBLE_DEVICES":"",
+            "HIP_VISIBLE_DEVICES":"",
+            "ROCR_VISIBLE_DEVICES":"",
+        })
+        code=SOURCE.read_text()
+        worker=code.index("def worker")
+        self.assertLess(code.index("os.environ.update(STATIC_DEVICE_HIDE_ENV)",worker),
+                        code.index("import pytest",worker))
+
 if __name__=="__main__":unittest.main()
