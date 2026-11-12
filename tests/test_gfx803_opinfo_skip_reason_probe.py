@@ -61,6 +61,20 @@ class SkipReasonProbeTests(unittest.TestCase):
         self.assertEqual(row[0]["reason"],"ROCm unsupported")
         self.assertEqual(row[1]["name"],"xfail")
 
+    def test_guard_replaces_original_runtest_callable(self):
+        # This is stronger than relying on a pytest_runtest_call hook to
+        # execute before the upstream call implementation.
+        class FakeItem:
+            nodeid="test/test_ops.py::TestCommonCUDA::test_compare_cpu_fake_cuda_float32"
+            def iter_markers(self):return iter(())
+            def runtest(self):raise AssertionError("original body executed")
+        item=FakeItem()
+        original=item.runtest
+        capture=m.Capture("setup")
+        capture.pytest_collection_modifyitems([item])
+        self.assertNotEqual(item.runtest, original)
+        self.assertEqual(capture.rows[item.nodeid]["runtime_outcome"],"not-run")
+
     def test_no_test_body_execution_in_source(self):
         code=SOURCE.read_text()
         self.assertIn('pytest.skip(GUARD)',code)
