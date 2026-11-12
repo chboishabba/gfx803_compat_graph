@@ -35,6 +35,15 @@ class ABIInventoryTests(unittest.TestCase):
             matches=m.discover(root)
             self.assertEqual(len(matches["librocblas"]),2)
 
+    def test_byte_identical_version_aliases_are_one_candidate(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            lib=root/"librocsolver.so.0"
+            lib.write_bytes(b"same binary under two SONAME aliases")
+            (root/"librocsolver.so.0.12").write_bytes(lib.read_bytes())
+            matches=m.discover(root)
+            self.assertEqual(matches["librocsolver"],[str(lib)])
+
     def test_symbols_do_not_claim_public_api(self):
         self.assertIn("rocPRIM",m.HEADER_ONLY)
         self.assertIn("triton",m.NO_ELF_LIBRARY)

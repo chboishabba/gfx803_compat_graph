@@ -49,10 +49,15 @@ def discover(root):
         identity=identify_lib(file.name)
         if identity is None or not file.is_file():continue
         _,name=identity
-        resolved=file.resolve()
-        found[name][str(resolved)]=str(file)
+        # Versioned SONAME aliases in staged OCI imports may be copied rather
+        # than symlinked.  Identical bytes are one ABI candidate; distinct
+        # bytes remain deliberately ambiguous.
+        binary_digest=sha(file.resolve())
+        previous=found[name].get(binary_digest)
+        candidate=str(file)
+        found[name][binary_digest]=min(previous,candidate) if previous else candidate
     # Do not silently pick among incompatible ABI revisions of a library.
-    return {name:sorted(values) for name,values in found.items()}
+    return {name:sorted(values.values()) for name,values in found.items()}
 
 def executable(path):
     path=path.resolve()
