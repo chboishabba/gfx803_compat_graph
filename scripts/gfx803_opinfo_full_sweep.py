@@ -126,6 +126,22 @@ def run_one(node,number,source,wrapper,root,timeout,output):
             "stderr_sha256":digest(stderr.read_bytes()),
             "elapsed_seconds":round(time.monotonic()-started,3)}
 
+def read_discovery_journal(path, nodes, returncode):
+    """Map durable worker events; an unfinished current node is a candidate fault."""
+    rows={}; active=None
+    if path.exists():
+        for line in path.read_text().splitlines():
+            event=json.loads(line)
+            if event["nodeid"] not in nodes: raise ValueError("foreign discovery node")
+            if event["event"]=="start": active=event["nodeid"]
+            elif event["event"]=="result":
+                outcome=event["outcome"]
+                rows[event["nodeid"]]={"status":{"passed":"pass","skipped":"unsupported","failed":"fail"}.get(outcome,"fail"),"evidence_lane":"long-lived-discovery"}
+                if active==event["nodeid"]: active=None
+    if returncode is not None and (returncode < 0 or returncode >= 128) and active and active not in rows:
+        rows[active]={"status":"fault","evidence_lane":"long-lived-discovery","fault_candidate":True}
+    return rows
+
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--collection",required=True,type=Path)
@@ -140,6 +156,7 @@ def main(argv=None):
                    help="manual post-recovery acknowledgement; no automatic GPU reset")
     p.add_argument("--batch-size",type=int,default=24)
     p.add_argument("--timeout",type=int,default=180)
+    p.add_argument("--long-lived-discovery",action="store_true",help="one worker; restart only after a recorded fault")
     a=p.parse_args(argv)
     if a.timeout<1 or a.batch_size<1:p.error("timeout and batch-size must be positive")
     if a.recover_after_fault and not a.resume:p.error("recovery only applies to resume")
@@ -172,11 +189,25 @@ def main(argv=None):
         if pending_hazards and not a.recover_after_fault:
             p.error("prior fault/timeout/interruption; inspect GPU health before --recover-after-fault")
         if pending_hazards:
-            # Never rerun a faulting node automatically. Preserve its receipt;
-            # return to remaining unassayed nodes only after human review.
             state["recovery_acknowledged_hazards"]=sorted(
                 set(state.get("recovery_acknowledged_hazards",[])) | set(pending_hazards)
             )
+        if a.long_lived_discovery:
+            nodes=[node for node in state["selected"] if state["cases"][node]["status"]=="unassayed"]
+            if not nodes: print(json.dumps({"status":state["status"],"counts":counts(state)})); return 0
+            journal=out/f"discovery-{int(time.time())}.jsonl"; stdout=journal.with_suffix(".stdout"); stderr=journal.with_suffix(".stderr")
+            worker=Path(__file__).with_name("gfx803_opinfo_discovery_worker.py")
+            state["status"]="running"; state["discovery_active_nodes"]=nodes; persist(matrix_path,state)
+            with stdout.open("wb") as o, stderr.open("wb") as e:
+                proc=subprocess.Popen([str(profile["python_wrapper"]),str(worker),"--journal",str(journal),*nodes],cwd=profile["source"],env=clean_env(),stdout=o,stderr=e,start_new_session=True)
+                try: rc=proc.wait(timeout=a.timeout*len(nodes))
+                except subprocess.TimeoutExpired: os.killpg(proc.pid,signal.SIGKILL); proc.wait(); rc=None
+            for node,row in read_discovery_journal(journal,nodes,rc).items(): state["cases"][node]=row
+            state.pop("discovery_active_nodes",None); state["counts"]=counts(state)
+            state["status"]="halted-for-gpu-inspection" if state["counts"]["fault"] else "batch-checkpointed"
+            state["halted_after"]=next((n for n in nodes if state["cases"][n]["status"]=="fault"),None)
+            state["gpu_validated"]=False; state["release_admitted"]=False; persist(matrix_path,state)
+            print(json.dumps({"status":state["status"],"counts":state["counts"]},sort_keys=True)); return 2 if state["counts"]["fault"] else 0
         count=0
         for i,node in enumerate(state["selected"]):
             if state["cases"][node]["status"]!="unassayed":continue

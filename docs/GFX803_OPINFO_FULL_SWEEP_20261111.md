@@ -78,3 +78,11 @@ source SHA, wheel SHA, kernel logs and any GPU recovery reports. In parallel,
 run Schaka's independent direct MIOpen/rocBLAS/rocSOLVER/Triton/coherence
 suites, then matching TheRock HIP/ROCr/KFD tests, and later clean-client
 Cachix restore and longer stability tests.
+
+## Fast discovery lane
+
+`--long-lived-discovery` runs all currently unassayed nodes in one Torch/
+pytest worker and fsyncs a start/result JSONL event for every node. On a hard
+fault the active durable node is retained as a fault candidate, the worker
+ends, and a fresh worker resumes later after health inspection. Replay fault
+candidates in the isolated lane; discovery never automatically bisects them.
