@@ -136,7 +136,12 @@ def read_discovery_journal(path, nodes, returncode):
             if event["event"]=="start": active=event["nodeid"]
             elif event["event"]=="result":
                 outcome=event["outcome"]
-                rows[event["nodeid"]]={"status":{"passed":"pass","skipped":"unsupported","failed":"fail"}.get(outcome,"fail"),"evidence_lane":"long-lived-discovery"}
+                row={"status":{"passed":"pass","skipped":"unsupported","failed":"fail"}.get(outcome,"fail"),"evidence_lane":"long-lived-discovery"}
+                if outcome=="skipped" and isinstance(event.get("skip_reason"),str):
+                    row["skip_reason"]=event["skip_reason"]
+                if isinstance(event.get("wasxfail"),str):
+                    row["wasxfail"]=event["wasxfail"]
+                rows[event["nodeid"]]=row
                 if active==event["nodeid"]: active=None
     if returncode is not None and (returncode < 0 or returncode >= 128) and active and active not in rows:
         rows[active]={"status":"fault","evidence_lane":"long-lived-discovery","fault_candidate":True}
