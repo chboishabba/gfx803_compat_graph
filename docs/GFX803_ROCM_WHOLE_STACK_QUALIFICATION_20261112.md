@@ -150,3 +150,65 @@ support for a different GPU family.
 
 **No CI dependency; no Docker requirement for qualification; use
 pinned Nix closures, original source tests and local hardware receipts.**
+
+
+## P1a: Run two original Schaka direct suites without TheRock artifacts
+
+`scripts/gfx803_schaka_reuse_assay.py` reuses the literal, original
+Schaka `fp16_gemm_sweep.py` (all **27** cases) and
+`triton_dot_probe.py` (**bf16/fp16/fp32/i8**), extracted from pinned
+source AST declarations. No test implementations are copied.
+
+Both suites require the original source at SHA
+`8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78`, the selected
+**Nix** Python wrapper, and the selected ROCm store; the tool rejects
+source changes and refuses to overwrite receipts. Because the probes
+are actual GPU executables, first plan without `--execute` and
+ensure no conflicting C2/LILA, OpInfo or benchmark tenant is active.
+
+```bash
+cd /mnt/truenas/comet-net/gfx803_compat_graph
+SCHAKA=/ACTUAL/PINNED/SCHAKA-SOURCE
+PY=/nix/store/ACTUAL-TORCH-PYTHON-WRAPPER
+ROCM=/nix/store/ACTUAL-SELECTED-ROCM-ROOT
+FP=/mnt/truenas/comet-net/experiments/gfx803_schaka_fp16_20261112
+TR=/mnt/truenas/comet-net/experiments/gfx803_schaka_triton_20261112
+
+python3 scripts/gfx803_schaka_reuse_assay.py \
+  --suite fp16-gemm --schaka-source "$SCHAKA" \
+  --python-wrapper "$PY" --rocm-root "$ROCM" --out "$FP"
+python3 scripts/gfx803_schaka_reuse_assay.py \
+  --suite fp16-gemm --schaka-source "$SCHAKA" \
+  --python-wrapper "$PY" --rocm-root "$ROCM" --out "$FP" \
+  --resume --execute --batch-size 4 --timeout 120
+
+python3 scripts/gfx803_schaka_reuse_assay.py \
+  --suite triton-dot --schaka-source "$SCHAKA" \
+  --python-wrapper "$PY" --rocm-root "$ROCM" --out "$TR"
+python3 scripts/gfx803_schaka_reuse_assay.py \
+  --suite triton-dot --schaka-source "$SCHAKA" \
+  --python-wrapper "$PY" --rocm-root "$ROCM" --out "$TR" \
+  --resume --execute --batch-size 1 --timeout 120
+```
+
+Repeat `--resume --execute` in safe batches; stop on a GPU fault.
+The FP16 sweep uses Schaka's own numerical pass predicate and
+reports `source-verified-pass` where that predicate is satisfied.
+The Triton probe's `ok` flag only means execution returned; although
+it prints `max_err`, it does **not** threshold that error. Therefore
+the adapter reports `numeric-unqualified` on an apparently successful
+Triton run, NOT a numerical pass.
+
+To aggregate existing direct-suite physical receipts with CTest:
+
+```bash
+python3 scripts/gfx803_rocm_coverage_report.py \
+  --schaka-receipt fp16-gemm="$FP/matrix.json" \
+  --schaka-receipt triton-dot="$TR/matrix.json" \
+  --out /mnt/truenas/comet-net/experiments/gfx803_rocm_layers_direct_20261112.json
+```
+
+This adds only the exact tested cases to their original layer; it
+does not mark untested BLAS signatures, compiler options, Triton
+programs or ROCm APIs as supported. Direct-suite and CTest receipts
+can later be joined without changing any original matrix.
