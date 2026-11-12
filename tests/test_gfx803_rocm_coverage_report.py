@@ -63,6 +63,36 @@ class CoverageReportTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 mod.aggregate(self.catalog(),[("miopen",file)])
 
+    def test_schaka_execution_and_numeric_validation_remain_distinct(self):
+        with tempfile.TemporaryDirectory() as td:
+            file=Path(td)/"matrix.json"
+            ids=["bf16","fp16","fp32","i8"]
+            row={"schema":1,"suite":"triton-dot",
+                 "schaka_sha":"8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78",
+                 "selected":ids,
+                 "cases":{name:{"status":"numeric-unqualified"} for name in ids},
+                 "rocm_root":"/nix/store/123-test-runtime",
+                 "release_admitted":False,"gpu_validated":False}
+            file.write_text(json.dumps(row))
+            report=mod.aggregate(self.catalog(),[],[("triton-dot",file)])
+            self.assertEqual(report["source_suite_receipts_count"],1)
+            source=report["layers"]["triton"]["source_owned_direct_suites"][0]
+            self.assertEqual(source["execution_only_numeric_unqualified"],4)
+            self.assertEqual(source["source_verified_pass"],0)
+            self.assertFalse(report["all_rocm_apis_qualified"])
+
+    def test_schaka_suite_rejects_wrong_source_identity(self):
+        with tempfile.TemporaryDirectory() as td:
+            file=Path(td)/"matrix.json"
+            file.write_text(json.dumps({"schema":1,"suite":"triton-dot",
+                "schaka_sha":"wrong","selected":["bf16","fp16","fp32","i8"],
+                "cases":{x:{"status":"numeric-unqualified"} for x in
+                         ("bf16","fp16","fp32","i8")},
+                "rocm_root":"/nix/store/mock",
+                "gpu_validated":False,"release_admitted":False}))
+            with self.assertRaises(ValueError):
+                mod.aggregate(self.catalog(),[],[("triton-dot",file)])
+
     def test_source_compiles(self):
         compile(SRC.read_text(),str(SRC),"exec")
 
