@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "purpose": "Reuse-first gfx803 ROCm qualification: suite discovery is not GPU validation",
+  "observed_baseline": {
+    "opinfo_raw_matrix_sha256": "47c7ed58d7b549abfc038b534faaaa9ecaf6ee2fc18b3ba55addebeed02b7e36",
+    "opinfo_pass": 1583,
+    "opinfo_original_skips": 183,
+    "opinfo_fail": 3,
+    "opinfo_fault_candidates": 4,
+    "opinfo_interruption": 1,
+    "scope": "selected PyTorch generated eager/CPU comparisons, not all ROCm APIs"
+  },
+  "layers": [
+    {
+      "id": "pytorch-opinfo",
+      "scope": "selected CPU comparisons, eager variants; expand generated dtype/grad/shape coverage",
+      "origin": "pytorch/pytorch",
+      "entrypoint": "test/test_ops.py",
+      "runner": "scripts/gfx803_opinfo_full_sweep.py",
+      "status": "physical-original-receipt-partial"
+    },
+    {
+      "id": "rocblas-hipblas",
+      "scope": "GEMM, BLAS L1/L2/L3, dtype and selected algorithms",
+      "origin": "ROCm/TheRock and Schaka/rocm-gfx803",
+      "therock_artifact_flags": ["--blas", "--tests"],
+      "existing_schaka": ["verify.py", "tools/correctness-suite/fp16_gemm_sweep.py"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "miopen",
+      "scope": "convolution, pooling, normalization, solvers and numerical error",
+      "origin": "ROCm/TheRock and Schaka/rocm-gfx803",
+      "therock_artifact_flags": ["--miopen", "--tests"],
+      "existing_schaka": ["tools/correctness-suite/build.sh", "tools/correctness-suite/run_all.sh"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "rocsolver-rocsparse",
+      "scope": "factorizations, eigensystems, sparse matrices",
+      "origin": "ROCm/TheRock",
+      "therock_artifact_flags": ["--blas", "--solver", "--sparse", "--tests"],
+      "existing_schaka": ["verify.py"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "rocfft-rocrand-rocprim",
+      "scope": "FFT, RNG, scans/reductions/sort/partition, rocThrust/hipCUB",
+      "origin": "ROCm/TheRock",
+      "therock_artifact_flags": ["--fft", "--rand", "--prim", "--tests"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "hip-runtime",
+      "scope": "alloc/copy, managed and pinned memory, streams, events, graph capture, synchronization",
+      "origin": "ROCm/TheRock",
+      "therock_artifact_flags": ["--hip-tests", "--tests"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "rocr-hsa-kfd",
+      "scope": "ROCr signals, queues, paging and driver/KFD behavior",
+      "origin": "ROCm/TheRock",
+      "therock_artifact_flags": ["--rocrtst", "--kfdtest", "--tests"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "llvm-hip-compiler",
+      "scope": "ISA and wavefront semantics, atomics, barriers, codegen options",
+      "origin": "ROCm/TheRock and Schaka/rocm-gfx803",
+      "existing_schaka": ["tools/tc-staleness/ms3.py"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "triton",
+      "scope": "JIT kernel correctness, dot, reductions, layouts, dtype, backward",
+      "origin": "Schaka/rocm-gfx803",
+      "existing_schaka": ["tools/correctness-suite/triton_dot_probe.py"],
+      "status": "upstream-reuse-identified"
+    },
+    {
+      "id": "composed-workloads",
+      "scope": "training/inference, C2/LILA, AdamW, allocation pressure, checkpoint/reload, long stability",
+      "origin": "gfx803_compat_graph and project-local source-owned model workloads",
+      "status": "partial-native-hardware-evidence; broader-qualification-open"
+    }
+  ],
+  "sources": {
+    "pytorch_sha": "d70fd61bab718a3d49b053efa8058efc0566b2b0",
+    "schaka_sha": "8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78",
+    "therock_docs": [
+      "https://github.com/ROCm/TheRock/blob/main/TESTING.md",
+      "https://github.com/ROCm/TheRock/blob/main/docs/development/installing_artifacts.md",
+      "https://github.com/ROCm/TheRock/blob/main/BUILD_TOPOLOGY.toml"
+    ]
+  },
+  "release_admitted": false,
+  "all_rocm_apis_qualified": false
+}
