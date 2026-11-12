@@ -88,6 +88,20 @@ class SkipReasonProbeTests(unittest.TestCase):
         capture.pytest_runtest_logreport(Report())
         self.assertEqual(capture.finished()[Report.nodeid]["runtime_outcome"],"executed-passed")
 
+    def test_replay_capture_distinguishes_xfail_from_skip(self):
+        class Report:
+            nodeid="test/test_ops.py::TestCommonCUDA::test_compare_cpu_fake_cuda_float32"
+            when="call"
+            skipped=True
+            failed=False
+            passed=False
+            wasxfail="known upstream discrepancy"
+            longrepr="expected failure detail"
+        capture=m.Capture("replay")
+        capture.rows[Report.nodeid]={"markers":[],"runtime_outcome":"not-run"}
+        capture.pytest_runtest_logreport(Report())
+        self.assertEqual(capture.finished()[Report.nodeid]["runtime_outcome"],"upstream-xfailed")
+
     def test_replay_completion_accepts_a_test_failure_receipt(self):
         child={"pytest_returncode":1,"nodes":{"one":{"runtime_outcome":"execution-failed"}}}
         self.assertTrue(m.child_complete(child,["one"],"replay"))
