@@ -87,3 +87,36 @@ the reasons are recovered should we prioritize **shared** missing
 gfx803 implementations or obsolete upstream exclusions. Existing
 four complex64 VM fault candidates and three normal failures remain
 independent.
+
+
+## Discovery after static v4 receipt: call-time skip remains possible
+
+Static v4: all 183 nodes collected, zero attached `skip`/`skipif`/
+`xfail` markers, zero test bodies executed. This only rules out **attached
+static markers collected by the probe**; it does NOT prove all 183 are
+setup-time skips, or all are dynamic GPU exclusions.
+
+Pinned upstream `test/test_ops.py` shows:
+- `test_compare_cpu` calls `op.reference_inputs(device, dtype)`
+  **inside the original test body**.
+- `test_variant_consistency_eager` calls `op.sample_inputs(...)`
+  **inside the original test body**.
+
+Therefore an operator-specific `unittest.SkipTest` or `pytest.skip`
+raised during the sample-generation or call path cannot be recovered
+by the setup-only probe. A reported `probe-blocked-call` means only
+that the guarded setup reached the call phase. **Do not classify it as
+upstream-support, a missing kernel, a pass, or an identified skip policy.**
+
+The setup probe now replaces each collected item's original `runtest`
+callable with the deliberate `GFX803_SKIP_REASON_PROBE_BLOCKED_TEST_BODY`
+skip, rather than relying solely on hook execution order. Setup
+fixtures can still initialize HIP or dispatch work.
+
+**Decision cut after guarded setup:** identify cases actually skipped
+during setup, then group remaining `probe-blocked-call` cases by
+upstream OpInfo sample-generator and decorator implementation. Their
+skip reasons may require real, individual, opt-in test-body replay
+(`pytest -q -rs <exact-node-id>`) on a healthy GPU with failure
+containment, preserving a separate result receipt and original discovery.
+Never remove original upstream guards to force a test into execution.
