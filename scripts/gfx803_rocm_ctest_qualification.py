@@ -88,10 +88,36 @@ def collect(ctest:str,directory:Path,timeout:int)->tuple[list[str],str]:
         raise ValueError("empty/duplicate/malformed CTest suite")
     return names,digest(p.stdout.encode())
 
-def initial(layer,source,source_sha,runtime,testdir,ctest,ctest_hash,names,catalog_hash):
+def validate_build_source(source:Path,testdir:Path)->dict:
+    """Reject a CTest directory unrelated to the pinned upstream source.
+
+    CMakeCache may live above a nested CTest test directory; its
+    CMAKE_HOME_DIRECTORY must identify the same pinned root.
+    """
+    testfile=testdir/"CTestTestfile.cmake"
+    if not testfile.is_file():
+        raise ValueError("configured CTestTestfile.cmake missing")
+    caches=[directory/"CMakeCache.txt" for directory in
+            (testdir,*testdir.parents) if (directory/"CMakeCache.txt").is_file()]
+    if not caches:
+        raise ValueError("CMakeCache.txt source provenance unavailable")
+    cache=caches[0]
+    line=next((s for s in cache.read_text(errors="replace").splitlines()
+               if s.startswith("CMAKE_HOME_DIRECTORY:INTERNAL=")),None)
+    if not line:
+        raise ValueError("CMAKE_HOME_DIRECTORY is missing from CMakeCache")
+    home=Path(line.split("=",1)[1]).resolve()
+    # Only an exact matching source root proves this build's CMake origin.
+    if home!=source.resolve():
+        raise ValueError("CTest build CMake home differs from pinned source")
+    return {"cmake_home":str(home),
+            "cmake_cache_sha256":digest(cache.read_bytes()),
+            "ctestfile_sha256":digest(testfile.read_bytes())}
+
+def initial(layer,source,source_sha,runtime,testdir,ctest,ctest_hash,names,catalog_hash,build_provenance=None):
     return {"schema":1,"layer":layer,"source":source,"source_sha":source_sha,
             "rocm_root":runtime,"test_dir":testdir,"ctest":ctest,
-            "ctest_sha256":ctest_hash,"discovery_sha256":catalog_hash,
+            "ctest_sha256":ctest_hash,"discovery_sha256":catalog_hash,\n            "build_provenance":build_provenance,
             "all_discovered_tests":names,
             "cases":{n:{"status":"unassayed"} for n in names},
             "status":"planned","gpu_validated":False,"release_admitted":False,
@@ -100,7 +126,7 @@ def initial(layer,source,source_sha,runtime,testdir,ctest,ctest_hash,names,catal
 
 def verify_resume(original,proposed):
     for key in ("schema","layer","source","source_sha","rocm_root","test_dir",
-                "ctest","ctest_sha256","discovery_sha256","all_discovered_tests"):
+                "ctest","ctest_sha256","discovery_sha256","build_provenance","all_discovered_tests"):
         if original.get(key)!=proposed[key]:
             raise ValueError("source/runtime/CTest discovered universe drift: "+key)
     if set(original.get("cases",{}))!=set(proposed["cases"]):
@@ -172,11 +198,12 @@ def main(argv=None):
         testdir=a.test_dir.resolve()
         if not testdir.is_dir() or not (testdir/"CTestTestfile.cmake").is_file():
             raise ValueError("actual configured CTest build directory required")
+        build_provenance=validate_build_source(Path(source),testdir)
         names,catalog_hash=collect(tool["ctest"],testdir,a.timeout)
     except (ValueError,KeyError,OSError,subprocess.TimeoutExpired,json.JSONDecodeError) as ex:
         p.error(str(ex))
     proposed=initial(a.layer,source,a.source_sha,runtime,str(testdir),
-                     tool["ctest"],tool["ctest_sha256"],names,catalog_hash)
+                     tool["ctest"],tool["ctest_sha256"],names,catalog_hash,build_provenance)
     out=a.out.resolve()
     if a.resume:
         if not (out/"matrix.json").is_file():p.error("resume matrix missing")
