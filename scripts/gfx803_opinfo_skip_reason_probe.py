@@ -3,8 +3,10 @@
 
 The default 'static' phase collects pytest marks WITHOUT executing test setup
 or any test body. An optional 'setup' phase examines runtime skip reasons in
-isolated subprocesses, but blocks all test call bodies. Pytest setup/fixtures
-may still touch a GPU: run setup only on a healthy, idle GPU host.
+isolated subprocesses, but blocks all test call bodies. The explicit 'replay'
+phase executes an exact historical node in its own process and retains its
+observed pytest outcome. Pytest setup/fixtures may still touch a GPU: run
+setup or replay only on a healthy, idle GPU host.
 Original discovery matrix/receipt remains immutable.
 """
 from __future__ import annotations
@@ -70,10 +72,16 @@ def marker_record(item):
                         "conditions":[repr(arg) for arg in marker.args]})
     return markers
 
-def child_complete(child,batch):
+def child_complete(child,batch,mode):
     """A collection is valid only if every requested generated node exists."""
-    return (child.get("pytest_returncode")==0 and
-            set(child.get("nodes",{}))==set(batch))
+    if set(child.get("nodes",{}))!=set(batch):
+        return False
+    # A real pytest assertion failure returns 1, but its structured report is
+    # still valid replay evidence. Exit codes >=2 denote collection/internal
+    # errors and must not masquerade as an executed result.
+    if mode=="replay":
+        return child.get("pytest_returncode") in (0,1)
+    return child.get("pytest_returncode")==0
 
 class Capture:
     def __init__(self,mode):
@@ -93,9 +101,10 @@ class Capture:
                     pytest.skip(GUARD)
                 item.runtest=blocked_original_body
     def pytest_runtest_call(self,item):
-        import pytest
-        # Even when upstream skip policy disappears, never run the op body.
-        pytest.skip(GUARD)
+        if self.mode=="setup":
+            import pytest
+            # Even when upstream skip policy disappears, never run the op body.
+            pytest.skip(GUARD)
     def pytest_runtest_logreport(self,report):
         if report.when in ("setup","call"):
             if report.skipped:
@@ -107,6 +116,9 @@ class Capture:
                 self.reported[report.nodeid]={"runtime_outcome":"setup-failed" if
                     report.when=="setup" else "unexpected-call-failure",
                     "details":str(report.longrepr),"phase":report.when}
+            elif report.when=="call" and report.passed:
+                self.reported[report.nodeid]={"runtime_outcome":"executed-passed",
+                                              "phase":"call"}
     def finished(self):
         for node,row in self.rows.items():
             row.update(self.reported.get(node,{}))
@@ -125,7 +137,7 @@ def worker(mode,source,nodeids,out):
     rc=pytest.main(args,plugins=[cap])
     result={"schema":1,"phase":mode,"pytest_returncode":int(rc),
             "nodes":cap.finished(),"release_admitted":False,
-            "gpu_body_executed":False}
+            "gpu_body_executed":mode=="replay"}
     persist(out,result)
     return 0 if int(rc)==0 and set(result["nodes"])==set(nodeids) else 2
 
@@ -153,11 +165,13 @@ def main(argv=None):
     p.add_argument("--source",type=Path,required=True)
     p.add_argument("--python-wrapper",type=Path,required=True)
     p.add_argument("--out",type=Path,required=True)
-    p.add_argument("--mode",choices=("static","setup"),default="static")
+    p.add_argument("--mode",choices=("static","setup","replay"),default="static")
     p.add_argument("--start",type=int,default=0)
     p.add_argument("--limit",type=int,default=0,help="0 = all remaining cases")
     p.add_argument("--timeout",type=int,default=90)
     p.add_argument("--execute-setup",action="store_true")
+    p.add_argument("--execute-body",action="store_true",
+                   help="explicit consent to execute original GPU test bodies")
     p.add_argument("--worker",action="store_true",help=argparse.SUPPRESS)
     p.add_argument("--nodes-file",type=Path,help=argparse.SUPPRESS)
     a=p.parse_args(argv)
@@ -171,6 +185,8 @@ def main(argv=None):
     except (ValueError,OSError,KeyError) as e:p.error(str(e))
     if a.mode=="setup" and not a.execute_setup:
         p.error("setup may initialize GPU fixtures; explicit --execute-setup required")
+    if a.mode=="replay" and not a.execute_body:
+        p.error("replay executes GPU test bodies; explicit --execute-body required")
     wrapper=a.python_wrapper.resolve()
     if not str(wrapper).startswith("/nix/store/") or not wrapper.is_file():
         p.error("require existing immutable Nix pytest Python wrapper")
@@ -182,7 +198,7 @@ def main(argv=None):
             "audit_sha256":audit_sha,"pytorch_source":SOURCE_PIN,
             "python_wrapper":str(wrapper),"selected_nodes":selected,
             "status":"running","cases":{node:{"status":"unassayed"} for node in selected},
-            "gpu_body_executed":False,"release_admitted":False}
+            "gpu_body_executed":a.mode=="replay","release_admitted":False}
     persist(a.out/"matrix.json",report)
     batches=[selected] if a.mode=="static" else [[node] for node in selected]
     for number,batch in enumerate(batches):
@@ -194,20 +210,21 @@ def main(argv=None):
              "--source",str(source),"--python-wrapper",str(wrapper),
              "--out",str(receipt),"--mode",a.mode,"--nodes-file",str(nodes_file)]
         if a.mode=="setup":cmd.append("--execute-setup")
+        if a.mode=="replay":cmd.append("--execute-body")
         t=time.monotonic()
         rc=supervise(cmd,source,a.timeout,prefix)
         child=None
         if receipt.is_file():
             try: child=json.loads(receipt.read_text())
             except (ValueError,OSError): pass
-        complete=bool(child is not None and child_complete(child,batch))
+        complete=bool(child is not None and child_complete(child,batch,a.mode))
         for node in batch:
             row={"status":"missing-worker-receipt","returncode":rc}
             if complete:
                 row=child["nodes"].get(node,{"status":"missing-collected-node"})
                 # `runtime_outcome: not-run` is expected for --collect-only;
                 # the evidence status is that its source marker was collected.
-                row["status"]="collected"
+                row["status"]="replayed" if a.mode=="replay" else "collected"
             elif child is not None:
                 row={"status":"incomplete-worker-receipt","returncode":rc,
                      "worker_pytest_returncode":child.get("pytest_returncode"),
@@ -222,10 +239,10 @@ def main(argv=None):
                               else "incomplete-collection")
             break
     else:
-        report["status"]="reason-probe-complete"
+        report["status"]="body-replay-complete" if a.mode=="replay" else "reason-probe-complete"
     persist(a.out/"matrix.json",report)
     print(json.dumps({"status":report["status"],"selected":len(selected),
                       "observed":sum(r["status"]!="unassayed" for r in report["cases"].values())}))
-    return 0 if report["status"]=="reason-probe-complete" else 2
+    return 0 if report["status"] in ("reason-probe-complete","body-replay-complete") else 2
 
 if __name__=="__main__":raise SystemExit(main())

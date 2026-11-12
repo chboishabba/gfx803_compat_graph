@@ -75,6 +75,24 @@ class SkipReasonProbeTests(unittest.TestCase):
         self.assertNotEqual(item.runtest, original)
         self.assertEqual(capture.rows[item.nodeid]["runtime_outcome"],"not-run")
 
+    def test_replay_capture_preserves_a_passed_call(self):
+        class Report:
+            nodeid="test/test_ops.py::TestCommonCUDA::test_compare_cpu_fake_cuda_float32"
+            when="call"
+            skipped=False
+            failed=False
+            passed=True
+            longrepr=""
+        capture=m.Capture("replay")
+        capture.rows[Report.nodeid]={"markers":[],"runtime_outcome":"not-run"}
+        capture.pytest_runtest_logreport(Report())
+        self.assertEqual(capture.finished()[Report.nodeid]["runtime_outcome"],"executed-passed")
+
+    def test_replay_completion_accepts_a_test_failure_receipt(self):
+        child={"pytest_returncode":1,"nodes":{"one":{"runtime_outcome":"execution-failed"}}}
+        self.assertTrue(m.child_complete(child,["one"],"replay"))
+        self.assertFalse(m.child_complete({"pytest_returncode":2,"nodes":{"one":{}}},["one"],"replay"))
+
     def test_no_test_body_execution_in_source(self):
         code=SOURCE.read_text()
         self.assertIn('pytest.skip(GUARD)',code)
@@ -86,13 +104,13 @@ class SkipReasonProbeTests(unittest.TestCase):
     def test_collection_requires_all_requested_generated_nodes(self):
         requested=["one","two"]
         self.assertTrue(m.child_complete({"pytest_returncode":0,
-                                          "nodes":{"one":{},"two":{}}},requested))
-        self.assertFalse(m.child_complete({"pytest_returncode":4,"nodes":{}},requested))
-        self.assertFalse(m.child_complete({"pytest_returncode":0,"nodes":{"one":{}}},requested))
+                                          "nodes":{"one":{},"two":{}}},requested,"static"))
+        self.assertFalse(m.child_complete({"pytest_returncode":4,"nodes":{}},requested,"static"))
+        self.assertFalse(m.child_complete({"pytest_returncode":0,"nodes":{"one":{}}},requested,"static"))
 
     def test_static_collection_keeps_not_run_as_phase_not_evidence_failure(self):
         code=SOURCE.read_text()
-        self.assertIn('row["status"]="collected"',code)
+        self.assertIn('"replayed" if a.mode=="replay" else "collected"',code)
         self.assertIn('runtime_outcome: not-run',code)
 
 if __name__=="__main__":unittest.main()
