@@ -18,7 +18,7 @@ STATUSES={"unassayed","interrupted","ctest-pass","ctest-fail","fault","timeout"}
 def hashfile(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
-def aggregate(catalog,inputs):
+def aggregate(catalog,inputs,schaka_receipts=()):
     layers=catalog["layers"]
     by_id={x["id"]:x for x in layers}
     if len(by_id)!=10 or len(layers)!=10:
@@ -86,7 +86,50 @@ def aggregate(catalog,inputs):
             "rocm_root":root,
             "runtime_coherence_verified":data.get("runtime_coherence_verified") is True,
             "source_sha":data.get("source_sha")})
+    direct_mapping={"fp16-gemm":"rocblas-hipblas","triton-dot":"triton"}
+    seen_direct=set()
+    direct_states={"unassayed","interrupted","fault","timeout",
+                   "source-verified-pass","numeric-unqualified",
+                   "source-reported-fail","unparseable"}
+    for suite,path in schaka_receipts:
+        if suite not in direct_mapping or suite in seen_direct:
+            raise ValueError("unknown/duplicate pinned Schaka source suite")
+        seen_direct.add(suite)
+        raw=path.read_bytes()
+        record=json.loads(raw)
+        ids=record.get("selected")
+        cases=record.get("cases")
+        expected=27 if suite=="fp16-gemm" else 4
+        if record.get("schema")!=1 or record.get("suite")!=suite or (
+            record.get("schaka_sha")!="8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78"):
+            raise ValueError("untrusted Schaka suite provenance")
+        if not isinstance(ids,list) or len(ids)!=expected or len(set(ids))!=len(ids):
+            raise ValueError("incomplete source-owned suite identity")
+        if not isinstance(cases,dict) or set(cases)!=set(ids):
+            raise ValueError("source-owned case inventory mismatch")
+        if any(not isinstance(v,dict) or v.get("status") not in direct_states
+               for v in cases.values()):
+            raise ValueError("invalid original Schaka suite outcome")
+        if record.get("release_admitted") is not False or record.get("gpu_validated") is not False:
+            raise ValueError("source suite unexpectedly promoted")
+        root=record.get("rocm_root")
+        if not isinstance(root,str) or not root.startswith("/nix/store/"):
+            raise ValueError("source suite lacks selected ROCm closure")
+        profiles.add(root)
+        counts=Counter(v["status"] for v in cases.values())
+        target=summary[direct_mapping[suite]]
+        target.setdefault("source_owned_direct_suites",[]).append({
+            "suite":suite,"cases":len(ids),
+            "source_verified_pass":counts["source-verified-pass"],
+            "execution_only_numeric_unqualified":counts["numeric-unqualified"],
+            "fault_or_failed":sum(counts[s] for s in ("fault","timeout",
+                                                     "source-reported-fail","unparseable")),
+            "unassayed":counts["unassayed"],
+            "receipt_sha256":hashlib.sha256(raw).hexdigest(),
+            "rocm_root":root})
+        target["status"]="direct-suite-evidence-plus-other-unqualified-APIs"
     return {"schema":1,"layers":summary,
+            "source_suite_receipts_count":len(schaka_receipts),
             "ctest_receipts_count":len(inputs),
             "different_rocm_roots":len(profiles)>1,
             "runtime_roots":sorted(profiles),
@@ -98,7 +141,7 @@ def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--receipt",action="append",default=[],
                    help="layer-id=/exact/path/to/original/matrix.json")
-    p.add_argument("--out",required=True,type=Path)
+    p.add_argument("--schaka-receipt",action="append",default=[],\n                   help="fp16-gemm|triton-dot=/exact/original/matrix.json")\n    p.add_argument("--out",required=True,type=Path)
     a=p.parse_args(argv)
     if a.out.exists():p.error("refuse overwriting aggregate report")
     try:
@@ -108,7 +151,13 @@ def main(argv=None):
             name,path=arg.split("=",1)
             if not name or not path:raise ValueError("empty layer/path")
             pairs.append((name,Path(path)))
-        report=aggregate(json.loads(CATALOG.read_text()),pairs)
+        direct=[]
+        for arg in a.schaka_receipt:
+            if "=" not in arg:raise ValueError("schaka receipt must be suite=path")
+            suite,path=arg.split("=",1)
+            if not suite or not path:raise ValueError("empty direct suite/path")
+            direct.append((suite,Path(path)))
+        report=aggregate(json.loads(CATALOG.read_text()),pairs,direct)
     except (ValueError,OSError,KeyError,TypeError,json.JSONDecodeError) as ex:p.error(str(ex))
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
