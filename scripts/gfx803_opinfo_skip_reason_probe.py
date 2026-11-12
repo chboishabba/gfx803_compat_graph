@@ -21,14 +21,6 @@ import time
 SOURCE_PIN="d70fd61bab718a3d49b053efa8058efc0566b2b0"
 MATRIX_SHA="47c7ed58d7b549abfc038b534faaaa9ecaf6ee2fc18b3ba55addebeed02b7e36"
 GUARD="GFX803_SKIP_REASON_PROBE_BLOCKED_TEST_BODY"
-# Collection imports PyTorch's test configuration. Hiding every device in the
-# child process makes static mode genuinely non-GPU: it can inspect collected
-# markers but cannot create a HIP context.
-STATIC_DEVICE_HIDE_ENV={
-    "CUDA_VISIBLE_DEVICES":"",
-    "HIP_VISIBLE_DEVICES":"",
-    "ROCR_VISIBLE_DEVICES":"",
-}
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
@@ -78,6 +70,11 @@ def marker_record(item):
                         "conditions":[repr(arg) for arg in marker.args]})
     return markers
 
+def child_complete(child,batch):
+    """A collection is valid only if every requested generated node exists."""
+    return (child.get("pytest_returncode")==0 and
+            set(child.get("nodes",{}))==set(batch))
+
 class Capture:
     def __init__(self,mode):
         self.mode=mode
@@ -108,8 +105,10 @@ class Capture:
         return self.rows
 
 def worker(mode,source,nodeids,out):
-    if mode=="static":
-        os.environ.update(STATIC_DEVICE_HIDE_ENV)
+    # CUDA OpInfo nodes are generated conditionally.  Do not hide the device
+    # here: doing so changes the collected node IDs and cannot recover reasons
+    # for the historical CUDA results.  --collect-only below still prevents
+    # setup and test-body execution in static mode.
     import pytest
     cap=Capture(mode)
     args=["-q"]
@@ -118,8 +117,7 @@ def worker(mode,source,nodeids,out):
     rc=pytest.main(args,plugins=[cap])
     result={"schema":1,"phase":mode,"pytest_returncode":int(rc),
             "nodes":cap.finished(),"release_admitted":False,
-            "gpu_body_executed":False,
-            "device_environment":(STATIC_DEVICE_HIDE_ENV if mode=="static" else None)}
+            "gpu_body_executed":False}
     persist(out,result)
     return 0 if int(rc)==0 and set(result["nodes"])==set(nodeids) else 2
 
@@ -190,22 +188,28 @@ def main(argv=None):
         if a.mode=="setup":cmd.append("--execute-setup")
         t=time.monotonic()
         rc=supervise(cmd,source,a.timeout,prefix)
+        child=None
+        if receipt.is_file():
+            try: child=json.loads(receipt.read_text())
+            except (ValueError,OSError): pass
+        complete=bool(child is not None and child_complete(child,batch))
         for node in batch:
             row={"status":"missing-worker-receipt","returncode":rc}
-            if receipt.is_file():
-                try:
-                    child=json.loads(receipt.read_text())
-                    row=child.get("nodes",{}).get(node,row)
-                    row["status"]=row.get("runtime_outcome","collected")
-                except (ValueError,OSError):pass
+            if complete:
+                row=child["nodes"].get(node,{"status":"missing-collected-node"})
+                row["status"]=row.get("runtime_outcome","collected")
+            elif child is not None:
+                row={"status":"incomplete-worker-receipt","returncode":rc,
+                     "worker_pytest_returncode":child.get("pytest_returncode"),
+                     "collected_node_count":len(child.get("nodes",{}))}
             if rc is None:row["status"]="timeout"
             elif rc<0 or rc>=128:row["status"]="fault"
-            elif rc!=0 and row["status"]=="not-run":row["status"]="worker-failed"
             row["elapsed_batch_seconds"]=round(time.monotonic()-t,3)
             report["cases"][node]=row
         persist(a.out/"matrix.json",report)
-        if rc is None or rc<0 or rc>=128:
-            report["status"]="halted-for-host-inspection"
+        if not complete:
+            report["status"]=("halted-for-host-inspection" if rc is None or rc<0 or rc>=128
+                              else "incomplete-collection")
             break
     else:
         report["status"]="reason-probe-complete"
