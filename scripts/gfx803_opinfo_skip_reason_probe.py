@@ -111,7 +111,8 @@ class Capture:
                 reason=str(report.longrepr)
                 wasxfail=getattr(report,"wasxfail",None)
                 outcome=("probe-blocked-call" if GUARD in reason else
-                         "upstream-xfailed" if wasxfail else "upstream-skipped")
+                         "upstream-xfailed" if wasxfail or "XFailed" in reason
+                         else "upstream-skipped")
                 self.reported[report.nodeid]={"runtime_outcome":outcome,
                     "skip_reason":reason,"phase":report.when}
                 if wasxfail:
