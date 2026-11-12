@@ -68,6 +68,24 @@ class ROCmQualificationTests(unittest.TestCase):
             self.assertEqual(json.loads(out.read_text())["status"],"unassayed")
             self.assertFalse(out.with_name(out.name+".tmp").exists())
 
+    def test_ctest_build_must_be_from_pinned_source(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            source=root/"source"
+            source.mkdir()
+            build=root/"build"
+            build.mkdir()
+            (build/"CTestTestfile.cmake").write_text("add_test(one /bin/true)")
+            (build/"CMakeCache.txt").write_text(
+                "CMAKE_HOME_DIRECTORY:INTERNAL="+str(source)+"\\n")
+            row=m.validate_build_source(source,build)
+            self.assertEqual(row["cmake_home"],str(source))
+            self.assertEqual(len(row["ctestfile_sha256"]),64)
+            (build/"CMakeCache.txt").write_text(
+                "CMAKE_HOME_DIRECTORY:INTERNAL=/unrelated/source\\n")
+            with self.assertRaises(ValueError):
+                m.validate_build_source(source,build)
+
     def test_source_compiles(self):
         compile(FILE.read_text(),str(FILE),"exec")
 
