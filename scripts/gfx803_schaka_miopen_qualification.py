@@ -144,10 +144,19 @@ def evaluate(rc,stdout,stderr):
     if len(found)!=1:return {"status":"empty-results" if rc==0 else "failed",
                              "reason":"missing or ambiguous original upstream summary"}
     total,wrong=map(int,found[0])
-    if total<=0:return {"status":"empty-results","tested":total,"wrong":wrong}
+    if total<=0:return {"status":"empty-results","tested":total,
+                        "effective_tested":0,"wrong":wrong}
     skip_count=len(re.findall(r"\bSKIP\b",text))
+    # A solver can report its input shape count in the summary while every
+    # shape is inapplicable.  That is not a numerical pass.
+    effective_tested=max(0,total-skip_count)
+    if effective_tested==0:
+        return {"status":"empty-results","tested":total,
+                "effective_tested":0,"wrong":wrong,
+                "upstream_skip_lines":skip_count}
     return {"status":"passed" if rc==0 and wrong==0 else "failed",
-            "tested":total,"wrong":wrong,"upstream_skip_lines":skip_count,
+            "tested":total,"effective_tested":effective_tested,
+            "wrong":wrong,"upstream_skip_lines":skip_count,
             "numeric_contract":"original Schaka host CPU reference and solver applicability"}
 
 def execute(task,name,buildrec,out,index,timeout,source):
@@ -198,7 +207,8 @@ def validate_resume(state,identity):
     if any(not isinstance(x,dict) or x.get("status") not in STATES
            for x in state["cases"].values()):
         raise ValueError("corrupt case status")
-    if state.get("release_admitted") is not False:\n        raise ValueError("invalid release status")
+    if state.get("release_admitted") is not False:
+        raise ValueError("invalid release status")
     return state
 
 def main(argv=None):
@@ -243,7 +253,12 @@ def main(argv=None):
                 p.error("prebuilt binaries' source/runtime provenance differs")
         else:
             p.error("no verified build receipt; use --build")
-        if buildrec["status"]!="built":p.error("build incomplete, cannot run")\n        for binary in buildrec["binaries"].values():\n            if "sha256" not in binary or not Path(binary["path"]).is_file():\n                p.error("missing source-pinned build output")\n            if sha_file(Path(binary["path"]))!=binary["sha256"]:\n                p.error("built binary hash drift")
+        if buildrec["status"]!="built":p.error("build incomplete, cannot run")
+        for binary in buildrec["binaries"].values():
+            if "sha256" not in binary or not Path(binary["path"]).is_file():
+                p.error("missing source-pinned build output")
+            if sha_file(Path(binary["path"]))!=binary["sha256"]:
+                p.error("built binary hash drift")
         if len(buildrec.get("binaries",{}))!=len(EXPECTED):
             p.error("incomplete upstream binaries")
         matrix=out/"matrix.json"

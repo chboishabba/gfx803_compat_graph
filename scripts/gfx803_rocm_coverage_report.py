@@ -166,7 +166,8 @@ def aggregate(catalog,inputs,schaka_receipts=(),miopen_receipt=None):
             "runtime_coherence_verified":record.get("runtime_coherence_verified") is True})
         row["status"]="direct-MIOpen-sweep-results-not-complete-API-qualification"
     return {"schema":1,"layers":summary,
-            "source_suite_receipts_count":len(schaka_receipts),\n            "miopen_receipt_count":int(miopen_receipt is not None),
+            "source_suite_receipts_count":len(schaka_receipts),
+            "miopen_receipt_count":int(miopen_receipt is not None),
             "ctest_receipts_count":len(inputs),
             "different_rocm_roots":len(profiles)>1,
             "runtime_roots":sorted(profiles),
@@ -180,7 +181,9 @@ def main(argv=None):
                    help="layer-id=/exact/path/to/original/matrix.json")
     p.add_argument("--schaka-receipt",action="append",default=[],
                    help="fp16-gemm|triton-dot=/exact/original/matrix.json")
-    p.add_argument("--miopen-receipt",type=Path,default=None,\n                   help="exact original Schaka MIOpen sweep matrix.json")\n    p.add_argument("--out",required=True,type=Path)
+    p.add_argument("--miopen-receipt",type=Path,default=None,
+                   help="exact original Schaka MIOpen sweep matrix.json")
+    p.add_argument("--out",required=True,type=Path)
     a=p.parse_args(argv)
     if a.out.exists():p.error("refuse overwriting aggregate report")
     try:
