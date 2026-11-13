@@ -166,3 +166,43 @@ directory after health inspection.
 
 No code or documentation here claims the historical fault
 is already fixed or proves it was a doorbell regression.
+
+
+## P3: separate forward-only pooling workspace control
+
+A new diagnostic `scripts/gfx803_pool_forward_only_control.py`
+retains the exact Schaka original `run_one` and all 42 input cases,
+but surgically replaces the single workspace setup and the
+`miopenPoolingForward(..., do_backward=true, workspace, size)`
+call with the **documented forward-only** alternative:
+`do_backward=false, workspace=nullptr, size=0`.
+It does not change the MIOpen kernel, numerical CPU reference,
+case order or original acceptance binary.
+
+This is a different *semantics/dispatch* condition, so a pass
+is not directly interchangeable with the original backward-ready
+suite result. Only run after an independently healthy GPU check,
+and preserve a distinct destination:
+
+```bash
+cd /mnt/truenas/comet-net/gfx803_compat_graph
+OLD=/mnt/truenas/comet-net/experiments/gfx803_schaka_miopen_20261113
+FWD=/mnt/truenas/comet-net/experiments/gfx803_pool_forward_only_20261113
+
+python3 -m unittest discover -s tests \
+  -p test_gfx803_pool_forward_only_control.py -v
+
+python3 scripts/gfx803_pool_forward_only_control.py \
+  --build-receipt "$OLD/build.json" \
+  --out "$FWD" --build
+
+# Explicit single fresh-process GPU run, no repeat or automatic reset:
+python3 scripts/gfx803_pool_forward_only_control.py \
+  --build-receipt "$OLD/build.json" \
+  --out "$FWD" --execute --timeout 180
+```
+
+Compare the original binary baseline with this derivative
+only under matched healthy starting state and the same
+staged runtime, not by claiming the forward-only switch fixed
+a GPU page fault.
