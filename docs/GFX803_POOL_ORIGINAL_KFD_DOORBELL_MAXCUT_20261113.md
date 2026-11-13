@@ -206,3 +206,33 @@ Compare the original binary baseline with this derivative
 only under matched healthy starting state and the same
 staged runtime, not by claiming the forward-only switch fixed
 a GPU page fault.
+
+
+## P4: strict provenance join — no false repair claim
+
+After obtaining the complete prefix and single-case receipts, the
+joiner can already record the established constraints. Once new
+runtime and kernel audits exist, include them as well:
+
+```bash
+cd /mnt/truenas/comet-net/gfx803_compat_graph
+python3 -m unittest discover -s tests -p 'test_gfx803_pool_fault_evidence_join.py' -v
+
+ISO=/mnt/truenas/comet-net/experiments/gfx803_pool_isolation_20261113_v3/matrix.json
+SEQ=/mnt/truenas/comet-net/experiments/gfx803_pool_prefix_20261113/matrix.json
+OLD=/mnt/truenas/comet-net/experiments/gfx803_schaka_miopen_20261113/matrix.json
+CTL=/mnt/truenas/comet-net/experiments/gfx803_pool_original_runtime_20261113/matrix.json
+KFD=/mnt/truenas/comet-net/experiments/gfx803_kfd_doorbell_20261113/matrix.json
+
+python3 scripts/gfx803_pool_fault_evidence_join.py \
+  --isolated "$ISO" --prefix "$SEQ" --original "$OLD" \
+  --controls "$CTL" --kfd "$KFD" \
+  --out /mnt/truenas/comet-net/experiments/gfx803_pool_fault_causal_audit_20261113.json
+```
+
+Omit `--controls` or `--kfd` until that exact original receipt
+exists. The join verifies the source hash, staged runtime and
+42/42 plus 10/10 tests, and fails on missing/failed items.
+The report explicitly leaves cumulative-state causality,
+running-kernel doorbell callback presence, whole-MIOpen
+coverage and release admission **unproven**.
