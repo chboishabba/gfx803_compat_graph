@@ -26,6 +26,7 @@ PATTERNS={
  "gpu_vm_fault":re.compile(r"vm fault|page.not.present|protection.fault|gpu fault|0x1004800c",re.I),
  "queue_timeout":re.compile(r"ring .*timeout|scheduler .*not ready|queue.*hang|gpu reset",re.I),
  "memory_exhaustion":re.compile(r"out of memory|out-of-memory|allocation fail|oom",re.I),
+ "whisperx_reset_wave":re.compile(r"ring gfx timeout|BACO reset|VRAM is lost|failed to suspend|GPU Hang|init_user_pages",re.I),
 }
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -72,7 +73,7 @@ def audit(since,source=None):
         for key,pattern in PATTERNS.items():
             if pattern.search(line):categories[key].append(line)
     info={"schema":1,
-          "kernel_release":os.uname().release,
+          "kernel_release":os.uname().release,\n          "journal_boot_selector":boot,
           "kernel_version":os.uname().version,
           "amdgpu_modinfo":command(["modinfo","-F","vermagic","amdgpu"]),
           "amdgpu_module_loaded":Path("/sys/module/amdgpu").exists(),
@@ -93,10 +94,10 @@ def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--out",required=True,type=Path)
     p.add_argument("--since",default="today",help="journalctl --since expression")
-    p.add_argument("--kernel-source",type=Path,default=None)
+    p.add_argument("--kernel-source",type=Path,default=None)\n    p.add_argument("--boot",default="0",choices=("0","-1"),\n                   help="current or previous boot journal; previous boot is historical evidence, not current-kernel validation")
     a=p.parse_args(argv)
     if a.out.exists():p.error("refuse existing evidence directory")
-    record,journal=audit(a.since,a.kernel_source)
+    record,journal=audit(a.since,a.kernel_source,a.boot)
     a.out.mkdir(parents=True)
     raw=a.out/"kernel-journal.txt"
     raw.write_text(journal["stdout"]+"\nSTDERR:\n"+journal["stderr"])
@@ -106,7 +107,7 @@ def main(argv=None):
                      "journal_available":record["journal_available"],
                      "fault_lines":len(record["matched_kernel_lines"]["gpu_vm_fault"]),
                      "queue_lines":len(record["matched_kernel_lines"]["queue_timeout"]),
-                     "sdma_doorbell_lines":len(record["matched_kernel_lines"]["sdma_or_doorbell"]),
+                     "sdma_doorbell_lines":len(record["matched_kernel_lines"]["sdma_or_doorbell"]),\n                     "whisperx_reset_wave_lines":len(record["matched_kernel_lines"]["whisperx_reset_wave"]),
                      "running_kernel_patch_verified":False}))
     return 0
 
