@@ -60,4 +60,14 @@ int main() {
     def test_source_compiles(self):
         compile(SCRIPT.read_text(),str(SCRIPT),"exec")
 
+    def test_auto_recovery_uses_fresh_resume_invocation(self):
+        args=m.recovery_argv([str(SCRIPT),"--build","--execute","--auto-recover"])
+        self.assertNotIn("--build",args)
+        self.assertEqual(args.count("--resume"),1)
+        self.assertEqual(args.count("--execute"),1)
+        self.assertEqual(args.count("--recovered-after-fault"),1)
+        env=m.recovery_env()
+        self.assertEqual(env["PYTHONNOUSERSITE"],"1")
+        self.assertNotIn("LD_PRELOAD",env)
+
 if __name__=="__main__":unittest.main()

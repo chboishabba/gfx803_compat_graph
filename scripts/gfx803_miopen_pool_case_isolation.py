@@ -4,7 +4,10 @@
 Compiles a mechanically transformed COPY of source-pinned pool_sweep.cpp;
 only the main-loop selector is changed. The original run_one, CPU reference,
 MIOpen calls, memory layout and numeric acceptance remain byte-identical.
-Runs one case per process and HALTS at the first fault/timeout. No GPU reset.
+Runs one case per process.  With --auto-recover, a fault is persisted and
+the supervisor execs into a clean Python environment before continuing the
+remaining cases.  It never retries the faulting case and never claims that a
+new process repaired the GPU/driver.
 """
 from __future__ import annotations
 import argparse
@@ -120,6 +123,27 @@ def assess(index,rc,stdout,stderr):
     return {"status":"pass" if passed else "numeric-fail",
             "returncode":rc,"wrong":wrong,"tested":1}
 
+def recovery_argv(argv):
+    """Return a fresh invocation that resumes after a saved device fault."""
+    kept=[]
+    for item in argv:
+        if item in ("--build", "--recovered-after-fault"):
+            continue
+        kept.append(item)
+    if "--resume" not in kept: kept.append("--resume")
+    if "--execute" not in kept: kept.append("--execute")
+    kept.append("--recovered-after-fault")
+    return kept
+
+def recovery_env():
+    """Minimal, explicit parent environment for a post-fault fresh worker."""
+    keys=("HOME","PATH","LANG","LC_ALL","TERM","XDG_RUNTIME_DIR",
+          "HSA_OVERRIDE_GFX_VERSION","ROC_ENABLE_PRE_VEGA")
+    env={key:os.environ[key] for key in keys if key in os.environ}
+    env["PYTHONNOUSERSITE"]="1"
+    # Deliberately do not inherit preload/library overrides from a faulting run.
+    return env
+
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--source",type=Path,required=True)
@@ -130,6 +154,8 @@ def main(argv=None):
     p.add_argument("--execute",action="store_true")
     p.add_argument("--resume",action="store_true")
     p.add_argument("--recovered-after-fault",action="store_true")
+    p.add_argument("--auto-recover",action="store_true",
+                   help="after persisting a fault, exec a clean worker for remaining cases")
     p.add_argument("--timeout",type=int,default=90)
     p.add_argument("--build-timeout",type=int,default=900)
     p.add_argument("--batch-size",type=int,default=4)
@@ -241,6 +267,10 @@ def main(argv=None):
         persist(matrix,state)
         print(json.dumps({"status":state["status"],"executed":done,
                           "counts":state["counts"]},sort_keys=True))
+        if state["status"]=="halted-for-device-inspection" and a.auto_recover:
+            # exec replaces this potentially contaminated coordinator process;
+            # the recorded fault remains immutable and is skipped on resume.
+            os.execvpe(sys.executable, recovery_argv(sys.argv), recovery_env())
         return 2 if state["status"]=="halted-for-device-inspection" else 0
 
 if __name__=="__main__":sys.exit(main())

@@ -51,11 +51,13 @@ not itself prove that recovery occurred.
 ```bash
 python3 scripts/gfx803_miopen_pool_case_isolation.py \
   --source "$SCHAKA" --rocm-prefix "$PREFIX" --hipcc "$HIPCC" \
-  --out "$OUT" --resume --execute --batch-size 4 --timeout 90
+  --out "$OUT" --resume --execute --batch-size 42 --timeout 90 --auto-recover
 ```
 
-Repeat after inspecting each batch. The first fault or timeout
-immediately HALTS the sweep and saves its original case index,
+Each case is an independent child process. On a fault or timeout, the runner
+saves its original case index, then replaces its coordinator with a fresh
+Python process using a minimal environment and continues every remaining
+unassayed case. The faulting case is never retried. Its original case index,
 mode, C/H/W, pooling kernel dimensions, stride and pad in
 `$OUT/matrix.json`; individual stdout/stderr logs are SHA-256-bound.
 
@@ -69,7 +71,8 @@ The 8/9, 16/17, 32/33, 64/65 and 128 output-width
 thresholds, asymmetric 32×100 shapes and global-pooling shape
 are all retained.
 
-**Never auto-retry a faulting case.** If a fault appears, inspect
+**Never auto-retry a faulting case.** Automatic continuation isolates discovery
+from the failed child; it is not evidence that the GPU driver recovered. If a fault appears, inspect
 kernel logs and GPU state, then bisect the selected shape on a
 separate controlled branch of the diagnostic (not by changing the
 original acceptance receipt). A single fresh process is not enough
