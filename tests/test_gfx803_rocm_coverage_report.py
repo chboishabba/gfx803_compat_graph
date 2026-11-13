@@ -93,6 +93,25 @@ class CoverageReportTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 mod.aggregate(self.catalog(),[],[("triton-dot",file)])
 
+    def test_source_bound_miopen_sweeps_aggregate_without_release(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/"matrix.json"
+            row={"schema":1,
+                 "source_sha":"8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78",
+                 "rocm_root":"/nix/store/mock",
+                 "selected":["activ_sweep","conv:SolverA"],
+                 "cases":{"activ_sweep":{"status":"passed","tested":120},
+                          "conv:SolverA":{"status":"empty-results"}},
+                 "gpu_validated":False,"release_admitted":False,
+                 "runtime_coherence_verified":False}
+            path.write_text(json.dumps(row))
+            report=mod.aggregate(self.catalog(),[],[],path)
+            self.assertEqual(report["miopen_receipt_count"],1)
+            direct=report["layers"]["miopen"]["source_owned_direct_suites"][0]
+            self.assertEqual(direct["passed_with_nonzero_applicable_cases"],1)
+            self.assertEqual(direct["no_applicable_cases_or_missing_summary"],1)
+            self.assertFalse(report["all_rocm_apis_qualified"])
+
     def test_source_compiles(self):
         compile(SRC.read_text(),str(SRC),"exec")
 
