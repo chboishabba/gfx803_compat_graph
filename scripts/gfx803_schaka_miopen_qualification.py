@@ -160,6 +160,12 @@ def execute(task,name,buildrec,out,index,timeout,source):
     env=os.environ.copy()
     env.pop("LD_PRELOAD",None)
     env.pop("ONLY",None)
+    # Prefer the explicit tested ROCm prefix without deleting Nix wrapper
+    # dependencies. This is a loader preference, not proof of loaded maps.
+    prefix=buildrec["rocm_prefix"]
+    old_paths=env.get("LD_LIBRARY_PATH","")
+    env["LD_LIBRARY_PATH"]=str(Path(prefix)/"lib")+(
+        os.pathsep+old_paths if old_paths else "")
     if task["solver"]:
         env["MIOPEN_DEBUG_FIND_ONLY_SOLVER"]=task["solver"]
         env["MIOPEN_FIND_MODE"]="normal"
@@ -242,7 +248,10 @@ def main(argv=None):
             p.error("incomplete upstream binaries")
         matrix=out/"matrix.json"
         if a.resume:
-            try:state=validate_resume(json.loads(matrix.read_text()),identity)
+            try:
+                state=validate_resume(json.loads(matrix.read_text()),identity)
+                if state.get("build_receipt_sha256")!=sha_file(out/"build.json"):
+                    raise ValueError("original build receipt hash drift")
             except (ValueError,json.JSONDecodeError) as e:p.error(str(e))
         else:
             state={**identity,"status":"built-not-executed",
