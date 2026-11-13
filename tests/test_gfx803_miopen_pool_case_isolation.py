@@ -87,4 +87,9 @@ int main() {
         self.assertIn("-I"+str(source),args)
         self.assertIn("-I"+str(root/"include"),args)
 
+    def test_case_metadata_survives_json_round_trip(self):
+        import json
+        metadata=m.case_metadata([(8,16,16,2,2,2,0)]*14)
+        self.assertEqual(metadata,json.loads(json.dumps(metadata)))
+
 if __name__=="__main__":unittest.main()

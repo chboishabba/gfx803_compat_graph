@@ -150,6 +150,12 @@ def build_args(hipcc, rocm, changed, binary, source_dir):
             str(changed),"-o",str(binary),"-L"+str(rocm/"lib"),"-lMIOpen","-lm",
             "-Wl,-rpath,"+str(rocm/"lib")]
 
+def case_metadata(shapes):
+    modes=("MAX","AVG","AVG_INCL")
+    # Use JSON-native lists so an in-memory identity equals its persisted form.
+    return {str(i):{"mode":modes[i//14],"shape":list(shapes[i%14])}
+            for i in range(42)}
+
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--source",type=Path,required=True)
@@ -180,14 +186,12 @@ def main(argv=None):
     elif out.exists():p.error("new output directory required")
     else:out.mkdir(parents=True)
     ids=[str(i) for i in range(42)]
-    modes=("MAX","AVG","AVG_INCL")
     identities={"schema":1,"source_sha":PIN,"source":str(source),
                 "original_path":str(original),"original_sha256":sha(original),
                 "derived_sha256":hashlib.sha256(derived.encode()).hexdigest(),
                 "rocm_prefix":str(rocm),"hipcc":str(hipcc),
                 "hipcc_sha256":sha(hipcc),"selected":ids,
-                "metadata":{str(i):{"mode":modes[i//14],"shape":shapes[i%14]}
-                            for i in range(42)}}
+                "metadata":case_metadata(shapes)}
     with (out/"lock").open("a+") as lock:
         try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError:p.error("output in use")
