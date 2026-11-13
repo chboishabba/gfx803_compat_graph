@@ -129,3 +129,22 @@ suite, not TheRock's CTest tree.
 - Schaka PR #8 rebuilt TopK A/B performance measurements.
 
 No release or full-ROCm API qualification is implied by this script.
+
+
+## P3: join original results into the ten-layer coverage atlas
+
+Only after physically executing the MIOpen sweeps, append their
+original matrix to the atlas with an independent destination:
+
+```bash
+python3 scripts/gfx803_rocm_coverage_report.py \
+  --miopen-receipt "$OUT/matrix.json" \
+  --schaka-receipt fp16-gemm=/mnt/truenas/comet-net/experiments/gfx803_schaka_fp16_20261113/matrix.json \
+  --schaka-receipt triton-dot=/mnt/truenas/comet-net/experiments/gfx803_schaka_triton_20261113/matrix.json \
+  --out /mnt/truenas/comet-net/experiments/gfx803_rocm_layers_miopen_20261113.json
+```
+
+This displays bundle-level MIOpen numerical outcomes independently
+from CTest and PyTorch. It retains skipped/inapplicable solvers,
+unassayed bundles and any faults. It does not claim universal MIOpen
+function support or loaded-library coherence.
