@@ -39,6 +39,13 @@ class OriginalPoolDiagnostics(unittest.TestCase):
         self.assertFalse(kfd.PATTERNS["sdma_or_doorbell"].search("GPU page not present"))
         self.assertEqual(len(kfd.PATCHES),2)
 
+    def test_historical_whisperx_reset_signature_is_separate(self):
+        evidence="ring gfx timeout, GPU reset begin, BACO reset, VRAM is lost due to GPU reset"
+        self.assertTrue(kfd.PATTERNS["whisperx_reset_wave"].search(evidence))
+        self.assertFalse(kfd.PATTERNS["sdma_or_doorbell"].search(evidence))
+        self.assertTrue(kfd.PATTERNS["gpu_vm_fault"].search("VM fault page not present"))
+        self.assertFalse(kfd.PATTERNS["whisperx_reset_wave"].search("VM fault page not present"))
+
     def test_source_callback_audit_not_proof_of_running_kernel(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td)
