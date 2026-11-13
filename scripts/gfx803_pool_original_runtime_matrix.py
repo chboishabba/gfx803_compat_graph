@@ -36,7 +36,7 @@ CONTROL_KEYS=("AMD_SERIALIZE_KERNEL","AMD_SERIALIZE_COPY",
   "AMD_LOG_LEVEL","MIOPEN_ENABLE_LOGGING","MIOPEN_LOG_LEVEL",\n  "HSAKMT_DEBUG_LEVEL",
   "HSA_DISABLE_CACHE","HIP_LAUNCH_BLOCKING","GPU_MAX_HW_QUEUES")
 STATES=("unassayed","running-interrupted","pass","numeric-fail",
-        "missing-summary","fault","timeout","setup-fail")
+        "missing-summary","fault","timeout","setup-fail","kernel-fault-observed")
 
 def sha_file(path):
     h=hashlib.sha256()
@@ -151,6 +151,19 @@ def run_one(binary,prefix,case,output,timeout):
          "stdout_sha256":sha_file(stdout),"stderr_sha256":sha_file(stderr),
          "maps_sha256":sha_file(maps)})
     result["kernel_journal"]=kernel_logs(start-2,path/"kernel.log")
+    if result["kernel_journal"]["available"]:
+        # A child can return success after an asynchronous device fault.
+        # Journal events might originate with another tenant; halt for
+        # attribution without declaring this test's kernel causal.
+        lines=(path/"kernel.log").read_text(errors="replace").splitlines()
+        matches=[line for line in lines if re.search(
+            r"gpu.*(vm fault|page.not.present|fault)|VM_CONTEXT.*PROTECTION_FAULT|"
+            r"ring .*timeout|scheduler .*not ready|GPU reset|kernel BUG|Oops:",
+            line,re.I)]
+        result["kernel_fault_signals"]=matches[-30:]
+        if matches and result["status"]=="pass":
+            result["status"]="kernel-fault-observed"
+            result["note"]="journal contains possible host-wide GPU fault; attribution to child is not established"
     return result
 
 def main(argv=None):
