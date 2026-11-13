@@ -161,9 +161,11 @@ def run_one(binary,prefix,case,output,timeout):
             r"ring .*timeout|scheduler .*not ready|GPU reset|kernel BUG|Oops:",
             line,re.I)]
         result["kernel_fault_signals"]=matches[-30:]
-        if matches and result["status"]=="pass":
-            result["status"]="kernel-fault-observed"
-            result["note"]="journal contains possible host-wide GPU fault; attribution to child is not established"
+        if matches:
+            result["userspace_status_before_journal"]=result["status"]
+            if result["status"] not in ("fault","timeout"):
+                result["status"]="kernel-fault-observed"
+            result["note"]="kernel journal contains a possible host-wide GPU fault; attribution to child is not established"
     return result
 
 def main(argv=None):
