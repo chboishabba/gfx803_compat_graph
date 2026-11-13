@@ -160,7 +160,8 @@ def main(argv=None):
     p.add_argument("--build-timeout",type=int,default=900)
     p.add_argument("--batch-size",type=int,default=4)
     a=p.parse_args(argv)
-    if min(a.timeout,a.build-timeout,a.batch-size)<1:p.error("positive timeout and batch-size required")
+    if min(a.timeout,a.build_timeout,a.batch_size)<1:
+        p.error("positive timeout and batch-size required")
     if a.build and a.resume:p.error("cannot rebuild a previous original receipt")
     if a.recovered_after_fault and not a.resume:p.error("recovery requires --resume")
     try:

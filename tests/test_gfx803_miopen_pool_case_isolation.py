@@ -70,4 +70,13 @@ int main() {
         self.assertEqual(env["PYTHONNOUSERSITE"],"1")
         self.assertNotIn("LD_PRELOAD",env)
 
+    def test_main_parses_build_timeout_and_batch_size(self):
+        # Argument validation must reach source pinning instead of treating
+        # argparse attribute names as Python subtraction expressions.
+        with self.assertRaises(SystemExit) as stopped:
+            m.main(["--source","/missing","--rocm-prefix","/missing",
+                    "--hipcc","/missing","--out","/missing-out",
+                    "--build-timeout","1","--batch-size","1"])
+        self.assertEqual(stopped.exception.code,2)
+
 if __name__=="__main__":unittest.main()
