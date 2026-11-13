@@ -18,7 +18,7 @@ STATUSES={"unassayed","interrupted","ctest-pass","ctest-fail","fault","timeout"}
 def hashfile(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
-def aggregate(catalog,inputs,schaka_receipts=()):
+def aggregate(catalog,inputs,schaka_receipts=(),miopen_receipt=None):
     layers=catalog["layers"]
     by_id={x["id"]:x for x in layers}
     if len(by_id)!=10 or len(layers)!=10:
@@ -128,8 +128,45 @@ def aggregate(catalog,inputs,schaka_receipts=()):
             "receipt_sha256":hashlib.sha256(raw).hexdigest(),
             "rocm_root":root})
         target["status"]="direct-suite-evidence-plus-other-unqualified-APIs"
+    if miopen_receipt is not None:
+        raw=miopen_receipt.read_bytes()
+        record=json.loads(raw)
+        ids=record.get("selected")
+        cases=record.get("cases")
+        if (record.get("schema")!=1 or
+            record.get("source_sha")!="8fdcf7b1305d0cfc6fc8c1fc7b1bfb5f73494e78"
+            or record.get("release_admitted") is not False
+            or record.get("gpu_validated") is not False):
+            raise ValueError("invalid original MIOpen source and admission")
+        if (not isinstance(ids,list) or not ids or len(ids)!=len(set(ids))
+            or not isinstance(cases,dict) or set(ids)!=set(cases)):
+            raise ValueError("incomplete original MIOpen sweep target universe")
+        allowed={"unassayed","interrupted","passed","failed","fault","timeout",
+                 "empty-results","missing-binary"}
+        if any(not isinstance(v,dict) or v.get("status") not in allowed
+               for v in cases.values()):
+            raise ValueError("invalid MIOpen outcome")
+        root=record.get("rocm_root")
+        if not isinstance(root,str) or not root.startswith("/nix/store/"):
+            raise ValueError("MIOpen receipt lacks staged Nix ROCm")
+        profiles.add(root)
+        counts=Counter(v["status"] for v in cases.values())
+        row=summary["miopen"]
+        row.setdefault("source_owned_direct_suites",[]).append({
+            "suite":"schaka-miopen-original-cpp",
+            "case_bundles":len(ids),
+            "passed_with_nonzero_applicable_cases":counts["passed"],
+            "failed":counts["failed"],
+            "no_applicable_cases_or_missing_summary":counts["empty-results"],
+            "faults_or_timeouts":counts["fault"]+counts["timeout"],
+            "missing_binary":counts["missing-binary"],
+            "unassayed":counts["unassayed"],
+            "receipt_sha256":hashlib.sha256(raw).hexdigest(),
+            "rocm_root":root,
+            "runtime_coherence_verified":record.get("runtime_coherence_verified") is True})
+        row["status"]="direct-MIOpen-sweep-results-not-complete-API-qualification"
     return {"schema":1,"layers":summary,
-            "source_suite_receipts_count":len(schaka_receipts),
+            "source_suite_receipts_count":len(schaka_receipts),\n            "miopen_receipt_count":int(miopen_receipt is not None),
             "ctest_receipts_count":len(inputs),
             "different_rocm_roots":len(profiles)>1,
             "runtime_roots":sorted(profiles),
@@ -143,7 +180,7 @@ def main(argv=None):
                    help="layer-id=/exact/path/to/original/matrix.json")
     p.add_argument("--schaka-receipt",action="append",default=[],
                    help="fp16-gemm|triton-dot=/exact/original/matrix.json")
-    p.add_argument("--out",required=True,type=Path)
+    p.add_argument("--miopen-receipt",type=Path,default=None,\n                   help="exact original Schaka MIOpen sweep matrix.json")\n    p.add_argument("--out",required=True,type=Path)
     a=p.parse_args(argv)
     if a.out.exists():p.error("refuse overwriting aggregate report")
     try:
@@ -159,7 +196,7 @@ def main(argv=None):
             suite,path=arg.split("=",1)
             if not suite or not path:raise ValueError("empty direct suite/path")
             direct.append((suite,Path(path)))
-        report=aggregate(json.loads(CATALOG.read_text()),pairs,direct)
+        report=aggregate(json.loads(CATALOG.read_text()),pairs,direct,a.miopen_receipt)
     except (ValueError,OSError,KeyError,TypeError,json.JSONDecodeError) as ex:p.error(str(ex))
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
