@@ -144,6 +144,12 @@ def recovery_env():
     # Deliberately do not inherit preload/library overrides from a faulting run.
     return env
 
+def build_args(hipcc, rocm, changed, binary, source_dir):
+    """Compile the entrypoint-only derivative with Schaka's local headers."""
+    return [str(hipcc),"-O2","-I"+str(rocm/"include"),"-I"+str(source_dir),
+            str(changed),"-o",str(binary),"-L"+str(rocm/"lib"),"-lMIOpen","-lm",
+            "-Wl,-rpath,"+str(rocm/"lib")]
+
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--source",type=Path,required=True)
@@ -191,9 +197,7 @@ def main(argv=None):
             changed.write_text(derived)
             env=os.environ.copy()
             env["PATH"]=str(hipcc.parent)+os.pathsep+env.get("PATH","")
-            cmd=[str(hipcc),"-O2","-I"+str(rocm/"include"),str(changed),
-                 "-o",str(binary),"-L"+str(rocm/"lib"),"-lMIOpen","-lm",
-                 "-Wl,-rpath,"+str(rocm/"lib")]
+            cmd=build_args(hipcc,rocm,changed,binary,original.parent)
             rc=run_child(cmd,out,env,out/"build.stdout",out/"build.stderr",a.build_timeout)
             receipt={**identities,"build_returncode":rc,
                      "build_stdout_sha256":sha(out/"build.stdout"),

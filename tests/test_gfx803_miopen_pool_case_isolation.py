@@ -79,4 +79,12 @@ int main() {
                     "--build-timeout","1","--batch-size","1"])
         self.assertEqual(stopped.exception.code,2)
 
+    def test_build_uses_original_common_header_directory(self):
+        root=Path("/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-rocm")
+        source=Path("/work/tools/correctness-suite")
+        args=m.build_args(root/"bin/hipcc",root,Path("/out/pool_case.cpp"),
+                          Path("/out/pool_case"),source)
+        self.assertIn("-I"+str(source),args)
+        self.assertIn("-I"+str(root/"include"),args)
+
 if __name__=="__main__":unittest.main()
