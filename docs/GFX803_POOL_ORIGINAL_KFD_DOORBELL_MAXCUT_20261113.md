@@ -208,6 +208,76 @@ staged runtime, not by claiming the forward-only switch fixed
 a GPU page fault.
 
 
+## Historical first-party WhisperX GPU crash RCA — existing canonical evidence
+
+**Do not collapse this into a generic `gfx803 crash` or claim it proves
+MIOpen pooling shares the same defect.** The repo already contains a
+substantial, first-party queue/VM/copy-path investigation:
+
+- `docs/INCIDENT_2026-03-27_WHISPERX_TRANSCRIBE_RESET.md` — retained
+  reduced WhisperX repro enters active GPU work; earliest observed bad
+  boundary is after `transcribe` starts.
+- `docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md`
+  — no-profiler run survived transcription, entered alignment and then
+  hung/reset; profiler changed timing and sometimes allowed full workload
+  completion, but profiler teardown also segfaulted, and other profiled
+  runs still hung.
+- `docs/RETAINED_RCA_SET.md` — canonical retained `control-6.4`,
+  latest-HSA `hsa_init` userspace failure, and WhisperX reset anchors.
+- `docs/ADMISSIBILITY_CONE_TREE.md` — explicit exposure vs sentinel vs
+  observed failure class vs speculative root cause.
+- `POLARIS_STABILITY_BLUEPRINT.md`, `docs/USER_GUIDE.md`, `TODO.md` —
+  existing mitigation classes and status boundaries.
+- `scripts/trace-whisperx-rocprof.sh`,
+  `scripts/run-whisperx-rca-matrix.sh`,
+  `scripts/whisperx_rca_harness.py` — original instrumentation and
+  controlled-workload harnesses. Do not replace them with a generic
+  synthetic kernel without validating correspondence.
+
+The 30 March **15:27:20** crash evidence reports:
+`hipMemcpyWithStream(... DeviceToHost, 121916, ...)` →
+`Host active wait ... for -1 ns` →
+`hipMemcpyWithStream(... HostToDevice, 812160, ...)` →
+another host wait → GPU hang. Kernel logs then report
+`ring gfx timeout`, unsuccessful suspend of the WhisperX process,
+BACO reset and VRAM loss. Another 12:39:27 run showed a GPU VM
+fault on `TC4` in its reset wave. This is **retained exposure-path
+evidence**; it does not prove the memcpy call caused the earlier
+queue stall, pinned-page problem or memory mapping failure.
+
+WhisperX reproduced both with and without profiling in different
+runs. `rocprofv3` changed timing and occasionally changed survival.
+Do not promote a profiler-completed run to stable workflow support.
+
+### Cross-workload evidence gate
+
+For new original MIOpen pooling controls, the KFD audit and journal
+must distinguish:
+
+1. **GPU VM/page-not-present faults**: faulting GPU VA/VMID, client,
+   read/write, prior queue/kernel and relevant page mapping.
+2. **Ring/queue forward-progress stalls**: `ring gfx timeout`,
+   `Host active wait`, failed suspend/queue teardown and BACO reset.
+3. **SDMA doorbell callback/reset**: exact kernel source/binary
+   provenance for the June 2025 gfx7/8 callback patch and independent
+   GFX7/8 queue-validation change. These are not automatically
+   implicated by a GPU VM fault.
+4. **Userspace HSA-init rejection**: the separate
+   `docs/INCIDENT_2026-03-29_ROCMINFO_HSA_INIT_FAILURE.md`
+   records `hsa_init()=4096` in latest `libhsa-runtime64.so.1.18.70200`,
+   *before GPU enumeration*, and should not be called a hang/reset.
+
+Cross-workload comparison is warranted if the *same* queue/VM fault
+signature, kernel driver build and runtime closure can be identified.
+Otherwise classify `similar symptom; causal overlap unproved`.
+
+Suggested minimal **new** targeted run: a single original-pool
+baseline with no profiler, the existing HIP/HSA original-binary A/B
+matrix, and read-only previous-boot kernel journal classification.
+Do not rerun the full WhisperX long workload merely to reproduce
+a known destructive reset before the original pool failure
+is understood.
+
 ## P4: strict provenance join — no false repair claim
 
 After obtaining the complete prefix and single-case receipts, the
