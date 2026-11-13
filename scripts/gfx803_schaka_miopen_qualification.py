@@ -192,7 +192,7 @@ def validate_resume(state,identity):
     if any(not isinstance(x,dict) or x.get("status") not in STATES
            for x in state["cases"].values()):
         raise ValueError("corrupt case status")
-    if state.get("release_admitted") is not False:return ValueError("invalid release status")
+    if state.get("release_admitted") is not False:\n        raise ValueError("invalid release status")
     return state
 
 def main(argv=None):
@@ -237,7 +237,7 @@ def main(argv=None):
                 p.error("prebuilt binaries' source/runtime provenance differs")
         else:
             p.error("no verified build receipt; use --build")
-        if buildrec["status"]!="built":p.error("build incomplete, cannot run")
+        if buildrec["status"]!="built":p.error("build incomplete, cannot run")\n        for binary in buildrec["binaries"].values():\n            if "sha256" not in binary or not Path(binary["path"]).is_file():\n                p.error("missing source-pinned build output")\n            if sha_file(Path(binary["path"]))!=binary["sha256"]:\n                p.error("built binary hash drift")
         if len(buildrec.get("binaries",{}))!=len(EXPECTED):
             p.error("incomplete upstream binaries")
         matrix=out/"matrix.json"
