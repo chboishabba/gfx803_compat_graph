@@ -1,0 +1,49 @@
+/*
+ * Intentionally NOT auto-armed by the case4 launcher.
+ * GFX8 v7.3 KFD return probes for manual operator use only.
+ * Requires root permissions, bpftrace, actual installed module symbol matching.
+ * Changes execution timing; does not capture GPU ISA/first dispatch.
+ * Probe status BEFORE the one-shot run:
+ *   sudo bpftrace -l 'kprobe:unmap_queues_cpsch'
+ *   sudo bpftrace -l 'kretprobe:amdkfd_fence_wait_timeout'
+ *   sudo bpftrace -l 'kretprobe:kgd2kfd_quiesce_mm'
+ * A missing probe is a blocker, not permission to change the running driver.
+ */
+BEGIN
+{
+  printf("{\"event\":\"kfd_probe_start\",\"monotonic_ns\":%llu}\n", nsecs);
+}
+kprobe:unmap_queues_cpsch
+{
+  @u[tid] = nsecs;
+  printf("{\"event\":\"unmap_enter\",\"pid\":%d,\"tid\":%d,\"comm\":\"%s\",\"monotonic_ns\":%llu}\n", pid, tid, comm, nsecs);
+}
+kretprobe:unmap_queues_cpsch
+{
+  printf("{\"event\":\"unmap_return\",\"pid\":%d,\"tid\":%d,\"comm\":\"%s\",\"monotonic_ns\":%llu,\"return_code\":%ld,\"elapsed_ns\":%llu}\n", pid, tid, comm, nsecs, retval, @u[tid] ? nsecs-@u[tid] : 0);
+  delete(@u[tid]);
+}
+kprobe:amdkfd_fence_wait_timeout
+{
+  @f[tid] = nsecs;
+  printf("{\"event\":\"fence_wait_enter\",\"pid\":%d,\"tid\":%d,\"comm\":\"%s\",\"monotonic_ns\":%llu}\n", pid, tid, comm, nsecs);
+}
+kretprobe:amdkfd_fence_wait_timeout
+{
+  printf("{\"event\":\"fence_wait_return\",\"pid\":%d,\"tid\":%d,\"comm\":\"%s\",\"monotonic_ns\":%llu,\"return_code\":%ld,\"elapsed_ns\":%llu}\n", pid, tid, comm, nsecs, retval, @f[tid] ? nsecs-@f[tid] : 0);
+  delete(@f[tid]);
+}
+kprobe:kgd2kfd_quiesce_mm
+{
+  @q[tid] = nsecs;
+  printf("{\"event\":\"quiesce_enter\",\"pid\":%d,\"tid\":%d,\"comm\":\"%s\",\"monotonic_ns\":%llu}\n", pid, tid, comm, nsecs);
+}
+kretprobe:kgd2kfd_quiesce_mm
+{
+  printf("{\"event\":\"quiesce_return\",\"pid\":%d,\"tid\":%d,\"comm\":\"%s\",\"monotonic_ns\":%llu,\"return_code\":%ld,\"elapsed_ns\":%llu}\n", pid, tid, comm, nsecs, retval, @q[tid] ? nsecs-@q[tid] : 0);
+  delete(@q[tid]);
+}
+END
+{
+  printf("{\"event\":\"kfd_probe_end\",\"monotonic_ns\":%llu}\n", nsecs);
+}
