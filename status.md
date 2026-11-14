@@ -338,7 +338,7 @@ and original test logs take precedence over status prose.
 - **T1 accepted facts:** March Ollama recorded `comp_1.3.1` and userptr `init_user_pages -1`; March WhisperX D2H/H2D host wait and profiler effect; November first recorded gfx `kwin_wayland`, pre-hang visual corruption confirmed, source-selected TopK `mbtopk` but original HSACO/dispatch unknown. No original Nov devcoredump bytes after reboot.
 - **T2 exact statuses:** B1 XNACK-off SVM two-notifier source race/model + RFC present, actual incident activation OPEN. B2 March userptr source call known, error cause OPEN. B3 first original KFD fence return/queue OPEN, late -ETIME distinct. B4 normal TTM/PTE/GFX sync edges source present, specific broken edge unproven.
 - **New witness acceptance:** two distinct *registered* SVM ranges, matching capture/boot/mm/PASID, non-UNMAP XNACK-off invalidations, second returns before first KFD quiesce finishes; cross-boot/PASID/UNMAP/missing-registration controls fail closed. Such a witness still would not alone prove an RX580 hang cause.
-- [60-record source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) remains authoritative; retain misleading GPU-generation references as explicit negative controls.
+- [61-record source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) remains authoritative; retain misleading GPU-generation references as explicit negative controls.
 - **R4/R5:** SVM fix remains a source-context RFC not kernel-built or physically accepted; complete no-reboot GPU recovery remains OPEN. Continue in existing draft PR #7 only.
 
 
