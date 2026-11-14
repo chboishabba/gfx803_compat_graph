@@ -122,6 +122,8 @@ If one of the three named C files is absent from the previously *selective* rele
 
 **No destructive desktop experiments:**
 
+The TopK benchmark now requires independently recoverable-host attestation for *all* GPU cases, not only known-fault cases 0/1/4. This guards against repeating the shared, workload-independent hard-reboot failure class.
+
 1. Use the already retained March and November journals to compile the ordered, first-error signature **per boot** (compute/graphics ring, GPU VA/fault, queue/preemption, KIQ, BACO, VM reinit, KWin). Distinguish *first failure* from *reset fallout*.
 2. Source-diff March kernels against the verified November GFX8 KFD/AMDGPU implementation at `amdkfd_fence_wait_timeout`, `unmap_queues_cpsch`, queue reset, `gfx_v8_0_hw_fini`, KIQ test and process VM restoration. Identify shared uncorrected branch, not just strings.
 3. Prepare but do not run the **reviewed** PR #8 wheel (with source/patch/build hashes), retain a model-level sort-based TopK workaround and existing WhisperX `HIP_LAUNCH_BLOCKING=1` bounded control as independent *trigger mitigations*. Successful workarounds cannot close R.
