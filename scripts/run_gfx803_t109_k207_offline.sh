@@ -40,7 +40,8 @@ for suite in \
     test_gfx803_mbtopk_offline_attribution.py \
     test_gfx803_mbtopk_offload_container.py \
     test_gfx803_t109_k207_integrated.py \
-    test_gfx803_amdgpu_msgpack_notes.py; do
+    test_gfx803_amdgpu_msgpack_notes.py \
+    test_gfx803_mbtopk_kernel_disasm.py; do
   python3 -m unittest discover -s tests -p "$suite" -v
 done
 
@@ -54,6 +55,11 @@ python3 scripts/gfx803_amdgpu_msgpack_notes.py \
   --hsaco "$HSACO" \
   --container-receipt "$C/fatbin_container.json" \
   --out "$OUT/amdgpu_msgpack_notes.json"
+
+python3 scripts/gfx803_mbtopk_kernel_disasm.py \
+  --hsaco "$HSACO" \
+  --note-metadata "$OUT/amdgpu_msgpack_notes.json" \
+  --out "$OUT/kernel_disasm_inventory.json"
 
 python3 scripts/gfx803_mbtopk_retained_source_audit.py \
   --source "$SOURCE" \
