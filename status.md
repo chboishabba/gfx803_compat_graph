@@ -211,3 +211,24 @@ and original test logs take precedence over status prose.
 - Static symbols and metadata contain no readable `mbtopk`, `topk`, or
   `gather` label.  That does not refute the source candidate and is not proof
   of incident dispatch; T1.07 remains OPEN.  No GPU/HIP work occurred.
+
+
+## Integrated T1.09–T1.12 / K2.07–K2.08 host run prepared
+
+- a45ad49 original gfx803 HSACO receipt remains accepted:
+  5,246,152-byte extracted object, SHA 3aacb81a0c57…,
+  one gfx803 bundle class present 219 times, no named mbtopk
+  symbol in initial scan. Historical execution still unproven.
+- Implemented: exact SHA and machine-gated ELF metadata,
+  bounded AMDGPU MessagePack PT_NOTE kernel fields,
+  original TensorTopK source hash/launch terms, optional
+  metadata-scoped ISA disassembly, targeted non-MES source audit,
+  inert dedicated-host KFD trace proposal, full fail-closed join.
+- Single CPU-only runner:
+  scripts/run_gfx803_t109_k207_offline.sh.
+  Runbook: docs/GFX803_T109_K207_FULL_OFFLINE_HANDOFF_20261114.md.
+- **New host tests have NOT yet run.** No GPU, tracefs or
+  kernel operation; no release, patch or causal admission.
+- T1.06 original binary/loader linkage, T1.07 actual
+  incident kernel, K2.05 internal KFD error, K2.07 exact
+  CachyOS match, and stable recovery remain OPEN.
