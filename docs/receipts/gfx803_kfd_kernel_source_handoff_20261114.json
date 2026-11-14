@@ -57,9 +57,9 @@
     "gfx_target_version": "80003",
     "sched_policy_parameter": "0",
     "uni_mes_parameter": "1",
-    "conditional_mes_eviction_implementation": "With the post-reboot uni_mes=1 setting, v7.3 reference source selects evict_process_queues_cpsch -> remove_queue_mes -> adev->mes.funcs->remove_hw_queue.",
-    "contradiction": "The retained incident string 'The cp might be in an unrecoverable state due to an unsuccessful queues preemption' is emitted only by the non-MES unmap_queues_cpsch fence-timeout branch in the same v7.3 reference. Post-reboot parameters therefore cannot prove that remove_hw_queue was the incident-time failing operation.",
-    "conditional_failure_escalation": "If the MES branch was active and remove_hw_queue returned nonzero, it calls reset_queues_mes; a failed reset with amdgpu_gpu_recovery can call kfd_hws_hang. That sequence is static, not observed."
+    "mes_parameter_interpretation": "In the v7.3 reference, uni_mes only enables enable_uni_mes in the GC12 cases. KFD receives adev->enable_mes, which is set by the MES IP-block switch only for GC11/GC12; it is not set for GFX8/Polaris by that reference source.",
+    "reference_polaris_eviction_implementation": "For a GFX8 device under the v7.3 reference, shared_resources.enable_mes remains false, so evict_process_queues_cpsch reaches execute_queues_cpsch and unmap_queues_cpsch. This aligns with the retained unsuccessful-preemption fence-timeout message.",
+    "limits": "The exact CachyOS source package remains unmatched, so this is a source-reference attribution, not a captured incident-time stack or return value."
   },
   "postboot_compiled_branch_inventory": {
     "method": "read-only GDB disassembly of extracted postboot amdgpu.ko; no target was executed",

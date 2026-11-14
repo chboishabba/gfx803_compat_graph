@@ -309,6 +309,25 @@ sole display RX 580.
 the `live_polaris_runtime` object records a conditional MES path, not an
 observed invocation.
 
+## K2.06 / T1.04 correction — source-and-binary attribution
+
+`uni_mes=1` was previously treated as selecting the MES KFD path on Polaris.
+That was incorrect. In reference Linux v7.3, `amdgpu_discovery_set_mes_ip_blocks`
+sets `adev->enable_mes` only for GC11/GC12; `uni_mes` is consulted only in the
+GC12 cases for `enable_uni_mes`. `amdgpu_amdkfd_device_init` copies
+`adev->enable_mes`, not `uni_mes`, into KFD shared resources. Thus GFX8 uses
+the non-MES `execute_queues_cpsch` → `unmap_queues_cpsch` path in that source,
+which matches the retained fence-timeout diagnostic. This is a
+source-reference conclusion; the exact CachyOS source/incident return remains
+unmatched.
+
+The retained pre-review TopK source similarly narrows both large test shapes
+to **mbtopk**: the manual patch declines warptopk, and the multi-block
+heuristic is true for both 1×151936 and 32×151936. The hashed HIP ELF contains
+mbtopk symbols, but no trace identifies its executed HSACO/kernel. The full
+claim boundary is in
+`docs/receipts/gfx803_k205_t104_source_binary_attribution_20261114.json`.
+
 
 ## 14 November — K2.05/T1 implementation sprint landed
 

@@ -303,6 +303,17 @@ safe-host trace, then constrain the applicable return on safely recoverable
 hardware only. For exact gates see
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
 
+### Correction: K2.06 eliminates the MES hypothesis for reference Polaris
+
+The apparent contradiction came from conflating `uni_mes` with
+`adev->enable_mes`. Reference v7.3 only sets `enable_mes` for GC11/GC12 and
+copies that field into KFD; GFX8 therefore follows the non-MES queue-unmap
+path. This aligns with the retained preemption-timeout message. It does not
+recover the incident-time errno or establish exact CachyOS source equivalence.
+The accompanying TopK source audit identifies `mbtopk` as the large-shape
+candidate but not its executed HSACO. See
+`receipts/gfx803_k205_t104_source_binary_attribution_20261114.json`.
+
 
 ## 14 November — K2.05/T1 implementation sprint landed
 

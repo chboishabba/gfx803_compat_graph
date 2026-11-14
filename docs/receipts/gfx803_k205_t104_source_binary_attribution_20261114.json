@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "status": "offline-source-and-binary-attribution",
+  "scope": "read-only source, ELF, package-history and retained-journal analysis; no HIP initialization or GPU work",
+  "k2_06_reference_attribution": {
+    "hardware": "Polaris / gfx803 (GC8)",
+    "reference_source": {
+      "repository": "https://github.com/torvalds/linux",
+      "revision": "c03c1a14507dfaf8b856c2608f9ac216021fc222",
+      "tag": "v7.3",
+      "exact_cachyos_package_match": false
+    },
+    "package_history": "linux-cachyos-bore 7.3.0-2 was installed on 2026-10-30, before the 2026-11-14 incident; no persistent uni_mes or sched_policy override was found in the readable modprobe/boot configuration.",
+    "parameter_correction": "uni_mes is not itself KFD shared_resources.enable_mes. In reference amdgpu_discovery_set_mes_ip_blocks, enable_mes is set only for GC11/GC12. uni_mes is consulted only in the GC12 cases to set enable_uni_mes.",
+    "kfd_handoff": "amdgpu_amdkfd_device_init copies adev->enable_mes to KFD shared_resources.enable_mes.",
+    "reference_selected_branch": "For GC8 under this reference source: shared_resources.enable_mes=false; evict_process_queues_cpsch reaches execute_queues_cpsch then unmap_queues_cpsch.",
+    "journal_alignment": "The retained 'unsuccessful queues preemption' text is emitted by unmap_queues_cpsch after amdkfd_fence_wait_timeout returns nonzero.",
+    "allowed_conclusion": "The prior MES/remove_hw_queue hypothesis is eliminated for the v7.3 Polaris reference path. The exact CachyOS incident branch and internal errno remain unobserved, because no exact source match, trace, vmcore or devcoredump exists."
+  },
+  "t1_04_static_candidate": {
+    "observed_cases": [
+      {"shape": [1, 151936], "k": 50, "dtype": "float32", "result": "passed; 0.4008 ms median"},
+      {"shape": [32, 151936], "k": 50, "dtype": "float32", "result": "GPU hang; display GPU wedged"}
+    ],
+    "retained_pre_review_source": {
+      "path": "/mnt/truenas/comet-net/.gfx803-schaka-101-work/out/pytorch-topk-gfx803-20261109/hip-audit-r3/TensorTopK.hip",
+      "sha256": "acb592c2c25db61b5048a224d64a7a022fbcda91c5cfaa156e4cfdfa1b58059d",
+      "behavior": "The manual gfx803 patch declines only warptopk; it leaves normal multi-block versus single-block selection enabled."
+    },
+    "source_route": {
+      "warptopk": "eliminated by the retained manual patch and independently inapplicable to a 151936-element slice under the source threshold",
+      "mbtopk": "selected by should_use_multiblock for both cases: <=20 slices and >=20000 elements, or 21-40 slices and >=10000 elements",
+      "sbtopk": "not selected by that retained source route"
+    },
+    "binary": {
+      "path": "/mnt/truenas/comet-net/.gfx803-schaka-101-work/out/pytorch-topk-gfx803-20261109/python-overlay-r2/torch/lib/libtorch_hip.so",
+      "sha256": "dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2",
+      "build_id": "392fee76f7a23e82b345dae1b40d02bd0ea32cd5",
+      "evidence": "ELF exports float mbtopk gather and device-stub symbols and contains a .hip_fatbin section.",
+      "provenance_limit": "The retained source artifact and this ELF have no demonstrated byte-for-byte build linkage; symbols establish inclusion, not incident-time dispatch."
+    },
+    "allowed_conclusion": "mbtopk is the source-level candidate algorithm for the large incident shape. The actual HSACO/kernel, grid, register/LDS use and first stalled dispatch remain unobserved."
+  },
+  "next_gate": "Use a recoverable non-display GPU to capture a code-object/kernel trace for the exact mbtopk candidate. Do not rerun the destructive case on the display GPU.",
+  "gpu_rerun": false
+}

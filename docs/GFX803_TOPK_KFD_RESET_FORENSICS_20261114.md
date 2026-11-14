@@ -349,6 +349,16 @@ nor the later KIQ `-110` is established as the initial failure. See the
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md)
 for K2.05a–c acceptance criteria.
 
+## K2.06 correction — Polaris is non-MES in the reference path
+
+The preceding MES hypothesis is superseded for the v7.3 Polaris reference.
+`uni_mes` is not the KFD `enable_mes` flag: the latter is set only by the
+GC11/GC12 MES IP-block cases and is copied to KFD shared resources. A GFX8
+device therefore takes the non-MES unmap/fence path, which is consistent with
+the retained preemption diagnostic. The precise incident errno remains open
+without an exact CachyOS source match or trace. See
+`docs/receipts/gfx803_k205_t104_source_binary_attribution_20261114.json`.
+
 No GPU rerun, matched CachyOS source package, new DWARF symbols,
 or kernel patch is claimed.
 

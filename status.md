@@ -122,6 +122,22 @@ and original test logs take precedence over status prose.
   SHA prefix `dd0b4030` recorded; **selected HSACO unknown**.
 - Host receipts: `/mnt/truenas/comet-net/experiments/gfx803_k205_t1_static_20261114/`
   (not presumed uploaded). No GPU/HIP execution.
+
+## K2.06/T1.04 source-and-binary attribution — 14 November
+
+- **Correction:** `uni_mes=1` does not by itself select the KFD MES path on
+  Polaris. In the v7.3 reference, KFD receives `adev->enable_mes`; that field
+  is set only for GC11/GC12 MES IP blocks, not GFX8. The reference Polaris
+  route is therefore non-MES `execute_queues_cpsch` →
+  `unmap_queues_cpsch`, consistent with the preserved preemption-timeout log.
+- This replaces the prior conditional MES/remove-queue hypothesis as a
+  reference-source explanation. Exact CachyOS source equivalence and the
+  incident-time internal errno remain OPEN.
+- The retained pre-review TopK source routes both large vocabulary cases to
+  **mbtopk**, not warptopk or sbtopk. `libtorch_hip.so` build ID
+  `392fee76f7a23e82b345dae1b40d02bd0ea32cd5` and SHA-256
+  `dd0b4030…` are recorded, but selected HSACO/kernel remains OPEN.
+- Evidence: `docs/receipts/gfx803_k205_t104_source_binary_attribution_20261114.json`.
 - K2.05/T1 and stable KFD reset recovery **OPEN**; prioritize
   historical boot state and offline TopK code-object mapping,
   then only a recoverable non-display-host trace.
