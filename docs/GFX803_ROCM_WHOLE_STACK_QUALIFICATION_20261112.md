@@ -261,3 +261,23 @@ cross-workload stability assay are reconciled in
 [docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md](GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md).
 That dated reconciliation does **not** alter Phase A–E exit criteria,
 replace original receipts, or promote a candidate to an accepted release.
+
+
+## 14 November — direct HIP/ROCr/HSA/KFD implementation cut
+
+Native HIP/HSA first-pass smoke source, pinned build/isolated-run
+supervisor, and multi-original-CTest-suite result joining now exist.
+See [direct runtime qualification runbook](GFX803_HIP_HSA_KFD_DIRECT_QUALIFICATION_20261114.md)
+and [current phase/deliverable reconciliation](GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md).
+
+- 4 HIP + 3 HSA **source-written tests**, physical build/run **open**.
+- ROCr `rocrtst`, KFDTest and HIP upstream CTest **test build/run open**.
+- Original MIOpen pooling fault and historical WhisperX queue/reset
+  RCA retained as independent reliability gates.
+- Actual Schaka FP16 27/27, Triton four executed, MIOpen 23 original
+  entries and subsequent isolated/prefix successes credited in
+  the dated phase reconciliation; do not promote general API
+  compatibility from those limited measurements.
+- The atlas now accepts distinct original `rocrtst` and
+  `kfdtest` CTest receipts under one compatibility layer without
+  overwriting either original test universe.
