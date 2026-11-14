@@ -97,9 +97,28 @@ def probe_environment(python: Path, *, expect_kernel: str | None,
     if require_journal and (result.returncode != 0 or not result.stdout.strip() or
                             "No journal files were opened" in result.stdout):
         raise ValueError("kernel journal not readable; refusing blind reproduction")
-    if mode == "rocprof" and not shutil.which(rocprof):
-        raise ValueError("rocprofv3 missing; do not substitute system ROCm")
+    profiler_identity = None
+    if mode == "rocprof":
+        located = shutil.which(rocprof)
+        if not located:
+            raise ValueError("rocprofv3 missing; do not substitute system ROCm")
+        resolved = Path(located).resolve()
+        if not resolved.is_file():
+            raise ValueError("rocprofv3 not a readable executable")
+        # --help is CPU-only. Fail before arming if the installed profiler
+        # cannot represent the requested dispatch/HSA/memory capture.
+        help_result = subprocess.run([str(resolved), "--help"],
+                                     capture_output=True, text=True, timeout=15)
+        help_text = help_result.stdout + help_result.stderr
+        required_options = ("--kernel-trace", "--hip-trace", "--hsa-trace",
+                            "--memory-copy-trace", "--memory-allocation-trace")
+        missing_options = [opt for opt in required_options if opt not in help_text]
+        if help_result.returncode != 0 or missing_options:
+            raise ValueError(f"rocprofv3 unsupported CLI options: {missing_options}")
+        profiler_identity = {"path": str(resolved), "sha256": sha256(resolved),
+                             "required_capture_flags_verified": True}
     return {"kernel_release": release, "original_overlay": original,
+            "rocprofiler": profiler_identity,
             "python_executable": str(python), "python_sha256": sha256(python),
             "benchmark_sha256": sha256(BENCH),
             "child_sha256": sha256(CHILD), "journal_readable": bool(result.stdout.strip()),
