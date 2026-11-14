@@ -176,3 +176,21 @@ and original test logs take precedence over status prose.
   The first directory is retained as a superseded tool-output attempt, not
   evidence.  No HIP initialization, GPU workload, trace attachment or kernel
   modification occurred.
+
+
+## T1.08 fatbin container investigation — `052889b` handoff
+
+- Operator: 25/25 offline tests PASS; exact `libtorch_hip.so`
+  SHA/Build ID reconfirmed, 42.9 MB HIP fatbin extracted,
+  6,045 TopK-matching host symbols, no directly embedded
+  AMDGPU ELF found (inconclusive).
+- Added `gfx803_mbtopk_offload_container_audit.py`:
+  offline CCOB/Clang header parser, SHA, optional
+  `clang-offload-bundler --list`, exact advertised gfx803
+  target extraction with fail-closed bounds.
+- CPU-only tests: `test_gfx803_mbtopk_offload_container.py`.
+  **Committed; host execution pending**.
+- See `docs/GFX803_T105_K206_MBTopK_BINARY_MAXCUT_20261114.md`
+  for one-run commands and the preferred small JSON data handoff.
+- K2.05 incident fence return and T1.07 actual executing HSACO
+  remain OPEN; no GPU run.
