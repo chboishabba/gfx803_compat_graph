@@ -69,7 +69,7 @@ def detect_header(header:str)->dict:
     flags=re.search(r"Flags:\s*(.*)",header)
     return {"machine":machine.group(1).strip() if machine else None,
             "flags":flags.group(1).strip() if flags else None,
-            "amdgpu_machine_reported":bool(machine and "AMDGPU" in machine.group(1).upper()),
+            "amdgpu_machine_reported":bool(machine and ("AMDGPU" in machine.group(1).upper() or "AMD GPU" in machine.group(1).upper())),
             "gfx803_text_reported":bool(flags and "gfx803" in flags.group(1).lower())}
 
 def parse_sections(text:str)->list[dict]:
@@ -111,8 +111,12 @@ def analyze(path:Path,receipt:dict,*,llvm_readobj:str|None=None)->dict:
     actual=hash_file(path)
     if actual!=expected["sha256"]:
         raise ValueError("HSACO SHA mismatch; refuse candidate attribution")
-    if path.open("rb").read(4)!=b"\x7fELF":
-        raise ValueError("unbundled target not a direct ELF")
+    with path.open("rb") as stream:
+        ehdr=stream.read(64)
+    if ehdr[:4]!=b"\x7fELF" or len(ehdr)<64:
+        raise ValueError("unbundled target not a valid ELF header")
+    if int.from_bytes(ehdr[18:20],"little")!=224:
+        raise ValueError("unbundled ELF machine is not AMDGPU (224)")
     if not shutil.which("readelf"):
         raise ValueError("GNU readelf required")
     calls={
@@ -124,8 +128,8 @@ def analyze(path:Path,receipt:dict,*,llvm_readobj:str|None=None)->dict:
     if calls["header"]["status"]!="ok" or calls["sections"]["status"]!="ok":
         raise ValueError("ELF header and sections must be readable")
     hdr=detect_header(calls["header"].get("stdout",""))
-    if not hdr["amdgpu_machine_reported"]:
-        raise ValueError("ELF is not identified as AMDGPU by readelf")
+    hdr["machine_code"]=224
+    hdr["machine_verified_from_elf_header"]=True
     opt=llvm_readobj or find_tool(TOOL_CANDIDATES)
     metadata={"status":"tool-unavailable","commands":[]}
     if opt:
