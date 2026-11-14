@@ -22,6 +22,13 @@ def sha(path:Path)->str:
         for c in iter(lambda:f.read(1024*1024),b""):h.update(c)
     return h.hexdigest()
 
+def zip_member_hash(z: zipfile.ZipFile, member: str) -> str:
+    h=hashlib.sha256()
+    with z.open(member) as stream:
+        for block in iter(lambda: stream.read(1024*1024),b""):
+            h.update(block)
+    return h.hexdigest()
+
 def manifest(path:Path)->dict:
     if not path.exists():raise FileNotFoundError(path)
     if path.is_file():
@@ -33,7 +40,7 @@ def manifest(path:Path)->dict:
             for x in libs:
                 info=z.getinfo(x)
                 entries.append({"name":x,"bytes":info.file_size,
-                                "sha256":hashlib.sha256(z.read(x)).hexdigest() if info.file_size<=MAX_SCAN else None})
+                                "sha256":zip_member_hash(z,x) if info.file_size<=MAX_SCAN else None})
             return {"kind":"wheel","sha256":sha(path),"libs":entries,
                     "topk_file_in_wheel":any(x.endswith("TensorTopK.cpp") for x in names),
                     "torch_version_files":[x for x in names if x.endswith("torch/version.py")]}
