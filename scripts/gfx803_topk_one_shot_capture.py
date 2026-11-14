@@ -33,6 +33,8 @@ ACK = "I ACCEPT THE GPU WEDGE AND MANUAL REBOOT"
 BOOT_ID = Path("/proc/sys/kernel/random/boot_id")
 DANGEROUS = ("/tmp", "/run", "/dev/shm")
 MAP_TAGS = ("libtorch_hip", "libamdhip", "libhsa", "roc", "torch", "sgemm", "shim")
+PROBES = ("amdkfd_fence_wait_timeout", "unmap_queues_cpsch", "kgd2kfd_quiesce_mm")
+BT = ROOT / "scripts/gfx803_kfd_return_capture.bt"
 
 CHILD = r'''
 import importlib.util, json, sys
@@ -103,6 +105,26 @@ def validate_paths(python: Path, overlay: Path, rocm: Path, shim: Path) -> dict:
             "shim_path": str(shim), "shim_sha256": sha256(shim),
             "benchmark_sha256": sha256(BENCH),
             "python": str(python), "rocm": str(rocm), "overlay": str(overlay)}
+
+
+def validate_kfd_bpftrace() -> dict:
+    tool = shutil.which("bpftrace")
+    if not tool or not BT.is_file():
+        raise ValueError("opt-in bpftrace binary and exact probe script are required")
+    available = Path("/sys/kernel/tracing/available_filter_functions")
+    if not available.is_file():
+        available = Path("/sys/kernel/debug/tracing/available_filter_functions")
+    if not available.is_file():
+        raise ValueError("cannot inspect running-kernel kprobe function availability")
+    names = set()
+    for line in available.read_text(errors="replace").splitlines():
+        if line.strip():
+            names.add(line.split()[0].split(".")[0])
+    missing = [n for n in PROBES if n not in names]
+    if missing:
+        raise ValueError("cannot attach required KFD return probes; missing: " + ",".join(missing))
+    return {"binary": tool, "script": str(BT), "script_sha256": sha256(BT),
+            "functions": list(PROBES), "kind": "instrumentation-changing-kretprobes"}
 
 
 def build_env(overlay: Path, rocm: Path, shim: Path) -> dict:
@@ -191,6 +213,7 @@ def run_capture(args, identity: dict, env: dict) -> int:
                 "PYTHONPATH": env.get("PYTHONPATH"),
                 "kernel_release": os.uname().release,
                 "known_risk": "GPU may permanently wedge until manual host reboot",
+                "kfd_probe": args.probe_info,
                 "automatic_retry": False, "automatic_reset": False,
                 "automatic_reboot": False,
                 "capture_limits": ["journal and maps do NOT expose actual stalled HSACO",
@@ -200,6 +223,7 @@ def run_capture(args, identity: dict, env: dict) -> int:
     stop = threading.Event()
     watchers = []
     journal = None
+    probe = None
     log = args.out / "kernel-journal.log"
     log.touch(mode=0o600)
     # Journal follow starts BEFORE HIP child and persistently flushes lines.
@@ -215,6 +239,17 @@ def run_capture(args, identity: dict, env: dict) -> int:
         time.sleep(0.6)
         if journal.poll() is not None:
             raise RuntimeError("journal follower exited; refusing GPU dispatch")
+        if args.enable_kfd_probes:
+            with (args.out / "kfd-return-probe.log").open("w") as probe_stdout, (
+                 args.out / "kfd-return-probe-stderr.log").open("w") as probe_stderr:
+                # Keep descriptor duplication independent of this with-block:
+                # Popen inherits its own fds; the parent closes its copies.
+                probe = subprocess.Popen([args.probe_info["binary"], "-q",
+                                          str(BT)], stdout=probe_stdout,
+                                         stderr=probe_stderr)
+            time.sleep(1.5)
+            if probe.poll() is not None:
+                raise RuntimeError("KFD bpftrace probe attachment failed; refusing GPU dispatch")
         cmd = [str(args.python), "-u", "-c", CHILD, str(BENCH)]
         with (args.out / "child-stdout.log").open("w", buffering=1) as stdout, (
              args.out / "child-stderr.log").open("w", buffering=1) as stderr:
@@ -246,6 +281,12 @@ def run_capture(args, identity: dict, env: dict) -> int:
             return 0 if returncode == 0 else 3
     finally:
         stop.set()
+        if probe is not None and probe.poll() is None:
+            probe.terminate()
+            try:
+                probe.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                probe.kill()
         if journal is not None and journal.poll() is None:
             journal.terminate()
             try:
@@ -265,6 +306,8 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True,
                         help="new directory on persistent filesystem, not /tmp")
     parser.add_argument("--max-seconds", type=int, default=180)
+    parser.add_argument("--enable-kfd-probes", action="store_true",
+                        help="EXTRA RISK: attach 3 KFD kretprobes; changes kernel tracing and timing")
     parser.add_argument("--execute", action="store_true",
                         help="HANG RISK: dispatch case 4 exactly once")
     parser.add_argument("--accept-single-display-risk", action="store_true",
@@ -283,17 +326,21 @@ def main() -> int:
         durable_directory(a.out)
         if not shutil.which("journalctl"):
             raise ValueError("journalctl missing, no durable kernel event capture")
+        a.probe_info = validate_kfd_bpftrace() if a.enable_kfd_probes else None
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         parser.error(str(exc))
     if not a.execute:
         print(json.dumps({"mode": "PREFLIGHT-ONLY-NO-GPU",
                           "identity": identity, "output": str(a.out),
+                          "kfd_probe": a.probe_info,
                           "warning": "Known GPU wedge; execution requires explicit arm and acknowledgment"},
                          indent=2))
         return 0
     if a.ack != ACK or not a.accept_single_display_risk:
         parser.error("execute requires --accept-single-display-risk AND --ack '" + ACK + "'")
     print("ARMED: exactly one case-4 f32 32x151936 TopK; NO RESTART, NO GPU RESET", flush=True)
+    if a.enable_kfd_probes:
+        print("WARNING: KFD kretprobes enabled; can change scheduling/timing", flush=True)
     try:
         return run_capture(a, identity, env)
     except (OSError, RuntimeError) as exc:
