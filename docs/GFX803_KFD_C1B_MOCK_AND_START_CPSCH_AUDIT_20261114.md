@@ -67,6 +67,28 @@ The patch:
 
 The C behavioural model now contains **nine** cases, including the reset-held expected skip, normal non-reset map failure, and legacy ignored-error negative control. This version's CI outcome is **not verified** in this document.
 
+## Operational correction — actual failure is a nonrecovering GPU, not an inaccessible host
+
+**User-confirmed symptom:** even after a manual AMDGPU driver reset and Wayland restart, the RX 580 stays unusable; the emergency terminal remains accessible. A full machine restart has been required. This means the kernel/CPU can remain operational while the graphics and compute engines, queue command processor or its reset-dependent memory/firmware state remain nonfunctional. It does not by itself prove the board is electrically unpowered, nor whether a true PCIe/function/power-domain reset could succeed.
+
+**Raw November evidence:** first gfx timeout and failed queue preemption at 12:39:28; KIQ `-110` and KCQ disable at 12:39:29; BACO reset and VRAM loss at 12:39:29; additional gfx/comp timeouts and repeated reported resets; by 12:40:55 `GPU reset(62) succeeded!` while the device remains wedged. That is a documented **failed device recovery**, regardless of whether a kernel path returned zero.
+
+### Safety implication for this RFC
+
+The source error-propagation fix is a **diagnostic/containment correction**, not the repair of the hardware/firmware reset failure. Deallocating host packet-manager buffers while an engine may hold stale DMA addresses is still a kernel memory-safety question even when the device is apparently hung; a wedged queue is not a proof that all bus-mastering or DMA has stopped. Conversely, preserving packet allocations **does not restore a wedged CP/MEC**. We must not make teardown perfection a prerequisite to investigating why BACO/soft-reset fails to restore useful GPU ring execution.
+
+**Do not install the startup RFC on the display RX 580.** In particular, the proposed `!amdgpu_in_reset` gating plus direct cleanup needs reset-path maintainers' review: it may change whether queues are reprogrammed during restore and may incorrectly discard allocations on partial hardware failure. Keep it as an isolated proposal and mock until actual driver reset-route semantics are verified.
+
+### Highest-information recovery boundary
+
+1. **Before a reset:** record last successful gfx/KIQ/KCQ/compute ring test, PCI visibility, first VM fault or HWS timeout.
+2. **After GPU IP soft reset:** record the earliest failed command/ring test; do not infer that the following BACO caused an earlier KIQ failure.
+3. **After BACO:** establish whether any **fresh** gfx, KIQ, KCQ, SDMA or KFD queue can complete a fence; whether GPUVM/GART was restored; and which exact operations the reset reports successful.
+4. **After manual driver reset:** determine whether hardware reset was actually attempted (PCI reset, FLR if supported, full power cycle) or only software teardown/reprobe. A driver/module reload is not inherently a power cycle.
+5. Define success as the new KFD dispatch **and a new accelerated DRM/Wayland context** working. A reset log or responsive emergency TTY is not a GPU recovery receipt.
+
+**Hardware fix gate:** compare actual Polaris BACO/PCI fallback and IP reinitialization/firmware paths and obtain a non-display independently recoverable test setup. On the sole display machine, a historical post-mortem is safer than repeatedly triggering resets.
+
 ## Next source-level implementation cut
 
 **P1 (RFC staged; kernel-build and lifecycle review open):** refine and upstream-review a minimal fix for `start_cpsch`'s unchecked `execute_queues_cpsch` status; audit whether `pm_init`, resource setup and `sched_running` rollback are safe on failure. A simple `goto` to the existing failure path is **not** automatically safe after `sched_running = true`: it may require unmapping/cleanup, and post-reset hardware may already be unresponsive.
