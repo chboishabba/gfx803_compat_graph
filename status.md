@@ -56,3 +56,16 @@ and original test logs take precedence over status prose.
   display GPU; no release promotion from partial reset success.
 - **Handoff and phases:**
   `docs/GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md`.
+
+
+## K1/K2 handoff received — 14 November (`07a52c7`)
+
+- Kernel/module SHA + Build ID recorded; gfx8 SDMA doorbell callback
+  found in running module, registered in upstream v7.3 reference for
+  Polaris. First retained KFD failure is `Failed to quiesce KFD`;
+  subsequent queue restore/resume, KIQ `-110`, KCQ errors retained.
+- Exact CachyOS source package / DWARF **OPEN**; callback invocation
+  during incident **UNKNOWN**; exact first internal KFD failing branch
+  **OPEN**, as is original TopK kernel attribution. No GPU rerun.
+- Handoff: `docs/receipts/gfx803_kfd_kernel_source_handoff_20261114.json`.
+  Next cut: `docs/GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md`.
