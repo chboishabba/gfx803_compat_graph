@@ -76,7 +76,13 @@ def correlate(rows: list[dict]) -> dict:
     for (mm_id, pasid), evs in groups.items():
         quiesces = {}
         invalidations = {}
+        registrations = {}
         for e in evs:
+            if e["event"] == "svm_range_register":
+                rid = e.get("range_id")
+                if not rid:
+                    raise ValueError("svm_range_register requires range_id")
+                registrations.setdefault(rid, []).append(e)
             if e["event"] == "kfd_quiesce_begin":
                 quiesces.setdefault(e["quiesce_id"], {})["begin"] = e
             elif e["event"] == "kfd_quiesce_end":
@@ -114,6 +120,14 @@ def correlate(rows: list[dict]) -> dict:
             for fid, fi, fr in first:
                 for sid, si, sr in other:
                     if sid == fid or si["range_id"] == fi["range_id"]:
+                        continue
+                    # A registered range must be observed *before* its
+                    # invalidation, not assumed from notifier text alone.
+                    if not any(r["monotonic_ns"] < fi["monotonic_ns"]
+                               for r in registrations.get(fi["range_id"], ())):
+                        continue
+                    if not any(r["monotonic_ns"] < si["monotonic_ns"]
+                               for r in registrations.get(si["range_id"], ())):
                         continue
                     if not fi.get("xnack_off", False) or not si.get("xnack_off", False):
                         continue
