@@ -1,11 +1,35 @@
-# Status
+# gfx803 status — 14 November 2026
 
-- Phase: Schaka ROCm 10.1 gfx803 C2 admission, candidate PyTorch repair
-- Control lane: preserved and untouched
-- Runtime baseline: relocated Schaka candidate passes frozen-QKV and dense-LILA
-  CPU/GPU parity; it is not yet an accepted release
-- Current blocker: `torch.topk` faults in gfx803 `warptopk` for the authentic
-  C2 `[2, 4]`, `k=2` router input
-- Candidate: architecture-scoped TensorTopK dispatch guard that falls through
-  to the existing `sbtopk` route; source build and physical semantic/C2 gates
-  remain open
+- **Overall:** reproducible Schaka ROCm 10.1 gfx803 candidate with measured
+  native RX 580 functional GPU execution; **not accepted/released**.
+- **Factory:** Phase A partially physically staged; Phase B accepted
+  clean-client Cachix closure OPEN; Phase C full native Nix component
+  build DAG OPEN; D lifecycle OPEN; E upstream contributions parallel.
+- **Qualification:** ten-layer catalogue and evidence join exist.
+  Original PyTorch OpInfo 1,583/1,774 passes with original skips,
+  failures and fault candidates retained. Schaka FP16 suite 27/27
+  passed; Triton four dtypes executed (numeric acceptance still
+  separate); original direct MIOpen 23 entries: 18 pass, two
+  inapplicable, historical pooling fault, activation OOM, groupnorm
+  expected-boundary rejections conservatively classified failed.
+- **Pooling:** individual 42/42 and shared-process prefixes 10/10 pass;
+  historical original-binary VM fault remains unreproduced/cause open.
+- **Reliability:** existing March 2026 WhisperX D2H/copy-wait
+  → `ring gfx timeout` → reset/VRAM-loss investigation is a
+  *cross-workload stability/queue assay* in RCA_TRACK_3, plus
+  direct HIP/ROCr/HSA/KFD component qualification targets. Historic
+  gfx7/8 KFD doorbell callback regression has independent
+  kernel-build provenance gate. Do not conflate with MIOpen VM fault.
+- **TopK:** source fix, 120-case focused semantic result and upstream
+  PR #8 evidence exist; reviewed-wheel rebuild/paired large-input
+  performance and upstream acceptance remain OPEN.
+- **Next cuts:** original pooled binary A/B plus loader/KFD journals;
+  direct HIP/ROCr/KFD tests; activation OOM and groupnorm negative
+  controls; remaining OpInfo replay; scoped stability/release
+  admission. No automatic promotion.
+
+Full phase/deliverables reconciliation:
+`docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md`.
+
+This is a dated evidence snapshot. Retained source-specific receipts
+and original test logs take precedence over status prose.
