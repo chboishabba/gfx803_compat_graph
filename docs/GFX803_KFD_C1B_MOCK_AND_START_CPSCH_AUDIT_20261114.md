@@ -48,9 +48,28 @@ Test cases in the model:
 
 The C model's four stages share the same injected nonzero return path; this is a bounded **control-flow model**, not compilation of original `pm_init`, `kfd_gtt_sa_allocate` or `execute_queues_cpsch` under stubs. The Python unittest compiles and runs the committed C model in CI.
 
+## Implemented source candidate: reset-aware `start_cpsch` RFC
+
+**Committed patch:** [`patches/linux/gfx803-c1b-cpsch-startup-rfc.patch`](../patches/linux/gfx803-c1b-cpsch-startup-rfc.patch). This modifies the **actual Linux function** if applied to Linux v7.3; it is not a synthetic-only proposal, but it is **not installed, kernel-built or upstream-reviewed**.
+
+The source-level causal distinction changes the implementation choice: `start_cpsch()` is invoked during reset **while the reset-domain write semaphore is held**. `execute_queues_cpsch()` attempts `down_read_trylock()` on the *same semaphore* and returns `-EIO` on a failed trylock. The previously ignored return can therefore be an **expected reset-phase lock conflict**, and blindly promoting every such return to fatal would regress reset.
+
+The patch:
+
+1. Explicitly **skips queue execution when `amdgpu_in_reset(adev)`**, preserving the effective no-map behavior of the reset-held trylock without reporting a false hardware failure.
+2. Outside reset, **captures and propagates a real `execute_queues_cpsch` nonzero return** rather than returning startup success.
+3. Clears `dqm->sched_running = false` in the shared late-startup failure label before releasing fence/packet-manager resources. This also corrects the previously visible hang-buffer allocation failure state.
+4. Preserves the original KFD/AMDGPU outer call path; error propagation from `amdgpu_amdkfd_post_reset` remains a **separate future patch**.
+
+**Exact source-context check:** both unified-diff hunks were compared line-for-line against `torvalds/linux` tag `v7.3` `kfd_device_queue_manager.c`, Git blob `4594824985e1eff3cb1cde0726553b25ad1bab3e`, with 0 context mismatches and correct old/new hunk counts. That confirms textual patch compatibility with this upstream source snapshot, not physical correctness. The new `test_gfx803_kfd_c1b_patch.py` also exercises `git apply` against a CPU-only upstream-context fixture; when `GFX803_KERNEL_SOURCE_ROOT` is supplied, it validates the full exact source tree.
+
+**Review blocker before a production backport:** if the queue-management packet was already submitted and then failed mid-execution, freeing the packet manager/fence may race with hardware that is still consuming it. Likewise, after one node starts successfully and another fails, KFD post-reset retains the lock and previous nodes may need explicit teardown. A maintainer-reviewed lifecycle proof and kernel build are mandatory before installing this RFC; the C mock cannot establish that resource lifetime.
+
+The C behavioural model now contains **nine** cases, including the reset-held expected skip, normal non-reset map failure, and legacy ignored-error negative control. This version's CI outcome is **not verified** in this document.
+
 ## Next source-level implementation cut
 
-**P1 (directly actionable):** propose a minimal, upstream-reviewable fix for `start_cpsch`'s unchecked `execute_queues_cpsch` status; audit whether `pm_init`, resource setup and `sched_running` rollback are safe on failure. A simple `goto` to the existing failure path is **not** automatically safe after `sched_running = true`: it may require unmapping/cleanup, and post-reset hardware may already be unresponsive.
+**P1 (RFC staged; kernel-build and lifecycle review open):** refine and upstream-review a minimal fix for `start_cpsch`'s unchecked `execute_queues_cpsch` status; audit whether `pm_init`, resource setup and `sched_running` rollback are safe on failure. A simple `goto` to the existing failure path is **not** automatically safe after `sched_running = true`: it may require unmapping/cleanup, and post-reset hardware may already be unresponsive.
 
 **P2:** patch `amdgpu_device_gpu_resume` / `amdgpu_device_gpu_recover` error return and lock/scheduler ordering using a kernel test/mock that exercises nonzero KFD startup and partial node state. Ensure no stranded DRM reset lock or partially resumed graphics queue. Log the KFD return explicitly; do not call it physical recovery.
 
