@@ -1,6 +1,6 @@
 # Operator runbook — one-shot original TopK case 4, *known to wedge display RX580*
 
-**14 Nov 2026; single PR #7; manual next-day handoff.** **All files below are staged, not run against GPU.** The original incident's 14 Nov Python core is retained in [`gfx803_topk_incident_core_provenance_20261114.json`](receipts/gfx803_topk_incident_core_provenance_20261114.json). The original crash involved exactly case 4, f32 `[32,151936]`, `k=50`, 10 warmups and 50 timed iterations, a Nix `torch-site` overlay, staged ROCm 10.1, SGEMM `LD_PRELOAD` and `libtorch_hip.so` SHA-256 `c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff`.
+**14 Nov 2026; single PR #7; manual next-day handoff.** **All files below are staged, not run against GPU.** The original incident's 14 Nov Python core is retained in [`gfx803_topk_incident_core_provenance_20261114.json`](receipts/gfx803_topk_incident_core_provenance_20261114.json). The original crash involved exactly case 4, f32 `[32,151936]`, `k=50`, 10 warmups and 50 timed iterations, a Nix `torch-site` overlay, staged ROCm 10.1, SGEMM `LD_PRELOAD` and `libtorch_hip.so` SHA-256 `c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff` **and GNU Build ID** `3d27b29d191725660bbc4b8a83cb2f4753a09921`.
 
 **Physical warning:** this shape already caused corruption, KFD/KIQ failure, a persistent Wayland GPU wedge and a forced reboot. This harness does not make it safe. **Save work and consider not running on your only display GPU.** No software reset / `systemctl restart sddm` / re-run / second stress test is an acceptance gate; it can further poison the GPU. This is **one** consciously operator-armed attempt, never automatic, and no crash-proof profiler guarantee.
 
@@ -121,7 +121,9 @@ If the GPU wedges, recover the host in the ordinary operator-controlled manner. 
 # In the same shell where OUT and KFD_LOG were recorded:
 find "$OUT" -maxdepth 3 -type f -printf '%p %s bytes\n'
 sha256sum "$OUT"/* 2>/dev/null || true
-journalctl -k -b -1 --no-pager > "$OUT"/previous-boot-kernel-after-reboot.log
+# Use the saved ORIGINAL boot UUID, not -1 (which shifts after another reboot):
+ORIGINAL_BOOT_ID="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["original_boot_id"])' "$OUT/preflight.json")"
+journalctl -k --boot "$ORIGINAL_BOOT_ID" --no-pager > "$OUT"/original-boot-kernel-after-reboot.log
 coredumpctl list --no-pager | tail -40
 # Store full core only if explicitly needed; it can be huge/private.
 # Do not commit any raw core, memory maps containing private paths, or
