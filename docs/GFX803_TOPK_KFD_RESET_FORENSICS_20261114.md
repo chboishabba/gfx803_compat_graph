@@ -267,3 +267,21 @@ running but relaunching Plasma Wayland could not recover requires
 a full host reboot in the recorded incident. No short HIP smoke pass,
 GPU reset-return success code or `kwin_wayland` process restart
 closes this gate.
+
+
+## Current parallel K1/K2 + T1 plan
+
+The active source/recovery plan and exact machine-readable operator
+handoff are maintained in
+[TopK/KFD parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+
+The operator is acquiring the **incident-boot** CachyOS source and
+symbols, verifying compiled gfx7/8 callback/queue handling and mapping
+the first KIQ/KCQ/KFD error. In parallel, source analysis of the old
+TopK full-sort dispatch can proceed without re-triggering the
+known display-wedging GPU case.
+
+Do not mark K1, K2, T1 or J1 completed until source/build proof and
+actual first-error/dispatch attribution have been ingested.
+The immutable previous-boot journal is already preserved; avoid
+creating duplicate raw captures or overwriting original evidence.
