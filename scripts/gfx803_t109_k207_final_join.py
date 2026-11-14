@@ -15,10 +15,17 @@ def load(p:Path)->dict:
     return r
 
 def join(source_ref:dict,container:dict,hsaco:dict,source:dict,
-         old_join:dict,kfd:dict|None=None,trace:dict|None=None)->dict:
+         old_join:dict,elf_inventory:dict,kfd:dict|None=None,trace:dict|None=None)->dict:
     original=source_ref["t1_04_static_candidate"]
     if source.get("sha256")!=original["retained_pre_review_source"]["sha256"] or not source.get("source_verified"):
         raise ValueError("retained source SHA not verified")
+    original_elf=original["binary"]
+    if (elf_inventory.get("sha256")!=original_elf["sha256"] or
+        elf_inventory.get("build_id")!=original_elf["build_id"]):
+        raise ValueError("original libtorch_hip ELF identity mismatch")
+    recorded_fatbins=elf_inventory.get("extracted_fatbin",[])
+    if len(recorded_fatbins)!=1 or recorded_fatbins[0].get("sha256")!=container.get("sha256"):
+        raise ValueError("fatbin SHA linkage mismatch")
     extracted=container.get("unbundled_output")
     if not extracted or extracted.get("sha256")!=hsaco.get("sha256") or extracted.get("size_bytes")!=hsaco.get("size_bytes"):
         raise ValueError("HSACO identity not matching original container")
@@ -35,7 +42,8 @@ def join(source_ref:dict,container:dict,hsaco:dict,source:dict,
                       kfd.get("reference_log_site_found") and kfd.get("fence_function_name_found"))
     run_gates={
         "T1.04":{"status":"source-candidate","name":"mbtopk"},
-        "T1.05":{"status":"accepted-original-lib-and-fatbin","host_symbol_count":6045},
+        "T1.05":{"status":"accepted-original-lib-and-fatbin",
+                  "host_symbol_count":elf_inventory.get("symbols_total_matches")},
         "T1.08":{"status":"accepted-container-and-gfx803-target",
                   "bundle_occurrences":container.get("target_occurrences",{}).get("hip-amdgcn-amd-amdhsa--gfx803")},
         "T1.09":{"status":"verified-extracted-hsaco","sha256":hsaco["sha256"],
@@ -75,6 +83,7 @@ def main():
     for name in ("source-attribution","container-receipt","hsaco-metadata",
                  "retained-source","old-join","out"):
         p.add_argument("--"+name,type=Path,required=True)
+    p.add_argument("--elf-inventory",type=Path,required=True)
     p.add_argument("--kfd-source",type=Path)
     p.add_argument("--safehost-plan",type=Path)
     a=p.parse_args()
@@ -82,7 +91,7 @@ def main():
     try:
         r=join(load(a.source_attribution),load(a.container_receipt),
                load(a.hsaco_metadata),load(a.retained_source),load(a.old_join),
-               load(a.kfd_source) if a.kfd_source else None,
+               load(a.elf_inventory),load(a.kfd_source) if a.kfd_source else None,
                load(a.safehost_plan) if a.safehost_plan else None)
     except (ValueError,OSError,KeyError,TypeError,json.JSONDecodeError) as e:p.error(str(e))
     a.out.parent.mkdir(parents=True,exist_ok=True)
