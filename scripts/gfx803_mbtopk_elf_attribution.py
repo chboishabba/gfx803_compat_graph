@@ -19,7 +19,10 @@ SHAPES = ((1, 151936, 50), (32, 151936, 50))
 FATBIN_LIMIT = 1024 * 1024 * 1024
 SYMBOL_LIMIT = 300
 TOPK_MATCH = re.compile(r"(mbtopk|sbtopk|warptopk|gatherTopK|TensorTopK|topk)", re.I)
-SECTION_MATCH = re.compile(r"(hip_fatbin|llvm.offload|offload|rodata)",re.I)
+# Generic .rodata is not evidence of a HIP code-object bundle.  Keep this
+# deliberately specific so the receipt cannot mislabel ordinary constants as
+# offload payloads.
+SECTION_MATCH = re.compile(r"(hip_fatbin|llvm\.offload|offload)",re.I)
 
 def sha256(path: Path) -> str:
     h=hashlib.sha256()
@@ -39,6 +42,41 @@ def invoke(argv: list[str], max_bytes: int = 32_000_000) -> dict:
                 "stderr":p.stderr[:2000].decode("utf-8",errors="replace"),
                 "truncated":len(p.stdout)>max_bytes}
     except (OSError,subprocess.TimeoutExpired) as e:
+        return {"status":"error","error":str(e),"argv":argv,"stdout":"","stderr":""}
+
+def invoke_matching_lines(argv: list[str], pattern: re.Pattern[str], max_matches: int = 20_000) -> dict:
+    """Run a large inventory command without retaining unrelated symbols.
+
+    libtorch_hip has a tens-of-megabytes complete symbol table.  The audit's
+    evidence question is limited to TopK candidates, so retaining the entire
+    table makes the safety cap reject an otherwise inspectable binary.  This
+    streams stdout and records every matching line up to an explicit bound;
+    the result remains an exact *matching-symbol* inventory, not a claim of a
+    complete symbol-table inventory or runtime dispatch.
+    """
+    if not shutil.which(argv[0]):
+        return {"status":"tool-missing","argv":argv,"stdout":"","stderr":""}
+    try:
+        p = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        assert p.stdout is not None
+        matches: list[str] = []
+        truncated = False
+        for raw in p.stdout:
+            line = raw.decode("utf-8", errors="replace")
+            if pattern.search(line):
+                if len(matches) < max_matches:
+                    matches.append(line)
+                else:
+                    truncated = True
+        stderr = p.stderr.read(2000).decode("utf-8", errors="replace") if p.stderr else ""
+        exit_code = p.wait(timeout=120)
+        return {"status":"ok" if exit_code == 0 else "failed", "exit":exit_code,
+                "stdout":"".join(matches), "stderr":stderr,
+                "truncated":truncated, "matching_lines":len(matches)}
+    except (OSError, subprocess.TimeoutExpired) as e:
+        if 'p' in locals():
+            p.kill()
+            p.wait()
         return {"status":"error","error":str(e),"argv":argv,"stdout":"","stderr":""}
 
 def parse_build_id(note: str) -> str | None:
@@ -105,14 +143,17 @@ def audit(binary:Path, receipt:dict, source:Path|None, dump:Path|None)->dict:
     build_id=parse_build_id(note["stdout"])
     if build_id!=expected["build_id"]:
         raise ValueError("FAIL CLOSED: TopK ELF Build ID differs from retained T1 receipt")
-    sym=invoke(["readelf","-Ws",str(binary)])
+    # Stream/filter the huge complete symbol table; see invoke_matching_lines.
+    sym=invoke_matching_lines(["readelf","-Ws",str(binary)], TOPK_MATCH)
     sec=invoke(["readelf","-WS",str(binary)])
     if sym["status"]!="ok" or sec["status"]!="ok":
         raise ValueError("readelf symbols and sections required")
     symbols=parse_symbols(sym["stdout"])
     sections=parse_sections(sec["stdout"])
-    if sym.get("truncated") or sec.get("truncated"):
-        raise ValueError("readelf output too long: cannot make complete symbol/section inventory")
+    if sym.get("truncated"):
+        raise ValueError("too many matching TopK symbols: refusing an incomplete inventory")
+    if sec.get("truncated"):
+        raise ValueError("readelf section output too long: cannot make complete section inventory")
     dumps=[]
     if dump:
         # objcopy extracts ELF sections only; it does not perform GPU execution,
@@ -135,8 +176,12 @@ def audit(binary:Path, receipt:dict, source:Path|None, dump:Path|None)->dict:
                       "type":"ELF section payload; NOT a proven HSACO or dispatched kernel"})
     return {"schema":1,"mode":"offline-binary","libtorch_hip":str(binary),
             "sha256":actual,"build_id":build_id,
-            "symbols_total_matches":len(symbols),
-            "symbols_truncated_at":SYMBOL_LIMIT if len(symbols)>=SYMBOL_LIMIT else None,
+            # The retained display is intentionally bounded.  Preserve the
+            # streamed total separately so a 300-entry display never reads as
+            # a complete symbol count.
+            "symbols_total_matches":sym["matching_lines"],
+            "symbols_displayed":len(symbols),
+            "symbols_truncated_at":SYMBOL_LIMIT if sym["matching_lines"]>len(symbols) else None,
             "matching_symbols":symbols,
             "offload_sections":sections,"extracted_fatbin":dumps,
             "original_source":source_scan(source) if source else None,

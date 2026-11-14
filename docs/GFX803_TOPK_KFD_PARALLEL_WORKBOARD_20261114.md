@@ -427,3 +427,26 @@ for a single CPU-only command sequence. All scripts and tests are
 actual HSACO metadata, original build provenance, dispatch and
 KFD incident return are pending. No GPU/HIP workload or kernel
 patch has been performed.
+
+## 14 November — T1.05 host audit completed
+
+The CPU-only host cut completed with **25/25 focused tests passing** (12
+ELF/fatbin tests and 13 prior KFD/TopK tests).  A legitimate large-ELF
+condition in the first runner attempt was corrected before accepting the
+receipt: the runner now streams all TopK-matching `readelf` lines, records
+their full count separately from its 300-line evidence display, and excludes
+ordinary `.rodata` from offload-section classification.
+
+The source-bound candidate identity was reconfirmed: `libtorch_hip.so` SHA-256
+`dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2`, Build
+ID `392fee76f7a23e82b345dae1b40d02bd0ea32cd5`; its sole `.hip_fatbin` payload
+is 42,919,798 bytes with SHA-256
+`35733398518e0a82aadbf64a7f9e80874069f4da40e401b4bf772cab37623de3`.
+
+The bounded structural scanner found zero directly embedded ELF64/AMDGPU
+candidates.  That is not a negative dispatch result: the payload may use a
+wrapper or compression that this scanner intentionally does not decode.
+It leaves T1.06 (build linkage), T1.07 (selected HSACO/kernel), K2.05 and J1
+open.  The superseding host-local outputs are under
+`/mnt/truenas/comet-net/experiments/gfx803_t105_k206_20261114_r2/`; no GPU,
+HIP, tracing or kernel mutation occurred.

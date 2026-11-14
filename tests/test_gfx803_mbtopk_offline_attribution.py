@@ -30,6 +30,9 @@ class TopkElfTests(unittest.TestCase):
         s=elf.parse_sections(txt)
         self.assertEqual(s[0]["file_offset"],0x2000)
         self.assertEqual(s[0]["size_bytes"],0x3000)
+    def test_plain_rodata_is_not_an_offload_bundle(self):
+        txt=" [13] .rodata PROGBITS 0000000000001000 00002000 00003000 00 A 0 0 8"
+        self.assertEqual(elf.parse_sections(txt), [])
     def test_buildid(self):
         self.assertEqual(elf.parse_build_id("Build ID: 392FEE76"),"392fee76")
         self.assertIsNone(elf.parse_build_id("no build"))
@@ -45,6 +48,11 @@ class TopkElfTests(unittest.TestCase):
         many=elf.shape_bounds(32,151936,50)
         self.assertEqual(many["input_bytes_f32_min"],one["input_bytes_f32_min"]*32)
         self.assertEqual(many["full_sort_indices_bytes_min"],32*one["full_sort_indices_bytes_min"])
+    def test_streamed_symbol_inventory_is_explicitly_filtered(self):
+        # The real HIP ELF has a very large complete symbol table.  The audit
+        # must retain matching candidate lines without silently retaining only
+        # an arbitrary prefix of that table.
+        self.assertIn("matching-symbol", elf.invoke_matching_lines.__doc__)
 
 class FatbinTests(unittest.TestCase):
     def synthetic_elf(self):

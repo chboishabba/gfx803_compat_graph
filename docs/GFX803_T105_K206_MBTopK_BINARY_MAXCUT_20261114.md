@@ -45,7 +45,7 @@ python3 scripts/gfx803_kfd_topk_evidence_join.py \
   --out "$OUT/kfd_topk_join.json"
 ~~~
 
-Each output refuses overwrite; use a new directory if rerunning. The first auditor verifies the exact original library SHA and ELF Build ID against the committed attribution receipt before extracting anything. GNU readelf is required; objcopy is needed for fatbin extraction. The ELF scanner requires only Python and checks ELF64 little-endian machine 224, section and program header extents.
+Each output refuses overwrite; use a new directory if rerunning. The first auditor verifies the exact original library SHA and ELF Build ID against the committed attribution receipt before extracting anything. GNU readelf is required; objcopy is needed for fatbin extraction. The ELF scanner requires only Python and checks ELF64 little-endian machine 224, section and program header extents. The symbol display is capped, but the receipt records the full matching-line count separately; generic `.rodata` is not treated as an offload section.
 
 If extracted candidates exist, inspect them with read-only tools:
 

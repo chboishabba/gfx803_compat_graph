@@ -154,3 +154,25 @@ and original test logs take precedence over status prose.
   return and KFD durable recovery remain OPEN.
 - Runbook: docs/GFX803_T105_K206_MBTopK_BINARY_MAXCUT_20261114.md.
 - No new GPU runs, kernel fixes or Schaka PR changes.
+
+## T1.05 host audit executed — 14 November
+
+- CPU-only audit completed after its output guard was corrected: 25/25
+  focused offline tests passed.  The guard now streams TopK-matching symbol
+  lines from the large ELF and records the complete matching count separately
+  from the 300-entry display cap; ordinary `.rodata` is no longer mislabeled
+  as an offload payload.
+- The exact candidate `libtorch_hip.so` identity was reconfirmed: SHA-256
+  `dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2`,
+  Build ID `392fee76f7a23e82b345dae1b40d02bd0ea32cd5`.  It has one
+  `.hip_fatbin` payload (42,919,798 bytes; SHA-256
+  `35733398518e0a82aadbf64a7f9e80874069f4da40e401b4bf772cab37623de3`).
+- The bounded scanner found no directly embedded AMDGPU ELF in that payload.
+  This is **inconclusive**, consistent with a wrapped or compressed code-object
+  format; it does not eliminate `mbtopk`, identify a gfx803 HSACO, or identify
+  the incident dispatch.
+- Host-local superseding receipt directory:
+  `/mnt/truenas/comet-net/experiments/gfx803_t105_k206_20261114_r2/`.
+  The first directory is retained as a superseded tool-output attempt, not
+  evidence.  No HIP initialization, GPU workload, trace attachment or kernel
+  modification occurred.

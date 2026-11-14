@@ -362,6 +362,16 @@ without an exact CachyOS source match or trace. See
 No GPU rerun, matched CachyOS source package, new DWARF symbols,
 or kernel patch is claimed.
 
+## 14 November — offline fatbin result
+
+The fail-closed audit verified the retained candidate HIP ELF identity and
+extracted its 42,919,798-byte `.hip_fatbin` section.  A bounded scan found no
+direct embedded AMDGPU ELF64 payload.  This only rules out that narrow storage
+representation; it cannot identify or exclude a wrapped/compressed HSACO, and
+it cannot establish what dispatched in the incident.  The corrected results
+are in the host-local `gfx803_t105_k206_20261114_r2` directory cited by the
+parallel workboard.  No GPU execution occurred.
+
 
 ## 14 November — K2.05/T1 implementation sprint landed
 
