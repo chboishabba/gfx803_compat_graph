@@ -18,6 +18,7 @@ import sys
 import time
 
 EXPECTED_LIBTORCH_SHA256 = "c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff"
+EXPECTED_LIBTORCH_BUILD_ID = "3d27b29d191725660bbc4b8a83cb2f4753a09921"
 EXPECTED_OVERLAY = "/nix/store/vq1lgpc49im7qvvxgxabykyfs47l2ykb-gfx803-schaka101-torch-candidate-overlay/torch-site"
 EXPECTED_ROCM_ROOT = "/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm"
 CASE = 4
@@ -34,6 +35,24 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def read_gnu_build_id(path: Path) -> str:
+    """CPU-only check, fully fail-closed against incident-time ELF identity."""
+    import re
+    import shutil
+    import subprocess
+    readelf = shutil.which("readelf")
+    if not readelf:
+        raise ValueError("readelf is required for original ELF Build ID validation")
+    cp = subprocess.run([readelf, "-n", str(path)], capture_output=True,
+                        text=True, timeout=40)
+    if cp.returncode:
+        raise ValueError("readelf -n failed on original libtorch_hip.so")
+    found = {s.lower() for s in re.findall(r"Build ID:\s*([0-9a-fA-F]+)", cp.stdout)}
+    if len(found) != 1:
+        raise ValueError("cannot uniquely determine original ELF GNU Build ID")
+    return next(iter(found))
+
+
 def preflight_overlay(overlay: Path, rocm: Path, *, enforce_original: bool = True) -> dict:
     if enforce_original and str(overlay) != EXPECTED_OVERLAY:
         raise ValueError("wrong incident-time Nix torch-site overlay")
@@ -45,8 +64,12 @@ def preflight_overlay(overlay: Path, rocm: Path, *, enforce_original: bool = Tru
     actual = sha256(lib)
     if enforce_original and actual != EXPECTED_LIBTORCH_SHA256:
         raise ValueError(f"original libtorch_hip SHA mismatch: {actual}")
+    build_id = read_gnu_build_id(lib) if enforce_original else None
+    if enforce_original and build_id != EXPECTED_LIBTORCH_BUILD_ID:
+        raise ValueError("original incident libtorch_hip GNU Build ID mismatch")
     return {"overlay": str(overlay), "rocm_root": str(rocm),
             "libtorch_hip": str(lib), "libtorch_hip_sha256": actual,
+            "libtorch_hip_build_id": build_id,
             "sha_matches_original": actual == EXPECTED_LIBTORCH_SHA256}
 
 
