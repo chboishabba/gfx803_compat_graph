@@ -183,13 +183,16 @@ def run(args) -> int:
         "command": planned, "host_wall_ns": time.time_ns(),
         "host_monotonic_ns": time.monotonic_ns(), "gpu_work_not_yet_started": True,
         "one_shot": True, "auto_reboot": False, "auto_recovery": False,
+        "core_limit_mib_requested": args.core_limit_mib,
         "separate_kfd_log": str(args.kfd_log) if args.kfd_log else None,
     })
-    # Increase Python core dump allowance, but systemd core_pattern/limits
-    # may override this; coredumpctl must be inspected after reboot.
+    # Bound possible userspace core growth rather than blindly requesting
+    # unlimited disk consumption. systemd-coredump limits may still override.
     try:
         soft, hard = resource.getrlimit(resource.RLIMIT_CORE)
-        resource.setrlimit(resource.RLIMIT_CORE, (hard, hard))
+        requested = args.core_limit_mib * 1024 * 1024
+        bound = min(requested, hard) if hard != resource.RLIM_INFINITY else requested
+        resource.setrlimit(resource.RLIMIT_CORE, (bound, hard))
     except (ValueError, OSError):
         pass
     journal = None
@@ -274,6 +277,8 @@ def main() -> int:
                    help="optional exact host kernel release, e.g. 7.3.0-2-cachyos-bore")
     p.add_argument("--kfd-log", type=Path,
                    help="fresh separately armed KFD return-probe log; mandatory for baseline mode")
+    p.add_argument("--core-limit-mib", type=int, default=1024,
+                   help="bounded userspace core size; systemd-coredump may impose its own limits")
     p.add_argument("--tail-seconds", type=int, default=20,
                    help="capture post-abort recovery journal without new GPU work")
     p.add_argument("--timeout", type=int, default=180)
@@ -284,6 +289,8 @@ def main() -> int:
         p.error("timeout must be 15..600 seconds; no unbounded stress")
     if a.tail_seconds < 0 or a.tail_seconds > 120:
         p.error("tail-seconds must be 0..120")
+    if a.core_limit_mib < 0 or a.core_limit_mib > 8192:
+        p.error("core-limit-mib must be 0..8192")
     try:
         return run(a)
     except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as e:
