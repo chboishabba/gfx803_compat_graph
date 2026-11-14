@@ -351,3 +351,41 @@ for K2.05a–c acceptance criteria.
 
 No GPU rerun, matched CachyOS source package, new DWARF symbols,
 or kernel patch is claimed.
+
+
+## 14 November — K2.05/T1 implementation sprint landed
+
+Five standalone Python tools, all within this compatibility repo and
+not Schaka's PR #8:
+
+- scripts/gfx803_kfd_incident_offline_audit.py: original journal SHA
+  verification, first-error chronology, separated current-vs-historic
+  configuration and fail-closed state.
+- scripts/gfx803_kfd_trace_boundary.py: default read-only available
+  probe/symbol inventory; optional explicit root-bound temporary
+  entry/return kprobes, ten-second idle capture and scoped cleanup;
+  **never starts a GPU workload**.
+- scripts/gfx803_topk_binary_offline_audit.py: original wheel/overlay
+  source, ELF and optional code-object SHA, candidate TopK route
+  markers and lower-bound [1,151936] vs [32,151936] buffer sizing.
+  Static inventory is not proof of selected kernel.
+- scripts/gfx803_kfd_binary_branch_audit.py: exact compressed module,
+  decompressed module and Build ID comparisons before offline
+  objdump call-site and conditional-branch inventory.
+- scripts/gfx803_kfd_topk_evidence_join.py: SHA-bound aggregation,
+  preserving incident MES/non-MES branch and TopK trigger UNKNOWN,
+  K2.05/T1 OPEN and release BLOCKED.
+
+CPU-only synthetics:
+tests/test_gfx803_kfd_topk_offline_cut.py. These are **committed,
+not yet executed on the RX 580 host**. Run commands and safe stop
+rules are in
+[the implementation runbook](GFX803_K205_T1_IMPLEMENTATION_RUNBOOK_20261114.md).
+
+**Sprint acceptance:** code and offline tests source-written;
+physical/static host run results PENDING. No destructive GPU repro,
+new kernel patch, inferred historical MES dispatch, or claim of
+debugger attachment. Continue exact old wheel mapping and K2.05
+return discrimination only after original receipts are run and
+inspected. This adds tooling without changing the existing
+K2.04 contradiction or closing K2.05.
