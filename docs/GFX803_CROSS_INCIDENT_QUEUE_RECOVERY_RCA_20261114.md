@@ -80,6 +80,44 @@ If BACO/GFX8 soft reset completes but queue re-creation, VM rebind, TLB invalida
 
 A practical **fix** should be evaluated at this recovery boundary: either restore usable graphics/compute ring and VM state or explicitly **fail closed** and reject new GPU work without misleading soft-recovery loops. Neither is proven by a simple callback stub.
 
+
+## 3A. Source-level results: Linux v7.3 reference and the most promising repair candidates
+
+A read of the *actual upstream v7.3 source tag*, not a generic current-kernel example, found these **specific legacy orderings**:
+
+1. `amdgpu_device_gpu_recover` calls `amdgpu_device_recovery_get_reset_lock` **before** `amdgpu_device_halt_activities`; the latter calls `amdgpu_amdkfd_pre_reset`. Yet `unmap_queues_cpsch` uses `down_read_trylock(reset_domain->sem)` and returns `-EIO` when denied. This is the exact structural issue AMD's [8 October 2026 v2 preemption-before-lock patch](https://lore-kernel.gnuweeb.org/amd-gfx/20261008140045.1283288-1-William.Palacek@amd.com/T/) addresses. The v7.3 PCI-error branch also has lock before halt.
+2. In the same source, `amdgpu_device_gpu_recover` executes `amdgpu_device_sched_resume` **before** `amdgpu_device_gpu_resume`, which calls `amdgpu_amdkfd_post_reset`. AMD's [22 October 2026 callback-order patch](https://www.mail-archive.com/search?f=1&l=amd-gfx@lists.freedesktop.org&o=newest&q=date:20261022) proposes the opposite: finish KFD and display-audio callbacks before restarting DRM schedulers.
+3. `restore_process_queues_cpsch` in v7.3 does not show the `amdgpu_in_reset -> -EAGAIN` early guard described in [5 September 2026's queue-restore-during-reset patch](https://lore-kernel.gnuweeb.org/amd-gfx/20260905043031.1015676-2-xiang.liu@amd.com/T/). This is a distinct stale-queue/mapping hypothesis.
+4. Negative control: v7.3's `gfx_v8_0_mqd_init` **already exempts KIQ from compute quantum settings**, matching [Alex Deucher's GFX8 KIQ correction](https://git.zx2c4.com/wireguard-linux/commit/drivers/gpu/drm/amd/amdgpu?id=7346a046c6a9b9f30cb1f7d301449300a9174c71). Do not blame this absent fix on v7.3.
+
+**Do not yet transplant the v7.3 result to the loaded CachyOS module.** The previous receipt hash-matched only a set of relevant source files, not a full build equivalence of these newly audited functions. Patch applicability must be checked against the exact downloaded source first.
+
+### Extra evidence from the November *raw* journal
+
+At **12:40:55**, the log states `qcm fence wait loop timeout expired`, then `unsuccessful queues preemption` and `Failed to quiesce KFD`. In v7.3's `amdkfd_fence_wait_timeout`, the *printed* qcm-timeout branch returns **`-ETIME`**. That is affirmative evidence for the **later** wave. The first 12:39:28 failed quiescence has no retained qcm-timeout line; its internal return is still unknown, and neither later `-ETIME` nor KIQ `-110` should be substituted for it.
+
+The observed first 12:39:28 `unsuccessful queues preemption` proves that *some* invocation made it through to the fence wait/error branch; this is not explained by an immediate reset-lock read-lock denial alone. A reset-lock defect can still poison **subsequent** reset handling, particularly if pre-reset unmap is skipped while user queues remain active.
+
+### Run this exact-source audit (CPU-only, no HIP, kernel change, or GPU activity)
+
+```bash
+set -euo pipefail
+cd /mnt/truenas/comet-net/gfx803_compat_graph
+git fetch --all --prune
+git switch fix/topk-benchmark-fail-closed-20261114
+python3 -m unittest discover -s tests -p 'test_gfx803_gfx8_reset_order_audit.py' -v
+
+ROOT=/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/cachyos-7.3.0-2-amd-kfd-source
+python3 scripts/gfx803_gfx8_reset_order_audit.py \
+  --source "$ROOT" \
+  --release-receipt docs/receipts/gfx803_kfd_exact_release_doorbell_queue_20261114.json \
+  --out /mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/gfx8_reset_order_audit.json
+```
+
+If one of the three named C files is absent from the previously *selective* release extraction, stop and extract it from the already SHA-verified release archive. Do not silently substitute an upstream source tree or mark missing files safe. The audit classifies source ordering and records per-file SHA-256; it does **not** prove the module was compiled from those exact bytes.
+
+**Repair priority after exact match:** first pre-reset queue-unmap ordering, then post-reset callback/scheduler ordering, then restore-during-reset guard. These are small source-level hypotheses to evaluate via existing AMD patches on an independently recoverable host, not authorization to patch and test the sole display GPU.
+
 ## 4. Highest-information interventions, ordered
 
 **No destructive desktop experiments:**
