@@ -61,6 +61,15 @@
     "contradiction": "The retained incident string 'The cp might be in an unrecoverable state due to an unsuccessful queues preemption' is emitted only by the non-MES unmap_queues_cpsch fence-timeout branch in the same v7.3 reference. Post-reboot parameters therefore cannot prove that remove_hw_queue was the incident-time failing operation.",
     "conditional_failure_escalation": "If the MES branch was active and remove_hw_queue returned nonzero, it calls reset_queues_mes; a failed reset with amdgpu_gpu_recovery can call kfd_hws_hang. That sequence is static, not observed."
   },
+  "postboot_compiled_branch_inventory": {
+    "method": "read-only GDB disassembly of extracted postboot amdgpu.ko; no target was executed",
+    "function": "evict_process_queues_cpsch",
+    "symbols": [
+      "remove_queue_mes_on_reset_option.constprop.0 at 0x2dc500",
+      "unmap_queues_cpsch at 0x2df3e0"
+    ],
+    "interpretation": "The installed module compiles both MES and non-MES queue-eviction alternatives and conditionally calls one according to runtime state. This narrows neither branch as incident-time execution."
+  },
   "journal_sha256": "be965c117fc7fd2a815a843b63b3ad807d9e88ae43ffff33495cb82043fc70f6",
   "gpu_rerun": false,
   "conclusion": "The installed module has gfx8 SDMA doorbell callback symbols, and upstream v7.3 reference source registers the callback for Polaris. This is not an exact CachyOS source-package match. The preserved journal does not establish whether the callback was invoked or identify the first TopK kernel. First *logged* KFD recovery error is 'Failed to quiesce KFD'; first internal failing function is not established. No kernel patch is justified by this evidence alone.",

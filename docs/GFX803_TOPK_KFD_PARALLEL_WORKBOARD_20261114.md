@@ -283,6 +283,12 @@ state change, CachyOS source divergence, a different queue/device path, or an
 incomplete retained log. Neither the exact CachyOS source package nor an
 incident-time call trace is present.
 
+Read-only GDB disassembly of the extracted post-reboot module confirms that
+`evict_process_queues_cpsch` contains both the MES
+`remove_queue_mes_on_reset_option` call and the non-MES
+`unmap_queues_cpsch` call. It therefore confirms compiled branch availability,
+not the branch selected in the incident.
+
 | Gate | Status | Next decisive artifact |
 | --- | --- | --- |
 | **K2.04** Polaris MES eviction dispatch mapping | CONDITIONAL: selected by post-reboot parameters, contradicted by the retained v7.3 log site | Resolve incident-time state/source and alternate non-MES path |
