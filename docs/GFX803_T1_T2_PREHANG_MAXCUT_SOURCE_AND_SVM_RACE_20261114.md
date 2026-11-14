@@ -82,3 +82,22 @@ A first MMU notifier **A** increments from zero to one and begins blocking queue
 **Maximum cut:** T1 identify first GPU command with lost forward progress; T2 inspect actual concurrent SVM notifier presence/ordering and TTM/VM fence dependency, then T3 safe falsification; T4 port kernel correction only after mechanism activation confirmed (B2 RFC currently source-only); T5 independent device physical acceptance. The display RX580 must not be deliberately re-wedged by replaying `[32,151936], k=50` or large uncontrolled memory churn.
 
 **Status:** First-failure cross-incident matrix DONE from retained notes; kernel source and concrete B2 concurrency defect DONE at source level; physical attribution to RX580 incident, kernel compile and no-reboot recovery still OPEN. No observed browser crash was adjudicated as OOM or device loss in this pass.
+
+
+## 5. Source-provenance ledger and userptr-vs-SVM acceptance correction
+
+**Every supplied source remains findable:** [GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) retains 60 URLs/records, including previously linked upstream reference threads, actual hardware scopes, same-number-but-different-archive traps, contradictory examples and inaccessible originals. Entries are **not** to be silently deleted because the cited report was for gfx12, Navi or RX6800. The ledger gives the disposition rather than treating it as a candidate RX580 fix.
+
+### T2-U verified March `init_user_pages` callsite
+
+Linux v7.3 [`amdgpu_amdkfd_gpuvm.c`](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c) ~1049–1112: `init_user_pages()` registers an HMM/MMU notifier for a KFD `userptr` buffer and invokes `amdgpu_ttm_tt_get_user_pages()`. The code reports `init_user_pages: Failed to get user pages: -1` on an unsuccessful page acquisition. The March 20 Ollama log records that message; **it is a direct userptr-path signal, not a callsite in `kfd_svm.c::svm_range_evict`**. `amdgpu_amdkfd_evict_userptr` ~2517–2548 does use `process_info->notifier_lock` across the initial queue quiescence, unlike the separate SVM range path. Neither the exact `-1` cause nor any overlap with SVM migration is determined by the journal line alone.
+
+Linux v7.3 [`kfd_svm.c`](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdkfd/kfd_svm.c) ~2666–2705 distinguishes `MMU_NOTIFY_UNMAP` (route `svm_range_unmap_from_cpu`) from the other invalidation/migration cases (route `svm_range_evict`). **Don't infer the B4 two-notifier race from a plain `munmap` event** without demonstrating the latter branch.
+
+Conversely, AMD's [9 November reviewed fix](https://lore-kernel.gnuweeb.org/amd-gfx/9ea351fa-982b-4d9c-8471-03e168852c83@amd.com/T/) explicitly identifies pageable `hipMemcpy()` above 1 MiB entering `hsa_amd_memory_lock` and becoming a KFD SVM range. Therefore `hipMalloc` as a main allocator is **not** a proof that the entire process has no SVM ranges, especially when copying pageable host buffers. The key remaining B4 activation witness is an **actual SVM range for that PASID plus two overlapping non-UNMAP invalidation events before quiesce completed**.
+
+### Link-resolution precautions
+
+The user-supplied `lists.freedesktop.org/archives/amd-gfx/2026-July/149235.html` and `.../2026-September/153764.html` originals were inaccessible to fetch. Their numeric suffixes are **not** universal message IDs: using the same numbers at `mail-archive.com` retrieves unrelated AMD display MST-test and KFD SMI-filtering emails. Those latter two contents do not prove the supplied originals were mislabeled, and **do not verify the supplied SDMA claims**. The independent [24 September 2026 Linux discussion](https://lists.openwall.net/linux-kernel/2026/09/24/1984) *does* confirm a **gfx12** DCC/multiple-entity workaround, irrelevant to an automatic GFX8 backport. Source-provenance ledger entries make the distinction explicit.
+
+**No direct “read-only ftrace” claim:** listing currently available events/symbols can be a read-only inspection, but configuring tracing is a write that changes observational overhead. No `/sys/kernel/debug/kfd/mem` schema or named `kfd:kfd_svm_*` event was verified against the incident kernel. New trace configuration is not a retrospective answer and requires a separately reviewed safe-host protocol.
