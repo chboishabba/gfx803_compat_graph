@@ -69,3 +69,18 @@ and original test logs take precedence over status prose.
   **OPEN**, as is original TopK kernel attribution. No GPU rerun.
 - Handoff: `docs/receipts/gfx803_kfd_kernel_source_handoff_20261114.json`.
   Next cut: `docs/GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md`.
+
+
+## K2.03 source branch mapped — `43e70ef`
+
+- Upstream-reference `amdgpu_amdkfd_gpuvm.c:2535` →
+  `kgd2kfd_quiesce_mm` → `kfd_process_evict_queues` →
+  `dqm->ops.evict_process_queues` → qualifying nonzero return
+  → first logged `Failed to quiesce KFD`. Static call mapping
+  complete; **incident-time return value OPEN**.
+- **K2.04:** select real Polaris DQM eviction function and enumerate
+  source-level failure/error returns. **K2.05:** dynamically confirm
+  actual first failed operation if evidence becomes available.
+- Later KIQ `-110`/KCQ errors must not be mislabelled the
+  quiescence return. Exact CachyOS source match and first TopK
+  kernel still OPEN. No GPU rerun or kernel patch.
