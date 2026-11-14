@@ -206,3 +206,35 @@ provenance and T1/T2 exit criteria are in
 `docs/GFX803_TOPK_KFD_RESET_FORENSICS_20261114.md`.
 **No intentional reproduction of the wedging case on the sole
 display GPU** before isolation/recovery support.
+
+
+## 14 November — parallel operator handoff (current planning cut)
+
+The immediate owner split is now tracked in
+[TopK/KFD parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+
+**Host/operator, in parallel:** K1.01–K1.03 recover exact incident-boot
+CachyOS module/source/debug-symbol provenance and audit gfx7/8 SDMA
+doorbell/queue-validation implementation. K2.01–K2.02 map the **first**
+KIQ `-110`/KCQ disable/reset/KFD quiesce/restore/resume errors to
+matching source and observed return propagation. This is not
+equivalent to proving the callback was invoked.
+
+**Compatibility/source lane, in parallel:** T1.01–T1.02 statically
+attribute cached pre-review TopK `[32,151936]` dispatch and code
+object/resource requirements, prepare the original incident ↔
+first-recovery-error J1 evidence join and future source-level
+regression gates. T1.03 dynamic fault reproduction is **blocked
+on a demonstrably recoverable non-display test host**.
+
+**Concrete next handoff:** `kernel_source_handoff.json` using the
+workboard's schema, with exact source SHA/build IDs and source
+callsite/return evidence. Unknown claims remain null. The
+incident-boot module must not be silently replaced with the
+post-reboot module merely because their `uname -r` matches.
+
+**Acceptance:** original journal and CSVs remain unchanged; first
+faulting GPU dispatch (T1) and first failing KFD recovery operation
+(T2) are separate, grounded claims. The driver/doorbell fix, TopK
+patch, benchmark and release remain OPEN until those respective
+gates have actual evidence. No new GPU run is claimed here.
