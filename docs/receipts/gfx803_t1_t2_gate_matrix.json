@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "mode": "offline-T1-T2-connector-evidence-join",
+  "date": "2026-11-14",
+  "no_gpu_operations": true,
+  "method": "Inspect 8 original branch files via GitHub source, compare literal journal lines with reported original binary/source receipt and incident narrative. Dates before crash only where provided. SHA fields are Git blob identifiers from connector; original benchmark and module SHA-256 sourced from existing receipts, not recalculated here.",
+  "inputs": [
+    {
+      "path": "docs/receipts/gfx803_topk_pr8_review_safe_20261114/kernel-previous-boot.log",
+      "blob_sha": "c26f8b400618dcbbd95916c2495b4848578742b6",
+      "lines": 1308
+    },
+    {
+      "path": "docs/receipts/gfx803_topk_pr8_review_safe_20261114/unpatched.csv",
+      "blob_sha": "7c514ffff7d264bb6d6168859fc4c9fa69c50dc3"
+    },
+    {
+      "path": "docs/receipts/gfx803_topk_pr8_review_safe_20261114/INCIDENT_20261114_GPU_HANG.md",
+      "blob_sha": "be049ed9c9ceee26fc0aebc0758b72bd641bd503"
+    },
+    {
+      "path": "docs/INCIDENT_2026-03-20_OLLAMA_MISTRAL_KFD_RESET.md",
+      "blob_sha": "ff5f73f1e8e95c90bca1d786cc580f7d9c968d99"
+    },
+    {
+      "path": "docs/INCIDENT_2026-03-27_WHISPERX_TRANSCRIBE_RESET.md",
+      "blob_sha": "2da5c49b3ac208a77e13267d17e5c2b5f56c35b3"
+    },
+    {
+      "path": "docs/INCIDENT_2026-03-30_WHISPERX_ALIGN_GPU_HANG_AND_ROCPROFV3_SUCCESS.md",
+      "blob_sha": "fcb3f8e642cd277fa74e386d8fdd32158608de5a"
+    },
+    {
+      "path": "docs/receipts/gfx803_k205_t104_source_binary_attribution_20261114.json",
+      "blob_sha": "b3e1f5d6f75c607b09b021d21b1f760db19a95b4"
+    },
+    {
+      "path": "docs/receipts/gfx803_kfd_kernel_source_handoff_20261114.json",
+      "blob_sha": "8f4355d497a316cb74995a6485ae936c7ae10d1b"
+    }
+  ],
+  "chronologies": {
+    "nov14_topk": {
+      "first_recorded_ring": {
+        "time": "2026-11-14T12:39:28",
+        "ring": "gfx",
+        "process": "kwin_wayland",
+        "pid": 1877,
+        "signaled_seq": 131707128,
+        "emitted_seq": 131707130,
+        "source": "kernel-previous-boot.log"
+      },
+      "first_kfd_quiesce_failed": "2026-11-14T12:39:28",
+      "first_kiq_test_failed": {
+        "time": "2026-11-14T12:39:29",
+        "errno": -110
+      },
+      "first_baco": "2026-11-14T12:39:29",
+      "full_reset_successes": [
+        "2026-11-14T12:39:30 counter=2",
+        "2026-11-14T12:40:55 counter=62"
+      ],
+      "softreset_successes_reported": 88,
+      "source_selected_route": "mbtopk candidate",
+      "dispatch_identified": false,
+      "original_incident_coredump_available": false,
+      "original_kfd_return": null,
+      "raw_svm_events": 0,
+      "raw_userptr_failures": 0,
+      "absence_interpretation": "kernel log lacks activated SVM trace instrumentation: absence of text is not evidence of SVM absence",
+      "artifact_prior_to_crash": "visual corruption observed by user immediately before crash; time not logged"
+    },
+    "mar20_ollama": {
+      "source": "retrospective incident note",
+      "last_good": "inference returned reply",
+      "visual": "pink-green checkerboard before/around crash",
+      "recorded_ring": "comp_1.3.1",
+      "userptr_init_pages_failure": "-1",
+      "first_failing_userptr_pid": null,
+      "original_errno_cause": null,
+      "svm_overlap_recorded": false
+    },
+    "mar27_whisperx": {
+      "stage": "transcribe started 22:57:37 AEST, no end",
+      "first_hsaco_unknown": true
+    },
+    "mar30_whisperx": {
+      "first_run": "transcribe ended and align started 00:41:27; no-profiler GPU Hang; host gfx timeout 01:13:28",
+      "second_run": "long-file during transcribe, D2H then host wait then gfx timeout 12:39:27",
+      "third_run": "15:27:20 align D2H=121916 bytes, H2D=812160 bytes with host waits before GPU Hang",
+      "control": "HIP_LAUNCH_BLOCKING=1 summary success exit 0 kept_bundle=0; rocprof may alter outcome",
+      "first_stalled_kernel_known": false
+    }
+  },
+  "gates": {
+    "A1_runtime_allocation_provenance": {
+      "status": "partially-source-mapped",
+      "verified": "Ollama userptr/HMM init_user_pages; WhisperX HIP D2H/H2D copies; TopK PyTorch HIP device-side source and original CCOB",
+      "unknown": "per-process HSA SVM registration and HSA memory-lock/host allocation call trace"
+    },
+    "A2_first_stalled_dispatch": {
+      "status": "open",
+      "source_candidate": "mbtopk via original TensorTopK.hip selection",
+      "original_loaded_library_sha256": "dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2",
+      "note": "ELF inclusion not dispatch proof, source-to-binary build link incomplete"
+    },
+    "A3_historical_MMU": {
+      "status": "open-not-captured",
+      "march_userptr": "reported -1; no raw failure errno context",
+      "nov_svm": "no trace, cannot exclude"
+    },
+    "A4_cross_incident": {
+      "status": "historical-note-join-complete",
+      "shared": "compute-associated GPU hangs and gfx/compute queue timeouts",
+      "distinct": "March userptr log, November KWin first recorded timeout, March WhisperX host wait adjacency"
+    },
+    "B1_svm_overlap": {
+      "status": "source-reachable-and-model-counterexample",
+      "incident_overlap": false,
+      "absence_kind": "not-captured, not proven absent"
+    },
+    "B2_userptr_error_cause": {
+      "status": "open",
+      "literal_error": "-1",
+      "source_path": "amdgpu_amdkfd_gpuvm.c::init_user_pages -> amdgpu_ttm_tt_get_user_pages"
+    },
+    "B3_KFD_preemption_return": {
+      "status": "open",
+      "first_logged_fail": "unsuccessful queues preemption",
+      "later_return": "-ETIME when qcm fence wait loop timeout expired at 12:40:55; first return unknown"
+    },
+    "B4_TTM_VM_fence": {
+      "status": "source-verified-guards",
+      "producer_consumer_violation_observed": false,
+      "reason": "No actual BO move/PT/graphics IB trace"
+    }
+  },
+  "disallowed_inferences": [
+    "No SVM text in kernel journal proves no SVM mapping",
+    "Original TopK mbtopk candidate proves actual executing HSACO",
+    "Retrospective March userptr -1 proves SVM evict_lock race",
+    "KWin blamed in gfx timeout proves KWin originated error",
+    "Post-BACO VM fault explains pre-hang visual corruption",
+    "Clock or VRAM instability is proven absent because data not retained"
+  ],
+  "next_max_cut": [
+    "First-pass zero-GPU search of original host profiler/HSA logs and loader maps referenced in notes",
+    "Inspect original TopK coredump preservation status and original benchmark loader provenance",
+    "If no historical trace, independently recoverable host capture of SVM ranges, mmu notifier quiesce timeline and first stuck dispatch; do not rerun wedging TopK on display card"
+  ]
+}
