@@ -260,3 +260,22 @@ it executed during the incident is unknown.
 Authoritative exact identifiers, correction of unknown callback
 invocation and next callsite-level cut:
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+
+
+## K2.03 advancement — first KFD quiescence error path
+
+Commit `43e70ef` maps the upstream v7.3 reporting branch:
+`amdgpu_amdkfd_gpuvm.c:2535` →
+`kgd2kfd_quiesce_mm()` → `kfd_process_evict_queues()` →
+`dqm->ops.evict_process_queues()` → nonzero return
+(other than the source's `-EIO` exclusion) →
+`Failed to quiesce KFD`.
+
+**K2.03 source path CLOSED; K2.04 DQM dispatch and error branch
+OPEN; K2.05 incident-time error return OPEN.** Source-package
+exact matching, callback invocation and T1 TopK first kernel remain
+open. Subsequent KIQ/KCQ events are downstream in the recorded
+journal timeline, not automatically the quiescence return.
+
+Deliverable/acceptance and no-destructive-rerun constraints:
+[parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
