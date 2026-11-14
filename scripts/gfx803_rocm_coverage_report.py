@@ -18,7 +18,7 @@ STATUSES={"unassayed","interrupted","ctest-pass","ctest-fail","fault","timeout"}
 def hashfile(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
-def aggregate(catalog,inputs,schaka_receipts=(),miopen_receipt=None):
+def aggregate(catalog,inputs,schaka_receipts=(),miopen_receipt=None,native_receipt=None):
     layers=catalog["layers"]
     by_id={x["id"]:x for x in layers}
     if len(by_id)!=10 or len(layers)!=10:
@@ -74,18 +74,32 @@ def aggregate(catalog,inputs,schaka_receipts=(),miopen_receipt=None):
         profiles.add(root)
         counts=Counter(v["status"] for v in cases.values())
         complete=len(ids)-counts["unassayed"]-counts["interrupted"]
-        summary[name].update({
-            "status":"installed-CTest-receipt-partial" if complete<len(ids)
-                     else "installed-CTest-results-not-API-coverage",
-            "discovered_tests":len(ids),"executed_tests":complete,
-            "passed_ctest_reports":counts["ctest-pass"],
-            "failed_or_faulted":counts["ctest-fail"]+counts["fault"]+counts["timeout"],
-            "unassayed":counts["unassayed"],
-            "interrupted":counts["interrupted"],
-            "source_receipt":hashlib.sha256(raw).hexdigest(),
-            "rocm_root":root,
-            "runtime_coherence_verified":data.get("runtime_coherence_verified") is True,
-            "source_sha":data.get("source_sha")})
+        target=summary[name]
+        exact_identity=(data.get("source_sha"),data.get("test_dir"),
+                        data.get("discovery_sha256"),root)
+        if any(row["identity"]==list(exact_identity) for row in target.get("ctest_suites",[])):
+            raise ValueError("duplicate CTest source/build/test universe for layer "+name)
+        suite={"identity":list(exact_identity),
+               "discovered_tests":len(ids),"executed_tests":complete,
+               "passed_ctest_reports":counts["ctest-pass"],
+               "failed_or_faulted":counts["ctest-fail"]+counts["fault"]+counts["timeout"],
+               "unassayed":counts["unassayed"],"interrupted":counts["interrupted"],
+               "source_receipt":hashlib.sha256(raw).hexdigest(),
+               "rocm_root":root,"source_sha":data.get("source_sha"),
+               "test_dir":data.get("test_dir"),
+               "runtime_coherence_verified":data.get("runtime_coherence_verified") is True}
+        target.setdefault("ctest_suites",[]).append(suite)
+        for count in ("discovered_tests","executed_tests","passed_ctest_reports","failed_or_faulted"):
+            target[count]+=suite[count]
+        target["unassayed"]=sum(x["unassayed"] for x in target["ctest_suites"])
+        target["interrupted"]=sum(x["interrupted"] for x in target["ctest_suites"])
+        target["status"]="installed-CTest-receipt-partial" if any(
+            x["unassayed"]+x["interrupted"] for x in target["ctest_suites"]
+            ) else "installed-CTest-results-not-API-coverage"
+        target["source_receipt"]="multiple-original-suites" if len(target["ctest_suites"])>1 else suite["source_receipt"]
+        target["rocm_root"]=root if len({x["rocm_root"] for x in target["ctest_suites"]})==1 else "mixed-roots-unqualified"
+        target["runtime_coherence_verified"]=all(
+            x["runtime_coherence_verified"] for x in target["ctest_suites"])
     direct_mapping={"fp16-gemm":"rocblas-hipblas","triton-dot":"triton"}
     seen_direct=set()
     direct_states={"unassayed","interrupted","fault","timeout",
@@ -165,9 +179,41 @@ def aggregate(catalog,inputs,schaka_receipts=(),miopen_receipt=None):
             "rocm_root":root,
             "runtime_coherence_verified":record.get("runtime_coherence_verified") is True})
         row["status"]="direct-MIOpen-sweep-results-not-complete-API-qualification"
+    if native_receipt is not None:
+        raw=native_receipt.read_bytes()
+        record=json.loads(raw)
+        expected={"hip":("h2d-d2h","stream-event-copy","kernel-dispatch","pinned-host-copy"),
+                  "hsa":("agent-enumeration","signal-wait","queue-create-destroy")}
+        ids=[f"{kind}:{name}" for kind,names in expected.items() for name in names]
+        cases=record.get("results")
+        if (record.get("schema")!=1 or not isinstance(cases,dict)
+            or set(cases)!=set(ids) or record.get("case_order")!=ids
+            or record.get("release_admitted") is not False
+            or record.get("gpu_validated") is not False):
+            raise ValueError("invalid source-owned HIP/HSA direct smoke receipt")
+        allowed={"unassayed","interrupted","passed","nonzero-exit",
+                 "fault","timeout","invalid-output","kernel-fault-observed"}
+        if any(not isinstance(x,dict) or x.get("status") not in allowed for x in cases.values()):
+            raise ValueError("bad direct HIP/HSA case result")
+        prefix=record.get("rocm_prefix")
+        if not isinstance(prefix,str) or not prefix.startswith("/nix/store/"):
+            raise ValueError("native smoke missing Nix runtime prefix")
+        profiles.add(prefix)
+        for suite,layer in (("hip","hip-runtime"),("hsa","rocr-hsa-kfd")):
+            rows=[cases[f"{suite}:{n}"] for n in expected[suite]]
+            target=summary[layer]
+            target.setdefault("source_owned_direct_suites",[]).append({
+                "suite":"source-owned-"+suite+"-smoke",
+                "cases":len(rows),"source_verified_pass":sum(x["status"]=="passed" for x in rows),
+                "unassayed":sum(x["status"]=="unassayed" for x in rows),
+                "fault_or_failed":sum(x["status"] not in ("passed","unassayed") for x in rows),
+                "receipt_sha256":hashlib.sha256(raw).hexdigest(),"rocm_prefix":prefix,
+                "not_equivalent_to_vendor_conformance":True})
+            if not target.get("ctest_suites"):
+                target["status"]="direct-smoke-evidence-broader-API-and-stability-open"
     return {"schema":1,"layers":summary,
             "source_suite_receipts_count":len(schaka_receipts),
-            "miopen_receipt_count":int(miopen_receipt is not None),
+            "miopen_receipt_count":int(miopen_receipt is not None),\n            "native_runtime_receipt_count":int(native_receipt is not None),
             "ctest_receipts_count":len(inputs),
             "different_rocm_roots":len(profiles)>1,
             "runtime_roots":sorted(profiles),
@@ -183,7 +229,7 @@ def main(argv=None):
                    help="fp16-gemm|triton-dot=/exact/original/matrix.json")
     p.add_argument("--miopen-receipt",type=Path,default=None,
                    help="exact original Schaka MIOpen sweep matrix.json")
-    p.add_argument("--out",required=True,type=Path)
+    p.add_argument("--native-runtime-receipt",type=Path,\n                   help="source-owned HIP/HSA isolated smoke matrix.json")\n    p.add_argument("--out",required=True,type=Path)
     a=p.parse_args(argv)
     if a.out.exists():p.error("refuse overwriting aggregate report")
     try:
@@ -199,7 +245,7 @@ def main(argv=None):
             suite,path=arg.split("=",1)
             if not suite or not path:raise ValueError("empty direct suite/path")
             direct.append((suite,Path(path)))
-        report=aggregate(json.loads(CATALOG.read_text()),pairs,direct,a.miopen_receipt)
+        report=aggregate(json.loads(CATALOG.read_text()),pairs,direct,a.miopen_receipt,a.native_runtime_receipt)
     except (ValueError,OSError,KeyError,TypeError,json.JSONDecodeError) as ex:p.error(str(ex))
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
