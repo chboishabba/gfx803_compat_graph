@@ -533,3 +533,41 @@ dedicated-host tracing gated and NOT started.
 
 **Do not** run the destructive 32×151936 TopK on the display RX580.
 Do not upstream these forensic scripts via Schaka PR #8.
+
+
+## 14 November — T1.13/14 multi-CCOB member maximum cut
+
+Commit 11223f6 physically ran 61/61 CPU-only contracts and
+committed four original T1.09/K2.07 receipts under
+docs/receipts/gfx803_t109_k207_host_20261114/.
+The SHA-verified gfx803 HSACO was decoded as **336 kernels,
+zero readable TopK-name matches**; LLVM's specific metadata
+option was unavailable, while the pure-Python AMDGPU MessagePack
+decoder succeeded. Original retained TensorTopK.hip SHA
+acb592c2… verified (6 source spans, 226 selected lines).
+The existing join correctly leaves T1.06/T1.07/K2.05 open.
+
+The next cut is the **219-member offload format**, not another
+generic device reset experiment:
+- scripts/gfx803_ccob_member_index.py: SHA-verified CCOB v2/v3
+  indexing, authoritative member-size boundaries, bounded
+  inter-member padding inspection (never search inside compressed
+  bytes for CCOB magic).
+- scripts/gfx803_ccob_all_members_topk.py: offline per-member
+  clang-offload-bundler invocation, SHA and AMDGPU MessagePack
+  metadata, each member's readable TopK kernels, checkpointed
+  bounded JSON receipts.
+- tests/test_gfx803_ccob_member_index.py and
+  tests/test_gfx803_ccob_all_members.py: collision, padding,
+  bad identity, partial-scan and CPU-only batch tests.
+- Runbook:
+  [GFX803_T113_T114_CCOB_ALL_MEMBERS_20261114.md](GFX803_T113_T114_CCOB_ALL_MEMBERS_20261114.md).
+
+**New code committed, host acceptance PENDING.** The 61/61
+pass count pertains to 11223f6, *not* these new tests.
+
+Even 219/219 fully decoded members would only establish code-object
+inclusion and metadata, not original incident-time selected kernel,
+benchmark-loaded wheel linkage or KFD's missing internal fence
+return. T1.06/T1.07/K2.05/J1/F1/release stay OPEN/BLOCKED
+according to original receipts. No new GPU work or KFD patch.
