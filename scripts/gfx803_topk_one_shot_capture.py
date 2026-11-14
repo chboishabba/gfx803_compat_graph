@@ -240,13 +240,15 @@ def run_capture(args, identity: dict, env: dict) -> int:
         if journal.poll() is not None:
             raise RuntimeError("journal follower exited; refusing GPU dispatch")
         if args.enable_kfd_probes:
-            with (args.out / "kfd-return-probe.log").open("w") as probe_stdout, (
-                 args.out / "kfd-return-probe-stderr.log").open("w") as probe_stderr:
-                # Keep descriptor duplication independent of this with-block:
-                # Popen inherits its own fds; the parent closes its copies.
+            with (args.out / "kfd-return-probe-stderr.log").open("w") as probe_stderr:
                 probe = subprocess.Popen([args.probe_info["binary"], "-q",
-                                          str(BT)], stdout=probe_stdout,
-                                         stderr=probe_stderr)
+                                          str(BT)], stdout=subprocess.PIPE,
+                                         stderr=probe_stderr, text=True, bufsize=1)
+            t = threading.Thread(target=persist_lines,
+                                 args=(probe.stdout, args.out / "kfd-return-probe.log",
+                                       stop), daemon=True)
+            t.start()
+            watchers.append(t)
             time.sleep(1.5)
             if probe.poll() is not None:
                 raise RuntimeError("KFD bpftrace probe attachment failed; refusing GPU dispatch")
