@@ -19,6 +19,7 @@ incident=load("gfx803_kfd_incident_offline_audit")
 trace=load("gfx803_kfd_trace_boundary")
 topk=load("gfx803_topk_binary_offline_audit")
 join=load("gfx803_kfd_topk_evidence_join")
+binary=load("gfx803_kfd_binary_branch_audit")
 
 class IncidentAudit(unittest.TestCase):
     def test_log_event_order_and_case(self):
@@ -105,11 +106,21 @@ class TopKStatic(unittest.TestCase):
         with self.assertRaises(ValueError):
             join.report(old,probe,wheel,{"journal_sha256":"wrong"})
 
+    def test_disassembly_parser_preserves_both_calls_without_claiming_execution(self):
+        asm = (" 0010: e8 00 00 00 00 call 0 <unmap_queues_cpsch>\\n"
+               " 0020: e8 00 00 00 00 call 0 <remove_queue_mes>\\n"
+               " 0030: 75 01 jne 0x40\\n")
+        result=binary.dissect(asm)
+        self.assertEqual(len(result["named_call_sites"]),2)
+        self.assertEqual(len(result["conditional_jumps"]),1)
+        self.assertIn("no incident-time",result["warning"])
+
     def test_compile_all_sources(self):
         for name in ("gfx803_kfd_incident_offline_audit",
                      "gfx803_kfd_trace_boundary",
                      "gfx803_topk_binary_offline_audit",
-                     "gfx803_kfd_topk_evidence_join"):
+                     "gfx803_kfd_topk_evidence_join",
+                     "gfx803_kfd_binary_branch_audit"):
             path=ROOT/"scripts"/(name+".py")
             compile(path.read_text(),str(path),"exec")
 
