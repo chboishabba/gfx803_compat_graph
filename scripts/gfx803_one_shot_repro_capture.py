@@ -157,6 +157,15 @@ def run(args) -> int:
         return 0
     if args.out.exists():
         raise ValueError(f"capture folder already exists: {args.out}")
+    if args.mode == "baseline" and not args.kfd_log:
+        raise ValueError("baseline arm requires an already active --kfd-log; otherwise this run cannot identify the first KFD return")
+    if args.kfd_log:
+        if not args.kfd_log.is_file():
+            raise ValueError("KFD trace log not found; enable probes in a separate terminal first")
+        if time.time() - args.kfd_log.stat().st_mtime > 600:
+            raise ValueError("KFD trace log is stale (>10 minutes)")
+        if '"kfd_probe_start"' not in args.kfd_log.read_text(errors="replace")[:6000]:
+            raise ValueError("KFD trace startup receipt missing")
     if not sys.stdin.isatty():
         raise ValueError("interactive TTY required: never arm from CI, cron or remote pipe")
     print("\nWARNING: exact original TopK case 4 previously wedged the display RX580.")
@@ -174,6 +183,7 @@ def run(args) -> int:
         "command": planned, "host_wall_ns": time.time_ns(),
         "host_monotonic_ns": time.monotonic_ns(), "gpu_work_not_yet_started": True,
         "one_shot": True, "auto_reboot": False, "auto_recovery": False,
+        "separate_kfd_log": str(args.kfd_log) if args.kfd_log else None,
     })
     # Increase Python core dump allowance, but systemd core_pattern/limits
     # may override this; coredumpctl must be inspected after reboot.
@@ -240,6 +250,8 @@ def main() -> int:
                    help="explicitly verified rocprofv3 executable for instrumented arm")
     p.add_argument("--expect-kernel",
                    help="optional exact host kernel release, e.g. 7.3.0-2-cachyos-bore")
+    p.add_argument("--kfd-log", type=Path,
+                   help="fresh separately armed KFD return-probe log; mandatory for baseline mode")
     p.add_argument("--timeout", type=int, default=180)
     p.add_argument("--arm", action="store_true",
                    help="EXPLICIT dangerous single execution, requires local typed phrase")
