@@ -39,6 +39,12 @@ python3 -m unittest discover -s tests -p 'test_gfx803_kfd_event_correlation.py' 
 PY=$(readlink -f "$(command -v python3)")
 echo "Python=$PY"
 echo "Kernel=$(uname -r)"
+# Pin to the original November incident kernel; do not accept an accidental upgrade.
+INCIDENT_KERNEL="7.3.0-2-cachyos-bore"
+if [ "$(uname -r)" != "$INCIDENT_KERNEL" ]; then
+  echo "Kernel changed: this would be a different-version experiment. Stop." >&2
+  exit 2
+fi
 printf 'LD_PRELOAD=%s\n' "$LD_PRELOAD"
 
 # A NEW local persistent directory is preferable; avoid NFS logging stalls
@@ -50,7 +56,7 @@ OUT="/var/tmp/gfx803-case4-one-shot-$(date +%Y%m%d-%H%M%S)"
 python3 scripts/gfx803_one_shot_repro_capture.py \
   --python "$PY" --out "$OUT" --mode rocprof \
   --rocprof "$(command -v rocprofv3)" \
-  --expect-kernel "$(uname -r)"
+  --expect-kernel "$INCIDENT_KERNEL"
 ```
 
 **Do not continue** if the exact Nix overlay/lib is absent, the preload differs unexpectedly, the journal is inaccessible, your system contains irreplaceable unsaved work, or the device cannot be recovered after a wedge. The historical v7.3 kernel may differ from tomorrow's running kernel; `--expect-kernel` pins *what you explicitly enter*, not automatically the incident's version.
@@ -88,7 +94,7 @@ printf 'OUT=%s\\nKFD_LOG=%s\\n' "$OUT" "$KFD_LOG"
 python3 scripts/gfx803_one_shot_repro_capture.py \
   --python "$PY" --out "$OUT" \
   --mode rocprof --rocprof "$(command -v rocprofv3)" \
-  --kfd-log "$KFD_LOG" --expect-kernel "$(uname -r)" \
+  --kfd-log "$KFD_LOG" --expect-kernel "$INCIDENT_KERNEL" \
   --timeout 180 --tail-seconds 20 --core-limit-mib 1024 --arm
 ```
 
