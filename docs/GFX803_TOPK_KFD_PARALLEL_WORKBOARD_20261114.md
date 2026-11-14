@@ -450,3 +450,22 @@ It leaves T1.06 (build linkage), T1.07 (selected HSACO/kernel), K2.05 and J1
 open.  The superseding host-local outputs are under
 `/mnt/truenas/comet-net/experiments/gfx803_t105_k206_20261114_r2/`; no GPU,
 HIP, tracing or kernel mutation occurred.
+
+
+## T1.08 compressed/offload bundle inspection (after `052889b`)
+
+The 25/25 passed host offline suite verified the HIP binary and
+extracted a 42.9 MB .hip_fatbin. Failure to locate raw embedded
+ELF is inconclusive for Clang's CCOB compressed or uncompressed
+offload bundle container. The new `gfx803_mbtopk_offload_container_audit.py`
+classifies header magic, parses bounded bundle/CCOB metadata,
+optionally asks `clang-offload-bundler --type=o --list` for
+supported architecture IDs, and only unbundles an explicitly
+advertised unique gfx803 target. It never invokes HIP or GPU
+work. Tests and commands: `test_gfx803_mbtopk_offload_container.py`
+and `GFX803_T105_K206_MBTopK_BINARY_MAXCUT_20261114.md`.
+Do not commit the entire 42.9 MB payload if small JSON receipts
+can answer architecture/metadata questions.
+
+T1.08 tool source implemented; host acceptance pending.
+T1.07 incident kernel dispatch and K2.05 original fence errno OPEN.
