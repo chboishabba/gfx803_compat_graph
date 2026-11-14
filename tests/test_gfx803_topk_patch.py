@@ -23,8 +23,11 @@ class Gfx803TopKPatchContractTests(unittest.TestCase):
         text = SORT_PATCH.read_text(encoding="utf-8")
         diff = text.split("diff --git", 1)[1]
         self.assertIn("bool should_use_sort", text)
-        self.assertIn("properties->gcnArchName", diff)
-        self.assertIn('constexpr char gfx803[] = "gfx803"', diff)
+        self.assertIn("<ATen/detail/CUDAHooksInterface.h>", diff)
+        self.assertIn('getCUDAHooks().isGPUArch({"gfx803"})', diff)
+        self.assertIn("GFX803_TOPK_SORT_FALLBACK_PATCH", diff)
+        self.assertNotIn("properties->gcnArchName", diff)
+        self.assertNotIn("std::strncmp", diff)
         self.assertIn("return true;", diff)
         self.assertIn("kBool", diff)
         self.assertNotIn("torch.sort", diff)
