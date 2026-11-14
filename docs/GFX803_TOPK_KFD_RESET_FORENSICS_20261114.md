@@ -125,14 +125,16 @@ requires a trace or dump.
 
 ## P3: what GDB / ROCgdb / Ghidra can and cannot do
 
-**GDB on an offline kernel vmcore**: with exact `vmlinux`, unstripped
-module symbols and an actual kernel vmcore (kdump must have existed at
-failure), inspect the specific error path, return value and
-`kfd_process` / `device_queue_manager` state. Example:
-`gdb /path/to/exact/vmlinux /path/to/retained/vmcore`.
-A GPU device devcoredump is **not** a CPU kernel vmcore; GDB
-cannot directly open it as one. No vmcore means no post-hoc kernel
-pointer inspection from GDB.
+**Kernel crash analysis**: with matching `vmlinux`, unstripped
+module symbols and an actual CPU kernel vmcore (kdump must have existed
+at failure), use the Linux `crash` utility (`crash /exact/vmlinux
+/retained/vmcore`) to inspect kernel task/queue state and the relevant
+reset-path symbols. GDB is best used on an exact unstripped module,
+userspace crash core, or a live instrumented kernel debugger with a
+proper kgdb target. A GPU device devcoredump is **not** a CPU kernel
+vmcore and cannot be opened as one by ordinary GDB or `crash`.
+No kernel vmcore means no post-hoc kernel pointer inspection with
+a source-level debugger.
 
 **ROCgdb**: source-level debugging for ROCm host/device code where
 the installed version supports the architecture. A GPU hang may never
