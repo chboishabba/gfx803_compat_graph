@@ -232,3 +232,20 @@ and original test logs take precedence over status prose.
 - T1.06 original binary/loader linkage, T1.07 actual
   incident kernel, K2.05 internal KFD error, K2.07 exact
   CachyOS match, and stable recovery remain OPEN.
+
+
+## T1.13–T1.14 full CCOB membership audit implementation
+
+- **11223f6:** operator accepted 61/61 CPU-only contracts and
+  committed four HSACO/source/evidence-join receipts.
+- Pure Python AMDGPU note decoder: 336 kernels in prior 5.25 MB
+  gfx803 object; zero *readable* TopK-name matches (not a
+  negative result against mbtopk).
+- New SHA-verified, header-length-bounded CCOB member index and
+  offline per-member gfx803 unbundle/metadata/TopK-name
+  inventory implemented. Unit tests committed but **not yet
+  host-run**.
+- Runbook:
+  docs/GFX803_T113_T114_CCOB_ALL_MEMBERS_20261114.md.
+- T1.06 original build/loader proof, T1.07 actual incident
+  dispatch, K2.05 internal fence return and release all OPEN.
