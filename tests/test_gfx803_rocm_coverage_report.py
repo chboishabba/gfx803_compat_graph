@@ -112,6 +112,48 @@ class CoverageReportTests(unittest.TestCase):
             self.assertEqual(direct["no_applicable_cases_or_missing_summary"],1)
             self.assertFalse(report["all_rocm_apis_qualified"])
 
+    def test_distinct_rocr_and_kfd_original_ctest_suites_can_join(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            files=[]
+            for label in ("rocrtst","kfdtest"):
+                path=root/(label+".json")
+                path.write_text(json.dumps({
+                    "schema":1,"layer":"rocr-hsa-kfd","source_sha":"a"*40,
+                    "test_dir":"/configured/"+label,
+                    "discovery_sha256":label,
+                    "all_discovered_tests":[label+"-test"],
+                    "cases":{label+"-test":{"status":"ctest-pass"}},
+                    "rocm_root":"/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-staged-rocm",
+                    "release_admitted":False,"gpu_validated":False}))
+                files.append(("rocr-hsa-kfd",path))
+            data=mod.aggregate(self.catalog(),files)
+            layer=data["layers"]["rocr-hsa-kfd"]
+            self.assertEqual(len(layer["ctest_suites"]),2)
+            self.assertEqual(layer["passed_ctest_reports"],2)
+            self.assertEqual(layer["discovered_tests"],2)
+            with self.assertRaises(ValueError):
+                mod.aggregate(self.catalog(),files+[files[0]])
+
+    def test_native_smoke_receipt_not_promoted_to_vendor_api_coverage(self):
+        with tempfile.TemporaryDirectory() as td:
+            p=Path(td)/"matrix.json"
+            cases=["hip:h2d-d2h","hip:stream-event-copy","hip:kernel-dispatch",
+                   "hip:pinned-host-copy","hsa:agent-enumeration",
+                   "hsa:signal-wait","hsa:queue-create-destroy"]
+            p.write_text(json.dumps({
+                "schema":1,"case_order":cases,
+                "results":{k:{"status":"passed"} for k in cases},
+                "rocm_prefix":"/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-staged-rocm/core-10.1",
+                "release_admitted":False,"gpu_validated":False}))
+            result=mod.aggregate(self.catalog(),[],[],None,p)
+            self.assertEqual(result["native_runtime_receipt_count"],1)
+            self.assertEqual(result["layers"]["hip-runtime"]["source_owned_direct_suites"][0]
+                             ["source_verified_pass"],4)
+            self.assertEqual(result["layers"]["rocr-hsa-kfd"]["source_owned_direct_suites"][0]
+                             ["source_verified_pass"],3)
+            self.assertFalse(result["all_rocm_apis_qualified"])
+
     def test_source_compiles(self):
         compile(SRC.read_text(),str(SRC),"exec")
 
