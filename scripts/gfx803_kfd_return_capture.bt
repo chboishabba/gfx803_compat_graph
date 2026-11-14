@@ -1,0 +1,34 @@
+/*
+ * GFX803 / CachyOS 7.3.0-2 single-shot incident KFD return receipt.
+ * OPTIONAL, INSTRUMENTATION-CHANGING: bpftrace attaches k[ret]probes.
+ * Refuse execution unless exact symbols are available in the running module.
+ * Clock: bpftrace nsecs (monotonic nanoseconds), not wall clock.
+ * No GPU operations, no reset, no autoretry.
+ */
+BEGIN
+{
+  printf("CAPTURE_KFD_PROBES_ARMED monotonic_ns=%llu\n", nsecs);
+}
+kprobe:amdkfd_fence_wait_timeout
+{
+  @fence_start[tid] = nsecs;
+  printf("KFD_BEGIN amdkfd_fence_wait_timeout mono_ns=%llu pid=%d tid=%d comm=%s\n",
+         nsecs, pid, tid, comm);
+}
+kretprobe:amdkfd_fence_wait_timeout
+{
+  printf("KFD_RETURN amdkfd_fence_wait_timeout mono_ns=%llu pid=%d tid=%d ret=%d elapsed_ns=%llu\n",
+         nsecs, pid, tid, (int64)retval,
+         @fence_start[tid] ? nsecs - @fence_start[tid] : 0);
+  delete(@fence_start[tid]);
+}
+kretprobe:unmap_queues_cpsch
+{
+  printf("KFD_RETURN unmap_queues_cpsch mono_ns=%llu pid=%d tid=%d ret=%d\n",
+         nsecs, pid, tid, (int64)retval);
+}
+kretprobe:kgd2kfd_quiesce_mm
+{
+  printf("KFD_RETURN kgd2kfd_quiesce_mm mono_ns=%llu pid=%d tid=%d ret=%d\n",
+         nsecs, pid, tid, (int64)retval);
+}
