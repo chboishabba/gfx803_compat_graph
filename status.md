@@ -99,3 +99,15 @@ and original test logs take precedence over status prose.
   incident return value was observed.
 - No GPU rerun or speculative patch. TopK kernel T1,
   exact CachyOS source package, and KFD causal join J1 OPEN.
+
+
+## K2.05/T1 offline tooling — 14 November
+
+- Five implemented source tools (incident SHA/event audit, tracefs
+  inventory/explicit scoped tracing, original TopK wheel resource
+  inventory, exact hashed module disassembly, evidence join) and
+  focused CPU-only tests are committed. **Host execution pending**.
+- Runbook: docs/GFX803_K205_T1_IMPLEMENTATION_RUNBOOK_20261114.md.
+- K2.04 MES/non-MES contradiction remains; K2.05 actual incident
+  branch/return OPEN, T1 actual TopK GPU kernel OPEN, release BLOCKED.
+- No GPU jobs or new kernel patch were performed by this sprint.
