@@ -102,12 +102,14 @@
       "status": "open",
       "source_candidate": "mbtopk via original TensorTopK.hip selection",
       "original_loaded_library_sha256": "dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2",
-      "note": "ELF inclusion not dispatch proof, source-to-binary build link incomplete"
+      "note": "ELF inclusion not dispatch proof, source-to-binary build link incomplete",
+      "actual_original_dispatch_observed": null
     },
     "A3_historical_MMU": {
       "status": "open-not-captured",
       "march_userptr": "reported -1; no raw failure errno context",
-      "nov_svm": "no trace, cannot exclude"
+      "nov_svm": "no trace, cannot exclude",
+      "original_svm_presence": null
     },
     "A4_cross_incident": {
       "status": "historical-note-join-complete",
@@ -116,8 +118,9 @@
     },
     "B1_svm_overlap": {
       "status": "source-reachable-and-model-counterexample",
-      "incident_overlap": false,
-      "absence_kind": "not-captured, not proven absent"
+      "incident_overlap": null,
+      "absence_kind": "not-captured, not proven absent",
+      "incident_overlap_status": "not-captured-not-tested"
     },
     "B2_userptr_error_cause": {
       "status": "open",
@@ -131,8 +134,9 @@
     },
     "B4_TTM_VM_fence": {
       "status": "source-verified-guards",
-      "producer_consumer_violation_observed": false,
-      "reason": "No actual BO move/PT/graphics IB trace"
+      "producer_consumer_violation_observed": null,
+      "reason": "No actual BO move/PT/graphics IB trace",
+      "violation_status": "no-incident-time-fence-trace"
     }
   },
   "disallowed_inferences": [
