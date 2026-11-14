@@ -164,8 +164,9 @@ def run(args) -> int:
             raise ValueError("KFD trace log not found; enable probes in a separate terminal first")
         if time.time() - args.kfd_log.stat().st_mtime > 600:
             raise ValueError("KFD trace log is stale (>10 minutes)")
-        if '"kfd_probe_start"' not in args.kfd_log.read_text(errors="replace")[:6000]:
-            raise ValueError("KFD trace startup receipt missing")
+        with args.kfd_log.open("r", encoding="utf-8", errors="replace") as probe_fd:
+            if '"kfd_probe_start"' not in probe_fd.read(6000):
+                raise ValueError("KFD trace startup receipt missing")
     if not sys.stdin.isatty():
         raise ValueError("interactive TTY required: never arm from CI, cron or remote pipe")
     print("\nWARNING: exact original TopK case 4 previously wedged the display RX580.")
