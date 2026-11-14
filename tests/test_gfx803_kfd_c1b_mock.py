@@ -14,7 +14,7 @@ SOURCE = Path(__file__).resolve().parents[1] / "scripts" / "gfx803_kfd_c1b_mock.
 
 
 class TestKfdC1bMock(unittest.TestCase):
-    def test_compile_and_seven_contracts(self):
+    def test_compile_and_nine_contracts(self):
         cc = shutil.which("cc") or shutil.which("gcc") or shutil.which("clang")
         if cc is None:
             self.skipTest("C compiler unavailable; no model execution claim")
@@ -29,7 +29,7 @@ class TestKfdC1bMock(unittest.TestCase):
                                     text=True, timeout=10,
                                     env={"PATH": os.environ.get("PATH", "")})
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn("7/7 PASS", result.stdout)
+            self.assertIn("9/9 PASS", result.stdout)
             self.assertIn("kernel/hardware unqualified", result.stdout)
 
 
