@@ -16,6 +16,11 @@ import zipfile
 SHAPES=((1,151936,50,4),(32,151936,50,4))
 MAX_SCAN=400000000  # refuse reading giant ELF blobs into memory
 
+# TensorTopK HIP kernels are linked into libtorch_hip.so.  Hashing every
+# unrelated host-side library makes a TopK-only audit needlessly read hundreds
+# of MiB across network storage while adding no dispatch provenance.
+TOPK_HIP_LIBRARY = "libtorch_hip.so"
+
 def sha(path:Path)->str:
     h=hashlib.sha256()
     with path.open("rb") as f:
@@ -39,17 +44,26 @@ def manifest(path:Path)->dict:
             entries=[]
             for x in libs:
                 info=z.getinfo(x)
+                relevant=Path(x).name == TOPK_HIP_LIBRARY
                 entries.append({"name":x,"bytes":info.file_size,
-                                "sha256":zip_member_hash(z,x) if info.file_size<=MAX_SCAN else None})
+                                "topk_hip_library":relevant,
+                                "sha256":zip_member_hash(z,x) if relevant and info.file_size<=MAX_SCAN else None})
+            if not any(x["topk_hip_library"] for x in entries):
+                raise ValueError("wheel has no torch/lib/libtorch_hip.so")
             return {"kind":"wheel","sha256":sha(path),"libs":entries,
+                    "hash_scope":"wheel archive plus libtorch_hip.so; unrelated shared objects are listed but not read",
                     "topk_file_in_wheel":any(x.endswith("TensorTopK.cpp") for x in names),
                     "torch_version_files":[x for x in names if x.endswith("torch/version.py")]}
     entries=[]
     for p in sorted(path.glob("torch/lib/*.so")):
+        relevant=p.name == TOPK_HIP_LIBRARY
         entries.append({"name":str(p.relative_to(path)),"bytes":p.stat().st_size,
-                        "sha256":sha(p)})
-    if not entries:raise ValueError("no torch/lib/*.so found in overlay")
-    return {"kind":"overlay","libs":entries}
+                        "topk_hip_library":relevant,
+                        "sha256":sha(p) if relevant else None})
+    if not any(x["topk_hip_library"] for x in entries):
+        raise ValueError("no torch/lib/libtorch_hip.so found in overlay")
+    return {"kind":"overlay","libs":entries,
+            "hash_scope":"libtorch_hip.so only; unrelated shared objects are listed but not read"}
 
 def source_audit(path:Path)->dict:
     text=path.read_text()

@@ -36,7 +36,7 @@ OLD_TORCH=/mnt/truenas/comet-net/.gfx803-schaka-101-work/out/pytorch-topk-gfx803
 python3 scripts/gfx803_topk_binary_offline_audit.py --torch "$OLD_TORCH" --out "$OUT/topk_static.json"
 ~~~
 
-Optional --source /EXACT/TensorTopK.cpp and repeatable --code-object /EXISTING/HASCO/ELF give additional source/binary hashes and string inventory. String presence does NOT prove which GPU kernel was dispatched. The audit records minimum allocation sizes for passing [1,151936] and hanging [32,151936] shapes, omitting unknown workspaces and hardware registers/LDS.
+Optional --source /EXACT/TensorTopK.cpp and repeatable --code-object /EXISTING/HASCO/ELF give additional source/binary hashes and string inventory. For an overlay, the default hash is deliberately limited to `torch/lib/libtorch_hip.so`, which contains the HIP TopK implementation; unrelated host libraries are listed but not read. String presence does NOT prove which GPU kernel was dispatched. The audit records minimum allocation sizes for passing [1,151936] and hanging [32,151936] shapes, omitting unknown workspaces and hardware registers/LDS.
 
 The output paths deliberately refuse overwriting existing evidence. Use a new output directory when rerunning.
 

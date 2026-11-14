@@ -77,10 +77,13 @@ class TopKStatic(unittest.TestCase):
             f=Path(t)/"torch-test.whl"
             with zipfile.ZipFile(f,"w") as z:
                 z.writestr("torch/lib/libtorch_hip.so",b"gfx803/topk")
+                z.writestr("torch/lib/libtorch_cpu.so",b"unrelated-host-code")
             r=topk.manifest(f)
             self.assertEqual(r["kind"],"wheel")
             self.assertEqual(r["libs"][0]["sha256"],
                 hashlib.sha256(b"gfx803/topk").hexdigest())
+            self.assertIsNone(r["libs"][1]["sha256"])
+            self.assertIn("libtorch_hip.so",r["hash_scope"])
     def test_source_features_are_not_asserted_as_gpu_proof(self):
         with tempfile.TemporaryDirectory() as t:
             f=Path(t)/"TensorTopK.cpp"
@@ -107,9 +110,11 @@ class TopKStatic(unittest.TestCase):
             join.report(old,probe,wheel,{"journal_sha256":"wrong"})
 
     def test_disassembly_parser_preserves_both_calls_without_claiming_execution(self):
-        asm = (" 0010: e8 00 00 00 00 call 0 <unmap_queues_cpsch>\\n"
-               " 0020: e8 00 00 00 00 call 0 <remove_queue_mes>\\n"
-               " 0030: 75 01 jne 0x40\\n")
+        asm = "\n".join((
+            " 0010: e8 00 00 00 00 call 0 <unmap_queues_cpsch>",
+            " 0020: e8 00 00 00 00 call 0 <remove_queue_mes>",
+            " 0030: 75 01 jne 0x40",
+        ))
         result=binary.dissect(asm)
         self.assertEqual(len(result["named_call_sites"]),2)
         self.assertEqual(len(result["conditional_jumps"]),1)
