@@ -118,15 +118,18 @@ def _copy_lines(stream, out, prefix):
                 sys.stdout.flush()
 
 
-def _journal_start(path: Path) -> subprocess.Popen:
-    # Parent has already verified kernel journal access. Use persistent disk
-    # writing, not journald-only output which may be unavailable after reset.
-    fd = path.open("x", encoding="utf-8", buffering=1)
+def _journal_start(path: Path) -> tuple[subprocess.Popen, threading.Thread]:
+    # Pipe the kernel follower through fsync per line so a subsequent forced
+    # reboot does not lose all the last evidence to page cache buffering.
     proc = subprocess.Popen(["journalctl", "-k", "-f", "--no-pager",
                              "--output=short-iso-precise", "--since", "now"],
-                            stdout=fd, stderr=subprocess.STDOUT, start_new_session=True)
-    fd.close()
-    return proc
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, bufsize=1, start_new_session=True)
+    assert proc.stdout is not None
+    writer = threading.Thread(target=_copy_lines,
+                              args=(proc.stdout, path, "journal"), daemon=True)
+    writer.start()
+    return proc, writer
 
 
 def _stop(proc):
@@ -180,10 +183,11 @@ def run(args) -> int:
     except (ValueError, OSError):
         pass
     journal = None
+    journal_writer = None
     child = None
     start = time.monotonic()
     try:
-        journal = _journal_start(args.out / "kernel-follow.log")
+        journal, journal_writer = _journal_start(args.out / "kernel-follow.log")
         time.sleep(1)
         if journal.poll() is not None:
             raise RuntimeError("journal follower exited before workload")
@@ -221,6 +225,8 @@ def run(args) -> int:
         return 0 if status == "returned" and child.returncode == 0 else 2
     finally:
         _stop(journal)
+        if journal_writer is not None:
+            journal_writer.join(timeout=3)
 
 
 def main() -> int:
