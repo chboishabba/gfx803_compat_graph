@@ -396,3 +396,34 @@ design a **non-display, recoverable-host** trace that records the
 selected branch, entry/return, first GPU dispatch and ring/queue
 state. Do not equate a successful idle trace with fault reproduction.
 No known-wedging TopK run on the sole display GPU.
+
+
+## 14 November — T1.05 compiled mbtopk offline investigation implemented
+
+The executable maximum cut now targets the exact candidate
+`libtorch_hip.so` from the retained `7e0d5dd` attribution
+receipt. Tools added:
+
+- `scripts/gfx803_mbtopk_elf_attribution.py`: fail-closed
+  original binary SHA and Build ID check, `readelf` TopK
+  symbol/section inventory, optional bounded
+  `.hip_fatbin` extraction, original source SHA/marker inventory,
+  1-row/32-row arithmetic resource bounds.
+- `scripts/gfx803_mbtopk_fatbin_scan.py`: ELF64 AMDGPU
+  candidate detection with section/program-header extent validation
+  and optional bounded extraction. Candidate inclusion **is not**
+  incident-time execution or even necessarily a gfx803 target.
+- `tests/test_gfx803_mbtopk_offline_attribution.py`: CPU-only
+  synthetic SHA-mismatch, ELF parse, embedded candidate and
+  source/link-negative tests.
+- Extended `scripts/gfx803_kfd_topk_evidence_join.py`:
+  evidence-bound K2.06 non-MES reference conclusion,
+  T1.04 source candidate, T1.05 verified ELF inclusion,
+  explicit T1.06 build link and T1.07 selected dispatch still OPEN.
+
+See [the runnable runbook](GFX803_T105_K206_MBTopK_BINARY_MAXCUT_20261114.md)
+for a single CPU-only command sequence. All scripts and tests are
+**committed, not yet executed on the TrueNAS host**. Results,
+actual HSACO metadata, original build provenance, dispatch and
+KFD incident return are pending. No GPU/HIP workload or kernel
+patch has been performed.
