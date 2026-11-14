@@ -1,0 +1,3 @@
+case,shape,k,dtype,status,median_ms,min_ms,values_ok,indices_ok,torch,hip,arch,error
+3,1x151936,50,float32,ok,0.4008,0.3971,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
+4,32x151936,50,float32,exit--6,,,,,,,,HW Exception by GPU node-1 (Agent handle: 0x35f57d60) reason :GPU Hang

@@ -1,0 +1,10 @@
+case,shape,k,dtype,status,median_ms,min_ms,values_ok,indices_ok,torch,hip,arch,error
+4,32x151936,50,float32,known-fault-skip,,,,,,,,excluded from this arm: previously reproduced GPU fault
+1,2048x64,8,float32,known-fault-skip,,,,,,,,excluded from this arm: previously reproduced GPU fault
+0,2x4,2,float32,known-fault-skip,,,,,,,,excluded from this arm: previously reproduced GPU fault
+3,1x151936,50,float32,ok,0.429,0.4011,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
+5,32x151936,50,float16,ok,3.7567,3.0738,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
+6,1000000,10,float32,ok,2.0603,1.8279,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
+7,1000000,1000,float32,ok,2.1426,1.8104,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
+8,16000000,100,float32,ok,15.0219,11.8854,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
+2,2048x128,8,float16,ok,0.1456,0.1397,True,True,2.14.0+gitd70fd61,7.16.26385,gfx803,
