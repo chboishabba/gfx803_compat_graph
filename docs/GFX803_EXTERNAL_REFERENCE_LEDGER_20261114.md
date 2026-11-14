@@ -52,6 +52,30 @@
 | SRC42 | [Original URL](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153764.html) | Number-collision cross-check for claimed September archive link | **V-unrelated:** Actually KFD SMI process/VM fault event filtering (Oct 21); numeric ID must never be equated to lists.freedesktop.org September/153764.html | Reference audit |
 | SRC43 | [Original URL](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg149235.html) | Number-collision cross-check for claimed July archive link | **V-unrelated:** Actually AMD display MST detect_mst KUnit testcase (Aug 18), not a July SDMA finding; archive numeric IDs are not cross-site identifiers | Reference audit |
 
+## Additional sources already processed in the recovery RCA
+
+These are the **other** URLs already present in the earlier cross-incident and v7.3 source audits. They are retained here so the register covers that work too.
+
+| ID | Original link | Supplied or investigated claim | Verification and gfx803 applicability | Gate |
+| --- | --- | --- | --- | --- |
+| SRC44 | [Original URL](https://lore-kernel.gnuweeb.org/amd-gfx/20261008140045.1283288-1-William.Palacek@amd.com/T/) | Oct 2026 KFD preempt-before-reset lock ordering proposal | **P-primary:** Source linked in older cross-incident RCA; exact kernel v7.3 applicability is recorded there; needs refreshed maintainer/landing audit | R1 |
+| SRC45 | [Original URL](https://lore-kernel.gnuweeb.org/amd-gfx/20260905043031.1015676-2-xiang.liu@amd.com/T/) | Queue restore during reset should defer rather than proceed | **P-primary:** Previously discussed in cross-incident RCA; no single-gpu physical verification | R1 |
+| SRC46 | [Original URL](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153142.html) | amd-gfx recovery correspondence | **P-primary:** Previously indexed by R1 cross-incident report; no fresh original-content verification | R1 |
+| SRC47 | [Original URL](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153305.html) | amd-gfx recovery correspondence | **P-primary:** Previously indexed by R1 cross-incident report; no fresh original-content verification | R1 |
+| SRC48 | [Original URL](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153397.html) | amd-gfx recovery correspondence | **P-primary:** Previously indexed by R1 cross-incident report; no fresh original-content verification | R1 |
+| SRC49 | [Original URL](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg155301.html) | amd-gfx recovery correspondence | **P-primary:** Previously indexed by R1 cross-incident report; no fresh original-content verification | R1 |
+| SRC50 | [Original URL](https://lore-kernel.gnuweeb.org/all/20261107135005.989518435@linuxfoundation.org/) | November kernel/stable thread | **P-primary:** Previously indexed; must check exact commit and target branch before inclusion as a kernel fix | R1 |
+| SRC51 | [Original URL](https://git.zx2c4.com/wireguard-linux/commit/drivers/gpu/drm/amd/amdgpu?id=7346a046c6a9b9f30cb1f7d301449300a9174c71) | Historical AMDGPU commit source mirror | **P-source:** Original identity and version need confirmation; cited in existing cross-incident RCA | R1 |
+| SRC52 | [Original URL](https://git.zx2c4.com/wireguard-linux/commit/drivers/gpu/drm?id=47d799a718439764432d8ef3a0952af45f025f76) | Historical DRM commit source mirror | **P-source:** Original identity and version need confirmation; cited in existing cross-incident RCA | R1 |
+| SRC53 | [Original URL](https://github.com/torvalds/linux/blob/v6.13/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c) | Older reset sequencing source negative control | **P-source:** v6.13 comparison, not running v7.3 driver | R1 |
+| SRC54 | [Original URL](https://github.com/torvalds/linux/blob/v6.19/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c) | Middle reset sequencing source comparison | **P-source:** v6.19 comparison, not running v7.3 driver | R1 |
+| SRC55 | [Original URL](https://www.mail-archive.com/search?f=1&l=amd-gfx@lists.freedesktop.org&o=newest&q=date:20261022) | 22 Oct 2026 GPU resume callback ordering search | **P-index:** Search URL rather than immutable specific patch message; do not attribute a patch without its exact message | R1 |
+| SRC56 | [Original URL](https://github.com/chboishabba/gfx803_compat_graph/pull/6) | Previous first-party gfx803 RCA rollup | **P-internal:** Project source, not independent external evidence; avoid splitting work from PR #7 | Project |
+| SRC57 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdgpu/amdgpu_ctx.c) | VRAM-loss generation and context query guard | **V-source:** VRAM-loss context generation compared in query2 and during command submission; no historic KWin bypass proven | R1 |
+| SRC58 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/include/asic_reg/gmc/gmc_8_1_sh_mask.h) | VM fault protection/VMID register masks | **V-source:** Read-only fault bitfield decode reference; no unique absent PTE inference | R1 |
+| SRC59 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdkfd/kfd_process.c) | KFD eviction fence and process queue restore source | **V-source:** Eviction-fence release after queue destruction and TTM eviction/restore worker branch | T2 |
+| SRC60 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdkfd/kfd_priv.h) | per-process SVM eviction state struct | **V-source:** Base struct for RFC evict_lock field, init and fini lifecycle | T2-B4 |
+
 ## Identifiers supplied without a verified canonical URL
 
 | Identifier | Status | What remains |
