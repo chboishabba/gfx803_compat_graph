@@ -88,7 +88,7 @@ python3 scripts/gfx803_t109_k207_final_join.py \
   --retained-source "$OUT/mbtopk_retained_source.json" \
   --old-join "$C/kfd_topk_join.json" \
   --safehost-plan "$OUT/safehost_trace_qualification.json" \
-  "\${KFD_JOIN_ARGS[@]}" \
+  "${KFD_JOIN_ARGS[@]}" \
   --out "$OUT/t109_k207_final_join.json"
 
 python3 - "$OUT" <<'PY'
