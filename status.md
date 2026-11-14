@@ -111,3 +111,17 @@ and original test logs take precedence over status prose.
 - K2.04 MES/non-MES contradiction remains; K2.05 actual incident
   branch/return OPEN, T1 actual TopK GPU kernel OPEN, release BLOCKED.
 - No GPU jobs or new kernel patch were performed by this sprint.
+
+
+## Offline evidence acceptance — `39471ee`
+
+- Operator executed K2.05/T1 offline suite **12/12 PASS**;
+  incident SHA and exact postboot AMDGPU module SHA/Build ID verified.
+- Both MES and non-MES eviction branches compiled; actual incident
+  branch and return unknown. Original TopK `libtorch_hip.so`
+  SHA prefix `dd0b4030` recorded; **selected HSACO unknown**.
+- Host receipts: `/mnt/truenas/comet-net/experiments/gfx803_k205_t1_static_20261114/`
+  (not presumed uploaded). No GPU/HIP execution.
+- K2.05/T1 and stable KFD reset recovery **OPEN**; prioritize
+  historical boot state and offline TopK code-object mapping,
+  then only a recoverable non-display-host trace.
