@@ -627,7 +627,7 @@ This is an **observation-gated hypothesis** until logs or reproduction receipts 
 
 **Next exact gates:** **T1-F1** match actual first failing TopK HSACO/queue to CP/MEC fence (219 CCOB members do not themselves establish dispatch); **T2-B4a** prove any incident-time SVM range, notifier overlap and preemption window before considering port as repair; **T2-B4b** kernel/lockdep/reviewer validation; **T2-B1** producer-move/PT fence counterexample or negative result; **T2-C1** read-only historical clocks and VRAM pressure if archived; **R4/R5** separate post-BACO recovery fix and hardware no-reboot test. No known-wedging GPU run on the display card.
 
-### T1/T2 evidence provenance reconciliation — 60 source records (14 Nov)
+### T1/T2 evidence provenance reconciliation — 61 source records (14 Nov)
 
 **Canonical [external/source reference ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md)** now accounts for 60 original upstream/community/kernel URL records, including negative-control cases and earlier R1 patch links. Link inclusion is **not** scientific acceptance; records distinguish verified source, firsthand anecdote, prior-only inspection, dead/unavailable link and claim/target mismatch. Future references must update the ledger instead of being scattered only in the chat.
 
@@ -642,7 +642,7 @@ This is an **observation-gated hypothesis** until logs or reproduction receipts 
 
 ### T1/T2 big-cut implementation — original evidence joins and strict event witness (14 Nov 2026)
 
-**Actual delivered files, single draft PR #7:** [T1 source/binary/copy provenance](GFX803_T1_DISPATCH_MEMORY_PROVENANCE.md), [T2 exact B1–B4 synchronization audit](GFX803_T2_KFD_SVM_USERPTR_FENCE_AUDIT.md), [8-original-input gate receipt](receipts/gfx803_t1_t2_gate_matrix.json), [offline join parser](../scripts/gfx803_incident_join.py), [join tests](../tests/test_gfx803_incident_join.py), [structured KFD SVM-event correlator](../scripts/gfx803_kfd_event_correlation.py), and [event negative controls](../tests/test_gfx803_kfd_event_correlation.py). All source references remain in the [60-entry ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md).
+**Actual delivered files, single draft PR #7:** [T1 source/binary/copy provenance](GFX803_T1_DISPATCH_MEMORY_PROVENANCE.md), [T2 exact B1–B4 synchronization audit](GFX803_T2_KFD_SVM_USERPTR_FENCE_AUDIT.md), [8-original-input gate receipt](receipts/gfx803_t1_t2_gate_matrix.json), [offline join parser](../scripts/gfx803_incident_join.py), [join tests](../tests/test_gfx803_incident_join.py), [structured KFD SVM-event correlator](../scripts/gfx803_kfd_event_correlation.py), and [event negative controls](../tests/test_gfx803_kfd_event_correlation.py). All source references remain in the [61-entry ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md).
 
 | Exact gate | Result in this implementation round | Remaining acceptance / scope |
 | --- | --- | --- |
