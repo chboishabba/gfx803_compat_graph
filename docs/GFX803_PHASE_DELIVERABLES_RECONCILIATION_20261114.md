@@ -582,3 +582,18 @@ See [GFX803_R1_A2A_VRAM_CONTEXT_GUARDS_AND_FAULT_DECODE_20261114.md](GFX803_R1_A
 **External evidence classification:** [RPCS3 #16844](https://github.com/RPCS3/rpcs3/issues/16844) contains authentic 2025 GFX8 KIQ/KCQ/BACO and post-reset compute ring test failure (strong shared recovery-failure signature, not same initiating instruction). [Pop!_OS #4132](https://github.com/pop-os/pop/issues/4132) is **Navi 10**, not Polaris, and is only a generic AMDGPU-compositor failure analogy.
 
 Next cut remains T1 pre-reset stalled workload/queue and R1 post-BACO per-ring actual work, then V1/V2 first-post-reset graphics generation/VM mapping evidence; none warrants a claim of physical kernel repair. New unit tests are committed but await a confirmed run.
+
+
+### 14 November — pre-timeout graphics corruption and browser termination: newly reported symptom gate
+
+**New user-reported observations:** graphical corruption may occur **before** the GPU crash; at other times Chrome or Firefox may unexpectedly close. These symptoms are not yet timestamp-correlated with the retained November or March ring-timeout traces. They must **not** be silently treated as post-reset-only consequences, nor assigned to GPU causality without independent evidence.
+
+**Revise causal priority:** T0 pre-timeout graphics/browser symptoms → T1 original sustained compute-associated ring stall → R1 failed recovery and later KWin VM fault. The current R1 journal begins with kernel messages; lack of earlier graphics artifact records does not mean no artifacts existed. Browser process termination is ambiguous (GPU-process exit/restart, compositor/renderer device loss, OOM kill, SIGSEGV/abort, unrelated browser crash). Both browsers sharing GPU acceleration with Plasma/ROCm offers a *testable cross-workload hypothesis*, not proof of shared initiating hardware defect.
+
+**P0 — first-precursor capture (OPEN):** distinguish visual artifact type, exact time and whether it occurs before compute, during compute, or without compute. Match process-exit records in `journalctl -b` (`systemd-oomd`, `Out of memory`, `Killed process`, `segfault`, `core dumped`, `amdgpu`, `drm`, `kwin`) with coredumps (`coredumpctl list`) and browser own GPU-process/crash reports. A browser *tab* failing is not the browser main process being killed; require PID, signal/exit code and whether GPU process restarted. Search already retained original log before asking for new captures.
+
+**P1 — stress correlation (OPEN):** classify independent conditions: idle desktop/ordinary browser, sustained HIP compute with desktop active, and prior historical long inference. Do not induce crashes on the only display RX580. Include temperature, VRAM pressure, power and GPU utilization only when genuinely measured. If corruption precedes a ring timeout it can favor memory/scheduling/firmware instability; if browser is OOM-killed with no GPU messages it is a distinct pressure failure.
+
+**P2 — update R4 selection (OPEN):** investigate *first* loss of correct graphics/memory execution (when evidenced), not only post-BACO VMID7 fault. Retain the latter as recovery-specific consequence. Define success as no pretimeout visual corruption, no correlated browser GPU crash, sustained compute forward progress, and usable graphics/compute after controlled recovery.
+
+This is an **observation-gated hypothesis** until logs or reproduction receipts distinguish the mechanisms.
