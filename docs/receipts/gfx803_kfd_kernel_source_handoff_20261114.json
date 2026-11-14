@@ -22,7 +22,7 @@
     "registered_in_gfx_v8_kfd2kgd": true,
     "selected_for_polaris": true,
     "symbols_present_in_running_module": true,
-    "called_in_incident": false
+    "called_in_incident": null
   },
   "first_retained_timeout": {
     "timestamp": "2026-11-14T12:39:28",
@@ -48,5 +48,6 @@
   "first_recovery_error": "Failed to quiesce KFD",
   "journal_sha256": "be965c117fc7fd2a815a843b63b3ad807d9e88ae43ffff33495cb82043fc70f6",
   "gpu_rerun": false,
-  "conclusion": "The installed module and reference source show the gfx8 SDMA doorbell callback exists and is registered, but the preserved journal does not establish callback invocation or identify the first TopK kernel. No kernel patch is justified by this evidence alone."
+  "conclusion": "The installed module has gfx8 SDMA doorbell callback symbols, and upstream v7.3 reference source registers the callback for Polaris. This is not an exact CachyOS source-package match. The preserved journal does not establish whether the callback was invoked or identify the first TopK kernel. First *logged* KFD recovery error is 'Failed to quiesce KFD'; first internal failing function is not established. No kernel patch is justified by this evidence alone.",
+  "correction": "2026-11-14: changed called_in_incident from false to null: no invocation trace exists, so non-invocation is not proven. Original source/receipt preserved in commit 07a52c7 history."
 }
