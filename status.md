@@ -40,3 +40,19 @@ and original test logs take precedence over status prose.
   required; stop running that cached wheel on this shape.
   Incident debugger max-cut:
   `docs/GFX803_TOPK_KFD_RESET_FORENSICS_20261114.md`.
+
+
+## Active parallel source investigation — 14 November
+
+- **K1/K2 operator:** matching incident-boot CachyOS GFX8
+  amdgpu/KFD module, symbols, callback/queue source, then first
+  KIQ `-110`, KCQ disable and KFD quiesce/restore/resume error.
+  OPEN; no presumed successful source/binary match.
+- **T1 integration:** old cached-wheel TopK dispatch, HSACO,
+  shape/grid/resource and first-failure attribution. OPEN.
+- **J1 evidence join:** compare independent T1/T2 call traces
+  against immutable raw incident journal/CSV; OPEN.
+- **Safety:** no known-wedging TopK rerun on the only
+  display GPU; no release promotion from partial reset success.
+- **Handoff and phases:**
+  `docs/GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md`.
