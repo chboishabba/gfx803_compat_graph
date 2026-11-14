@@ -15,7 +15,8 @@ def load(p:Path)->dict:
     return r
 
 def join(source_ref:dict,container:dict,hsaco:dict,source:dict,
-         old_join:dict,elf_inventory:dict,kfd:dict|None=None,trace:dict|None=None)->dict:
+         old_join:dict,elf_inventory:dict,kfd:dict|None=None,trace:dict|None=None,
+         note_metadata:dict|None=None)->dict:
     original=source_ref["t1_04_static_candidate"]
     if source.get("sha256")!=original["retained_pre_review_source"]["sha256"] or not source.get("source_verified"):
         raise ValueError("retained source SHA not verified")
@@ -62,6 +63,16 @@ def join(source_ref:dict,container:dict,hsaco:dict,source:dict,
         "F1":{"status":"blocked","reason":"no proven minimal causal correction"},
         "release":{"status":"blocked","reason":"display GPU wedged and reset recovery unqualified"}
     }
+    if note_metadata:
+        if (note_metadata.get("mode")!="offline-amdgpu-msgpack-note" or
+            note_metadata.get("hsaco_sha256")!=hsaco.get("sha256") or
+            note_metadata.get("hsaco_size_bytes")!=hsaco.get("size_bytes")):
+            raise ValueError("AMDGPU note identity mismatch")
+        run_gates["T1.11"]={
+            "status":"code-object-note-inventory",
+            "total_metadata_kernels":note_metadata.get("metadata_kernel_count"),
+            "readable_topk_kernel_names":note_metadata.get("topk_named_kernel_count"),
+            "incident_executed":False}
     if trace:
         if trace.get("mode")!="INERT-TRACE-PLAN-ONLY" or trace.get("trace_armed") is not False:
             raise ValueError("trace plan cannot be admitted as active or historical trace")
@@ -86,13 +97,15 @@ def main():
     p.add_argument("--elf-inventory",type=Path,required=True)
     p.add_argument("--kfd-source",type=Path)
     p.add_argument("--safehost-plan",type=Path)
+    p.add_argument("--note-metadata",type=Path)
     a=p.parse_args()
     if a.out.exists():p.error("refuse overwrite")
     try:
         r=join(load(a.source_attribution),load(a.container_receipt),
                load(a.hsaco_metadata),load(a.retained_source),load(a.old_join),
                load(a.elf_inventory),load(a.kfd_source) if a.kfd_source else None,
-               load(a.safehost_plan) if a.safehost_plan else None)
+               load(a.safehost_plan) if a.safehost_plan else None,
+               load(a.note_metadata) if a.note_metadata else None)
     except (ValueError,OSError,KeyError,TypeError,json.JSONDecodeError) as e:p.error(str(e))
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(r,sort_keys=True,indent=2)+"\n")
