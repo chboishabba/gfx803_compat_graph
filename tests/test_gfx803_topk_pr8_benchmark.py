@@ -4,6 +4,8 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -54,6 +56,22 @@ class TopKBenchmarkSchedulingTests(unittest.TestCase):
     def test_missing_safehost_receipt_fails_closed(self) -> None:
         with self.assertRaises(ValueError):
             BENCH.validate_safe_host_receipt(Path("/nonexistent/gfx803_safehost.json"))
+
+    def test_direct_fault_case_refused_before_torch_import(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--case", "4"],
+            text=True, capture_output=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("independently recoverable safe host", result.stderr)
+
+    def test_auto_recovery_refused_without_gpu_work(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--recover-after-fault"],
+            text=True, capture_output=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("automatic healthcheck/continuation", result.stderr)
 
 
 if __name__ == "__main__":
