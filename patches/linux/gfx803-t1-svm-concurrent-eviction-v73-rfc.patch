@@ -1,6 +1,3 @@
-# RFC backport: AMD amd-gfx 2026-11-09 reviewed SVM eviction quiesce fix
-# Original: https://lore-kernel.gnuweeb.org/amd-gfx/9ea351fa-982b-4d9c-8471-03e168852c83@amd.com/T/
-# Source baseline: torvalds/linux tag v7.3. DO NOT INSTALL ON DISPLAY GPU.
 diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_priv.h b/drivers/gpu/drm/amd/amdkfd/kfd_priv.h
 --- a/drivers/gpu/drm/amd/amdkfd/kfd_priv.h
 +++ b/drivers/gpu/drm/amd/amdkfd/kfd_priv.h
