@@ -80,14 +80,19 @@ Prefer the **instrumented ROCprof arm** for original executed kernel/dispatch id
 
 ```bash
 # From the exact preflight shell, using the same PY and OUT set above:
+# IMPORTANT: the other probe terminal's shell variables are NOT shared.
+# Copy its actual KFD_LOG path into THIS terminal manually:
+KFD_LOG=/var/tmp/gfx803-kfd-return-REPLACE-WITH-ACTUAL-TIMESTAMP.jsonl
+# Print and save these literal paths somewhere outside the Wayland session:
+printf 'OUT=%s\\nKFD_LOG=%s\\n' "$OUT" "$KFD_LOG"
 python3 scripts/gfx803_one_shot_repro_capture.py \
   --python "$PY" --out "$OUT" \
   --mode rocprof --rocprof "$(command -v rocprofv3)" \
   --kfd-log "$KFD_LOG" --expect-kernel "$(uname -r)" \
-  --timeout 180 --tail-seconds 20 --arm
+  --timeout 180 --tail-seconds 20 --core-limit-mib 1024 --arm
 ```
 
-A local interactive TTY must type:
+A local interactive TTY must type **only after reviewing the capture paths and confirming the host is disposable for this run**:
 
 ```text
 I ACCEPT THE RX580 MAY WEDGE AND REQUIRE REBOOT
