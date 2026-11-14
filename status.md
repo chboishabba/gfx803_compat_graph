@@ -349,3 +349,12 @@ and original test logs take precedence over status prose.
 - **No run performed** and the new harness unit tests have **not been executed** in this tool session; operator-reported previous 38/38 suite pass covers earlier state only. User will decide when/if to arm on their display GPU.
 - **Risk:** case4 historically hangs the shared gfx/compute device and makes Wayland unusable until reboot. The wrapper never auto-reboots, auto-resets, attempts a GPU post-fault healthcheck or repeats. ROCprof may change timing and lose buffered traces on SIGABRT; KFD return probes can be missing or alter timing. Preserve both limits.
 - Remains OPEN: actual new-run first stalled GPU kernel/HSACO and KFD first return, SVM/userptr active-range status, physical kernel fix and recovery without reboot.
+
+
+## 14 Nov — one-shot capture and postboot evidence join staged for operator
+
+- New [one-shot trigger/dual-channel capture runbook](docs/GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md) with exact incident Nix overlay, libtorch hash, single case4 `_one(4,10,50)`, manually armed KFD return bpftrace, optional ROCprof kernel/HSA/HIP/memory tracing, line-fsynced host journaling and child receipt, and bounded tail after abort.
+- `scripts/gfx803_one_shot_postmortem.py` and 7 CPU-only synthetic tests now join new-run first KFD returns, kernel journal and ROCprof output **without** claiming that any submitted kernel was first stalled or that a missing profiler tail proves no launch.
+- `scripts/gfx803_one_shot_repro_capture.py` requires local TTY typed risk acceptance, dry-run default, no GPU in parent; baseline arm rejects missing active KFD return probe; kernel probe startup/trace verification is mandatory when specified. 1 GiB default core cap, 20s post-abort journal tail, host heartbeat, no automatic reset/retry/reboot. Optional `--mode rocprof` can alter timing and buffers may not flush on abort.
+- **12 new launcher tests + 7 postmortem tests not executed in this tool session**; prior 38/38 PASS was operator-reported before the new files. Source audited, staged in same draft PR #7.
+- External original source ledger now **61 source records**, including ROCprofiler-SDK official tracing docs. **The user will decide whether to risk their sole display RX580; no actual attempt occurred here.**
