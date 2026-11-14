@@ -250,3 +250,14 @@ exact pinned source checkout. It records SHA-256 for both metadata
 files and rejects mismatched CMake homes. That still does not prove
 the process loaded the selected runtime libraries during GPU
 execution: a separate mapped-library/loader receipt is required.
+
+
+## 14 November 2026 — current phase/assay/stability reconciliation
+
+The phase and status tables above are historical snapshots of the initial
+factory and qualification implementation. Current measured GPU results,
+actual outstanding release gates, and the existing WhisperX/KFD
+cross-workload stability assay are reconciled in
+[docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md](GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md).
+That dated reconciliation does **not** alter Phase A–E exit criteria,
+replace original receipts, or promote a candidate to an accepted release.
