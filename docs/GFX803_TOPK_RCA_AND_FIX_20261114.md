@@ -64,7 +64,7 @@ For a **qualified, independently recoverable** host only, the runner accepts `--
 }
 ```
 
-The normal RX 580 display desktop does **not** meet this safety contract. Do not create a fictitious receipt to bypass the guard. Direct `--case 0/1/4` is guarded too.
+**Any GPU benchmark invocation now requires the same eligible-host receipt**, including cases not previously known to fault. The known-fault cases additionally require `--enable-known-fault-cases`. The attestation is not a physical test of host recoverability.\n\nThe normal RX 580 display desktop does **not** meet this safety contract. Do not create a fictitious receipt to bypass the guard. Direct `--case 0/1/4` is guarded too.
 
 ## Remaining proof obligations, not blockers to beginning the fix
 
