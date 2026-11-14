@@ -128,7 +128,7 @@ def kernels_from_notes(entries:list[dict])->list[dict]:
     for entry in entries:
         meta=entry.get("metadata")
         if not isinstance(meta,dict):continue
-        kernels=meta.get("amdhsa.kernels") or meta.get("amdhsa.kernels".replace("amdhsa.","amdhsa."))
+        kernels=meta.get("amdhsa.kernels") or meta.get(".amdhsa.kernels")
         # Modern metadata often includes '.name' and '.symbol' in dicts.
         if not isinstance(kernels,list):continue
         for k in kernels:
