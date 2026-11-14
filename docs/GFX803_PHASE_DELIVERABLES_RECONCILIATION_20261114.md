@@ -238,3 +238,25 @@ faulting GPU dispatch (T1) and first failing KFD recovery operation
 (T2) are separate, grounded claims. The driver/doorbell fix, TopK
 patch, benchmark and release remain OPEN until those respective
 gates have actual evidence. No new GPU run is claimed here.
+
+
+## 14 November — verified K1/K2 handoff advancement
+
+The operator committed `07a52c7` with the kernel/module identity,
+Polaris gfx8 callback/module-symbol evidence, first retained KWin GFX
+timeout, first logged KFD quiesce failure, and subsequent restoration,
+KIQ `-110` and KCQ disable events. The reference source is upstream
+v7.3, **not** a proven exact CachyOS patchset; matching DWARF is
+unavailable. No new GPU run occurred.
+
+**K1.01 module fingerprints: DONE (recorded); K1.03 callback present:
+DONE for module symbol/reference registration. K1.02 exact DWARF and
+CachyOS source-package match: OPEN. K2.01 first logged recovery error:
+DONE. K2.03 first failing internal function/branch: OPEN. T1 original
+TopK GPU dispatch: OPEN.** The old missing gfx8 doorbell callback
+is not a justified patch target based on this evidence, and whether
+it executed during the incident is unknown.
+
+Authoritative exact identifiers, correction of unknown callback
+invocation and next callsite-level cut:
+[parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
