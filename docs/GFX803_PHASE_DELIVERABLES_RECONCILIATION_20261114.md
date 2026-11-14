@@ -180,3 +180,29 @@ the updated qualification handoff (14 November). Direct PR
 conversation comment was blocked by GitHub integration 403.
 This does not mean the upstream maintainer has acknowledged
 the expanded programme.
+
+
+## 14 November blocker: TopK long-row hang and failed KFD reset
+
+A **new hardware incident** supersedes any simple claim that the
+cached pre-review patched TopK wheel is stable: the `[32,151936]`
+float32 k=50 benchmark hung, AMDGPU reported compute/GFX ring
+timeouts/device coredump, KFD queue quiesce/restore/resume failed,
+and the sole display GPU remained wedged until reboot.
+The original unpatched safe cases passed; three known crashing
+unpatched cases were skipped. The smaller patched `[1,151936]`
+k=50 case passed. Neither is a successful paired review benchmark.
+
+This opens **two separate mandatory repair gates**:
+(T1) trace first nonprogressing TopK GPU dispatch and safely
+benchmark correct `mbtopk` vs full sort, and (T2) trace first
+failing KFD reset queue/doorbell return with matching kernel source
+and symbols. The 2025 gfx7/8 SDMA callback patch does not prove
+T2 is already corrected. An additional broad HIP/HSA smoke success
+cannot override a demonstrated kernel/queue reset or compositor failure.
+
+Read-only event capture, debugger use (GDB/ROCgdb/Ghidra), source
+provenance and T1/T2 exit criteria are in
+`docs/GFX803_TOPK_KFD_RESET_FORENSICS_20261114.md`.
+**No intentional reproduction of the wedging case on the sole
+display GPU** before isolation/recovery support.
