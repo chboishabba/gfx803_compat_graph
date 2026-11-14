@@ -156,3 +156,55 @@ When K1/K2 arrive, merge the source-grounded error path into
 `docs/GFX803_TOPK_KFD_RESET_FORENSICS_20261114.md`, reconcile
 with static TopK dispatch and update the phase acceptance table.
 Do not modify Schaka PR #8 with kernel-recovery speculation.
+
+
+## 14 November — K1/K2 evidence ingest: commit `07a52c7`
+
+[Committed kernel handoff](receipts/gfx803_kfd_kernel_source_handoff_20261114.json)
+establishes more than the previous hypothesis-only workboard:
+
+| Gate | Evidence / disposition | Remaining precision |
+| --- | --- | --- |
+| **K1.01 module inventory** | **Recorded:** `7.3.0-2-cachyos-bore`; compressed `amdgpu.ko.zst` SHA-256 `044c65a459798f469a3d3d4fb0ff6af975dceaed972ba5f5285359f12de3c2dd`; decompressed SHA-256 `20df0ac89a22e67b94bb24158092a77ec593616c518338747f8618eda4f5d35f`; module build ID `e18feec811ec99ec54d951f502a8cffe882c8d9b`. Kernel build ID recorded separately. | Confirm incident-boot binary identity if module installed after reboot differs; **exact CachyOS source package match OPEN** |
+| **K1.02 symbol/debug inventory** | Module symbol visibility supports callback presence; GDB-MCP registered on host | No matching DWARF in installed kernel/module; exact symbol-to-source line and locals OPEN |
+| **K1.03 gfx8 callback** | **Present in module and registered in upstream v7.3 reference**; `gfx_v8_kfd2kgd` selects Polaris | Actual incident invocation **UNKNOWN**, not false; exact distro backport/source equivalence OPEN |
+| **K2.01 logged failure** | **First retained KFD recovery error identified:** `Failed to quiesce KFD` following first KWin `ring gfx timeout` at 12:39:28 | First failing internal call/return branch OPEN; first *logged* error is not a full stack |
+| **K2.02 downstream chain** | KFD process-queue restore/resume, KIQ ring test `-110`, KCQ disable and persistent post-reset wedge retained | Which operation precipitated restore failure versus which merely followed already-dead ring hardware OPEN |
+| **T1** | Original benchmark and GPU hang remain source/shape bound | Initial TopK kernel/HSACO and first non-progressing dispatch **OPEN** |
+
+**Original evidence record:** `07a52c7`. The handoff was
+corrected on `master` after ingestion because `called_in_incident:
+false` incorrectly implied demonstrated non-invocation; it is now
+`null` (unknown). The immutable original commit remains available.
+
+**Source qualification:** reference Linux v7.3 at
+`c03c1a14507dfaf8b856c2608f9ac216021fc222` is *not* proof of
+identical CachyOS source code; `source_package_exact_match=false`
+in the receipt must remain visible. The recorded module build ID
+provides a key for finding exact matching symbols, not DWARF itself.
+
+### Next non-GPU max-cut (K2.03)
+
+1. Locate the source statement that emits `Failed to quiesce KFD`
+   in the **exact CachyOS patchset**, then follow the direct
+   callee/error return chain into queue preemption.
+2. Resolve the source site that prints `ring kiq_0.2.1.0 test
+   failed (-110)`; determine whether this error occurs during
+   teardown/reset or subsequent ring bring-up, from original
+   call order rather than assuming it is the first failure.
+3. Resolve `KCQ disable failed` and restore/resume prints
+   to source and create a structured sequence of observed
+   timestamp vs statically reachable function, retaining that
+   the original journal did not record a full call stack.
+4. For stripped symbols use **module build ID + ELF symbol table
+   and code disassembly** in read-only GDB; inspect exact
+   source/build metadata or debug-symbol build packages for
+   function+line mapping. Ghidra is a fallback for binary
+   control-flow, not proof of incident-time invocation.
+5. Keep T1 TopK GPU dispatch as a separate causal target;
+   avoid rerunning the known display-wedging case.
+
+**Definition of completion:** precise first failing **internal**
+KFD function/branch supported by a trace, matching binary/source,
+or negative/positive instrumentation on recoverable hardware.
+The first retained printed error alone does not close K2.
