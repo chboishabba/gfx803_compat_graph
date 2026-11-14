@@ -157,3 +157,33 @@ Source owner: `chboishabba/gfx803_compat_graph`.
 Original component tests and patches remain owned by
 Schaka/ROCm/TheRock. This is a developer-ready, *not yet executed*
 test cut and does not modify the Schaka TopK patch scope.
+
+
+## R1a — reconcile seven smoke receipts and multiple vendor suites
+
+The whole-stack atlas now accepts source-owned HIP/HSA smoke via
+`--native-runtime-receipt`, and *more than one*
+`--receipt rocr-hsa-kfd=<path>`. For example, after the respective
+original upstream suites physically execute:
+
+```bash
+python3 scripts/gfx803_rocm_coverage_report.py \
+  --native-runtime-receipt "$OUT/matrix.json" \
+  --receipt rocr-hsa-kfd=/ACTUAL/ROCRTST/ORIGINAL/matrix.json \
+  --receipt rocr-hsa-kfd=/ACTUAL/KFDTEST/ORIGINAL/matrix.json \
+  --out /mnt/truenas/comet-net/experiments/gfx803_hip_hsa_kfd_atlas_20261114.json
+```
+
+Before those original test suites exist, **omit both `--receipt`**
+arguments; never invent paths. The join preserves each source's
+build/CTest identity, test counts, unassayed work, fault and
+release flags. It does not deduplicate distinct tests merely
+because they share a compatibility layer. The direct seven-case
+smoke does not count as broad vendor suite coverage.
+
+Test these exact offline source contracts with:
+
+```bash
+python3 -m unittest discover -s tests \
+  -p 'test_gfx803_rocm_coverage_report.py' -v
+```
