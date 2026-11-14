@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "status": "unverified",
+  "incident_kernel_release": "7.3.0-2-cachyos-bore",
+  "running_module": {
+    "path": "/usr/lib/modules/7.3.0-2-cachyos-bore/kernel/drivers/gpu/drm/amd/amdgpu/amdgpu.ko.zst",
+    "sha256": "044c65a459798f469a3d3d4fb0ff6af975dceaed972ba5f5285359f12de3c2dd",
+    "decompressed_sha256": "20df0ac89a22e67b94bb24158092a77ec593616c518338747f8618eda4f5d35f",
+    "build_id": "e18feec811ec99ec54d951f502a8cffe882c8d9b",
+    "srcversion": "C407ADC0B867F2BF3B6977C"
+  },
+  "vmlinux_build_id": "3a3894a7feee4425b0c8cdf89bb7949b4b41c82d",
+  "reference_source": {
+    "repository": "https://github.com/torvalds/linux",
+    "revision": "c03c1a14507dfaf8b856c2608f9ac216021fc222",
+    "tag": "v7.3",
+    "scope": "targeted AMDGPU/KFD files"
+  },
+  "source_package_exact_match": false,
+  "gfx8_sdma_callback": {
+    "implemented_in_reference_source": true,
+    "registered_in_gfx_v8_kfd2kgd": true,
+    "selected_for_polaris": true,
+    "symbols_present_in_running_module": true,
+    "called_in_incident": false
+  },
+  "first_retained_timeout": {
+    "timestamp": "2026-11-14T12:39:28",
+    "ring": "gfx",
+    "process": "kwin_wayland",
+    "pid": 1877,
+    "thread_pid": 2273,
+    "sequence": "signaled=131707128 emitted=131707130"
+  },
+  "recovery_chain": [
+    "Failed to quiesce KFD",
+    "Failed to restore process queues",
+    "amdgpu_amdkfd_restore_userptr_worker: Failed to resume KFD",
+    "ring kiq_0.2.1.0 test failed (-110)",
+    "KCQ disable failed",
+    "BACO reset / GPU reset succeeded, but device remained wedged"
+  ],
+  "benchmark_process_recovery_error": {
+    "timestamp": "2026-11-14T12:39:29",
+    "pid": 2264013,
+    "message": "Failed to suspend process"
+  },
+  "first_recovery_error": "Failed to quiesce KFD",
+  "journal_sha256": "be965c117fc7fd2a815a843b63b3ad807d9e88ae43ffff33495cb82043fc70f6",
+  "gpu_rerun": false,
+  "conclusion": "The installed module and reference source show the gfx8 SDMA doorbell callback exists and is registered, but the preserved journal does not establish callback invocation or identify the first TopK kernel. No kernel patch is justified by this evidence alone."
+}
