@@ -22,7 +22,7 @@ PROBES = (
 NAMESPACE = "gfx803k2"
 VALID = re.compile(r"^[a-zA-Z_][a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*$")
 def symbols(kallsyms: str) -> set[str]:
-    return {match.group(1) for match in re.finditer(r"(?m)^[0-9a-fA-F]+ [tTwW] ([A-Za-z_]\w*)(?:\s.*)?$", kallsyms)}
+    return {match.group(1) for match in re.finditer(r"(?m)^[0-9a-fA-F]+ [tTwW] ([A-Za-z_][A-Za-z_0-9.]*)\s*$", kallsyms)}
 
 def choose_available(available: set[str]) -> list[tuple[str, str]]:
     # Exact names preferred. Only exact compiler-suffixed names are admitted.
