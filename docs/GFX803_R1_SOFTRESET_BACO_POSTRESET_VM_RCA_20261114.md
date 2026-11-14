@@ -48,6 +48,21 @@ The `VM fault` is **evidence of a faulting graphics memory access after reset**,
 
 Currently the evidence **does not select one uniquely**. H2 becomes especially high-alpha for the *post-BACO* persistent graphics failure because the raw journal contains a concrete VM fault shortly after the first apparently successful full reset. H1 is proven as the pre-BACO KIQ failure boundary, not proven as still broken after BACO. H3 remains plausible.
 
+## 3A. A2a actual GFX8 GPUVM source crosswalk and measured reset counts
+
+The original journal was processed **offline**. Its 1,308 retained lines contain **88 GFX8 soft-reset starts and 88 corresponding “Successful gfx_v8_0 IP block soft reset” lines**. It contains **two** explicitly printed full-reset-success records, counters **2** (12:39:30) and **62** (12:40:55). Both are followed by another graphics timeout **two seconds later**. Those are **two recorded reset-success messages, not evidence that exactly 62 full resets occurred in the retained file**. Reproducible read-only receipt: [gfx803_r1_nov14_reset_recovery_counts_20261114.json](receipts/gfx803_r1_nov14_reset_recovery_counts_20261114.json).
+
+A source-grounded distinction is now explicit:
+
+- `gmc_v8_0_hw_init` for Polaris reloads the MC firmware and calls `gmc_v8_0_gart_enable`. That latter function programs L1/L2 GPUVM controls, context page-table address registers and enables context1–15. Its visible final `gmc_v8_0_flush_gpu_tlb(adev, 0, ...)` is a **VMID 0** flush. Thus the journal's **`PCIE GART ... enabled`** message proves *this initialization branch returned successfully*, not that KWin's later **VMID 7** GPU page tables match still-valid BO mappings.
+- `gmc_v8_0_resume` calls `amdgpu_vmid_reset_all` following the GMC hardware initialization; the state manager is explicitly reset. This creates a separate requirement for user VMID reallocation/flush on subsequent submits.
+- Normal real graphics submission in `amdgpu_cs.c` checks `amdgpu_vm_ready`, then applies `amdgpu_vm_clear_freed`, PRT/CSA/BO mappings through `amdgpu_vm_bo_update`, handles moved BOs with `amdgpu_vm_handle_moved`, and updates PDEs with `amdgpu_vm_update_pdes`. Those operations can fail or be incomplete in a faulting userspace workload; their success in the original November incident **is not logged**.
+- The 12:39:32 `gmc_v8_0_process_interrupt` register print of `VM_CONTEXT1_PROTECTION_FAULT_ADDR` and `_STATUS` plus `TC3` fault decoding establishes an actual GPUVM memory fault in the KWin context, not an isolated KFD queue-manager return. It is still unknown whether the VMID 7 mapping itself was corrupt, the compositor reused an invalid pre-reset context, or the GPU ignored a valid mapping after reset.
+
+Original upstream source: [GMC8](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdgpu/gmc_v8_0.c), [GFX8 VM updates](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c), [graphics submission path](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c).
+
+**Next narrow maximum cut:** offline inspect reset-time BO migration/VRAM-loss invalidation and the *first subsequent KWin CS* handling of VMID/BO/PDE/fence; then design a minimal source instrumentation patch to record those outcomes and GFX8 ring/firmware tests at the same reset generation. Do **not** turn the KWin-after-reset VM fault into an assertion about its first initiating error before 12:39:28.
+
 ## 4. Implemented safe evidence extraction
 
 `scripts/gfx803_reset_wave_chronology.py` reads the original kernel journal, labels the KFD/soft reset/KIQ/KCQ/BACO/full reset and VM faults, and records faults within a bounded window after each `GPU reset(n) succeeded!`. It uses only standard-library file reads, **no GPU execution or system driver interaction**. `tests/test_gfx803_reset_wave_chronology.py` tests transient-success-followed-by-fault, absence of a hardware acceptance implication, timing window and overwrite refusal. **New committed tests have not been physically run on TrueNAS/CI in this step.**
