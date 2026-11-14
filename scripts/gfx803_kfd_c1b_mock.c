@@ -15,6 +15,7 @@ struct node {
     int start_error;
     enum stage failed_stage;
     int exec_error;
+    bool in_gpu_reset;
     bool sched_running;
     unsigned start_calls;
     unsigned exec_calls;
@@ -39,6 +40,27 @@ static int dqm_start_model(struct node *n)
     return 0;
 }
 
+/* Candidate GFX8 start_cpsch semantic contract. A reset writer blocks
+ * execute_queues_cpsch's down_read_trylock; skip mapping during reset rather
+ * than interpreting the expected lock conflict as a broken queue manager.
+ * Outside reset, report mapping failure and roll back sched_running.
+ * This model does NOT prove actual kernel resource teardown is safe.
+ */
+static int dqm_start_checked(struct node *n)
+{
+    n->start_calls++;
+    if (n->start_error) return n->start_error;
+    n->sched_running = true;
+    if (!n->in_gpu_reset) {
+        n->exec_calls++;
+        if (n->exec_error) {
+            n->sched_running = false;
+            return n->exec_error;
+        }
+    }
+    return 0;
+}
+
 /* Mimics the legacy kgd2kfd_post_reset early-return branch. */
 static int kfd_post_reset_legacy(struct state *s)
 {
@@ -58,7 +80,7 @@ static int kfd_post_reset_checked(struct state *s)
 {
     unsigned i;
     for (i = 0; i < s->count; ++i) {
-        int ret = dqm_start_model(&s->nodes[i]);
+        int ret = dqm_start_checked(&s->nodes[i]);
         if (ret) { ++s->failure_markers; return ret; }
     }
     assert(s->kfd_locked);
@@ -168,14 +190,34 @@ static void test_partial_multinode_start(void)
     /* Partial start needs actual kernel cleanup review. */
 }
 
-static void test_unchecked_queue_mapping_error(void)
+static void test_queue_mapping_error_propagates_outside_reset(void)
 {
     struct state s = initial(1);
     s.nodes[0].exec_error = NEG_EIO;
+    assert(gpu_recover_checked(&s) == NEG_EIO);
+    assert(!s.nodes[0].sched_running && s.nodes[0].exec_calls == 1);
+    assert(s.failure_markers == 1 && s.kfd_locked == 1);
+    assert(s.scheduler_starts == 0);
+    assert(s.reset_locks == s.reset_unlocks);
+}
+
+static void test_reset_writer_skips_execution_without_false_error(void)
+{
+    struct state s = initial(1);
+    s.nodes[0].in_gpu_reset = true;
+    s.nodes[0].exec_error = NEG_EIO;
     assert(gpu_recover_checked(&s) == 0);
-    assert(s.nodes[0].sched_running && s.nodes[0].exec_calls == 1);
-    assert(s.failure_markers == 0);
-    /* An unpropagated execute_queues error bypasses outer correction. */
+    assert(s.nodes[0].sched_running && s.nodes[0].exec_calls == 0);
+    assert(s.kfd_locked == 0 && s.scheduler_starts == 1);
+    assert(s.reset_locks == s.reset_unlocks);
+}
+
+static void test_legacy_unchecked_queue_error(void)
+{
+    struct node n = {0};
+    n.exec_error = NEG_EIO;
+    assert(dqm_start_model(&n) == 0);
+    assert(n.exec_calls == 1 && n.sched_running);
 }
 
 static void test_failed_recovery_stays_stopped(void)
@@ -194,8 +236,10 @@ int main(void)
     test_first_node_error();
     test_each_explicit_start_failure();
     test_partial_multinode_start();
-    test_unchecked_queue_mapping_error();
+    test_queue_mapping_error_propagates_outside_reset();
+    test_reset_writer_skips_execution_without_false_error();
+    test_legacy_unchecked_queue_error();
     test_failed_recovery_stays_stopped();
-    puts("C1b behavioral model: 7/7 PASS (CPU only; kernel/hardware unqualified)");
+    puts("C1b behavioral model: 9/9 PASS (CPU only; kernel/hardware unqualified)");
     return 0;
 }
