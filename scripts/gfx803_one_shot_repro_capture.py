@@ -212,19 +212,41 @@ def run(args) -> int:
                                   daemon=True)
         writer.start()
         status = "returned"
-        while child.poll() is None:
-            if time.monotonic() - start >= args.timeout:
-                status = "host_timeout_gpu_unhealthy"
-                # The child might be blocked inside the GPU driver. Kill the
-                # process group only, never write an AMDGPU reset sysfs node.
-                os.killpg(child.pid, signal.SIGTERM)
-                try:
-                    child.wait(timeout=4)
-                except subprocess.TimeoutExpired:
-                    os.killpg(child.pid, signal.SIGKILL)
-                break
-            time.sleep(0.25)
+        last_heartbeat = 0.0
+        with (args.out / "host-heartbeat.jsonl").open("x", encoding="utf-8", buffering=1) as heartbeat:
+            while child.poll() is None:
+                now = time.monotonic()
+                if now - last_heartbeat >= 2:
+                    heartbeat.write(json.dumps({
+                        "event": "host_alive", "monotonic_ns": time.monotonic_ns(),
+                        "wall_time_ns": time.time_ns(), "child_pid": child.pid,
+                        "child_returncode": child.poll(),
+                        "note": "host heartbeat is not GPU forward-progress proof"
+                    }, sort_keys=True) + "\n")
+                    heartbeat.flush()
+                    os.fsync(heartbeat.fileno())
+                    last_heartbeat = now
+                if now - start >= args.timeout:
+                    status = "host_timeout_gpu_unhealthy"
+                    # Never try an AMDGPU reset or new compute-healthcheck.
+                    try:
+                        os.killpg(child.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    try:
+                        child.wait(timeout=4)
+                    except subprocess.TimeoutExpired:
+                        try:
+                            os.killpg(child.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                    break
+                time.sleep(0.25)
         writer.join(timeout=3)
+        # Capture the *first* reset wave after child abort instead of shutting
+        # down the journal follower at exactly SIGABRT. No GPU work is issued.
+        if child.poll() != 0 and args.tail_seconds:
+            time.sleep(args.tail_seconds)
         flush_json(args.out / "supervisor-result.json", {
             "result": status, "returncode": child.poll(),
             "elapsed_monotonic_seconds": round(time.monotonic() - start, 3),
@@ -252,12 +274,16 @@ def main() -> int:
                    help="optional exact host kernel release, e.g. 7.3.0-2-cachyos-bore")
     p.add_argument("--kfd-log", type=Path,
                    help="fresh separately armed KFD return-probe log; mandatory for baseline mode")
+    p.add_argument("--tail-seconds", type=int, default=20,
+                   help="capture post-abort recovery journal without new GPU work")
     p.add_argument("--timeout", type=int, default=180)
     p.add_argument("--arm", action="store_true",
                    help="EXPLICIT dangerous single execution, requires local typed phrase")
     a = p.parse_args()
     if a.timeout < 15 or a.timeout > 600:
         p.error("timeout must be 15..600 seconds; no unbounded stress")
+    if a.tail_seconds < 0 or a.tail_seconds > 120:
+        p.error("tail-seconds must be 0..120")
     try:
         return run(a)
     except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as e:
