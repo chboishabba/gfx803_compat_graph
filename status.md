@@ -33,3 +33,10 @@ Full phase/deliverables reconciliation:
 
 This is a dated evidence snapshot. Retained source-specific receipts
 and original test logs take precedence over status prose.
+
+- **14 Nov new critical regression:** pre-review patched TopK float32
+  `[32,151936]`, k=50 hung GPU; KFD queue restore/resume then
+  failed and the single display GPU wedged Plasma Wayland. Reboot
+  required; stop running that cached wheel on this shape.
+  Incident debugger max-cut:
+  `docs/GFX803_TOPK_KFD_RESET_FORENSICS_20261114.md`.
