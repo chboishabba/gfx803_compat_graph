@@ -84,3 +84,36 @@ Do not combine the tracer with the known crashing TopK input on the display GPU.
 Next max-cut after running all offline receipts: map exact branch predicate to incident-time state; determine actual TopK HSACO and kernel selection; design a *recoverable non-display host* repro if archived evidence cannot answer; patch only proven causes.
 
 These scripts and reports belong in gfx803_compat_graph. They must not be introduced into Schaka PR #8, per maintainer instructions.
+
+
+## Phase D: one-command evidence join (CPU only)
+
+After the three offline receipts exist, validate provenance and export
+explicit open/blocked acceptance gates:
+
+~~~bash
+python3 scripts/gfx803_kfd_topk_evidence_join.py \
+  --incident "$OUT/incident_static.json" \
+  --trace "$OUT/kprobe_inventory.json" \
+  --topk "$OUT/topk_static.json" \
+  --handoff "$H" \
+  --out "$OUT/join.json"
+~~~
+
+It rejects mismatched original journal SHA, incorrect data modes and
+overwriting. It never infers historical MES/non-MES selection from
+postboot arguments, or initial TopK kernel from static ELF strings.
+It preserves K2.05 and T1 OPEN and release BLOCKED until additional
+actual evidence is obtained. Review all original receipts, not just
+the joined verdict.
+
+**Known limitations requiring later work:** no CPU vmcore or retained
+GPU coredump was available from the rebooted incident; no exact
+CachyOS source-package/DWARF match; the tracefs probe script does
+not recover 14 November incident-time registers; static source/
+ELF search is not HSACO dispatch attribution; tracefs instrumentation
+can perturb timing and must never be combined with the known
+display-wedging TopK input on this host.
+
+These are independent artifacts, not a GPU validation or source
+patch. Do not post local scripts to Schaka PR #8.
