@@ -125,7 +125,32 @@ existing GFX8 KIQ quantum exemption in
 source result—not proof that the stripped, deployed module was rebuilt from
 those bytes or that either ordering caused an incident.
 
-**Repair priority after exact match:** first pre-reset queue-unmap ordering, then post-reset callback/scheduler ordering, then restore-during-reset guard. These are small source-level hypotheses to evaluate via existing AMD patches on an independently recoverable host, not authorization to patch and test the sole display GPU.
+**Important correction (14 November): do not backport the pre-reset-before-lock patch.** AMD's v1–v3 proposal was explicitly rejected in [12–13 October review](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153142.html); the author dropped that approach. [v4 interrupt discard](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153305.html) was also superseded by [v5: wait for reset completion before freeing a BO](https://www.mail-archive.com/amd-gfx@lists.freedesktop.org/msg153397.html), which addresses a diagnosed SDMA/writeback use-after-free during reset on **MI300X**. Neither v4 nor v5 is a demonstrated solution for a Polaris reset/Wayland hang. The source audit establishes a candidate ordering/race surface, not a valid patch by itself.
+
+**Revised implementation priority:** (1) read-only source/backport and patch-lineage comparison, including the reviewed post-reset callback-before-scheduler ordering proposal; (2) audit queue/VM/BO cleanup when reset is already active, and determine whether any relevant GFX8 paths actually reach the newer v5 memory-lifetime hazard; (3) test focused recovery corrections only on independently recoverable hardware; (4) treat an upstream wedge/fence fail-closed policy as containment, not a restored GPU. Do not install the NAK'd reset-lock patch on the display machine.
+
+## 3B. Cross-distro and upstream-version reconciliation
+
+**Scope correction:** CachyOS is a particular November kernel package, not the proposed root-cause owner. The user also reports earlier occurrences on ordinary Arch Linux. Some *March 2026* repo measurements explicitly identify `6.19.7-1-cachyos-bore`; do not relabel those original measurements as plain Arch or treat older Arch reports as if they were proven to use that same build. The oldest Arch-era KFD reset reports must retain their own kernel/build provenance, and the **2025 missing gfx7/8 SDMA callback fix** is a separately resolved regression, not proof that this newer failure uses that missing callback.
+
+Independent source comparison against `torvalds/linux` immutable tags:
+
+| Mainline tag | GPU recovery reset lock / KFD pre-reset | Scheduler restart / KFD post-reset | GFX8 KIQ compute-quantum exemption |
+| --- | --- | --- | --- |
+| `v6.13` | Lock **before** pre-reset (inline, lines 5879 and 5903) | DRM scheduler restarted before `amdgpu_amdkfd_post_reset` (around 6001/6033) | Absent |
+| `v6.19` | Lock before `amdgpu_device_halt_activities` -> KFD pre-reset | `amdgpu_device_sched_resume` before `amdgpu_device_gpu_resume` | Absent |
+| `v7.3` | Same ordering as v6.19 | Same ordering as v6.19 | **Present** |
+| CachyOS `7.3.0-2` extracted source | Same as v7.3; 6/6 CPU-only source audit | Same as v7.3 | Present |
+
+Source files: [v6.13](https://github.com/torvalds/linux/blob/v6.13/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c), [v6.19](https://github.com/torvalds/linux/blob/v6.19/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c), [v7.3](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdgpu/amdgpu_device.c). The GFX8 MQD setting comes from the corresponding `gfx_v8_0.c` at each tag; the comparison establishes **source ancestry**, not binary equivalence for a physical Arch installation.
+
+The old ordering is thus **upstream and predates CachyOS's November build**. Conversely, the KIQ quantum exemption changed between v6.19 and v7.3, yet the November incident still logged a KIQ `-110`: that particular improvement was not sufficient to eliminate the observed RX 580 recovery-failure class.
+
+Important qualifications:
+- A source pattern across three tags can be an intentional legacy behavior or a defect; AMD's NAK means one tempting change is **not accepted as a repair**.
+- The v5 memory-free patch concerns buffer lifetime during GPU reset, not demonstrated first-fault attribution of TopK, WhisperX, or KWin.
+- The 2026 proposed user-queue/MES fixes for GC11/12 must not be assumed applicable to this **non-MES GFX8** device.
+- The November later `-ETIME` fence-timeout evidence does not determine the first quiescence return.
 
 ## 4. Highest-information interventions, ordered
 
