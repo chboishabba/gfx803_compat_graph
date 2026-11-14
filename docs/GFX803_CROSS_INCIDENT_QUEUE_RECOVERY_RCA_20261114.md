@@ -152,6 +152,27 @@ Important qualifications:
 - The 2026 proposed user-queue/MES fixes for GC11/12 must not be assumed applicable to this **non-MES GFX8** device.
 - The November later `-ETIME` fence-timeout evidence does not determine the first quiescence return.
 
+## 3C. Completed priority C/D source-path comparison — stronger recovery-path failure mode
+
+**See [GFX803_CROSS_VERSION_RECOVERY_C_D_AUDIT_20261114.md](GFX803_CROSS_VERSION_RECOVERY_C_D_AUDIT_20261114.md)** for original upstream v6.13/v6.19/v7.3 source references, exact branch ordering and missing evidence.
+
+The highest-information finding is **an error-return propagation gap** predating the recent CachyOS package:
+
+- `kgd2kfd_post_reset` calls `kfd_resume` for the KFD queue manager, returns an error if startup fails, and leaves the `kfd_locked` decrement untouched on that failure branch.
+- `amdgpu_amdkfd_post_reset` returns the KFD status, but `amdgpu_device_gpu_resume` calls it without checking that return; the upstream device path uses this pattern in v6.13, v6.19 and v7.3.
+- Thus a `GPU reset succeeded!` log is *not* equivalent to successful KFD queue restoration or a usable new graphics context. The wording may be emitted before KFD post-reset.
+- **No historical KFD post-reset return has been captured**; source alone does not prove it failed during the November event.
+
+Additional established details:
+
+- November ran **BACO** as shown by its kernel journal and by `vi_asic_reset`'s exact log statement. The initial KIQ `-110` precedes that BACO operation, so BACO *exit* cannot by itself explain the first KIQ failure.
+- GFX8 `gfx_v8_0_cp_test_all_rings` tests **gfx before KIQ before compute**; descriptions that call KIQ the 'first ring tested' are inaccurate.
+- For Polaris10/11/12, the actual IP block is **`tonga_ih`**, not `cik_ih`. KFD has a separate interrupt FIFO; stale-event involvement remains a hypothesis.
+- `kfd_process_wq_release` already waits on the reset workqueue before releasing process resources. The MI300X v5 buffer-free fix must be evaluated at its *specific* lifetime point, not assumed to provide the only reset-time wait.
+- DRM scheduler workqueues restart before KFD post-reset finishes in all three upstream versions. This is a source-visible window; `kfd_locked` prevents the overly strong claim that ROCm user queues necessarily resubmit during that window.
+
+**Revised repair cut:** first build a CPU-only/mock failure-path test for `kfd_resume != 0` and correct error propagation/unwind without leaking locks or starting DRM prematurely; then investigate queue-manager/VM recovery cause on an independently recoverable GFX8 machine. Capturing post-reset KFD return, queue-manager state, ring tests and actual fresh graphics-context usability is more discriminating than the reset-success line alone.
+
 ## 4. Highest-information interventions, ordered
 
 **No destructive desktop experiments:**
