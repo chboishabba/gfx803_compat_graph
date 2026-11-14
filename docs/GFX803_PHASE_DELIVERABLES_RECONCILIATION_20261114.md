@@ -498,3 +498,53 @@ inclusion and metadata, not original incident-time selected kernel,
 benchmark-loaded wheel linkage or KFD's missing internal fence
 return. T1.06/T1.07/K2.05/J1/F1/release stay OPEN/BLOCKED
 according to original receipts. No new GPU work or KFD patch.
+
+---
+
+## 14 November — GFX8 persistent GPU wedge: authoritative recovery roadmap (R0–R6)
+
+**Authority:** this section is the current *hardware recovery* critical path. Keep historical factory Phase 0/A/B/C/D/E, P0–P3 layer qualifications, and previous Track 1/2/3 intact. This is a recovery-specific dependency chain, **not** a replacement for those systems. Detailed source receipts: [cross-incident RCA](GFX803_CROSS_INCIDENT_QUEUE_RECOVERY_RCA_20261114.md), [C/D source audit](GFX803_CROSS_VERSION_RECOVERY_C_D_AUDIT_20261114.md), [C1b mock and patch audit](GFX803_KFD_C1B_MOCK_AND_START_CPSCH_AUDIT_20261114.md).
+
+### The engineering problem that determines the exit condition
+
+The user's Arch-era experience and March/November RX580 incidents show **kernel and emergency TTY remain available while the GPU stays unusable even after a manual driver reset and Wayland restart**. November's original journal shows: **12:39:28** gfx timeout and failed KFD preemption -> **12:39:29** KIQ ring-test `-110` and KCQ disable failure -> GFX8 soft reset and subsequent **BACO** -> VRAM loss -> further gfx/compute timeouts. At **12:40:55**, a `GPU reset(62) succeeded!` message occurs without demonstrated restoration of graphical function. The first KIQ failure *precedes* that BACO, therefore **BACO exit alone cannot explain the initial hang**. The kernel/TTY remaining alive is not evidence that CP/MEC, KIQ/KCQ, SDMA or GPUVM recovered. A driver-reload and compositor restart are not proof of a physical power cycle.
+
+The **goal is durable GPU execution recovery**, not prettier logs, KFD reopening alone, forced deletion of active DMA resources, or simply preventing an unsafe benchmark. Incident triggers (TopK, WhisperX, Ollama, Wayland) and recovery defects are separate until a physical join proves otherwise.
+
+### Phase and deliverable ledger
+
+| Phase / gate | Position on 14 Nov 2026 | Exact deliverable | Closure / acceptance test |
+| --- | --- | --- | --- |
+| **R0 — Cross-incident baseline** | **SOURCE/EVIDENCE COMPLETE**, causality OPEN | Immutable March Ollama/Wayland/WhisperX and Nov TopK time-ordered first-fault/recovery matrix; exact source/provenance and known missing first return | Every incident separated into pre-fault, first timeout, attempted soft reset, BACO/PCI, ring retest, post-reset outcome; mark unknown rather than infer |
+| **R1 — Hardware reset route** | **OPEN; highest priority** | Source-mapped Polaris10 `gfx_v8_0` soft reset, `vi_asic_reset` BACO and possible PCI fallback, CP/MEC microcode reload, KIQ/KCQ ring init/test, GPUVM/GART, and reset return/error dependency graph; record actual log ordering | Identify earliest failed post-reset ring/command and which reset stage claims success. Differentiate CPU/TTY availability from actual graphics/compute work. No dangerous on-display repro |
+| **R2 — Cross-kernel source differences** | **PARTIAL** | Linux v6.13/v6.19/v7.3 and exact 7.3.0-2 source crosswalk, historic Arch kernel provenance, upstream patch accept/NAK ledger, tested source locations | Confirm source-level invariants and changed pathways, review Polaris applicability. GFX8 KIQ quantum exemption already in 7.3 yet KIQ still failed; NAK'd reset-lock reorder must not be deployed |
+| **R3 — KFD recovery integrity / containment** | **SOURCE DEFECTS IDENTIFIED; patch DRAFT** | `kgd2kfd_post_reset` error/lock accounting, `amdgpu_amdkfd_post_reset` unchecked result, `start_cpsch` reset-aware `execute_queues_cpsch`, `sched_running` rollback and DRM scheduler start/unwind proof; mocked C/patch test receipt | Propagate failure without false `GPU reset succeeded` *end-to-end* qualification, leaked lock, scheduler double start or premature GPU work; ensure errors during reset-domain write lock are not misclassified. **This does not close R1** |
+| **R4 — Actual hardware/firmware recovery correction** | **OPEN / not implemented** | A minimal GFX8-applicable kernel correction targeting the real R1 failure (or a documented fail-closed wedge policy if hardware cannot recover), source patch and kernel build with reviewer-approved resource lifetime | Correct ring/VM/firmware state, not just error reporting. Confirm proper reset/power-domain behavior without release of still-DMA-visible memory |
+| **R5 — Physical qualification** | **BLOCKED: independent recoverable hardware not supplied** | Source and module Build IDs/hashes, safe-host manifest and externally persisted trace, bounded matched A/B (original vs corrected), direct post-reset KIQ/KCQ/SDMA/KFD/GFX and new graphics-context check | Same fault-class recovered **without host reboot**: new `/dev/kfd` open, fresh KFD queue makes progress, gfx/KIQ/KCQ ring tests and fresh DRM/Wayland client render; no recurrent timeout/reset loop. If hardware irrecoverable, *only* fail-closed containment can pass its separate safety gate; not a recovery pass |
+| **R6 — Release / upstream / rollup** | **BLOCKED on R4/R5** | Reviewed upstream contribution, regression tests, mainline/distro applicability table, reproducible Nix/kernel build, package/source SHA, rollback and accepted long-workload gate | Maintainer acceptance plus repeated physical recovery and clean-client release. Original binary factory Phase B and general stability promotion stay blocked while R5 fails |
+
+### Minimum exact implementation cuts (A/B/C priority)
+
+| Cut | Specific code or measurement target | Priority and rule |
+| --- | --- | --- |
+| **A1 — Soft-reset/BACO handoff** | `gfx_v8_0_hw_fini`, `gfx_v8_0_cp_resume`, `gfx_v8_0_cp_test_all_rings`, `vi_asic_reset_method`, `vi_asic_reset`, `amdgpu_device_asic_reset` | **Highest-alpha** — source-order and error-propagation crosswalk for first reset wave and repeated BACO waves; no inference from late `-ETIME` to first failed queue |
+| **A2 — Ring forward progress** | `gfx_v8_0_kiq_kcq_enable/disable`, KIQ scratch-ring test, per-engine firmware/doorbell/IB, GART/VM rebind and PCI/ASIC reset selection | Determine exact step first unable to complete a fence *after* each reset stage |
+| **A3 — Historical joint evidence** | March Arch/kernel build, later CachyOS build, first VM faults, KIQ `-110`, queue preemption and fault record | Separate shared upstream signature from unresolved initiating command or board-specific hardware state |
+| **B1 — Return and state** | `start_cpsch`: `execute_queues_cpsch` may return `-EIO` because reset writer owns semaphore; `sched_running` late-error unwind | **Draft RFC only**, must not compile/install on desktop without upstream-quality memory-lifetime/partial node review |
+| **B2 — Recovery caller** | `kgd2kfd_post_reset` / `amdgpu_amdkfd_post_reset` / `amdgpu_device_gpu_resume`, DRM scheduler admission | CPU/mocked failed-start contract, retain fail-closed state; propagate status and release reset lock; don't assert kernel hardware fix |
+| **B3 — Interrupt and memory** | Polaris `tonga_ih` (not `cik_ih`), KFD interrupt FIFO and restore workers; safe DMA buffer teardown; distinguish MI300X accepted BO-fence patch from GFX8 | Source audit only until concrete stale-event/BO-lifetime evidence |
+| **C1 — Controlled comparative reset** | Non-display independently recoverable gfx803 with external logging; exact selected TopK/WhisperX control; firmware clocks and power-mode attribution | Physical probe gated; do not trigger known-hang shapes on the single display RX580 |
+| **C2 — Durable acceptance** | New GFX/KIQ/KCQ fence, SDMA, KFD queue dispatch, new DRM acceleration and Wayland rendering without reboot | Hardware recovery proof; **failure to restore ≠ test pass**, even if driver prints success |
+
+### Existing artifacts, PRs and nonclaims
+
+- [#6](https://github.com/chboishabba/gfx803_compat_graph/pull/6) **merged**: incident RCA, benchmark safety, exact-source audit and CPU-only context; no physical hardware fix.
+- [#7](https://github.com/chboishabba/gfx803_compat_graph/pull/7) **draft/open**: `patches/linux/gfx803-c1b-cpsch-startup-rfc.patch`, C1b mock, fixture apply tests and reset-aware failure scope. A source-context comparison matched Linux v7.3. **No actual kernel build, patch installation or physical acceptance**. This is the active *one PR* for recovery work; avoid a new branch/PR for each audit.
+- [Schaka TopK #8](https://github.com/Schaka/rocm-gfx803/pull/8): independent **trigger mitigation**, not a GFX8 hardware-recovery fix. Previously safe bounded 120-case/20-step receipts do not qualify dangerous large-input/hang behavior or solve reset.
+- **Caution:** The attempted pre-reset-before-lock AMD patch was NAK'd. The October accepted BO-lifetime correction concerns MI300X and does not establish a Polaris fix. The already-present GFX8 SDMA callback and quantum exemption are negative controls.
+- **No performed physical recovery test** in the current patch series. Do not count source and mock acceptance as R4/R5.
+
+### Next actual max-cut
+
+**Work R1/A1+A2 before promoting R3/B1+B2.** Trace the verified kernel's soft-reset → KIQ/KCQ → BACO/PCI → IP reinit → post-reset ring-test logic and isolate the earliest stage failing to make forward progress. Build a specific *hardware restoration* correction from that, rather than spending another round on reporting, cleanup or benchmark policy. In parallel, keep #7's RFC as a draft and complete safe mock/error semantics. After the hardware path is understood, run bounded physical tests on a recoverable device and promote factory Phase B only with new graphics AND compute functionality.
+
