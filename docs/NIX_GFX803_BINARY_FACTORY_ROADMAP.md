@@ -879,3 +879,14 @@ long-run driver hang/reset, full native-batch/shape coverage and reproducible
 Nix binary distribution still require physical acceptance.
 No new hardware, ROCm 10.1 image digest, full native WGM1 dispatcher,
 or numerically drift-free LILA installation is claimed by these changes.
+
+
+## 14 November 2026 — current phase/assay/stability reconciliation
+
+The phase and status tables above are historical snapshots of the initial
+factory and qualification implementation. Current measured GPU results,
+actual outstanding release gates, and the existing WhisperX/KFD
+cross-workload stability assay are reconciled in
+[docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md](GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md).
+That dated reconciliation does **not** alter Phase A–E exit criteria,
+replace original receipts, or promote a candidate to an accepted release.
