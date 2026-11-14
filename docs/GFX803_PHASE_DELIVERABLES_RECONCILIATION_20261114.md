@@ -142,3 +142,41 @@ source cause, or declare full ROCm support based on PyTorch OpInfo.
 
 This document is a reconciliation of code, docs and reported receipts,
 **not** a new GPU execution result or automatic release promotion.
+
+
+## 14 November execution sprint — direct HIP/ROCr/HSA/KFD (phase R0/R1)
+
+**Highest-information priority confirmed:** direct runtime/driver
+conformance **in parallel with** original-binary pooling A/B.
+The historical WhisperX incident is the pre-existing load/stability
+negative control, not a new standalone release phase or an excuse
+to run destructive workloads prematurely.
+
+| Gate | New source deliverable | Current disposition | Physical exit |
+| --- | --- | --- | --- |
+| **R0.01 native HIP** | `qualification/native/gfx803_hip_runtime_smoke.hip.cpp`; 4 direct H2D/D2H, stream/event, kernel and pinned-host cases | Implemented, physical run pending | Original Nix hipcc build, four independently process-isolated passes, no relevant GPU fault/reset in observable logs |
+| **R0.02 native ROCR/HSA** | `qualification/native/gfx803_hsa_runtime_smoke.cpp`; agent init, signal store/wait, GPU queue create/destroy | Implemented, physical run pending | Original matched HSA headers/libs, three process-isolated passes; no claim of queue dispatch/doorbell recovery |
+| **R0.03 exact receipts** | `scripts/gfx803_hip_hsa_direct_assay.py` and offline contracts | Source-written | Source/compiler/runtime/binary SHA; exact tested marker and host journal visibility; faults stop further runs |
+| **R1.01 original HIP tests** | Existing `scripts/gfx803_rocm_ctest_qualification.py` and `--hip-tests --tests` acquisition path | Test adapter implemented; vendor test binaries unavailable/unmeasured | Fully enumerated original HIP upstream suite and direct real-hardware receipts |
+| **R1.02 original ROCRTST** | Existing upstream CTest adapter | Upstream build/test inventory open | Original ROCr signal/queue/agent/memory-pool/direct-copy test suite on selected closure |
+| **R1.03 original KFDTest** | Existing upstream CTest adapter | Upstream build/test inventory open | Original KFD/SDMA/doorbell/queue test suite, destructive tests safely segregated |
+| **R1.04 distinct suite fan-in** | `scripts/gfx803_rocm_coverage_report.py` now permits multiple original CTest receipts in `rocr-hsa-kfd` and limited seven-case native smoke results | Source-written; regression tests committed | Preserve separate original ROCRTST and KFDTest physical provenance; no false API-level promotion |
+| **R2.01 mixed copy/queue stress** | Existing WhisperX `trace-whisperx-rocprof.sh` and `run-whisperx-rca-matrix.sh` + KFD journal/fault taxonomy | Historical failure evidence retained; 10.1 same-runtime stability not admitted | Sustained D2H/H2D, queue progress, host-pinned-memory and memory-pressure stress without ring timeout/VM fault/BACO reset |
+| **P1.04 original MIOpen pool A/B** | `scripts/gfx803_pool_original_runtime_matrix.py`, `gfx803_pool_forward_only_control.py`, KFD audit | 42/42 isolated and 10/10 prefix passes; **original pool fault cause open** | Exact original 42-case binary/loader and journal A/B; either reproduce and attribute or record bounded non-reproduction |
+| **B/C release cross-gate** | `gfx803_release.py`, Cachix factory, clean-client acceptance | OPEN | Stable scoped HIP/HSA and math-workload conformance, complete source-verified binary closure, clean-client restore |
+
+**Source locations and runnable commands:**
+`docs/GFX803_HIP_HSA_KFD_DIRECT_QUALIFICATION_20261114.md`.
+
+The seven native smoke cases are a small deliberate bridge from
+the historical WhisperX load-time signature to the original
+vendor component suites. No case tests a KFD callback fix
+by itself. The Schaka TopK PR's source review, reviewed-wheel
+benchmark and patch scope remain independent.
+
+**Schaka PR communication:** PR #8 branch
+`chboishabba/rocm-gfx803:fix/gfx803-topk-sort-fallback` contains
+the updated qualification handoff (14 November). Direct PR
+conversation comment was blocked by GitHub integration 403.
+This does not mean the upstream maintainer has acknowledged
+the expanded programme.
