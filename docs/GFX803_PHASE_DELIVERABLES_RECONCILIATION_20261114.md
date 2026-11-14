@@ -340,3 +340,34 @@ debugger attachment. Continue exact old wheel mapping and K2.05
 return discrimination only after original receipts are run and
 inspected. This adds tooling without changing the existing
 K2.04 contradiction or closing K2.05.
+
+
+## 14 November — offline cut physically executed (`39471ee`)
+
+Host operator reports the K2.05/T1 offline suite **12/12 passed**.
+Original previous-boot journal SHA and exact postboot AMDGPU module
+SHA/Build ID verified. Disassembly confirms both MES and non-MES
+compiled eviction paths. TopK audit is now **scoped to
+`libtorch_hip.so`** (recorded SHA-256 prefix `dd0b4030`),
+avoiding unrelated NFS reads of `libtorch_cpu.so`.
+
+Original receipts (host-local, **not** assumed uploaded/committed):
+`/mnt/truenas/comet-net/experiments/gfx803_k205_t1_static_20261114/`.
+Do not claim receipt contents beyond the operator's reported outcomes
+without opening those original JSON files.
+
+**Accepted now:** offline code/test execution and binary provenance.
+**Still OPEN:** exact incident boot's effective `uni_mes`/
+scheduling policy and selected DQM branch; actual eviction
+return; initial TopK kernel/HSACO; exact CachyOS source-package match;
+post-hang KFD recovery root cause and stable GUI restoration.
+
+**Next decisive route:** (1) search exact incident-time
+initramfs/bootloader/module-load/recorded state artifacts using only
+read-only operations; (2) statically map cached `libtorch_hip.so`
+TopK call graph, embedded HSA GPU code objects, registration symbols
+and source revision; (3) if historical state cannot be recovered,
+design a **non-display, recoverable-host** trace that records the
+selected branch, entry/return, first GPU dispatch and ring/queue
+state. Do not equate a successful idle trace with fault reproduction.
+No known-wedging TopK run on the sole display GPU.
