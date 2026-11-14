@@ -54,3 +54,7 @@ Linux v7.3's [`amdgpu_drv.c`](https://github.com/torvalds/linux/blob/v7.3/driver
 | **P1** | CPU-only source audit and maintainer review of any instrumentation/driver fix before non-display physical test | SOURCE AUDIT ADVANCED, DRIVER FIX OPEN |
 
 **Disposition:** keep the sustained-compute/queue hang as leading initiating hypothesis, GFX8 failure to recover as separate decisive defect, and KWin VMID7 fault as a post-reset discriminator rather than a proven original root cause. Existing [PR #7](https://github.com/chboishabba/gfx803_compat_graph/pull/7) remains the single recovery rollup.
+
+## Source register for cross-incident comparisons
+
+See [GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) for original URLs, verification class, actual hardware identity, and exclusions. Manjaro Firefox case is RX480 X11, Pop!_OS #4132 Navi10, not identical Polaris RX580/Wayland sources. The pre-hang graphics corruption observation belongs to T1; the later KWin VMID7 TC3 fault remains R1 recovery evidence.
