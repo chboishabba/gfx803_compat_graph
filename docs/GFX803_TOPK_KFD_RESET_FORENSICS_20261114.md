@@ -215,3 +215,55 @@ Schaka TopK PR #8. The upstream PR should contain only requested
 patch/driver/Dockerfile and real benchmark CSVs or a concise
 human-written finding if performance testing is blocked by a
 reproducible hang.
+
+
+## P0a: full raw previous-boot journal reconciled (14 November)
+
+New first-party immutable evidence is now committed:
+
+- `docs/receipts/gfx803_topk_pr8_review_safe_20261114/INCIDENT_20261114_GPU_HANG.md`
+- `docs/receipts/gfx803_topk_pr8_review_safe_20261114/unpatched.csv`
+- `docs/receipts/gfx803_topk_pr8_review_safe_20261114/patched-pre-review.csv`
+- `docs/receipts/gfx803_topk_pr8_review_safe_20261114/kernel-previous-boot.log`,
+  original SHA-256
+  `be965c117fc7fd2a815a843b63b3ad807d9e88ae43ffff33495cb82043fc70f6`.
+
+**Do not rerun the first postboot preservation step to overwrite this
+captured evidence.** Historical incident and raw journal already exist,
+and the post-reboot transitory sysfs GPU devcoredump was not retained.
+
+The journal was reviewed directly rather than extrapolating from
+the short incident note. Chronology:
+
+| Time | Original kernel observation | Implication |
+| --- | --- | --- |
+| 12:39:28 | `ring gfx timeout`, submitted process `kwin_wayland` PID 1877; `The cp might be in an unrecoverable state due to an unsuccessful queues preemption` | KWin owns **reported timed-out ring job**, not necessarily original TopK fault |
+| 12:39:28 | `Failed to quiesce KFD`, `Failed to restore process queues`, `Failed to resume KFD` | Queue quiesce/restore path directly failed |
+| 12:39:29 | KIQ ring test `-110` (timeout), `KCQ disable failed` | KIQ/KCQ failures make queue management progress a decisive target |
+| 12:39:29 | `Successful gfx_v8_0 IP block soft reset` followed by `device wedged, but no recovery needed` | Success of individual hardware reset operation **does not equal functional GPU recovery** |
+| 12:39:29–30 | BACO reset; `GPU reset succeeded, trying to resume`; VRAM loss; `GPU reset(2) succeeded!`; **device still wedged** | Recovery state remained unusable despite low-level reset completion |
+| 12:39:32 | KWin VM fault, `VM_CONTEXT1_PROTECTION_FAULT_ADDR 0x0C000200`, `STATUS 0x0E0C4001`, VMID 7/PASID 7, TC3 read | Graphics-context VM mapping invalid after the first reset wave |
+| 12:39:55 | Plasma shell VM fault, address `0x00000027`, status `0x0E0C4008`, VMID 7/PASID 15, TC3 read | Separate graphics process/address; do **not** conflate either fault with the TopK process's GPU VA |
+| 12:39–12:43:59 | Repeated `ring gfx timeout`, `ring comp` timeouts and device coredump announcements plus intermittent `Successful gfx_v8_0 IP block soft reset` | Persistent GPU/queue failure; Wayland session restart alone cannot repair |
+
+**Correction to earlier root-cause phrasing:** the record proves
+a *non-durable reset / KFD queue recovery failure* that persists even
+after GFX8 soft reset and BACO stages reported success. It does not
+prove a failed reset at every hardware block, nor that the old missing
+doorbell callback recurred, nor that KWin rather than the TopK
+compute workload initiated the first fault.
+
+Updated maximum cut: recover exact kernel 7.3.0-2-cachyos-bore
+GFX8 reset source, inspect the KIQ ring test `-110` and KCQ
+disable handling before / during KFD queue-manager resume, and
+establish whether the queue restoration failed because hardware
+rings were already unresponsive, firmware/queue state mismatched,
+or KFD-specific doorbell/queue-memory restoration was invalid.
+Only a matched source line/trace or retained low-level dump can
+discriminate those mechanisms.
+
+**Release blocker:** a GPU wedged strongly enough that SDDM was
+running but relaunching Plasma Wayland could not recover requires
+a full host reboot in the recorded incident. No short HIP smoke pass,
+GPU reset-return success code or `kwin_wayland` process restart
+closes this gate.
