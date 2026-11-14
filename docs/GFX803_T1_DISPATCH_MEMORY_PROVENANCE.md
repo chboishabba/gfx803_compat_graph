@@ -73,3 +73,12 @@ python3 scripts/gfx803_incident_join.py \
 The newly committed script tests are **not** reported kernel-built, CI-verified or device-tested. [The separately executed eight-input source receipt](receipts/gfx803_t1_t2_gate_matrix.json) is the current grounded output, including missing fields. Avoid overwriting or rebranding absent raw records as direct measurements.
 
 **Next exact gate:** retrieve any *existing* saved host-side HSA/ROCprof/devcoredump/loader mapping receipt with relevant kernel execution / SVM registration. If none exists, A2/A3 remain “unobserved historically” and future attribution requires independent recoverable hardware, instrumented without rerunning the display-card wedging shape.
+
+
+## A2.1 — recovered incident-time Python core supersedes old loaded-ELF ambiguity
+
+**Correction / 14 Nov 2026:** The original Python core was subsequently recovered and [verified in committed provenance](receipts/gfx803_topk_incident_core_provenance_20261114.json), commit `d821899`. It **proves** the November crashing case used an original Nix `torch-site` overlay, relocated ROCm 10.1 and SGEMM shim, and loaded the `libtorch_hip.so` with SHA-256 **`c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff`**, GNU Build ID **`3d27b29d191725660bbc4b8a83cb2f4753a09921`**. The previous static-source candidate `dd0b403...` / Build ID `392fee...` is **a separate historical binary inventory**, not the incident-time loaded torch library.
+
+The core's ROCr asynchronous hardware exception handler invoked `abort`. This verifies host runtime identity and exception path, **not the stalled GPU kernel/HSACO**, original grid/queue/PASID or first KFD internal errno. The diagrams above are **superseded on the loaded-ELF uncertainty only**. Exact host-loaded-lib proven; runtime GPU device dispatch and first stalled command remain **OPEN**.
+
+For deliberate operator-controlled evidence acquisition see [morning one-shot runbook](GFX803_TOPK_ONE_SHOT_MORNING_CAPTURE_RUNBOOK_20261114.md). The repro launcher checks the **core's actual incident SHA/Build ID**, unlike the earlier static `dd0b...` candidate. A profiler could capture a new run's dispatch if output survives; that is future-run evidence, not retroactive proof of the November packet.
