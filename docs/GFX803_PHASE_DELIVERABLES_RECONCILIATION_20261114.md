@@ -279,3 +279,25 @@ journal timeline, not automatically the quiescence return.
 
 Deliverable/acceptance and no-destructive-rerun constraints:
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+
+
+## K2.04 advancement — Polaris uses MES queue removal (14 November)
+
+Commit `635b40c` recorded live Polaris
+`gfx_target_version=80003`, `sched_policy=0`, `uni_mes=1`
+and mapped selected upstream-reference DQM eviction to
+`evict_process_queues_cpsch` → `remove_queue_mes` →
+`adev->mes.funcs->remove_hw_queue`; failed MES removal may
+escalate to `reset_queues_mes` and `kfd_hws_hang`.
+
+**K2.04 dispatch mapping: SOURCE-MAPPED; K2.05 incident-time
+MES removal return and first failing hardware/firmware operation:
+OPEN.** The original journal's later KIQ `-110` and KCQ
+disable observations are not the missing MES return. Callback
+invocation, exact CachyOS source match and TopK first kernel
+remain OPEN. No GPU execution or kernel patch occurred.
+
+Next target: trace or otherwise constrain `remove_hw_queue`
+return and `reset_queues_mes` escalation on safely recoverable
+hardware only. For exact gates see
+[parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
