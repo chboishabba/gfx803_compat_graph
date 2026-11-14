@@ -327,3 +327,25 @@ common deeper hardware cause remains possible, not demonstrated.
 error propagation matrix; K2.05 actual incident-time return if
 recoverable from evidence. The complete gate table is in the
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+
+
+## K2.04 MES eviction path mapped (commit `635b40c`)
+
+For the recorded live Polaris KFD configuration
+`gfx_target_version=80003`, `sched_policy=0`, `uni_mes=1`,
+upstream reference-source selection reaches
+`evict_process_queues_cpsch` → `remove_queue_mes` →
+`adev->mes.funcs->remove_hw_queue`. Source-level failure
+escalation can reach `reset_queues_mes` and `kfd_hws_hang`
+when recovery is enabled.
+
+This narrows K2.05 to **actual MES queue removal return and reset
+escalation**. The preserved incident journal does not give that return
+or demonstrate `remove_hw_queue` invocation. Neither a GFX8
+doorbell regression nor the later KIQ `-110` is established as the
+initial MES error. See the
+[parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md)
+for K2.05a–c acceptance criteria.
+
+No GPU rerun, matched CachyOS source package, new DWARF symbols,
+or kernel patch is claimed.
