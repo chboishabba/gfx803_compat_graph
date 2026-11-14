@@ -85,3 +85,7 @@ The receipt is explicitly retrospective; it cannot invent the incident-time firs
 4. **R4 correction:** target the first demonstrably defective restoration step, not merely suppress reset output. C1b KFD error return remains a separate containment patch under PR #7 and **does not close R1**.
 
 **Not yet proven:** true hardware/firmware reset bug versus persistent userspace GPUVM replay bug versus missing host power-cycle step. The first post-BACO VM fault narrows what to test; it does not settle which subsystem is responsible.
+
+## Provenance and pre-hang scope reminder
+
+Original upstream and community incident citations (including KIQ/KCQ/BACO, browser crashes, Bazzite/Arch/Manjaro reports) and their actual hardware scopes are retained in [GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md). The user-confirmed pre-hang visual corruption is **not** caused by post-BACO VRAM loss. T1 first failure and R1 reset failure require separate evidence.
