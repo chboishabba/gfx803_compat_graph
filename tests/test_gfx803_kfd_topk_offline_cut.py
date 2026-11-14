@@ -18,6 +18,7 @@ def load(name):
 incident=load("gfx803_kfd_incident_offline_audit")
 trace=load("gfx803_kfd_trace_boundary")
 topk=load("gfx803_topk_binary_offline_audit")
+join=load("gfx803_kfd_topk_evidence_join")
 
 class IncidentAudit(unittest.TestCase):
     def test_log_event_order_and_case(self):
@@ -89,10 +90,26 @@ class TopKStatic(unittest.TestCase):
             self.assertTrue(r["arch_helper"])
             self.assertTrue(r["marker"])
             self.assertFalse(r["manual_gcn_arch"])
+    def test_join_refuses_bad_hash_and_does_not_promote_log_wording(self):
+        old = {"mode":"read-only","matches_receipt_hash":True,
+               "incident_journal_sha256":"sha",
+               "actual_incident_branch":None,"actual_evict_return":None,
+               "first_log_events":{"quiesce":{"first":{"record":"Failed to quiesce KFD"}},
+                 "preemption":{"first":{"record":"unsuccessful queues preemption"}}}}
+        probe={"probes":[],"unresolved":[]}
+        wheel={"mode":"static-only","incident":{"first_dispatched_kernel":None}}
+        result=join.report(old,probe,wheel,{"journal_sha256":"sha"})
+        self.assertEqual(result["gates"]["K2.05"]["status"],"open")
+        self.assertEqual(result["gates"]["T1"]["status"],"open")
+        self.assertEqual(result["gates"]["release"]["status"],"blocked")
+        with self.assertRaises(ValueError):
+            join.report(old,probe,wheel,{"journal_sha256":"wrong"})
+
     def test_compile_all_sources(self):
         for name in ("gfx803_kfd_incident_offline_audit",
                      "gfx803_kfd_trace_boundary",
-                     "gfx803_topk_binary_offline_audit"):
+                     "gfx803_topk_binary_offline_audit",
+                     "gfx803_kfd_topk_evidence_join"):
             path=ROOT/"scripts"/(name+".py")
             compile(path.read_text(),str(path),"exec")
 
