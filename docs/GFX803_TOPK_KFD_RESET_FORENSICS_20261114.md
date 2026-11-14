@@ -440,3 +440,50 @@ for a single CPU-only command sequence. All scripts and tests are
 actual HSACO metadata, original build provenance, dispatch and
 KFD incident return are pending. No GPU/HIP workload or kernel
 patch has been performed.
+
+
+## 14 November — T1.09–T1.12 / K2.07–K2.08 complete offline implementation
+
+**Source has landed; this new suite has NOT been executed on the
+RX580 host yet.** Start with the one-command no-GPU runbook:
+
+[GFX803_T109_K207_FULL_OFFLINE_HANDOFF_20261114.md](GFX803_T109_K207_FULL_OFFLINE_HANDOFF_20261114.md)
+
+New code:
+
+1. gfx803_mbtopk_hsaco_metadata.py — strict unbundled HSACO
+   SHA, size, ELF e_machine; readelf/LLVM note/section/symbol
+   and kernel metadata extraction.
+2. gfx803_amdgpu_msgpack_notes.py — bounded pure-Python ELF PT_NOTE
+   AMDGPU MessagePack metadata parser and kernel resource fields.
+3. gfx803_mbtopk_retained_source_audit.py — exact original
+   TensorTopK.hip SHA gate, source launch/heuristic excerpts and
+   explicitly supplied original build-log hints.
+4. gfx803_mbtopk_kernel_disasm.py — optional exact metadata-symbol
+   bounded llvm-objdump and static instruction classification.
+5. gfx803_kfd_nonmes_source_audit.py — targeted source-only
+   non-MES fence/preemption diagnostic evidence, with no inferred errno.
+6. gfx803_kfd_safehost_trace_plan.py — inert return-probe source
+   and six-way dedicated host eligibility checklist. No probes attached.
+7. gfx803_t109_k207_final_join.py — SHA-bound source/ELF/fatbin/HSACO
+   evidence chain with T1.06/T1.07/K2.05 still OPEN and release blocked.
+8. run_gfx803_t109_k207_offline.sh — one-command CPU-only host pipeline.
+
+CPU-only tests cover note parsing, identity refusals, messagepack
+bounds, source hashes, kernel symbol validation, safe-host default
+denial and evidence-join error rejection. **No test pass count is
+claimed for these newly committed tests until the operator runs them.**
+
+### Gating
+
+T1.08 CCOB/gfx803 inclusion ACCEPTED from a45ad49 (33/33 earlier
+tests). T1.09/T1.10/T1.11/T1.12 offline metadata/ISA acceptance
+PENDING. T1.06 original build-to-benchmark-loader provenance OPEN;
+T1.07 selected first stalled kernel/HSACO OPEN. K2.06 source
+non-MES fence alignment exists; K2.05 historical internal return
+OPEN, K2.07 exact source match/return OPEN. Do not substitute a
+future trace for missing historical Nov 14 capture. K2.08 safe
+dedicated-host tracing gated and NOT started.
+
+**Do not** run the destructive 32×151936 TopK on the display RX580.
+Do not upstream these forensic scripts via Schaka PR #8.
