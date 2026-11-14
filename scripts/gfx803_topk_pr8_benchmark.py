@@ -145,16 +145,15 @@ def main() -> int:
         parser.error("warmup must be nonnegative and iterations/timeout positive")
     if args.recover_after_fault:
         parser.error("automatic healthcheck/continuation after a GPU hang is unsafe")
-    if args.enable_known_fault_cases:
-        if args.safe_host_receipt is None:
-            parser.error("--enable-known-fault-cases requires --safe-host-receipt")
-        try:
-            validate_safe_host_receipt(args.safe_host_receipt)
-        except ValueError as exc:
-            parser.error(str(exc))
+    # Every benchmark case can exercise the same RX 580 reset failure class.
+    # No GPU dispatch on the sole display card through this harness.
+    if args.safe_host_receipt is None:
+        parser.error("any benchmark GPU work requires --safe-host-receipt")
+    try:
+        validate_safe_host_receipt(args.safe_host_receipt)
+    except ValueError as exc:
+        parser.error(str(exc))
     if args.healthcheck:
-        if not args.enable_known_fault_cases:
-            parser.error("standalone HIP healthcheck requires safe-host authorization")
         if args.case is not None:
             parser.error("--healthcheck cannot be combined with --case")
         print(json.dumps(_healthcheck(), sort_keys=True), flush=True)
@@ -188,9 +187,9 @@ def main() -> int:
         row = _base(index)
         command = [sys.executable, str(Path(__file__).resolve()), "--case", str(index),
                    "--warmup", str(args.warmup), "--iterations", str(args.iterations)]
+        command.extend(["--safe-host-receipt", str(args.safe_host_receipt)])
         if args.enable_known_fault_cases:
-            command.extend(["--enable-known-fault-cases", "--safe-host-receipt",
-                            str(args.safe_host_receipt)])
+            command.append("--enable-known-fault-cases")
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=args.timeout)
             if result.returncode == 0:
