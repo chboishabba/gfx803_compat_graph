@@ -24,7 +24,7 @@ model proves only the intended control-flow contract.
 diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c b/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
 --- a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
 +++ b/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
-@@ -2117,11 +2117,21 @@ static int start_cpsch(struct device_queue_manager *dqm)
+@@ -2117,9 +2117,19 @@ static int start_cpsch(struct device_queue_manager *dqm)
  	/* clear hang status when driver try to start the hw scheduler */
  	dqm->sched_running = true;
  
