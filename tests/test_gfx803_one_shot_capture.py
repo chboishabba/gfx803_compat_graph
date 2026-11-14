@@ -102,6 +102,34 @@ class OneShotReproHarnessTests(unittest.TestCase):
         self.assertNotIn("torch", CAPTURE.__dict__)
         self.assertNotIn("torch", DURABLE.__dict__)
 
+    def test_dry_run_does_not_create_folder_or_launch_child(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "not-created"
+            a = SimpleNamespace(
+                python=Path("/fake/python"), out=out,
+                expect_kernel=None, mode="rocprof", rocprof="rocprofv3",
+                arm=False, kfd_log=None, timeout=60, tail_seconds=0,
+                core_limit_mib=1024)
+            with mock.patch.object(CAPTURE, "probe_environment", return_value={"ready": True}):
+                with mock.patch.object(CAPTURE.subprocess, "Popen") as launch:
+                    self.assertEqual(CAPTURE.run(a), 0)
+                    launch.assert_not_called()
+            self.assertFalse(out.exists())
+
+    def test_armed_baseline_without_active_kfd_probe_refuses(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as d:
+            a = SimpleNamespace(
+                python=Path("/fake/python"), out=Path(d) / "fresh",
+                expect_kernel=None, mode="baseline", rocprof="rocprofv3",
+                arm=True, kfd_log=None, timeout=60, tail_seconds=0,
+                core_limit_mib=1024)
+            with mock.patch.object(CAPTURE, "probe_environment", return_value={"ready": True}):
+                with self.assertRaisesRegex(ValueError, "requires an already active"):
+                    CAPTURE.run(a)
+            self.assertFalse(a.out.exists())
+
     def test_confirmation_phrase_is_pinned(self):
         self.assertIn("WEDGE AND REQUIRE REBOOT", CAPTURE.CONFIRM)
 
