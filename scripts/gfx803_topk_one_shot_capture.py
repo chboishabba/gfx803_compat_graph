@@ -175,23 +175,41 @@ def persist_lines(stream, path: Path, stop: threading.Event) -> None:
             pass
 
 
+def descendants(root_pid: int) -> set[int]:
+    """Follow Linux /proc task children; rocprofv3 may wrap the Python PID."""
+    found, pending = set(), [root_pid]
+    while pending:
+        pid = pending.pop()
+        if pid in found:
+            continue
+        found.add(pid)
+        try:
+            task = Path(f"/proc/{pid}/task/{pid}/children").read_text()
+            pending.extend(int(x) for x in task.split())
+        except (FileNotFoundError, PermissionError, ValueError):
+            continue
+    return found
+
+
 def maps_watcher(pid: int, path: Path, stop: threading.Event) -> None:
     seen = set()
     with path.open("a", buffering=1) as fp:
         while not stop.is_set():
-            try:
-                lines = Path(f"/proc/{pid}/maps").read_text(errors="replace").splitlines()
-            except (FileNotFoundError, PermissionError, ProcessLookupError):
-                break
-            for line in lines:
-                if not any(tag in line.lower() for tag in MAP_TAGS):
+            for target in descendants(pid):
+                try:
+                    lines = Path(f"/proc/{target}/maps").read_text(errors="replace").splitlines()
+                except (FileNotFoundError, PermissionError, ProcessLookupError):
                     continue
-                if line in seen:
-                    continue
-                seen.add(line)
-                fp.write(f"{time.time_ns()} {line}\n")
-                fp.flush()
-                os.fsync(fp.fileno())
+                for line in lines:
+                    if not any(tag in line.lower() for tag in MAP_TAGS):
+                        continue
+                    key = (target, line)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    fp.write(f"{time.time_ns()} pid={target} {line}\n")
+                    fp.flush()
+                    os.fsync(fp.fileno())
             stop.wait(0.02)
 
 
@@ -214,6 +232,8 @@ def run_capture(args, identity: dict, env: dict) -> int:
                 "kernel_release": os.uname().release,
                 "known_risk": "GPU may permanently wedge until manual host reboot",
                 "kfd_probe": args.probe_info,
+                "rocprofv3": str(args.rocprofv3) if args.rocprofv3 else None,
+                "rocprofv3_note": "Profiler can mask hang and output may not flush before reset",
                 "automatic_retry": False, "automatic_reset": False,
                 "automatic_reboot": False,
                 "capture_limits": ["journal and maps do NOT expose actual stalled HSACO",
@@ -253,6 +273,11 @@ def run_capture(args, identity: dict, env: dict) -> int:
             if probe.poll() is not None:
                 raise RuntimeError("KFD bpftrace probe attachment failed; refusing GPU dispatch")
         cmd = [str(args.python), "-u", "-c", CHILD, str(BENCH)]
+        if args.rocprofv3 is not None:
+            (args.out / "rocprof-kernel-trace").mkdir(mode=0o700)
+            cmd = [str(args.rocprofv3), "--kernel-trace",
+                   "--output-format", "rocpd", "--output-directory",
+                   str(args.out / "rocprof-kernel-trace"), "--"] + cmd
         with (args.out / "child-stdout.log").open("w", buffering=1) as stdout, (
              args.out / "child-stderr.log").open("w", buffering=1) as stderr:
             child = subprocess.Popen(cmd, env=env, stdout=stdout, stderr=stderr,
@@ -308,6 +333,8 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True,
                         help="new directory on persistent filesystem, not /tmp")
     parser.add_argument("--max-seconds", type=int, default=180)
+    parser.add_argument("--rocprofv3", type=Path,
+                        help="optional pinned rocprofv3 binary; adds kernel dispatch trace but changes timing")
     parser.add_argument("--enable-kfd-probes", action="store_true",
                         help="EXTRA RISK: attach 3 KFD kretprobes; changes kernel tracing and timing")
     parser.add_argument("--execute", action="store_true",
@@ -329,12 +356,18 @@ def main() -> int:
         if not shutil.which("journalctl"):
             raise ValueError("journalctl missing, no durable kernel event capture")
         a.probe_info = validate_kfd_bpftrace() if a.enable_kfd_probes else None
+        if a.rocprofv3 is not None:
+            if not a.rocprofv3.is_file() or not os.access(a.rocprofv3, os.X_OK):
+                raise ValueError("rocprofv3 must be an explicit executable; no system fallback")
+            if not a.rocprofv3.resolve().is_relative_to(rocm.resolve()):
+                raise ValueError("rocprofv3 binary must be inside the pinned incident ROCm root")
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         parser.error(str(exc))
     if not a.execute:
         print(json.dumps({"mode": "PREFLIGHT-ONLY-NO-GPU",
                           "identity": identity, "output": str(a.out),
                           "kfd_probe": a.probe_info,
+                          "rocprofv3": str(a.rocprofv3) if a.rocprofv3 else None,
                           "warning": "Known GPU wedge; execution requires explicit arm and acknowledgment"},
                          indent=2))
         return 0
@@ -343,6 +376,8 @@ def main() -> int:
     print("ARMED: exactly one case-4 f32 32x151936 TopK; NO RESTART, NO GPU RESET", flush=True)
     if a.enable_kfd_probes:
         print("WARNING: KFD kretprobes enabled; can change scheduling/timing", flush=True)
+    if a.rocprofv3:
+        print("WARNING: rocprofv3 instrumentation may suppress the original hang", flush=True)
     try:
         return run_capture(a, identity, env)
     except (OSError, RuntimeError) as exc:
