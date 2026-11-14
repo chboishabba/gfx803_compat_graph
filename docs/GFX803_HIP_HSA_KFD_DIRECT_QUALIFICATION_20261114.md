@@ -187,3 +187,22 @@ Test these exact offline source contracts with:
 python3 -m unittest discover -s tests \
   -p 'test_gfx803_rocm_coverage_report.py' -v
 ```
+
+
+## 14 November safety dependency after TopK persistent display-GPU wedge
+
+The new TopK benchmark failure produced an unrecovered KFD/AMDGPU
+queue/ring state even though some reset operations reported success.
+A restarted Wayland session was insufficient; reboot was required.
+
+**Therefore:** source and CTest inventory discovery can continue
+without GPU use, but actual seven-case smoke and especially KFD
+reset/stress execution on the sole display RX 580 remain conditional
+on a healthy host and a pre-agreed risk/recovery boundary. A safe
+smoke pass cannot override the known persistent recovery incident.
+
+For source/driver matching, first KIQ/KCQ/KFD error attribution,
+and the mandatory operator handoff, use
+[the active TopK/KFD workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+The debugging work has its own T1/T2 acceptance gates, distinct
+from ROCr/HSA API-level qualification.
