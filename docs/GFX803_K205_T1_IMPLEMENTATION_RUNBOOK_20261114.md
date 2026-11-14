@@ -117,3 +117,26 @@ display-wedging TopK input on this host.
 
 These are independent artifacts, not a GPU validation or source
 patch. Do not post local scripts to Schaka PR #8.
+
+
+## Exact module branch disassembly (new, CPU-only)
+
+This is an additional independent module/source identity check. It
+requires zstd, readelf and objdump, verifies BOTH compressed and
+uncompressed module SHA-256 plus embedded ELF Build ID against the
+committed KFD handoff, and refuses to analyze a mismatch. No GPU
+runtime, module loading or kernel writes:
+
+~~~bash
+MOD=/usr/lib/modules/7.3.0-2-cachyos-bore/kernel/drivers/gpu/drm/amd/amdgpu/amdgpu.ko.zst
+python3 scripts/gfx803_kfd_binary_branch_audit.py \
+  --module "$MOD" --handoff "$H" --out "$OUT/kfd_binary_branches.json"
+~~~
+
+Output includes disassembly-derived named calls, conditional jumps,
+and evidence of compiler-suffixed function availability for four
+queue/eviction functions. If the original postboot module has been
+replaced, the command **must fail** rather than substitute another
+kernel build. Its result does not establish the November incident
+branch or call return. Manual offline GDB/Ghidra examination remains
+appropriate to interpret codegen and register-level predicates.
