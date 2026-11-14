@@ -339,11 +339,13 @@ upstream reference-source selection reaches
 escalation can reach `reset_queues_mes` and `kfd_hws_hang`
 when recovery is enabled.
 
-This narrows K2.05 to **actual MES queue removal return and reset
-escalation**. The preserved incident journal does not give that return
-or demonstrate `remove_hw_queue` invocation. Neither a GFX8
-doorbell regression nor the later KIQ `-110` is established as the
-initial MES error. See the
+This is only a **conditional** MES path: post-reboot `uni_mes=1` selects it
+in the v7.3 reference source, but the retained incident's unsuccessful
+queue-preemption diagnostic is emitted there only by the non-MES
+`unmap_queues_cpsch` fence-timeout path. K2.05 must first resolve that
+MES/non-MES contradiction. The journal does not demonstrate
+`remove_hw_queue` invocation or its return. Neither a GFX8 doorbell regression
+nor the later KIQ `-110` is established as the initial failure. See the
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md)
 for K2.05a–c acceptance criteria.
 

@@ -57,8 +57,9 @@
     "gfx_target_version": "80003",
     "sched_policy_parameter": "0",
     "uni_mes_parameter": "1",
-    "inferred_eviction_implementation": "evict_process_queues_cpsch -> remove_queue_mes -> adev->mes.funcs->remove_hw_queue",
-    "inferred_failure_escalation": "nonzero MES removal result -> reset_queues_mes; failed reset with amdgpu_gpu_recovery -> kfd_hws_hang"
+    "conditional_mes_eviction_implementation": "With the post-reboot uni_mes=1 setting, v7.3 reference source selects evict_process_queues_cpsch -> remove_queue_mes -> adev->mes.funcs->remove_hw_queue.",
+    "contradiction": "The retained incident string 'The cp might be in an unrecoverable state due to an unsuccessful queues preemption' is emitted only by the non-MES unmap_queues_cpsch fence-timeout branch in the same v7.3 reference. Post-reboot parameters therefore cannot prove that remove_hw_queue was the incident-time failing operation.",
+    "conditional_failure_escalation": "If the MES branch was active and remove_hw_queue returned nonzero, it calls reset_queues_mes; a failed reset with amdgpu_gpu_recovery can call kfd_hws_hang. That sequence is static, not observed."
   },
   "journal_sha256": "be965c117fc7fd2a815a843b63b3ad807d9e88ae43ffff33495cb82043fc70f6",
   "gpu_rerun": false,

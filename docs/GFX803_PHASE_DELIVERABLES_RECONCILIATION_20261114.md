@@ -281,23 +281,24 @@ Deliverable/acceptance and no-destructive-rerun constraints:
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
 
 
-## K2.04 advancement — Polaris uses MES queue removal (14 November)
+## K2.04 conditional MES queue-removal hypothesis (14 November)
 
-Commit `635b40c` recorded live Polaris
+Commit `635b40c` recorded post-reboot Polaris
 `gfx_target_version=80003`, `sched_policy=0`, `uni_mes=1`
-and mapped selected upstream-reference DQM eviction to
+and mapped the reference-source MES branch to
 `evict_process_queues_cpsch` → `remove_queue_mes` →
 `adev->mes.funcs->remove_hw_queue`; failed MES removal may
 escalate to `reset_queues_mes` and `kfd_hws_hang`.
 
-**K2.04 dispatch mapping: SOURCE-MAPPED; K2.05 incident-time
-MES removal return and first failing hardware/firmware operation:
-OPEN.** The original journal's later KIQ `-110` and KCQ
-disable observations are not the missing MES return. Callback
-invocation, exact CachyOS source match and TopK first kernel
-remain OPEN. No GPU execution or kernel patch occurred.
+**K2.04 dispatch mapping: CONDITIONAL; K2.05 incident-time return and first
+failing hardware/firmware operation: OPEN.** The same reference source emits
+the retained unsuccessful-preemption diagnostic only from its non-MES branch.
+Resolve incident-time MES state/source divergence before treating a MES return
+as causal. The later KIQ `-110` and KCQ disable observations are not either
+missing return. Callback invocation, exact CachyOS source match and TopK first
+kernel remain OPEN. No GPU execution or kernel patch occurred.
 
-Next target: trace or otherwise constrain `remove_hw_queue`
-return and `reset_queues_mes` escalation on safely recoverable
+Next target: resolve the MES/non-MES contradiction from exact artifacts or a
+safe-host trace, then constrain the applicable return on safely recoverable
 hardware only. For exact gates see
 [parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).

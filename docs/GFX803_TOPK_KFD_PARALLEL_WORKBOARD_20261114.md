@@ -254,7 +254,7 @@ dump. If the historical journal cannot support K2.05, record
 instrumentation, not a guessed fix.
 
 
-## 14 November — K2.04 source-mapped MES queue removal (commit `635b40c`)
+## 14 November — K2.04 conditional MES queue-removal hypothesis (commit `635b40c`)
 
 The operator's committed handoff now records the Polaris configuration:
 
@@ -271,29 +271,34 @@ dqm->ops.evict_process_queues
           → potential kfd_hws_hang escalation if GPU recovery enabled
 ```
 
-**K2.04 = selected path SOURCE-MAPPED** for the recorded live
-configuration. Neither the exact CachyOS source package nor an
-incident-time call trace is present; the original journal does not
-record the `remove_hw_queue` return. Thus this is **not**
-proof that `remove_hw_queue` itself failed during the incident.
-It remains the first specific return boundary to investigate.
+**K2.04 = conditional source hypothesis, not selected incident path.**
+The current post-reboot parameters (`sched_policy=0`, `uni_mes=1`) select the
+MES removal branch in the v7.3 reference source. However, that same reference
+emits the retained incident text `The cp might be in an unrecoverable state due
+to an unsuccessful queues preemption` only from the *non-MES*
+`unmap_queues_cpsch` fence-timeout branch. Therefore the post-reboot parameter
+observation and retained journal cannot together prove a MES
+`remove_hw_queue` failure. The possible explanations are an incident-time
+state change, CachyOS source divergence, a different queue/device path, or an
+incomplete retained log. Neither the exact CachyOS source package nor an
+incident-time call trace is present.
 
 | Gate | Status | Next decisive artifact |
 | --- | --- | --- |
-| **K2.04** Polaris MES eviction dispatch mapping | SOURCE-MAPPED from recorded config and reference source | Confirm exact source/binary implementation and any alternate pre-MES failure branches |
+| **K2.04** Polaris MES eviction dispatch mapping | CONDITIONAL: selected by post-reboot parameters, contradicted by the retained v7.3 log site | Resolve incident-time state/source and alternate non-MES path |
 | **K2.05a** actual `remove_hw_queue` invocation and return | OPEN | Incident-time trace/vmcore or bounded `unknown from retained journal` |
 | **K2.05b** MES removal failure vs `reset_queues_mes` result | OPEN | Separate returned error at removal, reset and `kfd_hws_hang` escalation, where observable |
 | **K2.05c** hardware/firmware vs queue state | OPEN | Distinguish MES ring/firmware timeout, queue mapping/preemption and device-level loss of forward progress |
 | **T1** first TopK GPU kernel | OPEN | Actual cached-wheel dispatch/HSACO, selected launch and resources |
 | **F1** minimal causal repair | BLOCKED | Evidence supporting specific failed operation, not a speculative doorbell/backport patch |
 
-**Priority ordering:** determine source-level `remove_hw_queue`
-implementation and its possible errors, then source-level
-`reset_queues_mes` escalation/termination. Do not substitute the
-later KIQ `-110` for the unknown MES removal return: it was logged
-after the first KFD quiescence failure. No destructive rerun is
-authorized on the sole display RX 580.
+**Priority ordering:** first resolve the MES/non-MES contradiction using the
+exact CachyOS source/module or a safe-host trace. Only then investigate the
+applicable `remove_hw_queue` or compute-scheduler preemption return. Do not
+substitute the later KIQ `-110` for either unknown return: it was logged after
+the first KFD quiescence failure. No destructive rerun is authorized on the
+sole display RX 580.
 
 **Handoff source:** `docs/receipts/gfx803_kfd_kernel_source_handoff_20261114.json`;
-the `live_polaris_runtime` object explicitly labels the path
-`inferred_eviction_implementation`, not observed invocation.
+the `live_polaris_runtime` object records a conditional MES path, not an
+observed invocation.

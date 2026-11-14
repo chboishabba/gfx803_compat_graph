@@ -88,13 +88,14 @@ and original test logs take precedence over status prose.
 
 ## K2.04 mapped — `635b40c`
 
-- Polaris `80003` with `sched_policy=0`, `uni_mes=1`
-  selects `evict_process_queues_cpsch` →
-  `remove_queue_mes` → `adev->mes.funcs->remove_hw_queue`.
-  Failure escalation can reach `reset_queues_mes` and
-  `kfd_hws_hang`.
-- **K2.04 source-mapped; K2.05 actual incident-time
-  `remove_hw_queue` return OPEN.** Original journal lacks
-  the value and no callback invocation was observed.
+- Post-reboot Polaris `80003` with `sched_policy=0`, `uni_mes=1`
+  selects `evict_process_queues_cpsch` → `remove_queue_mes` →
+  `adev->mes.funcs->remove_hw_queue` in the v7.3 reference source. Its
+  failure escalation can reach `reset_queues_mes` and `kfd_hws_hang`.
+- **K2.04 is conditional, not incident-selected:** the retained
+  unsuccessful-preemption diagnostic is emitted only by the non-MES branch in
+  that reference source. Resolve incident-time MES state/source divergence
+  before treating `remove_hw_queue` as causal. No callback invocation or
+  incident return value was observed.
 - No GPU rerun or speculative patch. TopK kernel T1,
   exact CachyOS source package, and KFD causal join J1 OPEN.
