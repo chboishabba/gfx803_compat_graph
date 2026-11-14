@@ -208,3 +208,47 @@ provides a key for finding exact matching symbols, not DWARF itself.
 KFD function/branch supported by a trace, matching binary/source,
 or negative/positive instrumentation on recoverable hardware.
 The first retained printed error alone does not close K2.
+
+
+## 14 November — K2.03 mapped: userptr-triggered queue eviction
+
+**Evidence:** commit `43e70ef`, source handoff
+`docs/receipts/gfx803_kfd_kernel_source_handoff_20261114.json`.
+
+Static upstream v7.3 control-flow mapping from the handoff:
+
+```text
+amdgpu_amdkfd_gpuvm.c:2535
+  kgd2kfd_quiesce_mm(mm, KFD_QUEUE_EVICTION_TRIGGER_USERPTR)
+    kfd_device.c:1200 → kfd_process_evict_queues(p, trigger)
+      kfd_process.c:2075 → dqm->ops.evict_process_queues(dqm, qpd)
+        nonzero error (other than -EIO in the mapped reporting branch)
+          → Failed to quiesce KFD
+```
+
+**K2.03 = source branch mapped, NOT dynamic error attribution.**
+The original journal establishes the failure print, not its internal
+return code or the exact DQM implementation entered on the incident
+kernel. Source/package exact match is still false; no GPU rerun.
+
+| Next gate | Concrete task | Required evidence |
+| --- | --- | --- |
+| **K2.04a DQM dispatch** | Determine registered `evict_process_queues` implementation for the real Polaris KFD DQM mode; inspect both available scheduler/queue-manager paths rather than guessing | Exact source callback assignment + matching binary symbol/call target |
+| **K2.04b DQM failure returns** | Enumerate every *reachable* nonzero return and its callee: process eviction preconditions, queue preemption/dequeue, HWS packet or interrupt wait, MES/direct queue mechanism as applicable to this GFX8 build | Function-by-function error propagation matrix; distinguish observed from statically possible |
+| **K2.04c precedence** | Compare the 12:39:28 `Failed to quiesce KFD` against the subsequently logged KIQ `-110`, KCQ disable, and restoration/resume failures | Event order backed by preserved journal; do not infer prior internal success/failure from later errors |
+| **K2.04d exact module/build** | Resolve real `7.3.0-2-cachyos-bore` source/binary equivalence and available debug symbols; use Build ID for read-only disassembly if source differs | Build/package match or explicitly bounded upstream-reference conclusion |
+| **K2.04e dynamic return** | If still unknowable from retained evidence, design *future* minimal return tracing on independently recoverable host | Capture DQM return value and first failing child call, no tracing on display GPU during a destructive reproducer |
+
+**Do not** assign KIQ `-110` as the quiescence return code merely
+because it appears later. **Do not** equate a static `-EIO`
+exclusion with the actual returned value. Dynamic callback invocation
+of the historical gfx8 SDMA doorbell patch remains unknown. T1
+TopK first GPU dispatch also remains OPEN.
+
+**Decisive acceptance:** for **K2.04**, name the selected DQM
+implementation, enumerate its concrete failure branches and identify
+which can propagate to the reported log; for **K2.05**, establish the
+actual incident-time DQM error/operation from trace or preserved
+dump. If the historical journal cannot support K2.05, record
+`unrecoverable-from-existing-evidence` and pursue safe future
+instrumentation, not a guessed fix.
