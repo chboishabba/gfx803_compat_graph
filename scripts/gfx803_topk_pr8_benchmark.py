@@ -27,9 +27,9 @@ CASES = (
 )
 FIELDS = ("case", "shape", "k", "dtype", "status", "median_ms",
           "min_ms", "values_ok", "indices_ok", "torch", "hip", "arch", "error")
-# Preserve the large/selection cases first.  A child is always a fresh Python
-# process; after an unexpected failure the parent additionally uses a fresh
-# health-check process before continuing with later cases.
+# Preserve the previous case IDs/order for evidence, but skip historically
+# faulting ones by default. A fresh Python process is NOT GPU fault isolation;
+# after an unexpected failure we must stop without any health-check dispatch.
 ORDER = (3, 4, 5, 6, 7, 8, 1, 2, 0)
 # Confirmed historic faults (0/1 unpatched, 4 pre-review). Never run by default.
 # Process isolation is not GPU isolation: case 4 wedged the display RX 580.
@@ -139,7 +139,7 @@ def main() -> int:
     parser.add_argument("--enable-known-fault-cases", action="store_true",
                         help="opt in to cases 0/1/4 ONLY on independently recoverable hardware")
     parser.add_argument("--safe-host-receipt", type=Path,
-                        help="operator-signed host eligibility JSON; no independent verification")
+                        help="operator-attested host eligibility JSON; no independent verification")
     args = parser.parse_args()
     if args.warmup < 0 or args.iterations < 1 or args.timeout < 1:
         parser.error("warmup must be nonnegative and iterations/timeout positive")
