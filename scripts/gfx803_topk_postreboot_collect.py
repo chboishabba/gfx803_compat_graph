@@ -35,10 +35,10 @@ def collect(run:Path,out:Path):
         raise ValueError("postmortem parent must exist")
     if out.resolve()==run.resolve() or run.resolve() in out.resolve().parents:
         raise ValueError("postmortem output must be separate from capture directory")
-    out.mkdir(mode=0o700)
     boot=info["boot_id"]
     if not isinstance(boot,str) or len(boot)!=36 or boot.count("-")!=4:
         raise ValueError("capture has invalid original boot ID")
+    out.mkdir(mode=0o700)
     # Boot ID, not -1: a later extra reboot must not shift attribution.
     commands={
         "original-kernel-journal.log":["journalctl","--boot",boot,"-k",
