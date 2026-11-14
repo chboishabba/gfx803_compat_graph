@@ -33,6 +33,10 @@
     "sequence": "signaled=131707128 emitted=131707130"
   },
   "recovery_chain": [
+    "amdgpu_amdkfd_gpuvm.c:2535 -> kgd2kfd_quiesce_mm(mm, KFD_QUEUE_EVICTION_TRIGGER_USERPTR)",
+    "kfd_device.c:1200 -> kfd_process_evict_queues(p, trigger)",
+    "kfd_process.c:2075 -> dqm->ops.evict_process_queues(dqm, qpd)",
+    "nonzero eviction return (other than -EIO) reaches Failed to quiesce KFD log",
     "Failed to quiesce KFD",
     "Failed to restore process queues",
     "amdgpu_amdkfd_restore_userptr_worker: Failed to resume KFD",
@@ -46,6 +50,8 @@
     "message": "Failed to suspend process"
   },
   "first_recovery_error": "Failed to quiesce KFD",
+  "first_recovery_internal_return": null,
+  "first_recovery_internal_return_note": "The preserved journal omits the return value from dqm->ops.evict_process_queues; only the source branch and log site are established.",
   "journal_sha256": "be965c117fc7fd2a815a843b63b3ad807d9e88ae43ffff33495cb82043fc70f6",
   "gpu_rerun": false,
   "conclusion": "The installed module has gfx8 SDMA doorbell callback symbols, and upstream v7.3 reference source registers the callback for Polaris. This is not an exact CachyOS source-package match. The preserved journal does not establish whether the callback was invoked or identify the first TopK kernel. First *logged* KFD recovery error is 'Failed to quiesce KFD'; first internal failing function is not established. No kernel patch is justified by this evidence alone.",
