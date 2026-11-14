@@ -78,3 +78,60 @@ The retained 1-row pass and 32-row hang share source-level mbtopk, but the 32-ro
 Historical binary link demands original build log/manifest including source hash, patch revision, compiler flags, final ELF SHA/Build ID AND process loader maps or equivalent. A new rebuild cannot replace missing incident-time evidence. The v7.3 reference maps Polaris non-MES unmap_queues_cpsch to amdkfd_fence_wait_timeout, but the exact CachyOS source package, actual incident errno and fence state remain unproven.
 
 No destructive TopK run on the sole display GPU; a future fault reproducer requires an independently recoverable non-display host. Keep all local scripts and AI-work documentation out of Schaka PR #8 per maintainer instructions.
+
+
+## T1.08 — inspect 42.9 MB HIP fatbin container (after `052889b`)
+
+Host operator reports 25/25 offline tests PASS, original `libtorch_hip.so`
+SHA/Build ID verified, one 42.9 MB `.hip_fatbin` extracted,
+6,045 TopK-matching host symbols (300 displayed), and zero
+direct embedded ELF candidates. The zero-ELF result is
+**inconclusive** and is not a negative control for `mbtopk`.
+
+Clang's documented offload bundle formats include uncompressed
+`__CLANG_OFFLOAD_BUNDLE__` and compressed `CCOB`. The executable
+offline classifier `scripts/gfx803_mbtopk_offload_container_audit.py`
+now identifies those magic/header structures, records fatbin
+SHA, and optionally invokes the installed
+`clang-offload-bundler --type=o --list`. It only extracts a
+single explicitly advertised gfx803 target after opt-in. It never
+initializes the GPU or executes a code object.
+
+Run (different output folder from the accepted r2 results):
+
+```bash
+set -euo pipefail
+cd /mnt/truenas/comet-net/gfx803_compat_graph
+git pull --ff-only
+python3 -m unittest discover -s tests -p 'test_gfx803_mbtopk_offload_container.py' -v
+PREV=/mnt/truenas/comet-net/experiments/gfx803_t105_k206_20261114_r2
+OUT=/mnt/truenas/comet-net/experiments/gfx803_t108_offload_20261114
+mkdir -p "$OUT"
+python3 scripts/gfx803_mbtopk_offload_container_audit.py \
+  --fatbin "$PREV/libtorch_hip_fatbin.bin" \
+  --out "$OUT/fatbin_container.json"
+```
+
+If one is installed, re-run into a **new** output filename
+with `--bundler /opt/rocm/llvm/bin/clang-offload-bundler`
+(or its actual `command -v` path). Only after an actual
+`gfx803` target appears in `available_targets` is
+`--unbundle-gfx803 "$OUT/gfx803.hsaco"` justified.
+Read-only `readelf -h -n -Ws` and LLVM kernel metadata inspection
+then identify code-object architecture and resources; no assumption
+that inclusion proves benchmark dispatch.
+
+**Data handoff preferred over a 42.9 MB upload:** commit or attach
+the small original `mbtopk_elf_inventory.json`,
+`embedded_elf_candidates.json` and
+`kfd_topk_join.json`, plus the new
+`fatbin_container.json`. Keep full fatbin local unless the
+container tools cannot classify it and header-level data prove
+insufficient. Supply tool versions and paths used if
+`clang-offload-bundler` rejects the bundle. Do not check a
+43 MB binary blob into the main repository just to obtain a
+header/architecture list.
+
+**Gate:** T1.08 format/architecture identification OPEN until
+run; T1.07 actual selected kernel OPEN even if a gfx803 HSACO
+is extracted; K2.05 original KFD return still OPEN.
