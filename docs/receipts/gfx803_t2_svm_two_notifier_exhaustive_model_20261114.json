@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "source": "Linux v7.3 kfd_svm.c:2085-2099",
+  "upstream_reference": "https://lore-kernel.gnuweeb.org/amd-gfx/9ea351fa-982b-4d9c-8471-03e168852c83@amd.com/T/",
+  "engine": "isolated JavaScript 2-invalidator exhaustive state exploration",
+  "actual_gpu_executed": false,
+  "assumptions": [
+    "two distinct SVM ranges; each notifier enters one of two branches",
+    "first quiesce is successful for the lock-success case",
+    "models only the process eviction ordering, not device scheduler or memory correctness"
+  ],
+  "cases": [
+    {
+      "serialized": false,
+      "quiesce_succeeds": true,
+      "states": 35,
+      "terminal_states": 1,
+      "unsafe_possible": true,
+      "unsafe_trace": [
+        [
+          0,
+          "enter"
+        ],
+        [
+          0,
+          "no_lock"
+        ],
+        [
+          0,
+          "first:begin_quiesce"
+        ],
+        [
+          1,
+          "enter"
+        ],
+        [
+          1,
+          "no_lock"
+        ],
+        [
+          1,
+          "later:skip_quiesce"
+        ],
+        [
+          1,
+          "return_notifier"
+        ]
+      ]
+    },
+    {
+      "serialized": true,
+      "quiesce_succeeds": true,
+      "states": 25,
+      "terminal_states": 1,
+      "unsafe_possible": false,
+      "unsafe_trace": null
+    },
+    {
+      "serialized": true,
+      "quiesce_succeeds": false,
+      "states": 25,
+      "terminal_states": 1,
+      "unsafe_possible": true,
+      "unsafe_trace": [
+        [
+          0,
+          "enter"
+        ],
+        [
+          0,
+          "lock"
+        ],
+        [
+          0,
+          "first:begin_quiesce"
+        ],
+        [
+          0,
+          "first:quiesce_failed"
+        ],
+        [
+          0,
+          "return_notifier"
+        ]
+      ]
+    }
+  ]
+}
