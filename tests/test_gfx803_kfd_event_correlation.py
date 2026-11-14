@@ -83,6 +83,12 @@ class KfdEventCorrelationTests(unittest.TestCase):
                 e["xnack_off"] = False
         self.assertFalse(MOD.correlate(ev)["witnesses"])
 
+    def test_unregistered_svm_range_cannot_be_imagined(self):
+        ev = [e for e in original()
+              if not (e["event"] == "svm_range_register" and
+                      e.get("range_id") == "range-b")]
+        self.assertFalse(MOD.correlate(ev)["witnesses"])
+
     def test_missing_return_is_not_an_overlapping_return(self):
         ev = [e for e in original()
               if not (e["event"] == "svm_invalidate_return" and
