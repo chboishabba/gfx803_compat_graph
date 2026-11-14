@@ -74,3 +74,10 @@ For a **qualified, independently recoverable** host only, the runner accepts `--
 - **Release:** whole-stack stability and independently restored Nix/Cachix closure.
 
 **Disposition:** `mbtopk` is a supported source-level suspect; **force sort-backed TopK via reviewed PR #8** is the concrete candidate fix. **KFD reset failure is independently observed**, and an already-present callback fix is not an appropriate speculative target. Attribution and release gates remain open until measured.
+
+
+## Post-recovery core correction and dedicated one-shot capture (14 Nov)
+
+Recovered original Python core [receipt](receipts/gfx803_topk_incident_core_provenance_20261114.json), commit `d821899`, identified **actual** November `libtorch_hip.so` SHA-256 `c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff` (Build ID `3d27b29d191725660bbc4b8a83cb2f4753a09921`), the pinned Nix torch overlay + ROCm 10.1 and SGEMM shim. Older claims that the *host-loaded torch library* was unknown are superseded; the **device HSACO / first dispatch remains unobserved**. The original ROSCr async hardware exception handler `SIGABRT` is a host abort, not proof which GPU shader hung.
+
+[One-shot opt-in runner](../scripts/gfx803_topk_one_shot_capture.py), [KFD optional probes](../scripts/gfx803_kfd_return_capture.bt), [post-boot collector](../scripts/gfx803_topk_postreboot_collect.py) and the [operator capture runbook](GFX803_TOPK_ONE_SHOT_MORNING_CAPTURE_RUNBOOK_20261114.md) are separately guarded; no GPU test was performed. Existing `gfx803_topk_pr8_benchmark.py` safehost guard remains intact. This dedicated one-shot code requires manual acceptance of the known display-card wedge; it does not create a fictional safehost eligibility receipt or auto retry/reset/reboot. Capturing an actual device kernel is optional ROCprof trace and not guaranteed to survive an abort.
