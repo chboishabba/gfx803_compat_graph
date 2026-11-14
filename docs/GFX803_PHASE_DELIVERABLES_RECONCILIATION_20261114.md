@@ -675,3 +675,14 @@ This is an **observation-gated hypothesis** until logs or reproduction receipts 
 **First-run capture acceptance:** ROCprof kernel dispatch record with symbol/grid/queue and time **plus** KFD return-probe event during same new run, with host journal and exact binary hash; T1.07 gets an observed kernel launch, and K2.05 gets a new-run retval (not retroactive Nov 14 retval). A launch record alone does **not** identify the first stalled GPU kernel; unresolved tail flush and reporter effects must be preserved. Actual SVM range/notifier overlap still needs separate PASID-specific capture, not supplied by this KFD-only probe.
 
 **Caution:** deliberately rerunning the original shape on the sole Wayland RX580 can wedge the system and require forced reboot. The runbook openly says so and prefers independently recoverable test hardware. A manually selected risky run is not reclassified as safe by a typed acknowledgement.
+
+
+### 14 Nov evening — one-shot postmortem and live return-probe capture ready
+
+**Manually operator-armed only.** The [one-shot capture runbook](GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md) now includes complete two-terminal KFD trace and original ROCprof case4 invocation, exact original `libtorch_hip` SHA, Nix `torch-site` overlay, inherited SGEMM preload provenance, local persistent fsynced log and post-reboot preservation. `--arm` requires a local typed risk statement; no automatic replays or driver reset, no code installed.
+
+**Extended code:** [offline postmortem join](../scripts/gfx803_one_shot_postmortem.py) + [7 negative-control tests](../tests/test_gfx803_one_shot_postmortem.py) consumes preflight, durable child stdout, journal, KFD bpftrace JSONL and ROCprof CSV. It reports **first actually captured new-run KFD return** and last ROCprof launch metadata but leaves the **first stalled GPU instruction**, SVM notifier overlap and stable recovery gates OPEN. Truncated/missing ROCprof output is inconclusive. **One-shot capture tests now total 12 (CPU-only)**, separate from 7 postmortem tests.
+
+**No actual execution of the known-wedging case has occurred here; all new Python files are committed but not yet run locally or in CI**. The operator-reported 38/38 tests passed on an earlier commit, before this new harness. No physical acceptance or first actual dispatch claim.
+
+**Safety and expected fork:** If no KFD symbols or exact preflight identity are available, do not fake the evidence or use a system ROCm fallback. If a new run produces ROCprof kernel records **and** KFD first-return records, evaluate new-run T1/K2 with timestamp provenance and separate first stalled kernel from last launched kernel. Otherwise do not repeat the destructive run just to generate another reset journal.
