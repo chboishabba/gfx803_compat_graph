@@ -1,0 +1,989 @@
+{
+  "actual_kernel_launch": null,
+  "bounds": {
+    "row_1": {
+      "elements": 151936,
+      "f32_bytes": 607744
+    },
+    "row_32": {
+      "elements": 4861952,
+      "f32_bytes": 19447808
+    }
+  },
+  "function_spans": [
+    {
+      "excerpt": "should_use_multiblock(int64_t num_slices, int64_t slice_size) {\n  if (num_slices > std::numeric_limits<uint32_t>::max() ||\n      slice_size > std::numeric_limits<uint32_t>::max()) return false;\n  // This heuristics is based on the experiment in https://github.com/pytorch/pytorch/pull/74267\n  return (num_slices <= 20 && slice_size >= 20000) ||\n      (num_slices > 20 && num_slices <= 40 && slice_size >= 10000) ||\n      (num_slices > 40 && num_slices <= 80 && slice_size >= 8000) ||\n      (num_slices > 80 && num_slices < 200 && slice_size >= 5000) ||\n      (num_slices >= 200 && num_slices < 800 && slice_size >= 3000) ||\n      (num_slices >= 800 && num_slices <= 4000 && slice_size >= 800) ||\n      (num_slices > 4000 && slice_size >= 400);\n}",
+      "function": "should_use_multiblock",
+      "line_end": 1489,
+      "line_start": 1478,
+      "text_sha256": "40aca4b5d7ad2aaa4f02c7eff5c3cbbf4af11f314661bceb7ae916bd96b90bf6",
+      "truncated": false
+    },
+    {
+      "excerpt": "should_use_multiblock(numInputSlices, sliceSize)) {          \\\n    RUN_K(INDEX_T, DIM, mbtopk::launch);                                  \\\n  }",
+      "function": "should_use_multiblock",
+      "line_end": 1554,
+      "line_start": 1552,
+      "text_sha256": "3fee7ddbdb3556219527ccf442c2936185d7f92fcb60881339d753858921aa94",
+      "truncated": false
+    },
+    {
+      "excerpt": "should_use_multiblock(numInputSlices, sliceSize)) {                 \\\n    RUN_K(INDEX_T, DIM, mbtopk::launch);                                  \\\n  }",
+      "function": "should_use_multiblock",
+      "line_end": 1561,
+      "line_start": 1559,
+      "text_sha256": "2db2aba3556833740d474303ee3eb2e1955aacb530b8faeabf7cd41abfcd7383",
+      "truncated": false
+    },
+    {
+      "excerpt": "gatherTopK(at::cuda::detail::TensorInfo<const T, IndexType> input,\n                           IndexType inputSliceSize,\n                           IndexType outputSliceSize, // aka `k`\n                           bool largest,\n\n                           IndexType numInputSlices,\n                           IndexType inputWithinSliceStride,\n\n                           at::cuda::detail::TensorInfo<T, IndexType> topK,\n                           IndexType topKWithinSliceStride,\n\n                           at::cuda::detail::TensorInfo<int64_t, IndexType> indices,\n                           IndexType indicesWithinSliceStride,\n                           T* kthValues) {\n  // smem is used for:\n  // 1. radixSelect: radix bin counts (RADIX_SIZE=4 elements)\n  // 2. exclusiveBinaryPrefixScan: warp prefix sums (\u226432 elements)\n  // 3. findPattern: flag and value (2 elements, cast to scalar_t*)\n  //\n  // Type must be IndexType to safely handle sliceSize > INT_MAX.\n  // In radix selection, counts can exceed INT_MAX when billions of\n  // elements fall into a single radix bin.\n  __shared__ IndexType smem[32];\n  IndexType slice = getLinearBlockId<IndexType>();\n  if (slice >= numInputSlices) {\n    return;\n  }\n\n  // Find the start offset for our slice\n  IndexType sliceStartIndex =\n    at::cuda::detail::IndexToOffset<const T, IndexType, Dim>::get(slice, input);\n  IndexType topKSliceStartIndex =\n    at::cuda::detail::IndexToOffset<T, IndexType, Dim>::get(slice, topK);\n  IndexType indicesSliceStartIndex =\n    at::cuda::detail::IndexToOffset<int64_t, IndexType, Dim>::get(slice, indices);\n\n  const T* inputSliceStart = &input.data[sliceStartIndex];\n  T* topKSliceStart = &topK.data[topKSliceStartIndex];\n  int64_t* indicesSliceStart = &indices.data[indicesSliceStartIndex];\n\n  // Find the k-th highest element in our input\n  T topKValue;\n  if (WithKthValues){\n    topKValue = kthValues[slice];\n  } else {\n    topKValue = static_cast<T>(0);\n    radixSelect<T, typename TopKTypeConfig<T>::RadixType, IndexType>(\n      inputSliceStart, outputSliceSize, largest,\n      inputSliceSize, inputWithinSliceStride,\n      smem, &topKValue);\n  }\n  const auto topKConverted = at::native::TopKTypeConfig<T>::convert(topKValue);\n\n  // Every value that is strictly less/greater than `pattern`\n  // (depending on sort dir) in sorted int format is in the top-K.\n  // The top-K value itself might not be unique.\n  //\n  // Since there are a variable number of elements that we see that\n  // are within the top-k, we don't know at what index to write out\n  // the resulting values.\n  // In order to get this, we perform an exclusive prefix sum of\n  // `hasTopK`. This will return the resulting index into which we\n  // need to write the result, if a thread has a result.\n\n  // All threads need to participate in the loop and the prefix sum,\n  // but not necessarily in the load; hence loop bounds being rounded\n  // up to a multiple of the block dim.\n  IndexType numIterations = round_up(inputSliceSize, (IndexType) blockDim.x);\n  IndexType writeIndexStart = 0;\n\n  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {\n    bool inRange = (i < inputSliceSize);\n    T v =\n      inRange ? doLdg(&inputSliceStart[i * inputWithinSliceStride]) : static_cast<T>(0);\n    const auto convertedV = at::native::TopKTypeConfig<T>::convert(v);\n    bool hasTopK;\n    if (largest) {\n      hasTopK = inRange && (convertedV > topKConverted);\n    } else {\n      hasTopK = inRange && (convertedV < topKConverted);\n    }\n\n    IndexType index;\n    IndexType carry;\n    at::cuda::exclusiveBinaryPrefixScan<IndexType, true>(\n        smem, hasTopK, &index, &carry, AddOp<IndexType>());\n\n    if (hasTopK) {\n      IndexType writeIndex = writeIndexStart + index;\n      CUDA_KERNEL_ASSERT(writeIndex < outputSliceSize);\n\n      IndexType topKOffset = writeIndex * topKWithinSliceStride;\n      IndexType indexOffset = writeIndex * indicesWithinSliceStride;\n\n      topKSliceStart[topKOffset] = v;\n      indicesSliceStart[indexOffset] = i;\n    }\n\n    writeIndexStart += carry;\n  }\n\n  // We need to fill in the rest with actual == top-K values.\n  // The number that we need is outputSliceSize -\n  // writeIndexStart. There might be more than that number available,\n  // in which case we have to choose the first seen set. We do this\n  // via a prefix sum to calculate indices for writing results.\n  CUDA_KERNEL_ASSERT(outputSliceSize >= writeIndexStart);\n  IndexType topKRemaining = (outputSliceSize - writeIndexStart);\n\n  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {\n    bool inRange = (i < inputSliceSize);\n    T v =\n      inRange ? doLdg(&inputSliceStart[i * inputWithinSliceStride]) : static_cast<T>(0);\n    const auto convertedV = at::native::TopKTypeConfig<T>::convert(v);\n    bool hasTopK = inRange && (convertedV == topKConverted);\n\n    IndexType index;\n    IndexType carry;\n    at::cuda::exclusiveBinaryPrefixScan<IndexType, true>(\n        smem, hasTopK, &index, &carry, AddOp<IndexType>());\n\n    if (hasTopK && index < topKRemaining) {\n      IndexType writeIndex = writeIndexStart + index;\n      CUDA_KERNEL_ASSERT(writeIndex < outputSliceSize);\n\n      IndexType topKOffset = writeIndex * topKWithinSliceStride;\n      IndexType indexOffset = writeIndex * indicesWithinSliceStride;\n\n      topKSliceStart[topKOffset] = v;\n      indicesSliceStart[indexOffset] = i;\n    }\n\n    if (carry >= topKRemaining) {\n      break;\n    }\n\n    topKRemaining -= carry;\n    writeIndexStart += carry;\n  }\n\n}",
+      "function": "gatherTopK",
+      "line_end": 185,
+      "line_start": 45,
+      "text_sha256": "2cb0ca134acc971302f848d152983cf1fd3218ef6be9303bbc7b5e867e0c1d88",
+      "truncated": false
+    },
+    {
+      "excerpt": "gatherTopK(at::cuda::detail::TensorInfo<const T, IndexType> input,\n                            IndexType inputSliceSize,\n                            IndexType outputSliceSize, // aka `k`\n                            bool largest,\n\n                            IndexType numInputSlices,\n                            IndexType inputWithinSliceStride,\n\n                            at::cuda::detail::TensorInfo<T, IndexType> topK,\n                            IndexType topKWithinSliceStride,\n\n                            at::cuda::detail::TensorInfo<int64_t, IndexType> indices,\n                            IndexType indicesWithinSliceStride,\n                            T* kthValues) {\n\n  // smem and counts must use IndexType to safely handle sliceSize > INT_MAX.\n  // In radix selection, counts tracks elements matching a radix pattern,\n  // which can exceed INT_MAX when billions of elements fall into one bin.\n\n  // Maximum shared memory size for radix select (used in countRadixAggregateCounts): NUM_BUFFERS * MAX_WARPS * RADIX_SIZE.\n  // HIP workgroups have at most 1024 threads. Warp size is at least 32 (can be 64 on some\n  // architectures), so we use 32 for safety: 2 buffers * (1024/32) warps * 4 radix bins = 256.\n  __shared__ IndexType smem[256];\n  __shared__ IndexType writeIndexStart; // index to track where to write results. This is shared by all threads in the block. Increases atomically.\n\n  IndexType slice = getLinearBlockId<IndexType>();\n  if (slice >= numInputSlices) {\n    return;\n  }\n\n  // Find the start offset for our slice\n  IndexType sliceStartIndex =\n    at::cuda::detail::IndexToOffset<const T, IndexType, Dim>::get(slice, input);\n  IndexType topKSliceStartIndex =\n    at::cuda::detail::IndexToOffset<T, IndexType, Dim>::get(slice, topK);\n  IndexType indicesSliceStartIndex =\n    at::cuda::detail::IndexToOffset<int64_t, IndexType, Dim>::get(slice, indices);\n\n  const T* inputSliceStart = &input.data[sliceStartIndex];\n  T* topKSliceStart = &topK.data[topKSliceStartIndex];\n  int64_t* indicesSliceStart = &indices.data[indicesSliceStartIndex];\n\n  // Find the k-th highest element in our input\n  T topKValue;\n  if (WithKthValues){\n    topKValue = kthValues[slice];\n  } else {\n    topKValue = static_cast<T>(0);\n    radixSelect<T, typename TopKTypeConfig<T>::RadixType, IndexType>(\n      inputSliceStart, outputSliceSize, largest,\n      inputSliceSize, inputWithinSliceStride,\n      smem, &topKValue);\n  }\n  const auto topKConverted = at::native::TopKTypeConfig<T>::convert(topKValue);\n\n  // Every value that is strictly less/greater than `pattern`\n  // (depending on sort dir) in sorted int format is in the top-K.\n  // The top-K value itself might not be unique.\n  //\n  // Since there are a variable number of elements that we see that\n  // are within the top-k, we don't know at what index to write out\n  // the resulting values.\n  // In order to get this, we perform warp level compaction.\n  // each warp counts its own number of hasTopk threads and\n  // reserves space for them by incrementing writeIndexStart atomically + saving the old value as start index.\n\n  // Initialize writeIndexStart to 0 by the first thread in the block.\n  if (threadIdx.x == 0) {\n    writeIndexStart = 0;\n  }\n  __syncthreads();\n  // All threads within the warp need to participate in the loop, so rounding up to a multiple of the warp size.\n  IndexType numIterations = round_up(inputSliceSize, (IndexType) C10_WARP_SIZE);\n\n  // phase 1: write actual > `pattern` (or < `pattern`, depending on the sort direction) values to the output.\n  // prefetching data from global memory.\n  T v = (threadIdx.x < inputSliceSize) ? doLdg(&inputSliceStart[threadIdx.x * inputWithinSliceStride]) : static_cast<T>(0);\n  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {\n    T v_next = (i + blockDim.x < inputSliceSize) ? doLdg(&inputSliceStart[(i + blockDim.x) * inputWithinSliceStride]) : static_cast<T>(0);\n\n    bool hasTopK = false;\n    if (i < inputSliceSize) {\n      const auto convertedV = at::native::TopKTypeConfig<T>::convert(v);\n      hasTopK = (largest) ? (convertedV > topKConverted) : (convertedV < topKConverted);\n    }\n\n    IndexType start_index;\n    int my_offset, warp_count;\n    reserveWarpSpace(hasTopK, writeIndexStart, start_index, my_offset, warp_count);\n\n    // now warp has reserved space for itself. If hasTopK == true, we need to find the index to write the result to.\n    if (hasTopK) {\n      writeResult(topKSliceStart,\n        indicesSliceStart,\n        topKWithinSliceStride,\n        indicesWithinSliceStride,\n        outputSliceSize,\n        /*writeIndex=*/start_index + my_offset,\n        /*value=*/v,\n        /*index=*/i);\n    }\n\n    v = v_next;\n  }\n\n  // till this point, actual > `pattern` values were being written.\n  // we first need to sync to make sure all threads have completed phase 1:\n  __syncthreads();\n\n  // We need to fill in the rest with actual == top-K values.\n  // The number that we need is outputSliceSize - writeIndexStart.\n  // There might be more than that number available in input,\n  // in which case we have to choose the first seen set. We do this\n  // in a similar warp level compaction fashion as in phase 1.\n\n  // phase 2: write actual == `pattern` values to the output.\n  // prefetching data from global memory.\n  T V = (threadIdx.x < inputSliceSize) ? doLdg(&inputSliceStart[threadIdx.x * inputWithinSliceStride]) : static_cast<T>(0);\n  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {\n    T V_next = (i + blockDim.x < inputSliceSize) ? doLdg(&inputSliceStart[(i + blockDim.x) * inputWithinSliceStride]) : static_cast<T>(0);\n    bool hasTopK = false;\n    if (i < inputSliceSize) {\n      const auto convertedV = at::native::TopKTypeConfig<T>::convert(V);\n      hasTopK = convertedV == topKConverted;\n    }\n\n    IndexType start_index;\n    int my_offset, warp_count;\n    reserveWarpSpace(hasTopK, writeIndexStart, start_index, my_offset, warp_count);\n\n    if ((warp_count > 0) && (outputSliceSize <= start_index)){\n      break; // there is no space to add topk values. Break out of the loop.\n    }\n\n    if (hasTopK){\n      IndexType slots_available = outputSliceSize - start_index;\n      if (my_offset < slots_available){\n        writeResult(topKSliceStart,\n          indicesSliceStart,\n          topKWithinSliceStride,\n          indicesWithinSliceStride,\n          outputSliceSize,\n          /*writeIndex=*/start_index + my_offset,\n          /*value=*/V,\n          /*index=*/i);\n      }\n    }\n\n    V = V_next;\n  }\n}",
+      "function": "gatherTopK",
+      "line_end": 403,
+      "line_start": 253,
+      "text_sha256": "79b4c48c71299177683070646d98008d95656ee3b722f22c46dc5b8e2b85fb32",
+      "truncated": false
+    },
+    {
+      "excerpt": "gatherTopK(at::cuda::detail::TensorInfo<const T, IndexType> input,\n                           IndexType inputSliceSize,\n                           IndexType outputSliceSize, // aka `k`\n                           bool largest,\n\n                           uint32_t numInputSlices,\n                           IndexType inputWithinSliceStride,\n\n                           at::cuda::detail::TensorInfo<T, IndexType> topK,\n                           IndexType topKWithinSliceStride,\n\n                           at::cuda::detail::TensorInfo<int64_t, IndexType> indices,\n                           IndexType indicesWithinSliceStride,\n\n                           uint32_t items_per_thread,\n                           uint32_t blocks_per_slice,\n\n                           T *kthValues,\n                           uint32_t* withinKCounts,\n                           uint32_t* kthCounts,\n                           uint32_t num_blocks) {\n\n  uint32_t items_per_block = items_per_thread * BLOCK_THREADS;\n  uint32_t tidx = threadIdx.x;\n  uint32_t block_idx = getLinearBlockId<uint32_t>();\n\n  // The grid is computed from `getGridFromTiles`, when there are lots of\n  // elements, we will use both blockIdx.x and blockIdx.y, and maybe blockIdx.z\n  // when this is the case, the number of blocks that we are launching can be\n  // more than the number of blocks we need. So we need to check the range of\n  // `block_idx`.\n  if (block_idx >= num_blocks) {\n    return;\n  }\n\n  uint32_t slice_idx = block_idx / blocks_per_slice;\n  uint32_t blk_idx_in_slice = block_idx % blocks_per_slice;\n\n  items_per_thread = (blk_idx_in_slice + 1 < blocks_per_slice)\n      ? items_per_thread\n      : at::ceil_div((int64_t)(inputSliceSize - blk_idx_in_slice * items_per_block), (int64_t)BLOCK_THREADS);\n\n  // Find the start offset for our slice\n  IndexType sliceStartIndex =\n    at::cuda::detail::IndexToOffset<const T, IndexType, Dim>::get(slice_idx, input);\n  IndexType topKSliceStartIndex =\n    at::cuda::detail::IndexToOffset<T, IndexType, Dim>::get(slice_idx, topK);\n  IndexType indicesSliceStartIndex =\n    at::cuda::detail::IndexToOffset<int64_t, IndexType, Dim>::get(slice_idx, indices);\n\n  const T* inputSliceStart = &input.data[sliceStartIndex];\n  T* topKSliceStart = &topK.data[topKSliceStartIndex];\n  int64_t* indicesSliceStart = &indices.data[indicesSliceStartIndex];\n\n  // Find the k-th highest element in our input\n  T kthValue = kthValues[slice_idx];\n  const auto kthValueConverted = at::native::TopKTypeConfig<T>::convert(kthValue);\n\n  // Find the start index in output tensor of this block\n#if !defined(USE_ROCM)\n  // CUDA path: Use pre-computed prefix sums from CUB\n  uint32_t startWithinK = 0;\n  if (blk_idx_in_slice > 0) {\n    startWithinK = withinKCounts[block_idx - 1];\n  }\n  uint32_t startKth = withinKCounts[slice_idx * blocks_per_slice + blocks_per_slice - 1];\n  if (blk_idx_in_slice > 0) {\n    startKth += kthCounts[block_idx - 1];\n  }\n#else\n  // ROCm path: Compute prefix sums inline with unrolled loop\n  __shared__ uint32_t slice_prefix_within;\n  __shared__ uint32_t slice_prefix_kth;\n  __shared__ uint32_t slice_total_within;\n  if (threadIdx.x == 0) {\n    uint32_t prefix_within = 0;\n    uint32_t prefix_kth = 0;\n    uint32_t total_within = 0;\n    uint32_t slice_offset = slice_idx * blocks_per_slice;\n    // AMD optimization: Unroll prefix sum loop to improve ILP\n    // This loop iterates up to 245 times for 1M case, causing memory latency\n    const uint32_t* within_ptr = withinKCounts + slice_offset;\n    const uint32_t* kth_ptr = kthCounts + slice_offset;\n    uint32_t blk = 0;\n    // Process 4 blocks at a time\n    for (; blk + 3 < blocks_per_slice; blk += 4) {\n      uint32_t w0 = within_ptr[0];\n      uint32_t w1 = within_ptr[1];\n      uint32_t w2 = within_ptr[2];\n      uint32_t w3 = within_ptr[3];\n      total_within += w0 + w1 + w2 + w3;\n      if (blk < blk_idx_in_slice) {\n        prefix_within += w0;\n        prefix_kth += kth_ptr[0];\n      }\n      if (blk + 1 < blk_idx_in_slice) {\n        prefix_within += w1;\n        prefix_kth += kth_ptr[1];\n      }\n      if (blk + 2 < blk_idx_in_slice) {\n        prefix_within += w2;\n        prefix_kth += kth_ptr[2];\n      }\n      if (blk + 3 < blk_idx_in_slice) {\n        prefix_within += w3;\n        prefix_kth += kth_ptr[3];\n      }\n      within_ptr += 4;\n      kth_ptr += 4;\n    }\n    // Handle remaining blocks\n    for (; blk < blocks_per_slice; ++blk) {\n      uint32_t within_val = *within_ptr++;\n      total_within += within_val;\n      if (blk < blk_idx_in_slice) {\n        prefix_within += within_val;\n        prefix_kth += *kth_ptr;\n      }\n      kth_ptr++;\n    }\n    slice_prefix_within = prefix_within;\n    slice_prefix_kth = prefix_kth;\n    slice_total_within = total_within;\n  }\n  __syncthreads();\n\n  uint32_t startWithinK = slice_prefix_within;\n  uint32_t startKth = slice_total_within + slice_prefix_kth;\n#endif // USE_ROCM\n\n  // Read input, select topk out and write\n  typedef hipcub::BlockScan<uint32_t, BLOCK_THREADS> BlockScan;\n  __shared__ typename BlockScan::TempStorage temp_storage;\n  for (int i = 0; i < items_per_thread; ++i) {\n    // Find the start offset for this slice\n    IndexType idx = blk_idx_in_slice * items_per_block + i * BLOCK_THREADS + tidx;\n    T val;\n    int withinK = 0;\n    int kth = 0;\n    if (idx < inputSliceSize) {\n      val = doLdg(inputSliceStart + idx * inputWithinSliceStride);\n      const auto valConverted = at::native::TopKTypeConfig<T>::convert(val);\n      withinK = (largest ? valConverted > kthValueConverted : valConverted < kthValueConverted);\n      kth = (valConverted == kthValueConverted);\n    }\n\n    uint32_t withinKIndex;\n    uint32_t numWithinK;\n    BlockScan(temp_storage).ExclusiveSum(withinK, withinKIndex, numWithinK);\n    __syncthreads();\n    if (withinK) {\n      uint32_t offset = withinKIndex + startWithinK;\n      topKSliceStart[offset * topKWithinSliceStride] = val;\n      indicesSliceStart[offset * indicesWithinSliceStride] = idx;\n    }\n    startWithinK += numWithinK;\n\n    if (startKth < outputSliceSize) {\n      uint32_t kthIndex;\n      uint32_t numKth;\n      BlockScan(temp_storage).ExclusiveSum(kth, kthIndex, numKth);\n      __syncthreads();\n      if (kth) {\n        uint32_t offset = kthIndex + startKth;\n        if (offset < outputSliceSize) {\n          topKSliceStart[offset * topKWithinSliceStride] = val;\n          indicesSliceStart[offset * indicesWithinSliceStride] = idx;\n        }\n      }\n      startKth += numKth;\n    }\n  }\n}",
+      "function": "gatherTopK",
+      "line_end": 1269,
+      "line_start": 1097,
+      "text_sha256": "441b0853cd45f60a3c6ec8b3f71bb2b1744ae1cb7505152d6a431456476bf76f",
+      "truncated": false
+    }
+  ],
+  "launch_parameters_proven_for_incident": false,
+  "limits": [
+    "text brace extraction is heuristic, not C++ semantic analysis",
+    "source route is not evidence of benchmark-loaded ELF",
+    "grid, workspaces and synchronization must be interpreted from source and compiled descriptors",
+    "no HIP or GPU workload"
+  ],
+  "matching_line_count": 226,
+  "mode": "static-retained-source",
+  "retained_build_artifacts": [],
+  "route_from_retained_attribution": {
+    "proof_scope": "retained source-level shape predicate only",
+    "row_1": "mbtopk candidate",
+    "row_32": "mbtopk candidate"
+  },
+  "schema": 1,
+  "selected_source_terms": [
+    {
+      "line": 25,
+      "text": "#include <rocprim/block/block_scan.hpp>"
+    },
+    {
+      "line": 32,
+      "text": "namespace sbtopk { // single_block_topk"
+    },
+    {
+      "line": 111,
+      "text": "  // up to a multiple of the block dim."
+    },
+    {
+      "line": 112,
+      "text": "  IndexType numIterations = round_up(inputSliceSize, (IndexType) blockDim.x);"
+    },
+    {
+      "line": 115,
+      "text": "  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {"
+    },
+    {
+      "line": 154,
+      "text": "  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {"
+    },
+    {
+      "line": 195,
+      "text": "block level synchronization points, which is not efficient, specially considering that exclusiveBinaryPrefixScan is"
+    },
+    {
+      "line": 199,
+      "text": "result to the corresponding indices. This requires no block level synchronization. It should be noted that we have"
+    },
+    {
+      "line": 200,
+      "text": "added a block level synchronization point after phase 1 to make sure all threads have completed phase 1. This"
+    },
+    {
+      "line": 273,
+      "text": "  // HIP workgroups have at most 1024 threads. Warp size is at least 32 (can be 64 on some"
+    },
+    {
+      "line": 276,
+      "text": "  __shared__ IndexType writeIndexStart; // index to track where to write results. This is shared by all threads in the block. Increases atomically."
+    },
+    {
+      "line": 319,
+      "text": "  // Initialize writeIndexStart to 0 by the first thread in the block."
+    },
+    {
+      "line": 330,
+      "text": "  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {"
+    },
+    {
+      "line": 331,
+      "text": "    T v_next = (i + blockDim.x < inputSliceSize) ? doLdg(&inputSliceStart[(i + blockDim.x) * inputWithinSliceStride]) : static_cast<T>(0);"
+    },
+    {
+      "line": 371,
+      "text": "  for (IndexType i = threadIdx.x; i < numIterations; i += blockDim.x) {"
+    },
+    {
+      "line": 372,
+      "text": "    T V_next = (i + blockDim.x < inputSliceSize) ? doLdg(&inputSliceStart[(i + blockDim.x) * inputWithinSliceStride]) : static_cast<T>(0);"
+    },
+    {
+      "line": 423,
+      "text": "    dim3 grid;"
+    },
+    {
+      "line": 424,
+      "text": "    TORCH_INTERNAL_ASSERT(getGridFromTiles(numInputSlices, grid), \"Too many slices for topk\");"
+    },
+    {
+      "line": 426,
+      "text": "    dim3 block(::min(at::ceil_div((int64_t)inputSliceSize, (int64_t)warp_size) * (int64_t)warp_size, (int64_t)1024));"
+    },
+    {
+      "line": 427,
+      "text": "    gatherTopK<T, IndexType, Dim, /* WithKthValues= */false><<<grid, block, 0, c10::cuda::getCurrentCUDAStream()>>>("
+    },
+    {
+      "line": 454,
+      "text": "template <int KeyDims, int ValueDims, int sort_size, int max_block_dim_y,"
+    },
+    {
+      "line": 468,
+      "text": "  const IndexType blockIndex = getLinearBlockId<IndexType>();"
+    },
+    {
+      "line": 469,
+      "text": "  const IndexType linearIndex = blockIndex * blockDim.y + threadIdx.y;"
+    },
+    {
+      "line": 493,
+      "text": "  CUDA_KERNEL_ASSERT(blockDim.x == WARP_SIZE);"
+    },
+    {
+      "line": 494,
+      "text": "  CUDA_KERNEL_ASSERT(blockDim.y <= max_block_dim_y);"
+    },
+    {
+      "line": 509,
+      "text": "  } tmp_storage[max_block_dim_y];"
+    },
+    {
+      "line": 536,
+      "text": "  // Initialize indices for this slice in blocked arrangement"
+    },
+    {
+      "line": 537,
+      "text": "  // WARP_LOAD_TRANSPOSE uses blocked layout: thread t gets items [t*items_per_thread, t*items_per_thread+items_per_thread-1]"
+    },
+    {
+      "line": 578,
+      "text": "  const auto stream = c10::cuda::getCurrentCUDAStream();"
+    },
+    {
+      "line": 579,
+      "text": "  // Use only 1 row per block to minimize shared memory usage"
+    },
+    {
+      "line": 580,
+      "text": "  // (max_block_dim_y * sizeof(union) must fit in 64KB LDS limit)"
+    },
+    {
+      "line": 581,
+      "text": "  constexpr int max_block_dim_y = 1;"
+    },
+    {
+      "line": 582,
+      "text": "  const int block_x = at::cuda::warp_size();"
+    },
+    {
+      "line": 583,
+      "text": "  dim3 block(block_x, max_block_dim_y);"
+    },
+    {
+      "line": 585,
+      "text": "  dim3 grid;"
+    },
+    {
+      "line": 586,
+      "text": "  TORCH_INTERNAL_ASSERT(getGridFromTiles(numInputSlices, grid),"
+    },
+    {
+      "line": 594,
+      "text": "    warpMergeSortTopK<Dim, Dim, SORT_SIZE, max_block_dim_y, scalar_t, IndexType, IS_DESCENDING, 32> \\"
+    },
+    {
+      "line": 595,
+      "text": "      <<<grid, block, 0, stream>>>( \\"
+    },
+    {
+      "line": 600,
+      "text": "    warpMergeSortTopK<Dim, Dim, SORT_SIZE, max_block_dim_y, scalar_t, IndexType, IS_DESCENDING, 64> \\"
+    },
+    {
+      "line": 601,
+      "text": "      <<<grid, block, 0, stream>>>( \\"
+    },
+    {
+      "line": 608,
+      "text": "    warpMergeSortTopK<Dim, Dim, SORT_SIZE, max_block_dim_y, scalar_t, IndexType, IS_DESCENDING, 32> \\"
+    },
+    {
+      "line": 609,
+      "text": "      <<<grid, block, 0, stream>>>( \\"
+    },
+    {
+      "line": 648,
+      "text": "namespace mbtopk { // multi_block_topk"
+    },
+    {
+      "line": 652,
+      "text": "// the number of total blocks can not be larger than UINT32_MAX."
+    },
+    {
+      "line": 655,
+      "text": "// because we could be using multiple blocks per slice."
+    },
+    {
+      "line": 668,
+      "text": "// AMD: Allow higher items_per_thread for large arrays to reduce blocks_per_slice"
+    },
+    {
+      "line": 677,
+      "text": "  IndexType idx = blockIdx.x * blockDim.x + threadIdx.x;"
+    },
+    {
+      "line": 678,
+      "text": "  for (IndexType i = idx; i < size; i += gridDim.x * blockDim.x) {"
+    },
+    {
+      "line": 683,
+      "text": "// compute local histogram for each block"
+    },
+    {
+      "line": 688,
+      "text": "    uint32_t slice_size,"
+    },
+    {
+      "line": 689,
+      "text": "    uint32_t* ks_to_find,  // size: num_slices, unused arg but for mysterious reasons perf is better when it's present"
+    },
+    {
+      "line": 690,
+      "text": "    uint32_t num_slices,"
+    },
+    {
+      "line": 694,
+      "text": "    uint32_t blocks_per_slice,"
+    },
+    {
+      "line": 696,
+      "text": "    Bitwise* desires,      // size: num_slices"
+    },
+    {
+      "line": 697,
+      "text": "    short* counts         // size: num_slices * blocks_per_slice * radix_digits"
+    },
+    {
+      "line": 700,
+      "text": "  int items_per_block = items_per_thread * BLOCK_THREADS;"
+    },
+    {
+      "line": 702,
+      "text": "  uint32_t block_idx = getLinearBlockId<uint32_t>();"
+    },
+    {
+      "line": 703,
+      "text": "  uint32_t slice_idx = block_idx / blocks_per_slice;"
+    },
+    {
+      "line": 704,
+      "text": "  uint32_t blk_idx_in_slice = block_idx % blocks_per_slice;"
+    },
+    {
+      "line": 705,
+      "text": "  if (slice_idx >= num_slices) {"
+    },
+    {
+      "line": 714,
+      "text": "    \"blockwise counter too large\");"
+    },
+    {
+      "line": 726,
+      "text": "  items_per_thread = (blk_idx_in_slice + 1 < blocks_per_slice)"
+    },
+    {
+      "line": 728,
+      "text": "      : at::ceil_div((int64_t)(slice_size - blk_idx_in_slice * items_per_block), (int64_t)BLOCK_THREADS);"
+    },
+    {
+      "line": 733,
+      "text": "    IndexType idx = blk_idx_in_slice * items_per_block + i * BLOCK_THREADS + tidx;"
+    },
+    {
+      "line": 734,
+      "text": "    if (idx < slice_size) {"
+    },
+    {
+      "line": 754,
+      "text": "  // We always write out counts regardless if blocks_per_slice == 1 because"
+    },
+    {
+      "line": 757,
+      "text": "    counts[block_idx * RADIX_DIGITS + tidx] = digit_count;"
+    },
+    {
+      "line": 766,
+      "text": "  uint32_t blocks_per_slice) {"
+    },
+    {
+      "line": 767,
+      "text": "  int tidx = threadIdx.x + blockIdx.x * blockDim.x;"
+    },
+    {
+      "line": 769,
+      "text": "  uint32_t slice_idx = blockIdx.x;"
+    },
+    {
+      "line": 773,
+      "text": "  // accumulates counters from multiple blocks"
+    },
+    {
+      "line": 777,
+      "text": "    uint32_t rounds = blocks_per_slice / HISTO_ACCUM_TILE;"
+    },
+    {
+      "line": 783,
+      "text": "        digit_count += counts[(slice_idx * blocks_per_slice + blk) * RADIX_DIGITS + digit_idx];"
+    },
+    {
+      "line": 786,
+      "text": "    for (int blk = HISTO_ACCUM_TILE * rounds; blk < blocks_per_slice; blk++)  {"
+    },
+    {
+      "line": 787,
+      "text": "      digit_count += counts[(slice_idx * blocks_per_slice + blk) * RADIX_DIGITS + digit_idx];"
+    },
+    {
+      "line": 791,
+      "text": "  // compute the block-wide inclusive prefix sum"
+    },
+    {
+      "line": 804,
+      "text": "  Bitwise* desires_in,          // size: num_slices"
+    },
+    {
+      "line": 805,
+      "text": "  short* counts,                // size: num_slices * blocks_per_slice * radix_digits"
+    },
+    {
+      "line": 807,
+      "text": "  uint32_t* ks_to_find_in,      // size: num_slices"
+    },
+    {
+      "line": 808,
+      "text": "  uint32_t blocks_per_slice,"
+    },
+    {
+      "line": 812,
+      "text": "  uint32_t* withinKCounts,      // size: num_slices * blocks_per_slice == num_blocks"
+    },
+    {
+      "line": 813,
+      "text": "  T* kthValues,                 // size: num_slices, only write when current_bit reaches 0"
+    },
+    {
+      "line": 816,
+      "text": "  uint32_t num_blocks"
+    },
+    {
+      "line": 818,
+      "text": "  // This kernel should be launched with the same number of blocks as the `computeBlockDigitCounts` kernel."
+    },
+    {
+      "line": 820,
+      "text": "  uint32_t block_idx = getLinearBlockId<uint32_t>();"
+    },
+    {
+      "line": 821,
+      "text": "  uint32_t slice_idx = block_idx / blocks_per_slice;"
+    },
+    {
+      "line": 823,
+      "text": "  // The grid is computed from `getGridFromTiles`, when there are lots of"
+    },
+    {
+      "line": 824,
+      "text": "  // elements, we will use both blockIdx.x and blockIdx.y, and maybe blockIdx.z"
+    },
+    {
+      "line": 825,
+      "text": "  // when this is the case, the number of blocks that we are launching can be"
+    },
+    {
+      "line": 826,
+      "text": "  // more than the number of blocks we need. So we need to check the range of"
+    },
+    {
+      "line": 827,
+      "text": "  // `block_idx`."
+    },
+    {
+      "line": 828,
+      "text": "  if (block_idx >= num_blocks) {"
+    },
+    {
+      "line": 843,
+      "text": "    // only one thread in block enters this condition"
+    },
+    {
+      "line": 847,
+      "text": "      // let a single block per slice update the values"
+    },
+    {
+      "line": 848,
+      "text": "      if (block_idx == slice_idx * blocks_per_slice) {"
+    },
+    {
+      "line": 881,
+      "text": "      count = doLdg(counts + block_idx * RADIX_DIGITS + tidx);"
+    },
+    {
+      "line": 908,
+      "text": "    withinKCounts[block_idx] += count;"
+    },
+    {
+      "line": 912,
+      "text": "// CUDA path: Assumption: slice_size can not be larger than UINT32_MAX"
+    },
+    {
+      "line": 915,
+      "text": "  Bitwise* desires,            // size: num_slices"
+    },
+    {
+      "line": 916,
+      "text": "  short* counts,               // size: num_slices * blocks_per_slice * radix_digits"
+    },
+    {
+      "line": 917,
+      "text": "  uint32_t num_blocks,         // the number of blocks used by `computeBlockDigitCounts` kernel"
+    },
+    {
+      "line": 918,
+      "text": "  uint32_t blocks_per_slice,"
+    },
+    {
+      "line": 920,
+      "text": "  uint32_t* kthCounts          // size: num_slices * blocks_per_slice == num_blocks"
+    },
+    {
+      "line": 922,
+      "text": "  CUDA_KERNEL_LOOP_TYPE(idx, num_blocks, uint32_t) {"
+    },
+    {
+      "line": 923,
+      "text": "    uint32_t slice_idx = idx / blocks_per_slice;"
+    },
+    {
+      "line": 936,
+      "text": "  Bitwise* desires_in,          // size: num_slices"
+    },
+    {
+      "line": 937,
+      "text": "  short* counts,                // size: num_slices * blocks_per_slice * radix_digits"
+    },
+    {
+      "line": 938,
+      "text": "  uint32_t* ks_to_find_in,      // size: num_slices"
+    },
+    {
+      "line": 939,
+      "text": "  uint32_t blocks_per_slice,"
+    },
+    {
+      "line": 943,
+      "text": "  uint32_t* withinKCounts,      // size: num_slices * blocks_per_slice == num_blocks"
+    },
+    {
+      "line": 944,
+      "text": "  T* kthValues,                 // size: num_slices, only write when current_bit reaches 0"
+    },
+    {
+      "line": 948,
+      "text": "  uint32_t num_blocks"
+    },
+    {
+      "line": 950,
+      "text": "  // This kernel should be launched with the same number of blocks as the `computeBlockDigitCounts` kernel."
+    },
+    {
+      "line": 952,
+      "text": "  uint32_t block_idx = getLinearBlockId<uint32_t>();"
+    },
+    {
+      "line": 953,
+      "text": "  uint32_t slice_idx = block_idx / blocks_per_slice;"
+    },
+    {
+      "line": 955,
+      "text": "  // The grid is computed from `getGridFromTiles`, when there are lots of"
+    },
+    {
+      "line": 956,
+      "text": "  // elements, we will use both blockIdx.x and blockIdx.y, and maybe blockIdx.z"
+    },
+    {
+      "line": 957,
+      "text": "  // when this is the case, the number of blocks that we are launching can be"
+    },
+    {
+      "line": 958,
+      "text": "  // more than the number of blocks we need. So we need to check the range of"
+    },
+    {
+      "line": 959,
+      "text": "  // `block_idx`."
+    },
+    {
+      "line": 960,
+      "text": "  if (block_idx >= num_blocks) {"
+    },
+    {
+      "line": 976,
+      "text": "    // Accumulate counts across all blocks in the slice for this digit"
+    },
+    {
+      "line": 980,
+      "text": "    // For large blocks_per_slice, this loop dominates kernel time"
+    },
+    {
+      "line": 982,
+      "text": "    const short* count_ptr = counts + slice_idx * blocks_per_slice * RADIX_DIGITS + tidx;"
+    },
+    {
+      "line": 984,
+      "text": "    // Process 4 blocks at a time to improve ILP"
+    },
+    {
+      "line": 985,
+      "text": "    for (; blk + 3 < blocks_per_slice; blk += 4) {"
+    },
+    {
+      "line": 993,
+      "text": "    // Handle remaining blocks"
+    },
+    {
+      "line": 994,
+      "text": "    for (; blk < blocks_per_slice; ++blk) {"
+    },
+    {
+      "line": 1018,
+      "text": "    // only one thread in block enters this condition"
+    },
+    {
+      "line": 1022,
+      "text": "      // let a single block per slice update the values"
+    },
+    {
+      "line": 1023,
+      "text": "      if (block_idx == slice_idx * blocks_per_slice) {"
+    },
+    {
+      "line": 1056,
+      "text": "      count = doLdg(counts + block_idx * RADIX_DIGITS + tidx);"
+    },
+    {
+      "line": 1083,
+      "text": "    withinKCounts[block_idx] += count;"
+    },
+    {
+      "line": 1086,
+      "text": "  // On the last pass (current_bit == 0), write out block-wise kthCounts directly"
+    },
+    {
+      "line": 1089,
+      "text": "    kthCounts[block_idx] = doLdg(counts + block_idx * RADIX_DIGITS + desired_digit0);"
+    },
+    {
+      "line": 1112,
+      "text": "                           uint32_t blocks_per_slice,"
+    },
+    {
+      "line": 1117,
+      "text": "                           uint32_t num_blocks) {"
+    },
+    {
+      "line": 1119,
+      "text": "  uint32_t items_per_block = items_per_thread * BLOCK_THREADS;"
+    },
+    {
+      "line": 1121,
+      "text": "  uint32_t block_idx = getLinearBlockId<uint32_t>();"
+    },
+    {
+      "line": 1123,
+      "text": "  // The grid is computed from `getGridFromTiles`, when there are lots of"
+    },
+    {
+      "line": 1124,
+      "text": "  // elements, we will use both blockIdx.x and blockIdx.y, and maybe blockIdx.z"
+    },
+    {
+      "line": 1125,
+      "text": "  // when this is the case, the number of blocks that we are launching can be"
+    },
+    {
+      "line": 1126,
+      "text": "  // more than the number of blocks we need. So we need to check the range of"
+    },
+    {
+      "line": 1127,
+      "text": "  // `block_idx`."
+    },
+    {
+      "line": 1128,
+      "text": "  if (block_idx >= num_blocks) {"
+    },
+    {
+      "line": 1132,
+      "text": "  uint32_t slice_idx = block_idx / blocks_per_slice;"
+    },
+    {
+      "line": 1133,
+      "text": "  uint32_t blk_idx_in_slice = block_idx % blocks_per_slice;"
+    },
+    {
+      "line": 1135,
+      "text": "  items_per_thread = (blk_idx_in_slice + 1 < blocks_per_slice)"
+    },
+    {
+      "line": 1137,
+      "text": "      : at::ceil_div((int64_t)(inputSliceSize - blk_idx_in_slice * items_per_block), (int64_t)BLOCK_THREADS);"
+    },
+    {
+      "line": 1155,
+      "text": "  // Find the start index in output tensor of this block"
+    },
+    {
+      "line": 1160,
+      "text": "    startWithinK = withinKCounts[block_idx - 1];"
+    },
+    {
+      "line": 1162,
+      "text": "  uint32_t startKth = withinKCounts[slice_idx * blocks_per_slice + blocks_per_slice - 1];"
+    },
+    {
+      "line": 1164,
+      "text": "    startKth += kthCounts[block_idx - 1];"
+    },
+    {
+      "line": 1175,
+      "text": "    uint32_t slice_offset = slice_idx * blocks_per_slice;"
+    },
+    {
+      "line": 1181,
+      "text": "    // Process 4 blocks at a time"
+    },
+    {
+      "line": 1182,
+      "text": "    for (; blk + 3 < blocks_per_slice; blk += 4) {"
+    },
+    {
+      "line": 1207,
+      "text": "    // Handle remaining blocks"
+    },
+    {
+      "line": 1208,
+      "text": "    for (; blk < blocks_per_slice; ++blk) {"
+    },
+    {
+      "line": 1232,
+      "text": "    IndexType idx = blk_idx_in_slice * items_per_block + i * BLOCK_THREADS + tidx;"
+    },
+    {
+      "line": 1271,
+      "text": "int get_items_per_thread(uint64_t num_slices, uint64_t slice_size) {"
+    },
+    {
+      "line": 1275,
+      "text": "  // AMD RDNA/CDNA architecture: measured via rocprof for mbtopk kernels"
+    },
+    {
+      "line": 1289,
+      "text": "  int max_blocks_per_mp = prop->maxBlocksPerMultiProcessor;"
+    },
+    {
+      "line": 1290,
+      "text": "  int blocks_per_mp = ::min(regs_per_mp / REGS_PER_BLOCK, max_blocks_per_mp);"
+    },
+    {
+      "line": 1293,
+      "text": "  int64_t items_per_thread = at::ceil_div((int64_t)(slice_size * num_slices), (int64_t)(mpc * blocks_per_mp * BLOCK_THREADS));"
+    },
+    {
+      "line": 1297,
+      "text": "  // to significantly reduce blocks_per_slice, which reduces overhead in:"
+    },
+    {
+      "line": 1300,
+      "text": "  // Goal: Keep blocks_per_slice under 100 for optimal performance"
+    },
+    {
+      "line": 1301,
+      "text": "  if (num_slices <= 4 && slice_size >= 800000) {"
+    },
+    {
+      "line": 1303,
+      "text": "    // For 1M elements: items_per_thread=32 \u2192 blocks_per_slice=123"
+    },
+    {
+      "line": 1304,
+      "text": "    // For 1M elements: items_per_thread=48 \u2192 blocks_per_slice=82"
+    },
+    {
+      "line": 1305,
+      "text": "    // For 1M elements: items_per_thread=64 \u2192 blocks_per_slice=62"
+    },
+    {
+      "line": 1307,
+      "text": "  } else if (num_slices <= 4 && slice_size >= 500000) {"
+    },
+    {
+      "line": 1310,
+      "text": "  } else if (num_slices <= 4 && slice_size >= 250000) {"
+    },
+    {
+      "line": 1322,
+      "text": "  uint32_t blocks_per_slice;"
+    },
+    {
+      "line": 1324,
+      "text": "  BlockIdxToKey(uint32_t blocks_per_slice): blocks_per_slice(blocks_per_slice) {}"
+    },
+    {
+      "line": 1326,
+      "text": "    return blk / blocks_per_slice;"
+    },
+    {
+      "line": 1345,
+      "text": "  auto stream = c10::cuda::getCurrentCUDAStream();"
+    },
+    {
+      "line": 1349,
+      "text": "  int items_per_block = items_per_thread * BLOCK_THREADS;"
+    },
+    {
+      "line": 1352,
+      "text": "  uint32_t blocks_per_slice = at::ceil_div((int64_t)inputSliceSize, (int64_t)items_per_block);"
+    },
+    {
+      "line": 1353,
+      "text": "  uint32_t num_blocks = numInputSlices * blocks_per_slice;"
+    },
+    {
+      "line": 1355,
+      "text": "  // temporary storage"
+    },
+    {
+      "line": 1361,
+      "text": "  TORCH_CHECK(blocks_per_slice <= std::numeric_limits<uint32_t>::max(), \"blocks_per_slice larger than uint32 maximum is not supported\");"
+    },
+    {
+      "line": 1367,
+      "text": "  fill<uint32_t><<<::min(((int64_t)numInputSlices + 511) / 512, (int64_t)1073741824), 512, 0, stream>>>("
+    },
+    {
+      "line": 1374,
+      "text": "  auto counts_buffer = allocator.allocate(num_blocks * RADIX_DIGITS * sizeof(short));"
+    },
+    {
+      "line": 1377,
+      "text": "    \"blockwise counter too large\");"
+    },
+    {
+      "line": 1388,
+      "text": "  auto withinKCounts_buffer = allocator.allocate(num_blocks * sizeof(uint32_t));"
+    },
+    {
+      "line": 1390,
+      "text": "  AT_CUDA_CHECK(hipMemsetAsync(withinKCounts, 0, num_blocks * sizeof(uint32_t), stream));"
+    },
+    {
+      "line": 1392,
+      "text": "  auto kthCounts_buffer = allocator.allocate(num_blocks * sizeof(uint32_t));"
+    },
+    {
+      "line": 1396,
+      "text": "  dim3 grid;"
+    },
+    {
+      "line": 1397,
+      "text": "  TORCH_INTERNAL_ASSERT(getGridFromTiles(num_blocks, grid), \"Too many slices for topk\");"
+    },
+    {
+      "line": 1398,
+      "text": "  dim3 block(BLOCK_THREADS);"
+    },
+    {
+      "line": 1407,
+      "text": "    computeBlockDigitCounts<T, IndexType, Bitwise, Dim><<<grid, block, 0, stream>>>("
+    },
+    {
+      "line": 1415,
+      "text": "        blocks_per_slice,"
+    },
+    {
+      "line": 1423,
+      "text": "    computeDigitCumSum<<<numInputSlices, RADIX_DIGITS, 0, stream>>>(counts, digit_cum_sum, blocks_per_slice);"
+    },
+    {
+      "line": 1427,
+      "text": "    computeBlockwiseWithinKCounts<Bitwise, T><<<grid, RADIX_DIGITS, 0, stream>>>("
+    },
+    {
+      "line": 1428,
+      "text": "      desired_in, counts, digit_cum_sum, ks_to_find_in, blocks_per_slice, current_bit, largest,"
+    },
+    {
+      "line": 1429,
+      "text": "      withinKCounts, kthValues, ks_to_find_out, desired_out, num_blocks);"
+    },
+    {
+      "line": 1435,
+      "text": "    computeBlockwiseWithinKCounts<Bitwise, T><<<grid, RADIX_DIGITS, 0, stream>>>("
+    },
+    {
+      "line": 1436,
+      "text": "      desired_in, counts, ks_to_find_in, blocks_per_slice, current_bit, largest,"
+    },
+    {
+      "line": 1437,
+      "text": "      withinKCounts, kthValues, ks_to_find_out, desired_out, kthCounts, num_blocks);"
+    },
+    {
+      "line": 1453,
+      "text": "  computeBlockwiseKthCounts<Bitwise><<<::min(((int64_t)numInputSlices + 255) / 256, (int64_t)1073741824), 256, 0, stream>>>("
+    },
+    {
+      "line": 1454,
+      "text": "    desired, counts, num_blocks, blocks_per_slice, kthCounts);"
+    },
+    {
+      "line": 1457,
+      "text": "  // CUDA path: Do a prefix scan of withinKCounts and kthCounts using slice_idx as keys to get the starting index of each block"
+    },
+    {
+      "line": 1460,
+      "text": "  slice_idx_iter_t slice_idx_iter(counting_iter_t(0), BlockIdxToKey(blocks_per_slice));"
+    },
+    {
+      "line": 1461,
+      "text": "  at::cuda::cub::inclusive_sum_by_key(slice_idx_iter, withinKCounts, withinKCounts, num_blocks);"
+    },
+    {
+      "line": 1462,
+      "text": "  at::cuda::cub::inclusive_sum_by_key(slice_idx_iter, kthCounts, kthCounts, num_blocks);"
+    },
+    {
+      "line": 1469,
+      "text": "  gatherTopK<T, IndexType, Dim><<<grid, block, 0, stream>>>("
+    },
+    {
+      "line": 1472,
+      "text": "    blocks_per_slice, kthValues, withinKCounts, kthCounts, num_blocks);"
+    },
+    {
+      "line": 1476,
+      "text": "} // namespace mbtopk"
+    },
+    {
+      "line": 1478,
+      "text": "bool should_use_multiblock(int64_t num_slices, int64_t slice_size) {"
+    },
+    {
+      "line": 1479,
+      "text": "  if (num_slices > std::numeric_limits<uint32_t>::max() ||"
+    },
+    {
+      "line": 1480,
+      "text": "      slice_size > std::numeric_limits<uint32_t>::max()) return false;"
+    },
+    {
+      "line": 1482,
+      "text": "  return (num_slices <= 20 && slice_size >= 20000) ||"
+    },
+    {
+      "line": 1483,
+      "text": "      (num_slices > 20 && num_slices <= 40 && slice_size >= 10000) ||"
+    },
+    {
+      "line": 1484,
+      "text": "      (num_slices > 40 && num_slices <= 80 && slice_size >= 8000) ||"
+    },
+    {
+      "line": 1485,
+      "text": "      (num_slices > 80 && num_slices < 200 && slice_size >= 5000) ||"
+    },
+    {
+      "line": 1486,
+      "text": "      (num_slices >= 200 && num_slices < 800 && slice_size >= 3000) ||"
+    },
+    {
+      "line": 1487,
+      "text": "      (num_slices >= 800 && num_slices <= 4000 && slice_size >= 800) ||"
+    },
+    {
+      "line": 1488,
+      "text": "      (num_slices > 4000 && slice_size >= 400);"
+    },
+    {
+      "line": 1491,
+      "text": "bool should_use_warp_topk(int64_t slice_size, int64_t k) {"
+    },
+    {
+      "line": 1512,
+      "text": "  if (slice_size <= 0 || k <= 0 || slice_size > warptopk::MAX_WARP_TOPK_SLICE) {"
+    },
+    {
+      "line": 1517,
+      "text": "  // Conservative threshold: slice_size <= 256 shows consistent improvements"
+    },
+    {
+      "line": 1518,
+      "text": "  return slice_size <= 256;"
+    },
+    {
+      "line": 1552,
+      "text": "  } else if (should_use_multiblock(numInputSlices, sliceSize)) {          \\"
+    },
+    {
+      "line": 1553,
+      "text": "    RUN_K(INDEX_T, DIM, mbtopk::launch);                                  \\"
+    },
+    {
+      "line": 1559,
+      "text": "  if (should_use_multiblock(numInputSlices, sliceSize)) {                 \\"
+    },
+    {
+      "line": 1560,
+      "text": "    RUN_K(INDEX_T, DIM, mbtopk::launch);                                  \\"
+    }
+  ],
+  "sha256": "acb592c2c25db61b5048a224d64a7a022fbcda91c5cfaa156e4cfdfa1b58059d",
+  "source_binary_build_link_proven": false,
+  "source_path": "/mnt/truenas/comet-net/.gfx803-schaka-101-work/out/pytorch-topk-gfx803-20261109/hip-audit-r3/TensorTopK.hip",
+  "source_verified": true
+}

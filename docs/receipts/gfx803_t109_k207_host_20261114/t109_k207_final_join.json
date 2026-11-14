@@ -1,0 +1,83 @@
+{
+  "boundaries": [
+    "names and metadata in bundled HSACO are not an execution trace",
+    "historic source-to-binary provenance is not implied by matching source markers",
+    "exact CachyOS source identity unresolved",
+    "KFD original quiescence path and TopK original hang remain distinct causal targets"
+  ],
+  "gates": {
+    "F1": {
+      "reason": "no proven minimal causal correction",
+      "status": "blocked"
+    },
+    "J1": {
+      "reason": "no paired actual incident TopK dispatch and KFD return",
+      "status": "open"
+    },
+    "K2.05": {
+      "incident_fence_return": null,
+      "status": "open"
+    },
+    "K2.06": {
+      "selected_reference_path": "evict_process_queues_cpsch -> unmap_queues_cpsch -> amdkfd_fence_wait_timeout",
+      "status": "reference-source-mapped"
+    },
+    "K2.07": {
+      "exact_cachyos_source_match": false,
+      "status": "open"
+    },
+    "K2.08": {
+      "operator_eligibility": false,
+      "status": "inert-plan-available"
+    },
+    "T1.04": {
+      "name": "mbtopk",
+      "status": "source-candidate"
+    },
+    "T1.05": {
+      "host_symbol_count": 6045,
+      "status": "accepted-original-lib-and-fatbin"
+    },
+    "T1.06": {
+      "reason": "no original build manifest and historical loader path linkage",
+      "status": "open"
+    },
+    "T1.07": {
+      "reason": "code-object inclusion does not establish actual selected incident kernel or grid",
+      "status": "open"
+    },
+    "T1.08": {
+      "bundle_occurrences": 219,
+      "status": "accepted-container-and-gfx803-target"
+    },
+    "T1.09": {
+      "metadata_kernel_blocks": 0,
+      "named_topk_blocks": 0,
+      "sha256": "3aacb81a0c571c10d842922935db1f248a59602746d0497f5aa383fad101a0c8",
+      "status": "verified-extracted-hsaco"
+    },
+    "T1.10": {
+      "sha256": "acb592c2c25db61b5048a224d64a7a022fbcda91c5cfaa156e4cfdfa1b58059d",
+      "source_binary_build_link": false,
+      "status": "verified-retained-source"
+    },
+    "T1.11": {
+      "incident_executed": false,
+      "readable_topk_kernel_names": 0,
+      "status": "code-object-note-inventory",
+      "total_metadata_kernels": 336
+    },
+    "release": {
+      "reason": "display GPU wedged and reset recovery unqualified",
+      "status": "blocked"
+    }
+  },
+  "gpu_runs": 0,
+  "historical_incident_kfd_return": null,
+  "historical_incident_topk_kernel": null,
+  "mode": "offline-final-evidence-join",
+  "physical_acceptance": "open",
+  "schema": 1,
+  "verified_hsaco_sha256": "3aacb81a0c571c10d842922935db1f248a59602746d0497f5aa383fad101a0c8",
+  "verified_retained_source_sha256": "acb592c2c25db61b5048a224d64a7a022fbcda91c5cfaa156e4cfdfa1b58059d"
+}
