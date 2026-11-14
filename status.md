@@ -321,3 +321,11 @@ and original test logs take precedence over status prose.
 - **Evidence and gates:** [T1/T2 source and falsification matrix](docs/GFX803_T1_T2_PREHANG_MAXCUT_SOURCE_AND_SVM_RACE_20261114.md). Before declaring the SVM patch to fix RX580: prove an actual SVM mapping, overlapping MMU invalidations and queue-preemption interval in the failing workload. DPM/VRAM physical instability and actual first TopK dispatch remain open.
 - **External-control correction:** July SDMA multi-GPU drain and Sept gfx12 DCC workarounds are not direct single-GFX8 fixes; #4919 is RX6800 XT, #6386 gfx1103, CachyOS #930 RX590 PRT, Bazzite #3383 genuine RX580 artifact report. `reset_method=1` is **mode0**, not legacy.
 - All patches remain **draft under PR #7**; no module loaded, no deliberate known-hang workload on single display RX580.
+
+## 14 November — 60-reference ledger and source-specific userptr correction
+
+- [External/source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) now retains **60 original reference records**, covering source, reports, technical controls, earlier recovery threads, misleading hardware matches, inaccessible archives and negative controls. Source-truth is never inferred from a matching issue number across repositories or a matching numeric archive suffix across hosts.
+- [T1/T2 RCA](docs/GFX803_T1_T2_PREHANG_MAXCUT_SOURCE_AND_SVM_RACE_20261114.md) distinguishes March Ollama's verified `amdgpu_amdkfd_gpuvm.c::init_user_pages` **userptr** error from the separate KFD SVM concurrent-eviction bug; `MMU_NOTIFY_UNMAP` is not the same branch as `svm_range_evict`.
+- AMD's reviewed Nov 9 SVM fix gives pageable `hipMemcpy` >1 MiB as a candidate SVM registration route; do not assume **all** hipMalloc workloads use SVM, nor that **none** do. Concrete failing-process SVM/notifier overlap remains OPEN.
+- July/September original `lists.freedesktop.org` messages were inaccessible, not disproven by unrelated messages with same ID on other archive sites. gfx12 DCC and multi-GPU SDMA source leads remain **non-GFX8 direct patches**.
+- No host trace, kernel build or physical ROCm stress run was performed for this documentation audit.
