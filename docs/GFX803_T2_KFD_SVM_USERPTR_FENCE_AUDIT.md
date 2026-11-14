@@ -87,3 +87,19 @@ Sources: [`amdgpu_ttm.c`](https://github.com/torvalds/linux/blob/v7.3/drivers/gp
 | T4 actual fix | RFC candidate only | Correct branch activated, compile/lockdep, no-regression and physical acceptance |
 
 **No live GPU work, no kernel source write, no reset run and no successful kernel build claimed.**
+
+
+## B1.1 — strict SVM notifier and KFD quiesce offline correlator
+
+The implementation at [scripts/gfx803_kfd_event_correlation.py](../scripts/gfx803_kfd_event_correlation.py) consumes newline-delimited structured JSON events. It performs **no kernel tracing, GPU execution, driver writes or reset**. [Regression cases](../tests/test_gfx803_kfd_event_correlation.py) cover a positive two-range overlap and rejection of missing registration, missing return, wrong PASID, wrong mm, wrong boot, XNACK-on, plain MMU_NOTIFY_UNMAP and duplicate/invalid events.
+
+**Required event keys:** capture_id, boot_id, mm_id, pasid, monotonic_ns, event. Event names are svm_range_register, svm_invalidate_enter, svm_invalidate_return, kfd_quiesce_begin, kfd_quiesce_end, userptr_get_pages_failed, hsa_memory_lock, hip_dispatch and gpu_ring_timeout. SVM events also require range_id, invalidation_id, notifier_event and xnack_off; quiesce events require quiesce_id and an end return_code if known.
+
+An accepted ordering witness needs two **actually registered, distinct** SVM range identifiers in the same mm/PASID and boot, the first non-UNMAP/XNACK-off invalidation entering before quiesce, the second non-UNMAP/XNACK-off invalidation returning while quiesce remains outstanding, and the first quiesce end. Even such a witness remains an **ordering observation**, not automatically the original graphics corruption cause. Quiesce failure is never interpreted as a recovered GPU.
+
+Use previously captured JSONL on a healthy host:
+
+    python3 -m unittest discover -s tests -p 'test_gfx803_kfd_event_correlation.py' -v
+    python3 scripts/gfx803_kfd_event_correlation.py --events /path/to/existing-events.jsonl --out /tmp/gfx803_svm_witness_new.json
+
+**No such event stream survived the November GPU crash.** These inputs must be created with separately reviewed trace configuration on a recoverable host, then checked for completeness/drops and consistent monotonic clock domain. Listing available tracepoints is read-only; **enabling** ftrace is not. Missing events do not prove a negative when trace coverage is incomplete. Existing tests are committed, not claimed to have passed a Python or kernel test run.
