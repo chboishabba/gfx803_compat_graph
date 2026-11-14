@@ -81,10 +81,25 @@ def main()->int:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--fatbin",type=Path,required=True)
     p.add_argument("--out",type=Path,required=True)
+    p.add_argument("--extract-dir",type=Path,help="optional: extract bounded AMDGPU ELF candidates into new directory")
     a=p.parse_args()
     if a.out.exists():p.error("refuse overwriting prior evidence")
     if a.fatbin.stat().st_size>MAX_INPUT:p.error("fatbin too large for bounded offline scan")
-    data=inspect(a.fatbin.read_bytes())
+    payload=a.fatbin.read_bytes()
+    data=inspect(payload)
+    if a.extract_dir:
+        if a.extract_dir.exists():p.error("refuse overwriting existing extraction directory")
+        if data["scan_cap_reached"]:p.error("candidate cap reached; extraction refused")
+        a.extract_dir.mkdir(parents=True)
+        for i,candidate in enumerate(data["embedded_amdgpu_elf_candidates"]):
+            start=candidate["offset"]
+            end=start+candidate["size_bytes_min"]
+            name=a.extract_dir/("amdgpu_candidate_%04d.elf"%i)
+            part=payload[start:end]
+            name.write_bytes(part)
+            candidate["extracted_elf"]=str(name)
+            candidate["extracted_sha256"]=hashlib.sha256(part).hexdigest()
+            candidate["identification"]="included ELF candidate; execution and gfx803 target not established"
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(data,indent=2,sort_keys=True)+"\n")
     print("fatbin structural scan done; candidates:",len(data["embedded_amdgpu_elf_candidates"]))
