@@ -307,3 +307,23 @@ rather than `false`.
 
 See [the updated parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md)
 for status and exact K2.03 next deliverables. No physical rerun.
+
+
+## K2.03 source map received (commit `43e70ef`)
+
+The source-owned handoff maps the first logged KFD quiescence
+failure from `amdgpu_amdkfd_gpuvm.c:2535` through
+`kgd2kfd_quiesce_mm` → `kfd_process_evict_queues` →
+`dqm->ops.evict_process_queues`, then a nonzero return (other
+than `-EIO` in the mapped reporting branch) to `Failed to quiesce KFD`.
+
+This is a **static reference-source call path**, not a captured
+incident-time internal return or proof of an exact CachyOS source
+package match. Later KIQ `-110` and KCQ disable occur after the
+first reported quiescence failure in the retained journal. Their
+common deeper hardware cause remains possible, not demonstrated.
+
+**Next:** K2.04 selected DQM eviction implementation and reachable
+error propagation matrix; K2.05 actual incident-time return if
+recoverable from evidence. The complete gate table is in the
+[parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
