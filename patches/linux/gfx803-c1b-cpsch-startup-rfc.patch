@@ -45,7 +45,7 @@ diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c b/drivers/gpu
 +				goto fail_detect_hang_buffer;
 +		}
  	}
-@@ -2145,6 +2155,7 @@ static int start_cpsch(struct device_queue_manager *dqm)
+@@ -2146,6 +2156,7 @@ static int start_cpsch(struct device_queue_manager *dqm)
  
  	return 0;
  fail_detect_hang_buffer:
