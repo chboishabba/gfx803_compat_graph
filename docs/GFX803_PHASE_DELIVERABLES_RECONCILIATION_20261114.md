@@ -597,3 +597,11 @@ Next cut remains T1 pre-reset stalled workload/queue and R1 post-BACO per-ring a
 **P2 — update R4 selection (OPEN):** investigate *first* loss of correct graphics/memory execution (when evidenced), not only post-BACO VMID7 fault. Retain the latter as recovery-specific consequence. Define success as no pretimeout visual corruption, no correlated browser GPU crash, sustained compute forward progress, and usable graphics/compute after controlled recovery.
 
 This is an **observation-gated hypothesis** until logs or reproduction receipts distinguish the mechanisms.
+
+### 14 November — user-confirmed pre-hang visual corruption (P0 chronology correction)
+
+**Confirmed user observation:** visible graphics corruption occurs **right before the GPU crash**. This is not an open question about whether corruption also occurs during idle browsing; do not ask that question again or dilute it into a hypothetical post-reset artifact. The associated incidents involve sustained compute/inference stress, but the first GPU instruction/queue to stop progressing remains unknown. Distinguish observation from independently timestamped trace: the historical journal starts at first recorded kernel timeout and does **not** timestamp the preceding visual corruption.
+
+**Prioritized causal chronology:** sustained compute-associated work → **visible pre-timeout graphics corruption** → gfx/compute command-ring timeout and failed queue preemption/KIQ ring test → GFX8 soft reset/BACO → recurrent post-reset GFX/VM faults, no durable recovery. The user also reports occasional browser (Chrome/Firefox) termination, but its PID/signal/GPU-process-versus-main-process/OOM classification is still unproven and must **not** be asserted to be a VRAM-loss guard action.
+
+**Max-cut priority:** first inspect shared graphics/compute resource integrity *before* reset (workload/CP-MEC fairness, memory bandwidth/VRAM/GTT/SDMA, DPM stability and contemporaneous GPU faults), then follow R1 recovery. Any specific memory-eviction race or voltage/VRAM failure remains a hypothesis. No destructive reproduction on the single display RX580; offline evidence and source first.
