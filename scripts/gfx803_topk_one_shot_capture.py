@@ -294,10 +294,16 @@ def run_capture(args, identity: dict, env: dict) -> int:
                 returncode = child.wait(timeout=args.max_seconds)
                 status = "child-exited"
             except subprocess.TimeoutExpired:
-                # No automatic GPU reset or new kernel dispatch; a wedged
-                # kernel may ignore SIGTERM. Avoid retry/extra GPU probing.
+                # Only stop the benchmark's process group. This does NOT
+                # reset hardware and may not work once a GPU has wedged.
+                # Never run a second health-check/benchmark dispatch.
                 status = "child-timeout-possible-wedge"
                 returncode = None
+                try:
+                    os.killpg(child.pid, signal.SIGTERM)
+                    child.wait(timeout=5)
+                except (ProcessLookupError, subprocess.TimeoutExpired):
+                    pass
             with (args.out / "result.json").open("x") as fp:
                 json.dump({"status": status, "child_returncode": returncode,
                            "child_pid": child.pid, "end_unix_ns": time.time_ns(),
