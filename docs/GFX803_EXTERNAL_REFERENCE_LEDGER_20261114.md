@@ -75,6 +75,7 @@ These are the **other** URLs already present in the earlier cross-incident and v
 | SRC58 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/include/asic_reg/gmc/gmc_8_1_sh_mask.h) | VM fault protection/VMID register masks | **V-source:** Read-only fault bitfield decode reference; no unique absent PTE inference | R1 |
 | SRC59 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdkfd/kfd_process.c) | KFD eviction fence and process queue restore source | **V-source:** Eviction-fence release after queue destruction and TTM eviction/restore worker branch | T2 |
 | SRC60 | [Original URL](https://github.com/torvalds/linux/blob/v7.3/drivers/gpu/drm/amd/amdkfd/kfd_priv.h) | per-process SVM eviction state struct | **V-source:** Base struct for RFC evict_lock field, init and fini lifecycle | T2-B4 |
+| SRC61 | [Original URL](https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/develop/how-to/using-rocprofv3.html) | ROCprofiler-SDK rocprofv3 HIP/HSA/kernel/memory trace CLI | **V-docs:** Official documented kernel, HIP and memory trace modes; capturing an aborting ROCr process can lose buffered tail data. Applies to tracing capability, not proof of gfx803 kernel dispatch or profiler neutrality | T1 next-day capture |
 
 ## Identifiers supplied without a verified canonical URL
 
