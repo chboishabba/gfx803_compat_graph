@@ -84,6 +84,17 @@ class TopKStatic(unittest.TestCase):
                 hashlib.sha256(b"gfx803/topk").hexdigest())
             self.assertIsNone(r["libs"][1]["sha256"])
             self.assertIn("libtorch_hip.so",r["hash_scope"])
+    def test_nix_torch_site_overlay_inventory(self):
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)
+            lib=root/"torch-site/torch/lib"
+            lib.mkdir(parents=True)
+            target=lib/"libtorch_hip.so"
+            target.write_bytes(b"gfx803/topk")
+            r=topk.manifest(root)
+            self.assertEqual(r["kind"],"overlay")
+            self.assertEqual(r["libs"][0]["name"],"torch-site/torch/lib/libtorch_hip.so")
+            self.assertEqual(r["libs"][0]["sha256"],hashlib.sha256(b"gfx803/topk").hexdigest())
     def test_source_features_are_not_asserted_as_gpu_proof(self):
         with tempfile.TemporaryDirectory() as t:
             f=Path(t)/"TensorTopK.cpp"

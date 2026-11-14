@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "scope": "read-only incident core and immutable runtime provenance",
+  "incident": {
+    "date": "2026-11-14",
+    "case": 4,
+    "command": "gfx803_topk_pr8_benchmark.py --case 4 --warmup 10 --iterations 50",
+    "shape": "float32 [32, 151936], k=50",
+    "signal": "SIGABRT",
+    "core_sha256": "779c77a8c65b5c1b11665c2caaf7307d67a9c52ca5763533efbf7676f4c872bd"
+  },
+  "runtime": {
+    "launcher_sha256": "9e378dbe94483f32ec66b9d02e0169d2542ab81df2063b01e0ac39fbb731a25c",
+    "torch_overlay": "/nix/store/vq1lgpc49im7qvvxgxabykyfs47l2ykb-gfx803-schaka101-torch-candidate-overlay/torch-site",
+    "rocm_root": "/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm",
+    "sgemm_shim_preloaded": true,
+    "libtorch_hip": {
+      "sha256": "c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff",
+      "gnu_build_id": "3d27b29d191725660bbc4b8a83cb2f4753a09921"
+    }
+  },
+  "observed": {
+    "rocr_async_thread": "Runtime::HwExceptionHandler abort",
+    "host_main_thread": "HIP teardown after SystemExit",
+    "mbtopk_source_route": "candidate only; not an executed-kernel attribution"
+  },
+  "artifacts": {
+    "gdb_provenance_sha256": "6bab33d353d4bb751849a9bd9bd7e819b99c4f8aef14c45a6dd78b28fb4b54e5",
+    "service_journal_sha256": "758b65e552ecad87adf4077c6d1b26421624792ff1b704ead26d558212dcb0e6",
+    "actual_libtorch_provenance_sha256": "820a9b6fd44a2871e61b09e43193a3386ba57ce543a0d751058deb294f633c35"
+  },
+  "not_established": [
+    "first GPU kernel or HSACO that stalled",
+    "first failing GPU instruction",
+    "incident-time KFD fence return",
+    "causality of SVM, userptr, or reset-order hypotheses"
+  ],
+  "safety": "No GPU workload, tracing change, or kernel modification was performed. The compressed core and full debugger output remain host-local."
+}

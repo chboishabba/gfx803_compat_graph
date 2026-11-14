@@ -55,13 +55,19 @@ def manifest(path:Path)->dict:
                     "topk_file_in_wheel":any(x.endswith("TensorTopK.cpp") for x in names),
                     "torch_version_files":[x for x in names if x.endswith("torch/version.py")]}
     entries=[]
-    for p in sorted(path.glob("torch/lib/*.so")):
+    # The immutable Nix candidate wraps a wheel under ``torch-site``; older
+    # overlays expose the wheel layout directly.  Treat both as an overlay,
+    # but retain the path relative to the supplied root in the receipt.
+    lib_dirs = (path / "torch/lib", path / "torch-site/torch/lib")
+    libraries = [p for lib_dir in lib_dirs if lib_dir.is_dir()
+                 for p in sorted(lib_dir.glob("*.so"))]
+    for p in libraries:
         relevant=p.name == TOPK_HIP_LIBRARY
         entries.append({"name":str(p.relative_to(path)),"bytes":p.stat().st_size,
                         "topk_hip_library":relevant,
                         "sha256":sha(p) if relevant else None})
     if not any(x["topk_hip_library"] for x in entries):
-        raise ValueError("no torch/lib/libtorch_hip.so found in overlay")
+        raise ValueError("no libtorch_hip.so found in overlay torch/lib or torch-site/torch/lib")
     return {"kind":"overlay","libs":entries,
             "hash_scope":"libtorch_hip.so only; unrelated shared objects are listed but not read"}
 
