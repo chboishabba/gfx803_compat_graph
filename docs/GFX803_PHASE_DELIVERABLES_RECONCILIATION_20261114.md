@@ -565,3 +565,20 @@ The first November KIQ `-110` and `KCQ disable failed` occur **before** BACO. `g
 - **R4** correct the causally identified restore mechanism and reproduce recovery without reboot
 
 Existing C1b startup RFC remains **R3 containment**, not hardware recovery. The new offline analyzer tests are committed, not yet validated by CI/TrueNAS.
+
+
+### 14 November — R1/A2a exact VM generation and fault-code verification
+
+See [GFX803_R1_A2A_VRAM_CONTEXT_GUARDS_AND_FAULT_DECODE_20261114.md](GFX803_R1_A2A_VRAM_CONTEXT_GUARDS_AND_FAULT_DECODE_20261114.md), plus the CPU-only GFX8 fault decoder and tests.
+
+**Priority hierarchy correction:** sustained compute-associated queue/ring nonprogress remains the leading *initiating* investigation (T1), and post-failure hardware reset integrity is R1. The 12:39:32 KWin VMID7 fault is a post-reset discriminator, not sufficient to identify the original TopK/WhisperX hang cause.
+
+**V1 source completed, incident closure OPEN:** v7.3 `amdgpu_vm_generation` includes `vram_lost_counter`; context creation saves the token; `amdgpu_cs.c` rejects stale contexts with `-ECANCELED` and `amdgpu_job.c` also rejects stale jobs at final scheduling. `amdgpu_ctx_query2` reports VRAMLOST, while `amdgpu_vm_validate` and CS VM handling recreate and update BO/page table state. **Do not claim the kernel lacks VRAM-loss gating** or that the incident proves an existing context bypassed it.
+
+**V2 source decode complete, PTE attribution OPEN:** `VM_CONTEXT1_PROTECTION_FAULT_STATUS=0x0E0C4001` includes protection bitfield `0x01`, VMID 7 and a read, with separate `TC3` memory client. `0x01` is not by itself a unique page-not-present diagnosis. Need contemporaneous actual PTE/PDE/BO evidence to choose between invalid mapping, stale context and hardware-side translation failure.
+
+**Proposed module parameter correction:** `vm_fault_stop=1` is documented as *print first*, not a reliable halt-before-cascade. `vm_update_mode=3` performs CPU-side graphics and compute VM updates, a possible controlled comparison but not unique evidence of PT transport cause. Both require safe non-display testing before fault induction.
+
+**External evidence classification:** [RPCS3 #16844](https://github.com/RPCS3/rpcs3/issues/16844) contains authentic 2025 GFX8 KIQ/KCQ/BACO and post-reset compute ring test failure (strong shared recovery-failure signature, not same initiating instruction). [Pop!_OS #4132](https://github.com/pop-os/pop/issues/4132) is **Navi 10**, not Polaris, and is only a generic AMDGPU-compositor failure analogy.
+
+Next cut remains T1 pre-reset stalled workload/queue and R1 post-BACO per-ring actual work, then V1/V2 first-post-reset graphics generation/VM mapping evidence; none warrants a claim of physical kernel repair. New unit tests are committed but await a confirmed run.
