@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "kind": "offline_retrospective_count",
+  "date": "2026-11-14",
+  "source": "docs/receipts/gfx803_topk_pr8_review_safe_20261114/kernel-previous-boot.log",
+  "source_note": "Original retained kernel journal subset; not a full boot journal",
+  "analysis_method": "Parse literal recorded lines, count reset starts/successes and first fault within 10 wall-clock seconds after each observed GPU reset(N) succeeded. Executed read-only through connected GitHub source on 2026-11-14; no GPU operations.",
+  "source_line_count": 1308,
+  "gfx8_soft_reset_starts": 88,
+  "gfx8_soft_reset_reported_successes": 88,
+  "recorded_full_gpu_reset_success_messages": 2,
+  "recorded_reset_counters": [
+    2,
+    62
+  ],
+  "recorded_success_followed_by_fault_within_10_seconds": 2,
+  "full_reset_waves": [
+    {
+      "counter": 2,
+      "success_at": "12:39:30",
+      "success_line": 37,
+      "first_post_success_graphics_timeout_at": "12:39:32",
+      "first_post_success_timeout_line": 43,
+      "elapsed_seconds": 2,
+      "post_success_vm_fault": {
+        "time": "12:39:32",
+        "line": 48,
+        "vmid": 7,
+        "pasid": 7,
+        "mc_client": "TC3"
+      }
+    },
+    {
+      "counter": 62,
+      "success_at": "12:40:55",
+      "success_line": 350,
+      "first_post_success_graphics_timeout_at": "12:40:57",
+      "first_post_success_timeout_line": 356,
+      "elapsed_seconds": 2
+    }
+  ],
+  "first_kiq_ring_test_failure_line": 18,
+  "first_baco_line": 28,
+  "other_later_vm_fault": {
+    "line": 119,
+    "vmid": 7,
+    "pasid": 15
+  },
+  "limitations": [
+    "88 reported soft resets are not 88 proven functioning GPU recoveries",
+    "two full-reset success messages in retained file do not establish number of all resets between counters 2 and 62",
+    "success followed by fault does not prove hardware never passed basic ring tests",
+    "post-reset VM fault does not distinguish bad kernel mapping, stale userspace graphics context or hardware TLB/cache/firmware",
+    "no physical GPU or kernel executed"
+  ]
+}

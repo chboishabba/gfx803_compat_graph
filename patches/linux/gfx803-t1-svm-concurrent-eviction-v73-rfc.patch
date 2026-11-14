@@ -1,0 +1,78 @@
+diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_priv.h b/drivers/gpu/drm/amd/amdkfd/kfd_priv.h
+--- a/drivers/gpu/drm/amd/amdkfd/kfd_priv.h
++++ b/drivers/gpu/drm/amd/amdkfd/kfd_priv.h
+@@ -905,7 +905,9 @@
+ 	struct list_head		deferred_range_list;
+ 	struct list_head                criu_svm_metadata_list;
+ 	spinlock_t			deferred_list_lock;
+-	atomic_t			evicted_ranges;
++	/* Serialize XNACK-off SVM invalidation until queue quiesce finishes. */
++	struct mutex			evict_lock
++	atomic_t			evicted_ranges;
+ 	atomic_t			drain_pagefaults;
+ 	struct delayed_work		restore_work;
+ 	DECLARE_BITMAP(bitmap_supported, MAX_GPU_INSTANCE);
+diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_svm.c b/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
+--- a/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
++++ b/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
+@@ -2082,21 +2082,25 @@
+ 		if (prange->start <= last && prange->last >= start)
+ 			atomic_inc(&prange->invalid);
+ 
+-		evicted_ranges = atomic_inc_return(&svms->evicted_ranges);
+-		if (evicted_ranges != 1)
+-			return r;
+-
+-		pr_debug("evicting svms 0x%p range [0x%lx 0x%lx]\n",
+-			 prange->svms, prange->start, prange->last);
+-
+-		/* First eviction, stop the queues */
+-		r = kgd2kfd_quiesce_mm(mm, KFD_QUEUE_EVICTION_TRIGGER_SVM);
+-		if (r)
+-			pr_debug("failed to quiesce KFD\n");
+-
+-		pr_debug("schedule to restore svm %p ranges\n", svms);
+-		queue_delayed_work(system_freezable_wq, &svms->restore_work,
+-			msecs_to_jiffies(AMDGPU_SVM_RANGE_RESTORE_DELAY_MS));
++		/* Concurrent MMU invalidations must not return before the first
++		 * queue quiesce finishes; the invalid PTEs are still GPU-visible.
++		 */
++		mutex_lock(&svms->evict_lock);
++		evicted_ranges = atomic_inc_return(&svms->evicted_ranges);
++		if (evicted_ranges == 1) {
++			pr_debug("evicting svms 0x%p range [0x%lx 0x%lx]\n",
++				 prange->svms, prange->start, prange->last);
++
++			/* First eviction, stop the queues */
++			r = kgd2kfd_quiesce_mm(mm, KFD_QUEUE_EVICTION_TRIGGER_SVM);
++			if (r)
++				pr_debug("failed to quiesce KFD\n");
++
++			pr_debug("schedule to restore svm %p ranges\n", svms);
++			queue_delayed_work(system_freezable_wq, &svms->restore_work,
++				msecs_to_jiffies(AMDGPU_SVM_RANGE_RESTORE_DELAY_MS));
++		}
++		mutex_unlock(&svms->evict_lock);
+ 	} else {
+ 		unsigned long s, l;
+ 		uint32_t trigger;
+@@ -3367,7 +3371,8 @@
+ 		svm_range_free(prange, true);
+ 	}
+ 
+-	mutex_destroy(&p->svms.lock);
++	mutex_destroy(&p->svms.evict_lock);
++	mutex_destroy(&p->svms.lock);
+ 
+ 	pr_debug("process pid %d svms 0x%p done\n",
+ 		p->lead_thread->pid, &p->svms);
+@@ -3379,7 +3384,8 @@
+ 	int i;
+ 
+ 	svms->objects = RB_ROOT_CACHED;
+-	mutex_init(&svms->lock);
++	mutex_init(&svms->lock);
++	mutex_init(&svms->evict_lock);
+ 	INIT_LIST_HEAD(&svms->list);
+ 	atomic_set(&svms->evicted_ranges, 0);
+ 	atomic_set(&svms->drain_pagefaults, 0);

@@ -290,3 +290,71 @@ and original test logs take precedence over status prose.
   No GPU/HIP execution, module replacement, dynamic trace or recovery claim
   occurred. A causal patch still requires a non-display, independently
   recoverable host.
+
+## 14 November — persistent Polaris GPU wedge: recovery critical path
+
+- **Problem definition:** RX580 GFX8 becomes unusable after a workload-triggered ring/queue stall. The host's emergency terminal remains usable; manual driver reset and Wayland restart have not restored GPU function. In November, first KFD queue-preemption failure and KIQ `-110` preceded BACO, which was followed by repeated resets (up to reported reset 62), VRAM loss, and no durable accelerated desktop.
+- **R0 evidence:** historical March and November traces + source error paths established; initiating instruction or universal single culprit **not proven**.
+- **R1 hardware reset:** OPEN and **highest priority** — source-trace GFX8 CP/MEC, KIQ/KCQ, soft-reset, BACO, GPUVM/GART and firmware reinitialization; determine earliest failed *post-reset* fence.
+- **R2 upstream applicability:** PARTIAL — v6.13/6.19/7.3 reset ordering and verified 7.3.0-2 source, existing GFX8 KIQ quantum exemption and fixed doorbell callbacks. NAK'd reset-lock reorder is not a deployable fix. Earlier Arch-era exact kernel metadata may still be missing.
+- **R3 recovery integrity:** DRAFT in [PR #7](https://github.com/chboishabba/gfx803_compat_graph/pull/7). Reset-aware `start_cpsch` RFC, CPU-only C model and patch context tests. `kgd2kfd_post_reset` failure may be ignored by AMDGPU caller and leave KFD locked; **none of this proves physical GPU recovery**.
+- **R4 actual hardware correction:** OPEN; not written, not kernel-built or reviewed. Avoid installing R3 RFC on the display GPU.
+- **R5 physical validation:** BLOCKED without an independent recoverable gfx803 host. Acceptance requires fresh KIQ/KCQ/GFX/SDMA progress, fresh `/dev/kfd` and KFD dispatch, and new accelerated DRM/Wayland rendering **without reboot**.
+- **R6 stable factory release/upstream:** BLOCKED until R4/R5; historical 120-case TopK and bounded C2 passes are scoped trigger/semantic controls, not recovery acceptance.
+- **Current source of truth:** [docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md](docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md), section *GFX8 persistent GPU wedge: authoritative recovery roadmap (R0–R6)*. Track work under the existing draft PR #7.
+
+## R1/A1–A2 source-traced post-BACO failure — 14 November
+
+- **New source audit:** [docs/GFX803_R1_SOFTRESET_BACO_POSTRESET_VM_RCA_20261114.md](docs/GFX803_R1_SOFTRESET_BACO_POSTRESET_VM_RCA_20261114.md). `gfx_v8_0_hw_fini` ignores `gfx_v8_0_kcq_disable` failure; first `KIQ -110` before BACO does not establish post-BACO KIQ nonprogress. Normal full-resume phase2 includes gfx/KIQ/compute scratch ring tests; `GPU reset(2) succeeded!` suggests they may have completed **transiently**, not that KWin's subsequent VMID7 graphics memory access was valid.
+- **Original measured counts:** [docs/receipts/gfx803_r1_nov14_reset_recovery_counts_20261114.json](docs/receipts/gfx803_r1_nov14_reset_recovery_counts_20261114.json): 1,308 lines, 88 soft-reset starts and 88 reported soft-reset successes; two full-reset-success log entries, counters 2 and 62. Both have a fresh gfx timeout 2 seconds later. First post-BACO VM fault is KWin VMID7/PASID7 from TC3.
+- **GART-vs-user-VM distinction:** `gmc_v8_0_gart_enable` establishes MC/GART setup and VMID0 flush, **not** KWin VMID7 post-VRAM-loss BO/page-table restoration. Normal KWin CS updates PDEs/BOs separately.
+- **New CPU-only tooling:** `scripts/gfx803_reset_wave_chronology.py` with `tests/test_gfx803_reset_wave_chronology.py`; host/CI execution not yet asserted. No GPU, kernel patch, driver reset or graphics execution in this step.
+- **Gate result:** R1 source state machine substantially mapped; actual H1 residual CP versus H2 graphics GPUVM stale mapping versus H3 firmware/ASIC under load **OPEN**. Next A2a trace post-reset BO/VMID/context revalidation, then design specific R4 correction. Keep PR #7 as existing recovery rollup.
+
+
+## 14 November — T1/T2 initiating-failure cut (pre-timeout corruption + reviewed SVM race)
+
+- **T1 incident join source-complete, physical initiating dispatch OPEN:** March 20 Ollama pink/green checkerboard then first cited `comp_1.3.1` timeout; March 25 and Nov 14 first recorded gfx/KWin timeouts; WhisperX long-file transcribe/align failures vary and profiling changes outcomes. User has confirmed visible corruption immediately before GPU crash. This does **not** identify the first device instruction.
+- **T2 ordinary TTM/graphics VM sync source-mapped:** BO move DMA fence, TTM cleanup, KFD/BO reservation synchronization, VM PT/PDE updates and CS job dependencies exist in v7.3; do not assert an absent fence without a specific broken producer→consumer edge.
+- **T2 SVM high-alpha:** Linux v7.3 `kfd_svm.c::svm_range_evict` lets a second XNACK-off MMU invalidator return before the first `kgd2kfd_quiesce_mm` finishes. AMD independently proposed a process `evict_lock` on Nov 9, Reviewed-by Felix Kuehling. **Source race established, incident association unknown.**
+- **RFC backport staged:** [v7.3 SVM patch](patches/linux/gfx803-t1-svm-concurrent-eviction-v73-rfc.patch), direct original-source four-hunk check completed, CPU-only interleaving and git-apply tests committed. Executed [35/25-state ordering receipt](docs/receipts/gfx803_t2_svm_two_notifier_exhaustive_model_20261114.json) confirms original unsafe early return and successful-quiesce mutex negative control. Kernel compile and full committed Python test run **not** verified.
+- **Evidence and gates:** [T1/T2 source and falsification matrix](docs/GFX803_T1_T2_PREHANG_MAXCUT_SOURCE_AND_SVM_RACE_20261114.md). Before declaring the SVM patch to fix RX580: prove an actual SVM mapping, overlapping MMU invalidations and queue-preemption interval in the failing workload. DPM/VRAM physical instability and actual first TopK dispatch remain open.
+- **External-control correction:** July SDMA multi-GPU drain and Sept gfx12 DCC workarounds are not direct single-GFX8 fixes; #4919 is RX6800 XT, #6386 gfx1103, CachyOS #930 RX590 PRT, Bazzite #3383 genuine RX580 artifact report. `reset_method=1` is **mode0**, not legacy.
+- All patches remain **draft under PR #7**; no module loaded, no deliberate known-hang workload on single display RX580.
+
+## 14 November — 60-reference ledger and source-specific userptr correction
+
+- [External/source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) now retains **60 original reference records**, covering source, reports, technical controls, earlier recovery threads, misleading hardware matches, inaccessible archives and negative controls. Source-truth is never inferred from a matching issue number across repositories or a matching numeric archive suffix across hosts.
+- [T1/T2 RCA](docs/GFX803_T1_T2_PREHANG_MAXCUT_SOURCE_AND_SVM_RACE_20261114.md) distinguishes March Ollama's verified `amdgpu_amdkfd_gpuvm.c::init_user_pages` **userptr** error from the separate KFD SVM concurrent-eviction bug; `MMU_NOTIFY_UNMAP` is not the same branch as `svm_range_evict`.
+- AMD's reviewed Nov 9 SVM fix gives pageable `hipMemcpy` >1 MiB as a candidate SVM registration route; do not assume **all** hipMalloc workloads use SVM, nor that **none** do. Concrete failing-process SVM/notifier overlap remains OPEN.
+- July/September original `lists.freedesktop.org` messages were inaccessible, not disproven by unrelated messages with same ID on other archive sites. gfx12 DCC and multi-GPU SDMA source leads remain **non-GFX8 direct patches**.
+- No host trace, kernel build or physical ROCm stress run was performed for this documentation audit.
+
+
+## 14 November — major offline T1/T2 implementation and gate receipt
+
+- **New canonical deliverables:** [T1 original dispatch/memory provenance](docs/GFX803_T1_DISPATCH_MEMORY_PROVENANCE.md), [T2 B1–B4 KFD/SVM/userptr/fence audit](docs/GFX803_T2_KFD_SVM_USERPTR_FENCE_AUDIT.md), and [8-input evidence gate receipt](docs/receipts/gfx803_t1_t2_gate_matrix.json). Retained original TopK 1,308-line journal, unpatched-safe benchmark, November incident notes, March Ollama/WhisperX notes and old source/binary receipts inspected via repository connector.
+- **Executable offline tooling:** `scripts/gfx803_incident_join.py` plus `tests/test_gfx803_incident_join.py`; `scripts/gfx803_kfd_event_correlation.py` plus `tests/test_gfx803_kfd_event_correlation.py`. No kernel symbols probed, no trace enabled, no GPU executed. **Python test suite not yet verified in current run**; source-level evidence join receipt is executed and committed.
+- **T1 accepted facts:** March Ollama recorded `comp_1.3.1` and userptr `init_user_pages -1`; March WhisperX D2H/H2D host wait and profiler effect; November first recorded gfx `kwin_wayland`, pre-hang visual corruption confirmed, source-selected TopK `mbtopk` but original HSACO/dispatch unknown. No original Nov devcoredump bytes after reboot.
+- **T2 exact statuses:** B1 XNACK-off SVM two-notifier source race/model + RFC present, actual incident activation OPEN. B2 March userptr source call known, error cause OPEN. B3 first original KFD fence return/queue OPEN, late -ETIME distinct. B4 normal TTM/PTE/GFX sync edges source present, specific broken edge unproven.
+- **New witness acceptance:** two distinct *registered* SVM ranges, matching capture/boot/mm/PASID, non-UNMAP XNACK-off invalidations, second returns before first KFD quiesce finishes; cross-boot/PASID/UNMAP/missing-registration controls fail closed. Such a witness still would not alone prove an RX580 hang cause.
+- [61-record source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) remains authoritative; retain misleading GPU-generation references as explicit negative controls.
+- **R4/R5:** SVM fix remains a source-context RFC not kernel-built or physically accepted; complete no-reboot GPU recovery remains OPEN. Continue in existing draft PR #7 only.
+
+
+## 14 Nov — original-core-pinned destructive one-shot handoff staged
+
+- **New operator-only reproduction kit in draft PR #7:** [case4 runbook](docs/GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md), `scripts/gfx803_one_shot_repro_capture.py` (dry-run default/interactive manual arming, kernel journal and child output fsync, heartbeat), `scripts/gfx803_one_shot_case4.py` (original `_one(4,10,50)` from existing benchmark, runtime binary hash pin), `scripts/gfx803_case4_kfd_returns.bt` (inert until separate authorized bpftrace command), `scripts/gfx803_durable_stream.py` (line fsync), `tests/test_gfx803_one_shot_capture.py` (10 CPU-only contracts).
+- Source evidence from [incident-time recovered Python core](docs/receipts/gfx803_topk_incident_core_provenance_20261114.json) distinguishes original `libtorch_hip` SHA `c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff` and Build ID `3d27b29d191725660bbc4b8a83cb2f4753a09921` from prior offline source-candidate ELF `dd0b403...`. Do not conflate either.
+- **No run performed** and the new harness unit tests have **not been executed** in this tool session; operator-reported previous 38/38 suite pass covers earlier state only. User will decide when/if to arm on their display GPU.
+- **Risk:** case4 historically hangs the shared gfx/compute device and makes Wayland unusable until reboot. The wrapper never auto-reboots, auto-resets, attempts a GPU post-fault healthcheck or repeats. ROCprof may change timing and lose buffered traces on SIGABRT; KFD return probes can be missing or alter timing. Preserve both limits.
+- Remains OPEN: actual new-run first stalled GPU kernel/HSACO and KFD first return, SVM/userptr active-range status, physical kernel fix and recovery without reboot.
+
+
+## 14 Nov — one-shot capture and postboot evidence join staged for operator
+
+- New [one-shot trigger/dual-channel capture runbook](docs/GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md) with exact incident Nix overlay, libtorch hash, single case4 `_one(4,10,50)`, manually armed KFD return bpftrace, optional ROCprof kernel/HSA/HIP/memory tracing, line-fsynced host journaling and child receipt, and bounded tail after abort.
+- `scripts/gfx803_one_shot_postmortem.py` and 7 CPU-only synthetic tests now join new-run first KFD returns, kernel journal and ROCprof output **without** claiming that any submitted kernel was first stalled or that a missing profiler tail proves no launch.
+- `scripts/gfx803_one_shot_repro_capture.py` requires local TTY typed risk acceptance, dry-run default, no GPU in parent; baseline arm rejects missing active KFD return probe; kernel probe startup/trace verification is mandatory when specified. 1 GiB default core cap, 20s post-abort journal tail, host heartbeat, no automatic reset/retry/reboot. Optional `--mode rocprof` can alter timing and buffers may not flush on abort.
+- **12 new launcher tests + 7 postmortem tests not executed in this tool session**; prior 38/38 PASS was operator-reported before the new files. Source audited, staged in same draft PR #7.
+- External original source ledger now **61 source records**, including ROCprofiler-SDK official tracing docs. **The user will decide whether to risk their sole display RX580; no actual attempt occurred here.**

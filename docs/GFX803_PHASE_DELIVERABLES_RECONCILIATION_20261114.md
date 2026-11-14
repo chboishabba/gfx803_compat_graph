@@ -498,3 +498,191 @@ inclusion and metadata, not original incident-time selected kernel,
 benchmark-loaded wheel linkage or KFD's missing internal fence
 return. T1.06/T1.07/K2.05/J1/F1/release stay OPEN/BLOCKED
 according to original receipts. No new GPU work or KFD patch.
+
+---
+
+## 14 November — GFX8 persistent GPU wedge: authoritative recovery roadmap (R0–R6)
+
+**Authority:** this section is the current *hardware recovery* critical path. Keep historical factory Phase 0/A/B/C/D/E, P0–P3 layer qualifications, and previous Track 1/2/3 intact. This is a recovery-specific dependency chain, **not** a replacement for those systems. Detailed source receipts: [cross-incident RCA](GFX803_CROSS_INCIDENT_QUEUE_RECOVERY_RCA_20261114.md), [C/D source audit](GFX803_CROSS_VERSION_RECOVERY_C_D_AUDIT_20261114.md), [C1b mock and patch audit](GFX803_KFD_C1B_MOCK_AND_START_CPSCH_AUDIT_20261114.md).
+
+### The engineering problem that determines the exit condition
+
+The user's Arch-era experience and March/November RX580 incidents show **kernel and emergency TTY remain available while the GPU stays unusable even after a manual driver reset and Wayland restart**. November's original journal shows: **12:39:28** gfx timeout and failed KFD preemption -> **12:39:29** KIQ ring-test `-110` and KCQ disable failure -> GFX8 soft reset and subsequent **BACO** -> VRAM loss -> further gfx/compute timeouts. At **12:40:55**, a `GPU reset(62) succeeded!` message occurs without demonstrated restoration of graphical function. The first KIQ failure *precedes* that BACO, therefore **BACO exit alone cannot explain the initial hang**. The kernel/TTY remaining alive is not evidence that CP/MEC, KIQ/KCQ, SDMA or GPUVM recovered. A driver-reload and compositor restart are not proof of a physical power cycle.
+
+The **goal is durable GPU execution recovery**, not prettier logs, KFD reopening alone, forced deletion of active DMA resources, or simply preventing an unsafe benchmark. Incident triggers (TopK, WhisperX, Ollama, Wayland) and recovery defects are separate until a physical join proves otherwise.
+
+### Phase and deliverable ledger
+
+| Phase / gate | Position on 14 Nov 2026 | Exact deliverable | Closure / acceptance test |
+| --- | --- | --- | --- |
+| **R0 — Cross-incident baseline** | **SOURCE/EVIDENCE COMPLETE**, causality OPEN | Immutable March Ollama/Wayland/WhisperX and Nov TopK time-ordered first-fault/recovery matrix; exact source/provenance and known missing first return | Every incident separated into pre-fault, first timeout, attempted soft reset, BACO/PCI, ring retest, post-reset outcome; mark unknown rather than infer |
+| **R1 — Hardware reset route** | **OPEN; highest priority** | Source-mapped Polaris10 `gfx_v8_0` soft reset, `vi_asic_reset` BACO and possible PCI fallback, CP/MEC microcode reload, KIQ/KCQ ring init/test, GPUVM/GART, and reset return/error dependency graph; record actual log ordering | Identify earliest failed post-reset ring/command and which reset stage claims success. Differentiate CPU/TTY availability from actual graphics/compute work. No dangerous on-display repro |
+| **R2 — Cross-kernel source differences** | **PARTIAL** | Linux v6.13/v6.19/v7.3 and exact 7.3.0-2 source crosswalk, historic Arch kernel provenance, upstream patch accept/NAK ledger, tested source locations | Confirm source-level invariants and changed pathways, review Polaris applicability. GFX8 KIQ quantum exemption already in 7.3 yet KIQ still failed; NAK'd reset-lock reorder must not be deployed |
+| **R3 — KFD recovery integrity / containment** | **SOURCE DEFECTS IDENTIFIED; patch DRAFT** | `kgd2kfd_post_reset` error/lock accounting, `amdgpu_amdkfd_post_reset` unchecked result, `start_cpsch` reset-aware `execute_queues_cpsch`, `sched_running` rollback and DRM scheduler start/unwind proof; mocked C/patch test receipt | Propagate failure without false `GPU reset succeeded` *end-to-end* qualification, leaked lock, scheduler double start or premature GPU work; ensure errors during reset-domain write lock are not misclassified. **This does not close R1** |
+| **R4 — Actual hardware/firmware recovery correction** | **OPEN / not implemented** | A minimal GFX8-applicable kernel correction targeting the real R1 failure (or a documented fail-closed wedge policy if hardware cannot recover), source patch and kernel build with reviewer-approved resource lifetime | Correct ring/VM/firmware state, not just error reporting. Confirm proper reset/power-domain behavior without release of still-DMA-visible memory |
+| **R5 — Physical qualification** | **BLOCKED: independent recoverable hardware not supplied** | Source and module Build IDs/hashes, safe-host manifest and externally persisted trace, bounded matched A/B (original vs corrected), direct post-reset KIQ/KCQ/SDMA/KFD/GFX and new graphics-context check | Same fault-class recovered **without host reboot**: new `/dev/kfd` open, fresh KFD queue makes progress, gfx/KIQ/KCQ ring tests and fresh DRM/Wayland client render; no recurrent timeout/reset loop. If hardware irrecoverable, *only* fail-closed containment can pass its separate safety gate; not a recovery pass |
+| **R6 — Release / upstream / rollup** | **BLOCKED on R4/R5** | Reviewed upstream contribution, regression tests, mainline/distro applicability table, reproducible Nix/kernel build, package/source SHA, rollback and accepted long-workload gate | Maintainer acceptance plus repeated physical recovery and clean-client release. Original binary factory Phase B and general stability promotion stay blocked while R5 fails |
+
+### Minimum exact implementation cuts (A/B/C priority)
+
+| Cut | Specific code or measurement target | Priority and rule |
+| --- | --- | --- |
+| **A1 — Soft-reset/BACO handoff** | `gfx_v8_0_hw_fini`, `gfx_v8_0_cp_resume`, `gfx_v8_0_cp_test_all_rings`, `vi_asic_reset_method`, `vi_asic_reset`, `amdgpu_device_asic_reset` | **Highest-alpha** — source-order and error-propagation crosswalk for first reset wave and repeated BACO waves; no inference from late `-ETIME` to first failed queue |
+| **A2 — Ring forward progress** | `gfx_v8_0_kiq_kcq_enable/disable`, KIQ scratch-ring test, per-engine firmware/doorbell/IB, GART/VM rebind and PCI/ASIC reset selection | Determine exact step first unable to complete a fence *after* each reset stage |
+| **A3 — Historical joint evidence** | March Arch/kernel build, later CachyOS build, first VM faults, KIQ `-110`, queue preemption and fault record | Separate shared upstream signature from unresolved initiating command or board-specific hardware state |
+| **B1 — Return and state** | `start_cpsch`: `execute_queues_cpsch` may return `-EIO` because reset writer owns semaphore; `sched_running` late-error unwind | **Draft RFC only**, must not compile/install on desktop without upstream-quality memory-lifetime/partial node review |
+| **B2 — Recovery caller** | `kgd2kfd_post_reset` / `amdgpu_amdkfd_post_reset` / `amdgpu_device_gpu_resume`, DRM scheduler admission | CPU/mocked failed-start contract, retain fail-closed state; propagate status and release reset lock; don't assert kernel hardware fix |
+| **B3 — Interrupt and memory** | Polaris `tonga_ih` (not `cik_ih`), KFD interrupt FIFO and restore workers; safe DMA buffer teardown; distinguish MI300X accepted BO-fence patch from GFX8 | Source audit only until concrete stale-event/BO-lifetime evidence |
+| **C1 — Controlled comparative reset** | Non-display independently recoverable gfx803 with external logging; exact selected TopK/WhisperX control; firmware clocks and power-mode attribution | Physical probe gated; do not trigger known-hang shapes on the single display RX580 |
+| **C2 — Durable acceptance** | New GFX/KIQ/KCQ fence, SDMA, KFD queue dispatch, new DRM acceleration and Wayland rendering without reboot | Hardware recovery proof; **failure to restore ≠ test pass**, even if driver prints success |
+
+### Existing artifacts, PRs and nonclaims
+
+- [#6](https://github.com/chboishabba/gfx803_compat_graph/pull/6) **merged**: incident RCA, benchmark safety, exact-source audit and CPU-only context; no physical hardware fix.
+- [#7](https://github.com/chboishabba/gfx803_compat_graph/pull/7) **draft/open**: `patches/linux/gfx803-c1b-cpsch-startup-rfc.patch`, C1b mock, fixture apply tests and reset-aware failure scope. A source-context comparison matched Linux v7.3. **No actual kernel build, patch installation or physical acceptance**. This is the active *one PR* for recovery work; avoid a new branch/PR for each audit.
+- [Schaka TopK #8](https://github.com/Schaka/rocm-gfx803/pull/8): independent **trigger mitigation**, not a GFX8 hardware-recovery fix. Previously safe bounded 120-case/20-step receipts do not qualify dangerous large-input/hang behavior or solve reset.
+- **Caution:** The attempted pre-reset-before-lock AMD patch was NAK'd. The October accepted BO-lifetime correction concerns MI300X and does not establish a Polaris fix. The already-present GFX8 SDMA callback and quantum exemption are negative controls.
+- **No performed physical recovery test** in the current patch series. Do not count source and mock acceptance as R4/R5.
+
+### Next actual max-cut
+
+**Work R1/A1+A2 before promoting R3/B1+B2.** Trace the verified kernel's soft-reset → KIQ/KCQ → BACO/PCI → IP reinit → post-reset ring-test logic and isolate the earliest stage failing to make forward progress. Build a specific *hardware restoration* correction from that, rather than spending another round on reporting, cleanup or benchmark policy. In parallel, keep #7's RFC as a draft and complete safe mock/error semantics. After the hardware path is understood, run bounded physical tests on a recoverable device and promote factory Phase B only with new graphics AND compute functionality.
+
+
+
+### R1/A1–A2 source trace landed — 14 Nov 2026
+
+**New evidence:** [GFX803_R1_SOFTRESET_BACO_POSTRESET_VM_RCA_20261114.md](GFX803_R1_SOFTRESET_BACO_POSTRESET_VM_RCA_20261114.md) and the read-only `gfx803_reset_wave_chronology.py` tool/tests.
+
+The first November KIQ `-110` and `KCQ disable failed` occur **before** BACO. `gfx_v8_0_hw_fini` **discards** the KCQ-disable return; GFX8 soft reset can report success despite failed queue quiescence. After BACO, the source's normal IP-resume phase2 includes gfx/KIQ/compute ring tests, and the observed `GPU reset(2) succeeded!` follows the full-reinit path. **Within two seconds**, however, `kwin_wayland` encounters a gfx timeout and **VM fault (vmid 7, pasid 7)**. This is the strongest current post-BACO discriminator: a transient basic ring-test success need not imply durable shader/VM/graphics progress.
+
+**R1 is now SOURCE-TRACED / CAUSAL FAULT UNKNOWN**, not physically closed. The repair priority shifts to comparing the first post-reset *actual graphics GPUVM fault* against the GART/VM page-table, VRAM-loss and compositor-context recreation invariants, as well as verifying that CP/MEC/KIQ registers/firmware genuinely survive into normal workloads. Do not assert the KIQ stayed dead continuously after BACO or that a GPUVM fault proves broken kernel mappings rather than stale userspace state. The original journal cannot distinguish those cases.
+
+**Exact remaining A2 gates:**
+- **A2a** trace the GFX8 VM fault source and post-reset page-table/BO repair, including distinguishable newly-created versus pre-reset contexts
+- **A2b** produce a source-level instrumentation/diagnostic patch proving which full-reset substep and fresh ring/VM command first fails
+- **A2c** test controlled new-graphics/new-KFD execution *only* on independently recoverable hardware
+- **R4** correct the causally identified restore mechanism and reproduce recovery without reboot
+
+Existing C1b startup RFC remains **R3 containment**, not hardware recovery. The new offline analyzer tests are committed, not yet validated by CI/TrueNAS.
+
+
+### 14 November — R1/A2a exact VM generation and fault-code verification
+
+See [GFX803_R1_A2A_VRAM_CONTEXT_GUARDS_AND_FAULT_DECODE_20261114.md](GFX803_R1_A2A_VRAM_CONTEXT_GUARDS_AND_FAULT_DECODE_20261114.md), plus the CPU-only GFX8 fault decoder and tests.
+
+**Priority hierarchy correction:** sustained compute-associated queue/ring nonprogress remains the leading *initiating* investigation (T1), and post-failure hardware reset integrity is R1. The 12:39:32 KWin VMID7 fault is a post-reset discriminator, not sufficient to identify the original TopK/WhisperX hang cause.
+
+**V1 source completed, incident closure OPEN:** v7.3 `amdgpu_vm_generation` includes `vram_lost_counter`; context creation saves the token; `amdgpu_cs.c` rejects stale contexts with `-ECANCELED` and `amdgpu_job.c` also rejects stale jobs at final scheduling. `amdgpu_ctx_query2` reports VRAMLOST, while `amdgpu_vm_validate` and CS VM handling recreate and update BO/page table state. **Do not claim the kernel lacks VRAM-loss gating** or that the incident proves an existing context bypassed it.
+
+**V2 source decode complete, PTE attribution OPEN:** `VM_CONTEXT1_PROTECTION_FAULT_STATUS=0x0E0C4001` includes protection bitfield `0x01`, VMID 7 and a read, with separate `TC3` memory client. `0x01` is not by itself a unique page-not-present diagnosis. Need contemporaneous actual PTE/PDE/BO evidence to choose between invalid mapping, stale context and hardware-side translation failure.
+
+**Proposed module parameter correction:** `vm_fault_stop=1` is documented as *print first*, not a reliable halt-before-cascade. `vm_update_mode=3` performs CPU-side graphics and compute VM updates, a possible controlled comparison but not unique evidence of PT transport cause. Both require safe non-display testing before fault induction.
+
+**External evidence classification:** [RPCS3 #16844](https://github.com/RPCS3/rpcs3/issues/16844) contains authentic 2025 GFX8 KIQ/KCQ/BACO and post-reset compute ring test failure (strong shared recovery-failure signature, not same initiating instruction). [Pop!_OS #4132](https://github.com/pop-os/pop/issues/4132) is **Navi 10**, not Polaris, and is only a generic AMDGPU-compositor failure analogy.
+
+Next cut remains T1 pre-reset stalled workload/queue and R1 post-BACO per-ring actual work, then V1/V2 first-post-reset graphics generation/VM mapping evidence; none warrants a claim of physical kernel repair. New unit tests are committed but await a confirmed run.
+
+
+### 14 November — pre-timeout graphics corruption and browser termination: newly reported symptom gate
+
+**New user-reported observations:** graphical corruption may occur **before** the GPU crash; at other times Chrome or Firefox may unexpectedly close. These symptoms are not yet timestamp-correlated with the retained November or March ring-timeout traces. They must **not** be silently treated as post-reset-only consequences, nor assigned to GPU causality without independent evidence.
+
+**Revise causal priority:** T0 pre-timeout graphics/browser symptoms → T1 original sustained compute-associated ring stall → R1 failed recovery and later KWin VM fault. The current R1 journal begins with kernel messages; lack of earlier graphics artifact records does not mean no artifacts existed. Browser process termination is ambiguous (GPU-process exit/restart, compositor/renderer device loss, OOM kill, SIGSEGV/abort, unrelated browser crash). Both browsers sharing GPU acceleration with Plasma/ROCm offers a *testable cross-workload hypothesis*, not proof of shared initiating hardware defect.
+
+**P0 — first-precursor capture (OPEN):** distinguish visual artifact type, exact time and whether it occurs before compute, during compute, or without compute. Match process-exit records in `journalctl -b` (`systemd-oomd`, `Out of memory`, `Killed process`, `segfault`, `core dumped`, `amdgpu`, `drm`, `kwin`) with coredumps (`coredumpctl list`) and browser own GPU-process/crash reports. A browser *tab* failing is not the browser main process being killed; require PID, signal/exit code and whether GPU process restarted. Search already retained original log before asking for new captures.
+
+**P1 — stress correlation (OPEN):** classify independent conditions: idle desktop/ordinary browser, sustained HIP compute with desktop active, and prior historical long inference. Do not induce crashes on the only display RX580. Include temperature, VRAM pressure, power and GPU utilization only when genuinely measured. If corruption precedes a ring timeout it can favor memory/scheduling/firmware instability; if browser is OOM-killed with no GPU messages it is a distinct pressure failure.
+
+**P2 — update R4 selection (OPEN):** investigate *first* loss of correct graphics/memory execution (when evidenced), not only post-BACO VMID7 fault. Retain the latter as recovery-specific consequence. Define success as no pretimeout visual corruption, no correlated browser GPU crash, sustained compute forward progress, and usable graphics/compute after controlled recovery.
+
+This is an **observation-gated hypothesis** until logs or reproduction receipts distinguish the mechanisms.
+
+### 14 November — user-confirmed pre-hang visual corruption (P0 chronology correction)
+
+**Confirmed user observation:** visible graphics corruption occurs **right before the GPU crash**. This is not an open question about whether corruption also occurs during idle browsing; do not ask that question again or dilute it into a hypothetical post-reset artifact. The associated incidents involve sustained compute/inference stress, but the first GPU instruction/queue to stop progressing remains unknown. Distinguish observation from independently timestamped trace: the historical journal starts at first recorded kernel timeout and does **not** timestamp the preceding visual corruption.
+
+**Prioritized causal chronology:** sustained compute-associated work → **visible pre-timeout graphics corruption** → gfx/compute command-ring timeout and failed queue preemption/KIQ ring test → GFX8 soft reset/BACO → recurrent post-reset GFX/VM faults, no durable recovery. The user also reports occasional browser (Chrome/Firefox) termination, but its PID/signal/GPU-process-versus-main-process/OOM classification is still unproven and must **not** be asserted to be a VRAM-loss guard action.
+
+**Max-cut priority:** first inspect shared graphics/compute resource integrity *before* reset (workload/CP-MEC fairness, memory bandwidth/VRAM/GTT/SDMA, DPM stability and contemporaneous GPU faults), then follow R1 recovery. Any specific memory-eviction race or voltage/VRAM failure remains a hypothesis. No destructive reproduction on the single display RX580; offline evidence and source first.
+
+
+### T1/T2 execution round — source-verified memory/preemption maximum cut (14 Nov)
+
+**Authoritative new deliverable:** [GFX803_T1_T2_PREHANG_MAXCUT_SOURCE_AND_SVM_RACE_20261114.md](GFX803_T1_T2_PREHANG_MAXCUT_SOURCE_AND_SVM_RACE_20261114.md). Covers the 20/25/27/30 March and 14 Nov incident first-failure matrix, kernel v7.3 KFD/TTM/VM fence chain, AMD-reviewed Nov 9 SVM concurrency bug, external evidence applicability and the T3 falsification gates.
+
+**T1-0 historical join: COMPLETE at retained-note level, physical initiating command OPEN.** March 20 Ollama had pink/green checkerboard and first explicitly cited **compute `comp_1.3.1` timeout**. March 25 and Nov 14 first *recorded* timeout is gfx/KWin. March 27 WhisperX stops after transcribe starts; one March 30 no-profiler run completes transcribe and enters align then hangs, while profiler alters outcome. User confirms visible corruption immediately before device hang; no original pre-hang timing/clock or browser signal receipt was available.
+
+**T2-A scheduler/preemption: SOURCE-TRACED, root cause OPEN.** `unmap_queues_cpsch` waits for hardware completion and queries HIQ preemption failure. `amdkfd_fence_wait_timeout` distinguishes reset/fatal `-EIO` from actual timeout `-ETIME`; November's `qcm fence wait loop timeout expired` arises **later** than the first reported KFD quiesce failure, so cannot automatically be retroactively assigned to the first failure.
+
+**T2-B normal graphics memory fences: SOURCE-TRACED, missing edge NOT DEMONSTRATED.** `amdgpu_ttm` creates move fences; `amdgpu_vm_bo_update` synchronizes against BO reservation and KFD fences; `amdgpu_cs_vm_handling` collects PT and final VM update fences. Any generic claim that TTM moves are unfenced is rejected pending a specific producer→consumer counterexample.
+
+**T2-B4 NEW concrete original KFD SVM race:** In Linux `v7.3`, `kfd_svm.c::svm_range_evict` increments `evicted_ranges` and immediately returns for value greater than one, even if first concurrent `kgd2kfd_quiesce_mm` has not finished. AMD's 9 Nov 2026 [reviewed SVM quiescence patch](https://lore-kernel.gnuweeb.org/amd-gfx/9ea351fa-982b-4d9c-8471-03e168852c83@amd.com/T/) fixes this with a process `evict_lock`. The source branch is **actually present in v7.3**. Staged [v7.3 RFC port](../patches/linux/gfx803-t1-svm-concurrent-eviction-v73-rfc.patch) (4/4 hunk content and line-count checks against original v7.3 blobs) and [CPU-only Python tests](../tests/test_gfx803_svm_evict_interleavings.py), [git-apply test](../tests/test_gfx803_svm_patch_context.py). **No kernel build/installed module, no hardware test.**
+
+**Offline model receipt:** [gfx803_t2_svm_two_notifier_exhaustive_model_20261114.json](receipts/gfx803_t2_svm_two_notifier_exhaustive_model_20261114.json) records an executed 2-invalidator state exploration: original 35 states with an unsafe early return; lock version 25 states without early return **if quiesce succeeds**; with quiesce failure it remains unsafe even with the lock. This proves a simplified ordering counterexample only, not execution on Polaris.
+
+**T2-C DPM/VRAM hardware:** no matched `sclk/mclk`, load, temperature or page-eviction telemetry identified in retained cited notes. User-observed pre-hang corruption justifies investigating power/VRAM as a separate control but does **not** prove physical board failure.
+
+**Controls corrected:** 2025 LKML RX580 bisect is a historical original reported regression; July 2026 pre-reset SDMA-drain proposal is *multi-GPU* and questioned in review; Sept 2026 DCC multi-entity workaround is *gfx12*; legacy ROCm issue #4919 is *RX6800 XT* and #6386 is *gfx1103 MES*, not RX580. CachyOS #930 is RX590 Polaris PRT, while Bazzite #3383 explicitly RX580 artifacts. No conflation with VCE regression #1091. v7.3 `amdgpu.reset_method=0` is legacy, `4` BACO; do not use `1` as legacy.
+
+**Next exact gates:** **T1-F1** match actual first failing TopK HSACO/queue to CP/MEC fence (219 CCOB members do not themselves establish dispatch); **T2-B4a** prove any incident-time SVM range, notifier overlap and preemption window before considering port as repair; **T2-B4b** kernel/lockdep/reviewer validation; **T2-B1** producer-move/PT fence counterexample or negative result; **T2-C1** read-only historical clocks and VRAM pressure if archived; **R4/R5** separate post-BACO recovery fix and hardware no-reboot test. No known-wedging GPU run on the display card.
+
+### T1/T2 evidence provenance reconciliation — 61 source records (14 Nov)
+
+**Canonical [external/source reference ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md)** now accounts for 60 original upstream/community/kernel URL records, including negative-control cases and earlier R1 patch links. Link inclusion is **not** scientific acceptance; records distinguish verified source, firsthand anecdote, prior-only inspection, dead/unavailable link and claim/target mismatch. Future references must update the ledger instead of being scattered only in the chat.
+
+**T2-U corrected March userptr evidence:** exact v7.3 `amdgpu_amdkfd_gpuvm.c::init_user_pages` logs `Failed to get user pages: -1` through HMM `amdgpu_ttm_tt_get_user_pages`; the March 20 Ollama string is **userptr**, not proof of `kfd_svm.c::svm_range_evict`. Userptr's `notifier_lock` and SVM's missing `evict_lock` are different source paths.
+
+**B4 event discriminator sharpened:** plain `MMU_NOTIFY_UNMAP` takes `svm_range_unmap_from_cpu`; other invalidations reach `svm_range_evict`. AMD's upstream Nov 9 fix names pageable `hipMemcpy` >1 MiB as a possible SVM-range producer. Must prove original process SVM registration and actual concurrent invalidations, not infer from `hipMalloc` alone. Existing RFC stays draft.
+
+**Provenance corrections:** Original July and September `lists.freedesktop.org/archives/amd-gfx/...` URLs could not be retrieved. Do not equate their numerical suffixes with `mail-archive.com` message numbers; those are different archive namespaces. The **independently verified** Sept 24 gfx12 DCC thread is a different reference. Framework CWSR workaround concerns FW16 7840HS; Reddit LocalLLM diarization report is RX6750XT; Manjaro Firefox/KWin report is RX480/X11. RX580-specific Arch/Bazzite/Reedit cases are useful comparison observations, not host RCA proofs.
+
+**Next max-cut:** T1 original first command/fence, T2-U userptr HMM `-1` context and flags, T2-B4 original SVM registration and overlap, T2-B1 producer→consumer fence receipt, T3 independently recoverable hardware controls. No default tracing event or writable debugfs knob assumed to exist.
+
+
+### T1/T2 big-cut implementation — original evidence joins and strict event witness (14 Nov 2026)
+
+**Actual delivered files, single draft PR #7:** [T1 source/binary/copy provenance](GFX803_T1_DISPATCH_MEMORY_PROVENANCE.md), [T2 exact B1–B4 synchronization audit](GFX803_T2_KFD_SVM_USERPTR_FENCE_AUDIT.md), [8-original-input gate receipt](receipts/gfx803_t1_t2_gate_matrix.json), [offline join parser](../scripts/gfx803_incident_join.py), [join tests](../tests/test_gfx803_incident_join.py), [structured KFD SVM-event correlator](../scripts/gfx803_kfd_event_correlation.py), and [event negative controls](../tests/test_gfx803_kfd_event_correlation.py). All source references remain in the [61-entry ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md).
+
+| Exact gate | Result in this implementation round | Remaining acceptance / scope |
+| --- | --- | --- |
+| **A1** workload allocator/copy | March Ollama `init_user_pages -1` **userptr/HMM** source verified; WhisperX actual D2H/H2D host waits and possible pageable HSA lock; TopK selected `mbtopk` source path, cached-wheel process | Actual relevant PASID/BO/SVM allocation records absent |
+| **A2** first nonprogressing dispatch | November raw first logged gfx timeout `kwin_wayland` 12:39:28, signaled/emitted `131707128/131707130`; source-selected `mbtopk`, original ELF SHA/Build ID from prior receipts | **OPEN:** historical actual HSACO, grid/queue/PASID, first stalled compute instruction, original coredump unavailable after reboot |
+| **A3** historical MMU | November 1,308-line kernel log scanned, zero named SVM/userptr events, *trace coverage absent*; March userptr `-1` in retained note | **OPEN:** absence of strings is no-SVM conclusion; no notifier timeline recorded |
+| **A4** original incident join | March 20 `comp_1.3.1` with pink/green checkerboard; March 27 transcribe incomplete; March 30 D2H/H2D waits and profiler/blocking controls; November first reported gfx and failed recovery | DONE at source/retrospective level, not causally one root defect |
+| **B1** SVM race | Actual v7.3 missing serialisation, AMD reviewed 9 Nov patch, source-context RFC and 35/25-state model; new strict same-mm/PASID/boot overlap parser | **OPEN:** original TopK/WhisperX SVM registration, two relevant non-UNMAP invalidations before quiesce end, kernel build and physical test |
+| **B2** userptr | `init_user_pages -> amdgpu_ttm_tt_get_user_pages` and `notifier_lock` mapped; actual March `-1` cited | **OPEN:** HMM failure cause/errno call site process flags, ordering vs first compute stall |
+| **B3** preemption | `unmap_queues_cpsch`, `pm_send_query_status`, fence -EIO/-ETIME branches; Nov late qcm timeout evidenced | **OPEN:** first 12:39:28 internal return, exact queue/pasid/doorbell/HIQ state |
+| **B4** TTM/GPUVM | Source-level move-fence, BO reservation, PTE update and graphics CS sync graph | **OPEN:** actual offending BO producer→consumer edge; no blanket missing-fence assertion |
+| **T3** safe falsification | Only **offline** parser/correlator and checks staged, no GPU operations | Need signed event schema and trace completeness on independently recoverable hardware; no known-wedging TopK replay |
+| **T4/T5** fix and no-reboot recovery | SVM `evict_lock` RFC candidate, R1 soft-reset RCA existing | Kernel build/lockdep, proof of activated mechanism, real GPU and Wayland no-reboot acceptance **OPEN** |
+
+**Regression test status:** new Python unittest files are committed but **not yet executed in this ChatGPT tool session**; a historical eight-input evidence join was **executed using read-only GitHub file retrieval**, separately from the new parser's test suite. Do not interpret a schema-checked synthetic witness as incident-time evidence.
+
+**Highest-information next cut:** recover any **existing** original HSA runtime/ROCprof/devcoredump/loader map recorded on TrueNAS; if none can be recovered, a timestamped, complete, safe-host **same PASID/boot** allocation and SVM/quiesce event trace is required for B1. Evaluate whether the February/March workload's HMM userptr error preceded or merely accompanied ring timeout. Preserve pre-hang visual artifacts in T0 and R1 failed post-reset hardware recovery as separate causal gates.
+
+
+### 14 Nov evening — manually armed original case4 repro capture staged
+
+**Operator intent:** user plans one future controlled reproduction after deciding host is ready. This is **not** permission for automatic execution. Implementation in **existing draft PR #7**: [one-shot runbook](GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md), [host-side launcher](../scripts/gfx803_one_shot_repro_capture.py), [exact-case child](../scripts/gfx803_one_shot_case4.py), [inert manual KFD bpftrace](../scripts/gfx803_case4_kfd_returns.bt), [durable kernel-probe stream sink](../scripts/gfx803_durable_stream.py) and [10 CPU-only refusal/identity tests](../tests/test_gfx803_one_shot_capture.py).
+
+**Original recovered Python core ties** incident case 4 to 10 warmups/50 iterations, Nix overlay `/nix/store/vq1lgpc49im7qvvxgxabykyfs47l2ykb-gfx803-schaka101-torch-candidate-overlay/torch-site`, staged ROCm `/nix/store/5dbvxcs7l4mvnj1cq3ybbkdm15jpvqr9-staged-rocm`, SGEMM shim `LD_PRELOAD`, and `libtorch_hip.so` SHA `c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff`. Original core [receipt](receipts/gfx803_topk_incident_core_provenance_20261114.json) was already accepted; the present launcher does not reconstruct/guarantee original full dynamic loader environment, but pins original GPU binary and records preload SHA before any dispatch.
+
+**Arming contract:** dry-run is default; `--arm` requires local interactive typed confirmation; baseline mode requires fresh already-running KFD return-probe evidence; ROCprof mode is explicit and can alter timing. Host preflight refuses a missing original Nix library, wrong digest, absent shim preload, unreadable kernel journal, missing requested profiler or existing output directory. One child invocation of benchmark `_one(4,10,50)` only; fsync per kernel/probe/output line and before first GPU work; periodic two-second host heartbeat, 20-second reset tail after child failure; no retries, auto reboots, automatic GPU recovery or after-failure GPU healthcheck.
+
+**No GPU or KFD trace has been executed by ChatGPT.** New tests committed but not yet validated in CI/local Python. Existing suite 38/38 PASS was operator-reported *before* these new files; do not misstate it as testing the new harness.
+
+**First-run capture acceptance:** ROCprof kernel dispatch record with symbol/grid/queue and time **plus** KFD return-probe event during same new run, with host journal and exact binary hash; T1.07 gets an observed kernel launch, and K2.05 gets a new-run retval (not retroactive Nov 14 retval). A launch record alone does **not** identify the first stalled GPU kernel; unresolved tail flush and reporter effects must be preserved. Actual SVM range/notifier overlap still needs separate PASID-specific capture, not supplied by this KFD-only probe.
+
+**Caution:** deliberately rerunning the original shape on the sole Wayland RX580 can wedge the system and require forced reboot. The runbook openly says so and prefers independently recoverable test hardware. A manually selected risky run is not reclassified as safe by a typed acknowledgement.
+
+
+### 14 Nov evening — one-shot postmortem and live return-probe capture ready
+
+**Manually operator-armed only.** The [one-shot capture runbook](GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md) now includes complete two-terminal KFD trace and original ROCprof case4 invocation, exact original `libtorch_hip` SHA, Nix `torch-site` overlay, inherited SGEMM preload provenance, local persistent fsynced log and post-reboot preservation. `--arm` requires a local typed risk statement; no automatic replays or driver reset, no code installed.
+
+**Extended code:** [offline postmortem join](../scripts/gfx803_one_shot_postmortem.py) + [7 negative-control tests](../tests/test_gfx803_one_shot_postmortem.py) consumes preflight, durable child stdout, journal, KFD bpftrace JSONL and ROCprof CSV. It reports **first actually captured new-run KFD return** and last ROCprof launch metadata but leaves the **first stalled GPU instruction**, SVM notifier overlap and stable recovery gates OPEN. Truncated/missing ROCprof output is inconclusive. **One-shot capture tests now total 12 (CPU-only)**, separate from 7 postmortem tests.
+
+**No actual execution of the known-wedging case has occurred here; all new Python files are committed but not yet run locally or in CI**. The operator-reported 38/38 tests passed on an earlier commit, before this new harness. No physical acceptance or first actual dispatch claim.
+
+**Safety and expected fork:** If no KFD symbols or exact preflight identity are available, do not fake the evidence or use a system ROCm fallback. If a new run produces ROCprof kernel records **and** KFD first-return records, evaluate new-run T1/K2 with timestamp provenance and separate first stalled kernel from last launched kernel. Otherwise do not repeat the destructive run just to generate another reset journal.

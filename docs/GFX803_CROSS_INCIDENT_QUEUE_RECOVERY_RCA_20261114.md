@@ -198,3 +198,7 @@ The TopK benchmark now requires independently recoverable-host attestation for *
 - **Safety:** one desktop RX 580 is not a recovery isolation environment. Do not reenact March/November destructive runs there.
 
 The *primary programme* is common recovery RCA/fix; TopK and WhisperX are independent probes for that common failure class.
+
+## Original source register and verification caveat
+
+The [61-entry original source/URL ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) includes every cross-incident source, upstream link and negative control processed through 14 November. A source-matched userptr `init_user_pages -1` line in March Ollama **does not** demonstrate a second concurrent KFD SVM invalidation. Exact original `lists.freedesktop.org` July/Sept pages were unavailable; numeric matches at `mail-archive.com` do not identify their content. Avoid upgrading related reports to a proven initiating defect.
