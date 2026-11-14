@@ -95,9 +95,32 @@ def main() -> int:
     original["torch_file"] = str(actual_torch)
     original["torch_version"] = torch.__version__
     original["hip_version"] = torch.version.hip
-    original["ld_preload_present"] = bool(os.environ.get("LD_PRELOAD"))
+    preload = os.environ.get("LD_PRELOAD", "")
+    original["ld_preload_present"] = bool(preload)
     if not original["ld_preload_present"]:
         parser.error("original incident used a SGEMM shim preload; LD_PRELOAD absent")
+    # Preserve concrete preload identities without copying system environment
+    # secrets into the receipt. The incident's shim hash was not recorded,
+    # so this is provenance, not a false exact-shim identity verification.
+    import shlex
+    loaded_preloads = []
+    for raw in shlex.split(preload.replace(":", " ")):
+        entry = Path(raw)
+        if not entry.is_file():
+            parser.error(f"LD_PRELOAD library not resolvable: {entry}")
+        loaded_preloads.append({"path": str(entry.resolve()),
+                                "sha256": sha256(entry),
+                                "bytes": entry.stat().st_size})
+    original["preload_libraries"] = loaded_preloads
+    # This is only the host dynamic-loader snapshot before HIP device work.
+    # Kernel code-object dispatch cannot be inferred from shared lib maps.
+    try:
+        original["pre_dispatch_maps_relevant"] = sorted(set(
+            line.split()[-1] for line in Path("/proc/self/maps").read_text().splitlines()
+            if any(term in line.lower() for term in
+                   ("libtorch_hip", "libamdhip64", "libhsa-runtime64", "sgemm"))))
+    except OSError:
+        original["pre_dispatch_maps_relevant"] = []
     a.receipt.parent.mkdir(parents=True, exist_ok=True)
     with a.receipt.open("x", encoding="utf-8", buffering=1) as fd:
         emit(fd, "pre_gpu_dispatch", case=CASE, shape=SHAPE, k=K,
