@@ -66,7 +66,9 @@ class MessagePackTests(unittest.TestCase):
         found=m.notes(blob)
         self.assertEqual(len(found),1)
         self.assertTrue(found[0]["msgpack_decoded"])
-        self.assertEqual(m.kernels_from_notes(found)[0]["name"],"gather")
+        kernel=m.kernels_from_notes(found)[0]
+        self.assertEqual(kernel["name"],"gather")
+        self.assertFalse(kernel["topk_name_match"])
     def test_wrong_elf_machine_refused(self):
         data=bytearray(synthetic_elf({}))
         struct.pack_into("<H",data,18,62)

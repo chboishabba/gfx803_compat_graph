@@ -18,6 +18,14 @@ MAX_FILE=128*1024*1024
 MAX_NODES=100000
 MAX_DEPTH=32
 MAX_BLOB=8*1024*1024
+# Keep this deliberately narrower than generic selection/indexing kernels.
+# ``gather`` is used across unrelated ATen operations and is not evidence of
+# a TopK implementation.  The accepted spellings mirror the host-side TopK
+# attribution audit.
+TOPK_KERNEL_NAME=re.compile(
+    r"mbtopk|sbtopk|warptopk|gatherTopK|TensorTopK|(?:^|[_:])topk(?:[_:<>]|$)",
+    re.I,
+)
 
 class DecodeError(ValueError):pass
 
@@ -142,7 +150,7 @@ def kernels_from_notes(entries:list[dict])->list[dict]:
                         ".max_flat_workgroup_size"):
                 if key in k:props[key]=k[key]
             out.append({"name":name,"properties":props,
-                        "topk_name_match":bool(re.search(r"mbtopk|topk|gather",name,re.I))})
+                        "topk_name_match":bool(TOPK_KERNEL_NAME.search(name))})
             if len(out)>10000:raise ValueError("too many metadata kernels")
     return out
 
