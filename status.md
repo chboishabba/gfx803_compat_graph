@@ -249,3 +249,24 @@ and original test logs take precedence over status prose.
   docs/GFX803_T113_T114_CCOB_ALL_MEMBERS_20261114.md.
 - T1.06 original build/loader proof, T1.07 actual incident
   dispatch, K2.05 internal fence return and release all OPEN.
+
+## K1.03/K2.01 exact CachyOS source and callback audit — 14 November
+
+- The published `cachyos-7.3.0-2.tar.gz` source release was retrieved to
+  TrueNAS and SHA-256 verified as
+  `cb70a96c13f491230366596d72698f5192f907e6c457ef25b03d28eacc99a23a`.
+  Only the relevant AMDGPU/KFD files were extracted.
+- Four central KFD source files and `kfd_queue.c` are byte-identical to the
+  Linux v7.3 reference used by the earlier static analysis. The exact
+  CachyOS release source therefore confirms the non-MES
+  `unmap_queues_cpsch -> amdkfd_fence_wait_timeout` log site, the KIQ ring
+  test helper, and the KCQ-disable error site.
+- The 2025 gfx7/8 doorbell fix is **present**, not missing: both gfx7 and
+  gfx8 bridge tables register intentional zero-return
+  `kgd_hqd_sdma_get_doorbell` stubs. Read-only postboot-module disassembly
+  found both compiled stubs returning zero. The distinct gfx7/8 AQL
+  half-queue-size validation is also present.
+- These facts do not establish historical callback invocation, the incident
+  fence return, or a source-to-rebuilt-module identity. The TopK dispatch and
+  KFD recovery remain separate causal gates. Receipt:
+  `docs/receipts/gfx803_kfd_exact_release_doorbell_queue_20261114.json`.

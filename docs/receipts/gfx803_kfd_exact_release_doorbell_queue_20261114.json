@@ -1,0 +1,60 @@
+{
+  "binary_source_rebuild_match": false,
+  "callback_called_in_incident": null,
+  "callbacks": {
+    "amdgpu_amdkfd_gfx_v7.c": {
+      "callback_assignment": true,
+      "callback_implementation": true,
+      "intentional_zero_return_stub": true,
+      "path": "/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/cachyos-7.3.0-2-amd-kfd-source/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gfx_v7.c",
+      "sha256": "188271f37fcaa4ba234afc1bd8c1b9e38947cf530bd786de6d0bcee980403d22"
+    },
+    "amdgpu_amdkfd_gfx_v8.c": {
+      "callback_assignment": true,
+      "callback_implementation": true,
+      "intentional_zero_return_stub": true,
+      "path": "/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/cachyos-7.3.0-2-amd-kfd-source/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gfx_v8.c",
+      "sha256": "77cbbb8bf7ab66c33874e728b0386ecf8f7154b2d5a2449502eb1b630c801a21"
+    }
+  },
+  "gpu_executed": false,
+  "incident_queue_validation_path": null,
+  "limits": [
+    "zero-return callbacks protect unconditional calls; they do not supply a doorbell value",
+    "source presence does not establish historical callback invocation",
+    "the original KFD return and TopK kernel remain unobserved"
+  ],
+  "mode": "offline-source-only-doorbell-queue-audit",
+  "postboot_module": {
+    "path": "/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/amdgpu.ko.postboot",
+    "sha256": "20df0ac89a22e67b94bb24158092a77ec593616c518338747f8618eda4f5d35f",
+    "stub_symbol_count": 2,
+    "stubs": [
+      {
+        "address": "0x2ca770",
+        "zero_return_instruction": true
+      },
+      {
+        "address": "0x2d9000",
+        "zero_return_instruction": true
+      }
+    ],
+    "two_zero_return_stubs_present": true
+  },
+  "queue_validation": {
+    "gfx7_8_guard": true,
+    "half_queue_size": true,
+    "path": "/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/cachyos-7.3.0-2-amd-kfd-source/drivers/gpu/drm/amd/amdkfd/kfd_queue.c",
+    "ring_validation_uses_expected_size": true,
+    "sha256": "8acf80a02d9684739ad772b8819be9c273840c7027686886045820cd472a01db"
+  },
+  "queue_validation_source_present": true,
+  "schema": 1,
+  "sdma_callback_source_present": true,
+  "source_release_sha256": "cb70a96c13f491230366596d72698f5192f907e6c457ef25b03d28eacc99a23a",
+  "source_root": "/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/cachyos-7.3.0-2-amd-kfd-source",
+  "upstream_patches": {
+    "gfx7_8_queue_validation": "542c3bb836733a1325874310d54d25b4907ed10e",
+    "sdma_callback": "34659c1a1f4fd4c148ab13e13b11fd64df01ffcd"
+  }
+}
