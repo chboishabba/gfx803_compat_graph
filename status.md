@@ -141,3 +141,16 @@ and original test logs take precedence over status prose.
 - K2.05/T1 and stable KFD reset recovery **OPEN**; prioritize
   historical boot state and offline TopK code-object mapping,
   then only a recoverable non-display-host trace.
+
+
+## T1.05 offline ELF/code-object tooling — 14 November
+
+- Exact candidate HIP SHA/Build ID gate, TopK ELF symbol/fatbin
+  inventory, optional AMDGPU ELF candidate extraction, regression
+  tests and extended KFD/TopK join committed, **host run pending**.
+- K2.06 GFX8 non-MES reference path, T1.04 mbtopk source candidate
+  established by 7e0d5dd; T1.06 source→binary build linkage and
+  T1.07 actually selected kernel/HSACO **OPEN**. K2.05 actual KFD
+  return and KFD durable recovery remain OPEN.
+- Runbook: docs/GFX803_T105_K206_MBTopK_BINARY_MAXCUT_20261114.md.
+- No new GPU runs, kernel fixes or Schaka PR changes.
