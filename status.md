@@ -194,3 +194,20 @@ and original test logs take precedence over status prose.
   for one-run commands and the preferred small JSON data handoff.
 - K2.05 incident fence return and T1.07 actual executing HSACO
   remain OPEN; no GPU run.
+
+## T1.08 CCOB/container audit executed — 14 November
+
+- The fatbin is a CCOB v3 compressed container.  Its first header describes
+  an internal member, not the full concatenated payload; the declared-size
+  mismatch is therefore not classified as corruption.
+- The matching staged ROCm 10.1 `clang-offload-bundler` lists one unique
+  target, `hip-amdgcn-amd-amdhsa--gfx803`, repeated **219** times alongside
+  219 host bundles.  The target parser was corrected to accept the normal
+  `hip-` spelling and record unique IDs plus occurrence counts.
+- Offline unbundling of that explicit target produced a 5,246,152-byte
+  AMDGPU ELF with `gfx803` flags (SHA-256
+  `3aacb81a0c571c10d842922935db1f248a59602746d0497f5aa383fad101a0c8`).
+  It remains local; neither it nor the 42.9 MB fatbin is committed.
+- Static symbols and metadata contain no readable `mbtopk`, `topk`, or
+  `gather` label.  That does not refute the source candidate and is not proof
+  of incident dispatch; T1.07 remains OPEN.  No GPU/HIP work occurred.

@@ -1,0 +1,135 @@
+{
+  "chronology": {
+    "non_mes_text": {
+      "line": 14,
+      "record": "Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: The cp might be in an unrecoverable state due to an unsuccessful queues preemption"
+    },
+    "quiesce": {
+      "line": 15,
+      "record": "Nov 14 12:39:28 cachy-lambo kernel: amdgpu: Failed to quiesce KFD"
+    }
+  },
+  "gates": {
+    "F1": {
+      "reason": "no causal kernel/queue repair attributed",
+      "status": "blocked"
+    },
+    "J1": {
+      "reason": "no paired incident-time GPU dispatch and KFD return",
+      "status": "open"
+    },
+    "K2.03": {
+      "evidence": "original quiescence source path",
+      "status": "source-mapped"
+    },
+    "K2.04": {
+      "reason": "both MES and non-MES exist; historical setting not established",
+      "status": "conditional-branches-compiled"
+    },
+    "K2.05": {
+      "actual_return": null,
+      "incident_branch": null,
+      "reason": "retained journal has no incident-time DQM return or trace",
+      "status": "open"
+    },
+    "K2.06": {
+      "exact_cachyos_match": false,
+      "incident_return": null,
+      "path": "evict_process_queues_cpsch -> unmap_queues_cpsch -> amdkfd_fence_wait_timeout",
+      "status": "reference-source-mapped"
+    },
+    "T1": {
+      "first_kernel": null,
+      "reason": "static wheel/source inventory cannot prove incident GPU dispatch",
+      "status": "open"
+    },
+    "T1.04": {
+      "build_link_proven": false,
+      "candidate": "mbtopk",
+      "executed_kernel": null,
+      "status": "source-candidate"
+    },
+    "T1.05": {
+      "actual_executed_hsaco": null,
+      "build_link_proven": false,
+      "elf_build_id": "392fee76f7a23e82b345dae1b40d02bd0ea32cd5",
+      "fatbin_sections": 1,
+      "status": "binary-inventory"
+    },
+    "release": {
+      "reason": "persistent GPU wedge/Wayland loss after unsuccessful recovery",
+      "status": "blocked"
+    }
+  },
+  "gpu_rerun": false,
+  "schema": 1,
+  "scope": "offline-only",
+  "trace_probe_inventory": [],
+  "trace_unresolved": [
+    "evict",
+    "unmap",
+    "mes",
+    "reset_mes"
+  ],
+  "warning": "neither incident branch nor DQM return is established",
+  "wheel_provenance": {
+    "hash_scope": "libtorch_hip.so only; unrelated shared objects are listed but not read",
+    "kind": "overlay",
+    "libs": [
+      {
+        "bytes": 1569792,
+        "name": "torch/lib/libc10.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 655088,
+        "name": "torch/lib/libc10_hip.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 16456,
+        "name": "torch/lib/libcaffe2_nvrtc.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 53264,
+        "name": "torch/lib/libshm.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 63640,
+        "name": "torch/lib/libtorch.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 278155088,
+        "name": "torch/lib/libtorch_cpu.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 15120,
+        "name": "torch/lib/libtorch_global_deps.so",
+        "sha256": null,
+        "topk_hip_library": false
+      },
+      {
+        "bytes": 176436000,
+        "name": "torch/lib/libtorch_hip.so",
+        "sha256": "dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2",
+        "topk_hip_library": true
+      },
+      {
+        "bytes": 36953864,
+        "name": "torch/lib/libtorch_python.so",
+        "sha256": null,
+        "topk_hip_library": false
+      }
+    ]
+  }
+}

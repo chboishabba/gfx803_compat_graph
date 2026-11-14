@@ -116,7 +116,10 @@ If one is installed, re-run into a **new** output filename
 with `--bundler /opt/rocm/llvm/bin/clang-offload-bundler`
 (or its actual `command -v` path). Only after an actual
 `gfx803` target appears in `available_targets` is
-`--unbundle-gfx803 "$OUT/gfx803.hsaco"` justified.
+`--unbundle-gfx803 "$OUT/gfx803.hsaco"` justified.  The receipt
+deduplicates repeated target IDs and separately records their occurrence
+counts: one unique gfx803 target may legitimately occur in many bundled
+objects.
 Read-only `readelf -h -n -Ws` and LLVM kernel metadata inspection
 then identify code-object architecture and resources; no assumption
 that inclusion proves benchmark dispatch.

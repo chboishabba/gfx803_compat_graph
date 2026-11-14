@@ -45,10 +45,11 @@ class OffloadInspectionTests(unittest.TestCase):
         self.assertEqual(bundle.classify(b"\x7fELF"+b"\0"*64,68)["kind"],"direct-elf")
         self.assertEqual(bundle.classify(b"other",5)["kind"],"unknown")
     def test_target_list_fails_closed_to_single_gfx803(self):
-        lines="hipv4-amdgcn-amd-amdhsa--gfx803\nhipv4-amdgcn-amd-amdhsa--gfx900\n"
+        lines="hip-amdgcn-amd-amdhsa--gfx803\nhip-amdgcn-amd-amdhsa--gfx803\nhipv4-amdgcn-amd-amdhsa--gfx900\n"
         out=bundle.target_lines(lines)
-        self.assertEqual(len(out),2)
-        self.assertEqual(len([x for x in out if x.endswith("--gfx803")]),1)
+        self.assertEqual(len(out),3)
+        self.assertEqual(bundle.unique_targets(out), [
+            "hip-amdgcn-amd-amdhsa--gfx803", "hipv4-amdgcn-amd-amdhsa--gfx900"])
     def test_readonly_classification_and_output_gate(self):
         with tempfile.TemporaryDirectory() as t:
             f=Path(t)/"fatbin.bin"

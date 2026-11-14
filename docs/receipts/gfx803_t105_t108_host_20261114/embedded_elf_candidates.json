@@ -1,0 +1,16 @@
+{
+  "actual_dispatched_hsaco": null,
+  "embedded_amdgpu_elf_candidates": [],
+  "fatbin_sha256": "35733398518e0a82aadbf64a7f9e80874069f4da40e401b4bf772cab37623de3",
+  "fatbin_size_bytes": 42919798,
+  "limitations": [
+    "embedded ELF inclusion is not incident execution evidence",
+    "candidate extent may omit trailing bundle wrapper metadata",
+    "compressed or non-ELF code objects are not found",
+    "ELF metadata is not a reliable kernel grid/occupancy record",
+    "no HIP initialization or GPU workload"
+  ],
+  "mode": "offline-fatbin-scan",
+  "scan_cap_reached": false,
+  "schema": 1
+}

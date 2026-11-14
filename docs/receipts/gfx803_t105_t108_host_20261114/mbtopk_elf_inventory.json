@@ -1,0 +1,2829 @@
+{
+  "actual_incident_executed_hsaco": null,
+  "actual_incident_first_stalled_kernel": null,
+  "build_id": "392fee76f7a23e82b345dae1b40d02bd0ea32cd5",
+  "build_link_to_retained_source_proven": false,
+  "case_bounds": [
+    {
+      "cols": 151936,
+      "full_sort_indices_bytes_min": 1215488,
+      "full_sort_key_bytes_min": 607744,
+      "input_bytes_f32_min": 607744,
+      "k": 50,
+      "notes": "Lower bounds only: not actual mbtopk temp buffer, CTAs, occupancy, LDS or registers",
+      "output_indices_i64_bytes_min": 400,
+      "output_values_bytes_f32_min": 200,
+      "rows": 1,
+      "single_row_scaling_factor": 1,
+      "total_elements": 151936
+    },
+    {
+      "cols": 151936,
+      "full_sort_indices_bytes_min": 38895616,
+      "full_sort_key_bytes_min": 19447808,
+      "input_bytes_f32_min": 19447808,
+      "k": 50,
+      "notes": "Lower bounds only: not actual mbtopk temp buffer, CTAs, occupancy, LDS or registers",
+      "output_indices_i64_bytes_min": 12800,
+      "output_values_bytes_f32_min": 6400,
+      "rows": 32,
+      "single_row_scaling_factor": 32,
+      "total_elements": 4861952
+    }
+  ],
+  "extracted_fatbin": [
+    {
+      "path": "/mnt/truenas/comet-net/experiments/gfx803_t105_k206_20261114_r2/libtorch_hip_fatbin.bin",
+      "sha256": "35733398518e0a82aadbf64a7f9e80874069f4da40e401b4bf772cab37623de3",
+      "size_bytes": 42919798,
+      "type": "ELF section payload; NOT a proven HSACO or dispatched kernel"
+    }
+  ],
+  "libtorch_hip": "/mnt/truenas/comet-net/.gfx803-schaka-101-work/out/pytorch-topk-gfx803-20261109/python-overlay-r2/torch/lib/libtorch_hip.so",
+  "limitations": [
+    "readelf symbol presence cannot prove runtime selection",
+    ".hip_fatbin may hold bundles; extraction is not kernel extraction",
+    "source and ELF matching names are not build provenance",
+    "grid, LDS, VGPR/SGPR, synchronization and real workspaces require exact code object metadata",
+    "no GPU/HIP work executed"
+  ],
+  "matching_symbols": [
+    {
+      "address": "0000000000000000",
+      "binding": "GLOBAL",
+      "index": 1143,
+      "name": "_ZN2at4meta15structured_topk4metaERKNS_6TensorEllbb",
+      "section": "UND",
+      "size_bytes": 0,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e7c8",
+      "binding": "WEAK",
+      "index": 3393,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EsmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c4e500",
+      "binding": "WEAK",
+      "index": 3401,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi512ELi1EN3c108BFloat16EmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c29550",
+      "binding": "WEAK",
+      "index": 3423,
+      "name": "_ZN2at6native6sbtopk6launchIfmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 770,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ea48",
+      "binding": "WEAK",
+      "index": 3443,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi256ELi1EdmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b35700",
+      "binding": "WEAK",
+      "index": 3449,
+      "name": "_ZN2at6native6mbtopk38__device_stub__computeBlockDigitCountsIajjLi1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EEjPjjS8_iijT1_PSB_Ps",
+      "section": "12",
+      "size_bytes": 297,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bd9260",
+      "binding": "WEAK",
+      "index": 3456,
+      "name": "_ZN2at6native8warptopk6launchIimLi2EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 8015,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778daa8",
+      "binding": "WEAK",
+      "index": 3460,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi64ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bd29d0",
+      "binding": "WEAK",
+      "index": 3465,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EamLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778c820",
+      "binding": "WEAK",
+      "index": 3475,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EhjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d138",
+      "binding": "WEAK",
+      "index": 3482,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EsjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778dc78",
+      "binding": "WEAK",
+      "index": 3485,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b64a30",
+      "binding": "WEAK",
+      "index": 3486,
+      "name": "_ZN2at6native6sbtopk6launchIsjLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 737,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cc20",
+      "binding": "WEAK",
+      "index": 3497,
+      "name": "_ZN2at6native6mbtopk23computeBlockDigitCountsIajjLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EEjPjjS8_iijT1_PSB_Ps",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b6bfd0",
+      "binding": "WEAK",
+      "index": 3499,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1EsjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b7a900",
+      "binding": "WEAK",
+      "index": 3508,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EdjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c405c0",
+      "binding": "WEAK",
+      "index": 3525,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1EN3c104HalfEmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bd5610",
+      "binding": "WEAK",
+      "index": 3540,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1EamLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c119e0",
+      "binding": "WEAK",
+      "index": 3541,
+      "name": "_ZN2at6native8warptopk6launchIdmLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 8015,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c3b270",
+      "binding": "WEAK",
+      "index": 3546,
+      "name": "_ZN2at6native6sbtopk6launchIN3c104HalfEmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 770,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e600",
+      "binding": "WEAK",
+      "index": 3549,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1ElmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ebf8",
+      "binding": "WEAK",
+      "index": 3569,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EfmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c31290",
+      "binding": "WEAK",
+      "index": 3570,
+      "name": "_ZN2at6native6mbtopk6launchIN3c104HalfEmLi1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 3618,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d330",
+      "binding": "WEAK",
+      "index": 3583,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EsjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778f120",
+      "binding": "WEAK",
+      "index": 3584,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi512ELi1EN3c108BFloat16EmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b7d320",
+      "binding": "WEAK",
+      "index": 3587,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1EdjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b377b0",
+      "binding": "WEAK",
+      "index": 3591,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EajLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e608",
+      "binding": "WEAK",
+      "index": 3594,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d790",
+      "binding": "WEAK",
+      "index": 3604,
+      "name": "_ZN2at6native6mbtopk23computeBlockDigitCountsIfjjLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EEjPjjS8_iijT1_PSB_Ps",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778f188",
+      "binding": "WEAK",
+      "index": 3614,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EN3c108BFloat16EmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778f060",
+      "binding": "WEAK",
+      "index": 3626,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi128ELi1EN3c108BFloat16EmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bd28b0",
+      "binding": "WEAK",
+      "index": 3627,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi64ELi1EamLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e490",
+      "binding": "WEAK",
+      "index": 3628,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi256ELi1ElmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c06160",
+      "binding": "WEAK",
+      "index": 3631,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EsmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778c808",
+      "binding": "WEAK",
+      "index": 3660,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EhjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778cf38",
+      "binding": "WEAK",
+      "index": 3662,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIljLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b7a7f0",
+      "binding": "WEAK",
+      "index": 3668,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi64ELi1EdjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b27c50",
+      "binding": "WEAK",
+      "index": 3672,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EhjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c51e60",
+      "binding": "WEAK",
+      "index": 3676,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EN3c108BFloat16EmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c490d0",
+      "binding": "WEAK",
+      "index": 3710,
+      "name": "_ZN2at6native6mbtopk6launchIN3c108BFloat16EmLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 3618,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b34e80",
+      "binding": "WEAK",
+      "index": 3721,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi64ELi1EajLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b9b150",
+      "binding": "WEAK",
+      "index": 3724,
+      "name": "_ZN2at6native6sbtopk6launchIN3c104HalfEjLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 737,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cb30",
+      "binding": "WEAK",
+      "index": 3730,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi256ELi1EajLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2e1e0",
+      "binding": "WEAK",
+      "index": 3734,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EfmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b47860",
+      "binding": "WEAK",
+      "index": 3738,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi64ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cb10",
+      "binding": "WEAK",
+      "index": 3740,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EajLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bafa00",
+      "binding": "WEAK",
+      "index": 3741,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ef90",
+      "binding": "WEAK",
+      "index": 3751,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EN3c104HalfEmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d778",
+      "binding": "WEAK",
+      "index": 3797,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi256ELi1EfjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e820",
+      "binding": "WEAK",
+      "index": 3801,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi256ELi1EsmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b590f0",
+      "binding": "WEAK",
+      "index": 3843,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b6a160",
+      "binding": "WEAK",
+      "index": 3845,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1EsjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bf5ca0",
+      "binding": "WEAK",
+      "index": 3853,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f0d0",
+      "binding": "WEAK",
+      "index": 3866,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1EN3c108BFloat16EmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ef68",
+      "binding": "WEAK",
+      "index": 3868,
+      "name": "_ZN2at6native6mbtopk10gatherTopKIN3c104HalfEmLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_jjPS8_PjSF_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b5bb10",
+      "binding": "WEAK",
+      "index": 3910,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778c858",
+      "binding": "WEAK",
+      "index": 3914,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EhjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "00000000010a64c0",
+      "binding": "GLOBAL",
+      "index": 3915,
+      "name": "_ZN2at4cuda8topk_outERNS_6TensorES2_RKS1_llbb",
+      "section": "12",
+      "size_bytes": 95,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bf88e0",
+      "binding": "WEAK",
+      "index": 3917,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e8e0",
+      "binding": "WEAK",
+      "index": 3940,
+      "name": "_ZN2at6native6mbtopk10gatherTopKIsmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_jjPS6_PjSD_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778f1f0",
+      "binding": "WEAK",
+      "index": 3944,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EN3c108BFloat16EmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b34820",
+      "binding": "WEAK",
+      "index": 3959,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EajLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e638",
+      "binding": "WEAK",
+      "index": 3978,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1ElmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ea38",
+      "binding": "WEAK",
+      "index": 4010,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EdmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778c970",
+      "binding": "WEAK",
+      "index": 4019,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EhjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b281a0",
+      "binding": "WEAK",
+      "index": 4061,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EhjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b7af60",
+      "binding": "WEAK",
+      "index": 4068,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi64ELi1EdjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e358",
+      "binding": "WEAK",
+      "index": 4073,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EimLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2bd80",
+      "binding": "WEAK",
+      "index": 4075,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1EfmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c52640",
+      "binding": "WEAK",
+      "index": 4080,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EN3c108BFloat16EmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b59fa0",
+      "binding": "WEAK",
+      "index": 4082,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi64ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ed48",
+      "binding": "WEAK",
+      "index": 4094,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EfmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778cff0",
+      "binding": "WEAK",
+      "index": 4109,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EljLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b47310",
+      "binding": "WEAK",
+      "index": 4111,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1EijLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cb68",
+      "binding": "WEAK",
+      "index": 4140,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi256ELi1EajLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b260e0",
+      "binding": "WEAK",
+      "index": 4143,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi128ELi1EhjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e1a0",
+      "binding": "WEAK",
+      "index": 4144,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi256ELi1EamLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2e9c0",
+      "binding": "WEAK",
+      "index": 4145,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EfmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cb48",
+      "binding": "WEAK",
+      "index": 4153,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EajLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778efc8",
+      "binding": "WEAK",
+      "index": 4166,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EN3c104HalfEmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bbfa30",
+      "binding": "WEAK",
+      "index": 4178,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EhmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002be26b0",
+      "binding": "WEAK",
+      "index": 4179,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi64ELi1EimLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d568",
+      "binding": "WEAK",
+      "index": 4180,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi256ELi1EdjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b49d30",
+      "binding": "WEAK",
+      "index": 4184,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EijLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c51680",
+      "binding": "WEAK",
+      "index": 4190,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EN3c108BFloat16EmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bb1c80",
+      "binding": "WEAK",
+      "index": 4191,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIN3c108BFloat16EjLin1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_PS8_",
+      "section": "12",
+      "size_bytes": 305,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c09c40",
+      "binding": "WEAK",
+      "index": 4204,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EsmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bd4bf0",
+      "binding": "WEAK",
+      "index": 4205,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EamLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b37010",
+      "binding": "WEAK",
+      "index": 4236,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIajLi2ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 305,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c40c90",
+      "binding": "WEAK",
+      "index": 4262,
+      "name": "_ZN2at6native6mbtopk25__device_stub__gatherTopKIN3c104HalfEmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_jjPS8_PjSF_j",
+      "section": "12",
+      "size_bytes": 417,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ebf0",
+      "binding": "WEAK",
+      "index": 4263,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EfmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ce70",
+      "binding": "WEAK",
+      "index": 4265,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi256ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778eb88",
+      "binding": "WEAK",
+      "index": 4273,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EfmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d1c8",
+      "binding": "WEAK",
+      "index": 4284,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1EsjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778f108",
+      "binding": "WEAK",
+      "index": 4289,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1EN3c108BFloat16EmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b46880",
+      "binding": "WEAK",
+      "index": 4291,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi512ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b304f0",
+      "binding": "WEAK",
+      "index": 4297,
+      "name": "_ZN2at6native6mbtopk6launchIajLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 3558,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bae1c0",
+      "binding": "WEAK",
+      "index": 4311,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EN3c108BFloat16EjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dac8",
+      "binding": "WEAK",
+      "index": 4312,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi256ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778dd08",
+      "binding": "WEAK",
+      "index": 4338,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIN3c108BFloat16EjLin1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_PS8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d768",
+      "binding": "WEAK",
+      "index": 4356,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EfjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bd3370",
+      "binding": "WEAK",
+      "index": 4362,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIamLi2ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 318,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c51b00",
+      "binding": "WEAK",
+      "index": 4377,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EN3c108BFloat16EmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f228",
+      "binding": "WEAK",
+      "index": 4381,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EN3c108BFloat16EmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d368",
+      "binding": "WEAK",
+      "index": 4389,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIsjLin1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b69f40",
+      "binding": "WEAK",
+      "index": 4404,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EsjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bf5a60",
+      "binding": "WEAK",
+      "index": 4415,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d7a0",
+      "binding": "WEAK",
+      "index": 4430,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIfjLi3ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778daf0",
+      "binding": "WEAK",
+      "index": 4442,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi64ELi1EN3c108BFloat16EjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ea70",
+      "binding": "WEAK",
+      "index": 4444,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EdmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778c9a8",
+      "binding": "WEAK",
+      "index": 4466,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EhjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b76040",
+      "binding": "WEAK",
+      "index": 4467,
+      "name": "_ZN2at6native8warptopk6launchIdjLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 7622,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dcc0",
+      "binding": "WEAK",
+      "index": 4473,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1EN3c108BFloat16EjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e020",
+      "binding": "WEAK",
+      "index": 4475,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EamLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d8c8",
+      "binding": "WEAK",
+      "index": 4476,
+      "name": "_ZN2at6native6mbtopk29computeBlockwiseWithinKCountsIjN3c104HalfEEEvPT_PsPjjibS8_PT0_S8_S6_S8_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e460",
+      "binding": "WEAK",
+      "index": 4481,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b6c960",
+      "binding": "WEAK",
+      "index": 4484,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1EsjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bf86a0",
+      "binding": "WEAK",
+      "index": 4499,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b7b290",
+      "binding": "WEAK",
+      "index": 4500,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EdjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dbf8",
+      "binding": "WEAK",
+      "index": 4511,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EN3c108BFloat16EjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c384f0",
+      "binding": "WEAK",
+      "index": 4515,
+      "name": "_ZN2at6native8warptopk6launchIN3c104HalfEmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 8015,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bb8850",
+      "binding": "WEAK",
+      "index": 4539,
+      "name": "_ZN2at6native8warptopk6launchIhmLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 8015,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ed10",
+      "binding": "WEAK",
+      "index": 4567,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIfmLi3ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d028",
+      "binding": "WEAK",
+      "index": 4568,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EljLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b7a2d0",
+      "binding": "WEAK",
+      "index": 4572,
+      "name": "_ZN2at6native6mbtopk44__device_stub__computeBlockwiseWithinKCountsImdEEvPT_PsPjjibS6_PT0_S6_S4_S6_j",
+      "section": "12",
+      "size_bytes": 297,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b38140",
+      "binding": "WEAK",
+      "index": 4573,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EajLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e650",
+      "binding": "WEAK",
+      "index": 4575,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1ElmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778c7f0",
+      "binding": "WEAK",
+      "index": 4579,
+      "name": "_ZN2at6native6mbtopk29computeBlockwiseWithinKCountsIjhEEvPT_PsPjjibS6_PT0_S6_S4_S6_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e1c0",
+      "binding": "WEAK",
+      "index": 4583,
+      "name": "_ZN2at6native6mbtopk10gatherTopKIamLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_jjPS6_PjSD_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b8a770",
+      "binding": "WEAK",
+      "index": 4590,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EfjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b6bdb0",
+      "binding": "WEAK",
+      "index": 4606,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EsjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778c850",
+      "binding": "WEAK",
+      "index": 4624,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EhjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002be2e90",
+      "binding": "WEAK",
+      "index": 4633,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi64ELi1EimLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e008",
+      "binding": "WEAK",
+      "index": 4634,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EamLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d5a0",
+      "binding": "WEAK",
+      "index": 4635,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi256ELi1EdjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c3a440",
+      "binding": "WEAK",
+      "index": 4638,
+      "name": "_ZN2at6native6mbtopk6launchIN3c104HalfEmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 3618,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e308",
+      "binding": "WEAK",
+      "index": 4643,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EimLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778dd30",
+      "binding": "WEAK",
+      "index": 4644,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi256ELi1EhmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bd53d0",
+      "binding": "WEAK",
+      "index": 4652,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EamLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002ba0610",
+      "binding": "WEAK",
+      "index": 4654,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EN3c104HalfEjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b5a3e0",
+      "binding": "WEAK",
+      "index": 4660,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c52b60",
+      "binding": "WEAK",
+      "index": 4667,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIN3c108BFloat16EmLin1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_PS8_",
+      "section": "12",
+      "size_bytes": 318,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b56ac0",
+      "binding": "WEAK",
+      "index": 4676,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi64ELi1EljLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e7f0",
+      "binding": "WEAK",
+      "index": 4677,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi512ELi1EsmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c3cf60",
+      "binding": "WEAK",
+      "index": 4683,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EN3c104HalfEmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ee88",
+      "binding": "WEAK",
+      "index": 4692,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EN3c104HalfEmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b7d100",
+      "binding": "WEAK",
+      "index": 4694,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EdjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b39c50",
+      "binding": "WEAK",
+      "index": 4699,
+      "name": "_ZN2at6native8warptopk6launchIijLi1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 7622,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b7bab0",
+      "binding": "WEAK",
+      "index": 4711,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIdjLi2ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 305,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ec28",
+      "binding": "WEAK",
+      "index": 4714,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EfmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bb0390",
+      "binding": "WEAK",
+      "index": 4727,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EN3c108BFloat16EjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ebc0",
+      "binding": "WEAK",
+      "index": 4728,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EfmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ccd8",
+      "binding": "WEAK",
+      "index": 4755,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EijLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bae930",
+      "binding": "WEAK",
+      "index": 4766,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EN3c108BFloat16EjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cc68",
+      "binding": "WEAK",
+      "index": 4767,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EijLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d980",
+      "binding": "WEAK",
+      "index": 4774,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EN3c104HalfEjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b8b830",
+      "binding": "WEAK",
+      "index": 4781,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIfjLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 305,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bbf7f0",
+      "binding": "WEAK",
+      "index": 4783,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EhmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b70280",
+      "binding": "WEAK",
+      "index": 4792,
+      "name": "_ZN2at6native8warptopk6launchIdjLi2EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 7622,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b4cc40",
+      "binding": "WEAK",
+      "index": 4816,
+      "name": "_ZN2at6native6mbtopk6launchIljLi1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 3622,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f268",
+      "binding": "WEAK",
+      "index": 4824,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIN3c108BFloat16EmLin1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_PS8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c1a7c0",
+      "binding": "WEAK",
+      "index": 4848,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIdmLi2ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 318,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778db48",
+      "binding": "WEAK",
+      "index": 4859,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ce60",
+      "binding": "WEAK",
+      "index": 4863,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c3b940",
+      "binding": "WEAK",
+      "index": 4865,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EN3c104HalfEmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d1b8",
+      "binding": "WEAK",
+      "index": 4880,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EsjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b25120",
+      "binding": "WEAK",
+      "index": 4887,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EhjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778da48",
+      "binding": "WEAK",
+      "index": 4892,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EN3c104HalfEjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002be27d0",
+      "binding": "WEAK",
+      "index": 4908,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EimLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c2aec0",
+      "binding": "WEAK",
+      "index": 4910,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIfmLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 318,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ce00",
+      "binding": "WEAK",
+      "index": 4916,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIijLi3ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e058",
+      "binding": "WEAK",
+      "index": 4921,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EamLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b27b40",
+      "binding": "WEAK",
+      "index": 4956,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EhjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dc30",
+      "binding": "WEAK",
+      "index": 4958,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EN3c108BFloat16EjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d420",
+      "binding": "WEAK",
+      "index": 4964,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EdjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b35830",
+      "binding": "WEAK",
+      "index": 4976,
+      "name": "_ZN2at6native6mbtopk44__device_stub__computeBlockwiseWithinKCountsIjaEEvPT_PsPjjibS6_PT0_S6_S4_S6_j",
+      "section": "12",
+      "size_bytes": 297,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c2b6c0",
+      "binding": "WEAK",
+      "index": 4977,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EfmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002ba6970",
+      "binding": "WEAK",
+      "index": 4990,
+      "name": "_ZN2at6native8warptopk6launchIN3c108BFloat16EjLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 7622,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002baf8f0",
+      "binding": "WEAK",
+      "index": 5025,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EN3c108BFloat16EjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ded8",
+      "binding": "WEAK",
+      "index": 5027,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1EhmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b78c30",
+      "binding": "WEAK",
+      "index": 5031,
+      "name": "_ZN2at6native6sbtopk6launchIdjLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 737,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cb38",
+      "binding": "WEAK",
+      "index": 5039,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi512ELi1EajLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e390",
+      "binding": "WEAK",
+      "index": 5041,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIimLi3ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e170",
+      "binding": "WEAK",
+      "index": 5044,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EamLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2e300",
+      "binding": "WEAK",
+      "index": 5049,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EfmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bd5970",
+      "binding": "WEAK",
+      "index": 5107,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EamLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e340",
+      "binding": "WEAK",
+      "index": 5116,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EimLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ef80",
+      "binding": "WEAK",
+      "index": 5127,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1EN3c104HalfEmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ec10",
+      "binding": "WEAK",
+      "index": 5134,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1EfmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b7d650",
+      "binding": "WEAK",
+      "index": 5143,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EdjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b47ca0",
+      "binding": "WEAK",
+      "index": 5147,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cfd8",
+      "binding": "WEAK",
+      "index": 5150,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EljLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b25fd0",
+      "binding": "WEAK",
+      "index": 5158,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi64ELi1EhjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c3e8e0",
+      "binding": "WEAK",
+      "index": 5163,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EN3c104HalfEmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c064c0",
+      "binding": "WEAK",
+      "index": 5179,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EsmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bd36f0",
+      "binding": "WEAK",
+      "index": 5187,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi128ELi1EamLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dbd8",
+      "binding": "WEAK",
+      "index": 5216,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIN3c108BFloat16EjLi2ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_PS8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b4a6c0",
+      "binding": "WEAK",
+      "index": 5217,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d9b8",
+      "binding": "WEAK",
+      "index": 5228,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EN3c104HalfEjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2c620",
+      "binding": "WEAK",
+      "index": 5249,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi64ELi1EfmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b46d90",
+      "binding": "WEAK",
+      "index": 5258,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIijLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 305,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c18260",
+      "binding": "WEAK",
+      "index": 5262,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EdmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778cfb8",
+      "binding": "WEAK",
+      "index": 5303,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi512ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e4e8",
+      "binding": "WEAK",
+      "index": 5309,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c23430",
+      "binding": "WEAK",
+      "index": 5313,
+      "name": "_ZN2at6native6sbtopk6launchIfmLi2EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 770,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f138",
+      "binding": "WEAK",
+      "index": 5326,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIN3c108BFloat16EmLi2ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bSA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_PS8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c3d2c0",
+      "binding": "WEAK",
+      "index": 5331,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1EN3c104HalfEmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b25890",
+      "binding": "WEAK",
+      "index": 5337,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EhjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778da80",
+      "binding": "WEAK",
+      "index": 5338,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EN3c104HalfEjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002be3a70",
+      "binding": "WEAK",
+      "index": 5370,
+      "name": "_ZN2at6native6sbtopk25__device_stub__gatherTopKIimLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "12",
+      "size_bytes": 318,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c2d820",
+      "binding": "WEAK",
+      "index": 5390,
+      "name": "_ZN2at6native6mbtopk38__device_stub__computeBlockDigitCountsIfmjLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EEjPjjS8_iijT1_PSB_Ps",
+      "section": "12",
+      "size_bytes": 298,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c52520",
+      "binding": "WEAK",
+      "index": 5396,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EN3c108BFloat16EmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bcd360",
+      "binding": "WEAK",
+      "index": 5397,
+      "name": "_ZN2at6native6sbtopk6launchIamLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 770,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b282b0",
+      "binding": "WEAK",
+      "index": 5404,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EhjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bf6480",
+      "binding": "WEAK",
+      "index": 5433,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1ElmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d308",
+      "binding": "WEAK",
+      "index": 5439,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EsjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bb0060",
+      "binding": "WEAK",
+      "index": 5469,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EN3c108BFloat16EjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e1a8",
+      "binding": "WEAK",
+      "index": 5481,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EamLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c169e0",
+      "binding": "WEAK",
+      "index": 5485,
+      "name": "_ZN2at6native6mbtopk6launchIdmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 3650,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c3bca0",
+      "binding": "WEAK",
+      "index": 5495,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EN3c104HalfEmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bc6440",
+      "binding": "WEAK",
+      "index": 5497,
+      "name": "_ZN2at6native6mbtopk6launchIamLi1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 3615,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bf90c0",
+      "binding": "WEAK",
+      "index": 5498,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi128ELi1ElmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e5f0",
+      "binding": "WEAK",
+      "index": 5500,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIlmLi3ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002be62b0",
+      "binding": "WEAK",
+      "index": 5506,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EimLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c3efa0",
+      "binding": "WEAK",
+      "index": 5509,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi128ELi1EN3c104HalfEmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d570",
+      "binding": "WEAK",
+      "index": 5520,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EdjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b34b50",
+      "binding": "WEAK",
+      "index": 5522,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EajLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b9f730",
+      "binding": "WEAK",
+      "index": 5526,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EN3c104HalfEjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b59d80",
+      "binding": "WEAK",
+      "index": 5541,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EljLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dd50",
+      "binding": "WEAK",
+      "index": 5547,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi64ELi1EhmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778efb8",
+      "binding": "WEAK",
+      "index": 5549,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1EN3c104HalfEmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bedfe0",
+      "binding": "WEAK",
+      "index": 5553,
+      "name": "_ZN2at6native8warptopk6launchIlmLi3EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 8015,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ee38",
+      "binding": "WEAK",
+      "index": 5558,
+      "name": "_ZN2at6native6mbtopk10gatherTopKIN3c104HalfEmLi1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_jjPS8_PjSF_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ec48",
+      "binding": "WEAK",
+      "index": 5559,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1EfmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c4f220",
+      "binding": "WEAK",
+      "index": 5569,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EN3c108BFloat16EmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b7ddc0",
+      "binding": "WEAK",
+      "index": 5570,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi256ELi1EdjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ccf8",
+      "binding": "WEAK",
+      "index": 5591,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi256ELi1EijLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b26740",
+      "binding": "WEAK",
+      "index": 5592,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi64ELi1EhjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c3f0c0",
+      "binding": "WEAK",
+      "index": 5595,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EN3c104HalfEmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b8b100",
+      "binding": "WEAK",
+      "index": 5600,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EfjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d1b0",
+      "binding": "WEAK",
+      "index": 5604,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EsjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c06ca0",
+      "binding": "WEAK",
+      "index": 5611,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EsmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b6c740",
+      "binding": "WEAK",
+      "index": 5620,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EsjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778c8b0",
+      "binding": "WEAK",
+      "index": 5621,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi128ELi1EhjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778def0",
+      "binding": "WEAK",
+      "index": 5627,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi128ELi1EhmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bf8460",
+      "binding": "WEAK",
+      "index": 5634,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e050",
+      "binding": "WEAK",
+      "index": 5642,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EamLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778dfe8",
+      "binding": "WEAK",
+      "index": 5654,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EamLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778dd78",
+      "binding": "WEAK",
+      "index": 5656,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi256ELi1EhmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b57450",
+      "binding": "WEAK",
+      "index": 5675,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi64ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d418",
+      "binding": "WEAK",
+      "index": 5678,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EdjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c18a40",
+      "binding": "WEAK",
+      "index": 5683,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EdmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c3d980",
+      "binding": "WEAK",
+      "index": 5690,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi128ELi1EN3c104HalfEmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d3a8",
+      "binding": "WEAK",
+      "index": 5695,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EdjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b7da90",
+      "binding": "WEAK",
+      "index": 5702,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EdjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b26410",
+      "binding": "WEAK",
+      "index": 5719,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EhjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f178",
+      "binding": "WEAK",
+      "index": 5751,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi512ELi1EN3c108BFloat16EmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ccb0",
+      "binding": "WEAK",
+      "index": 5768,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EijLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c3daa0",
+      "binding": "WEAK",
+      "index": 5770,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi256ELi1EN3c104HalfEmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b19c20",
+      "binding": "WEAK",
+      "index": 5790,
+      "name": "_ZN2at6native8warptopk6launchIhjLi2EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 7622,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f0b8",
+      "binding": "WEAK",
+      "index": 5791,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EN3c108BFloat16EmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2caa0",
+      "binding": "WEAK",
+      "index": 5794,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi256ELi1EfmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c18020",
+      "binding": "WEAK",
+      "index": 5816,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EdmLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778db90",
+      "binding": "WEAK",
+      "index": 5843,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EN3c108BFloat16EjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c3c360",
+      "binding": "WEAK",
+      "index": 5848,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EN3c104HalfEmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d200",
+      "binding": "WEAK",
+      "index": 5863,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1EsjLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778e4d8",
+      "binding": "WEAK",
+      "index": 5869,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi128ELi1ElmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002bd2670",
+      "binding": "WEAK",
+      "index": 5874,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EamLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c07540",
+      "binding": "WEAK",
+      "index": 5879,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi64ELi1EsmLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002be31f0",
+      "binding": "WEAK",
+      "index": 5880,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EimLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b44630",
+      "binding": "WEAK",
+      "index": 5884,
+      "name": "_ZN2at6native6mbtopk6launchIijLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bjS8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 3562,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b56df0",
+      "binding": "WEAK",
+      "index": 5908,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi128ELi1EljLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778dca8",
+      "binding": "WEAK",
+      "index": 5924,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi512ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d1a0",
+      "binding": "WEAK",
+      "index": 5927,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIsjLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d9b0",
+      "binding": "WEAK",
+      "index": 5928,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi512ELi1EN3c104HalfEjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b352c0",
+      "binding": "WEAK",
+      "index": 5936,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi256ELi1EajLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002bd52b0",
+      "binding": "WEAK",
+      "index": 5938,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EamLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e330",
+      "binding": "WEAK",
+      "index": 5939,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi512ELi1EimLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b9fea0",
+      "binding": "WEAK",
+      "index": 5941,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi64ELi1EN3c104HalfEjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c2c0e0",
+      "binding": "WEAK",
+      "index": 5944,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EfmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778f260",
+      "binding": "WEAK",
+      "index": 5947,
+      "name": "_ZN2at6native6mbtopk10gatherTopKIN3c108BFloat16EmLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EESA_SA_bjSA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_jjPS8_PjSF_j",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b5a4f0",
+      "binding": "WEAK",
+      "index": 5955,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi512ELi1EljLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002c4fa00",
+      "binding": "WEAK",
+      "index": 5974,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EN3c108BFloat16EmLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "0000000002b47640",
+      "binding": "WEAK",
+      "index": 5979,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi2ELi2ELi512ELi1EijLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778ea68",
+      "binding": "WEAK",
+      "index": 5990,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EdmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002baceb0",
+      "binding": "WEAK",
+      "index": 5993,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi1ELi1ELi512ELi1EN3c108BFloat16EjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778df20",
+      "binding": "WEAK",
+      "index": 5994,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILin1ELin1ELi64ELi1EhmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778cb80",
+      "binding": "WEAK",
+      "index": 6002,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi512ELi1EajLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002c2ed20",
+      "binding": "WEAK",
+      "index": 6003,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EfmLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 283,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d1e8",
+      "binding": "WEAK",
+      "index": 6004,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EsjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d5f8",
+      "binding": "WEAK",
+      "index": 6028,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi256ELi1EfjLb1ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778ce88",
+      "binding": "WEAK",
+      "index": 6030,
+      "name": "_ZN2at6native6mbtopk23computeBlockDigitCountsIijjLin1EEEvNS_4cuda6detail10TensorInfoIKT_T0_EEjPjjS8_iijT1_PSB_Ps",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b4a060",
+      "binding": "WEAK",
+      "index": 6046,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILin1ELin1ELi512ELi1EijLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778e720",
+      "binding": "WEAK",
+      "index": 6052,
+      "name": "_ZN2at6native6sbtopk10gatherTopKIsmLi1ELb0EEEvNS_4cuda6detail10TensorInfoIKT_T0_EES8_S8_bS8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_PS6_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d450",
+      "binding": "WEAK",
+      "index": 6093,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi64ELi1EdjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d040",
+      "binding": "WEAK",
+      "index": 6097,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi256ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "0000000002b6abd0",
+      "binding": "WEAK",
+      "index": 6102,
+      "name": "_ZN2at6native8warptopk32__device_stub__warpMergeSortTopKILi3ELi3ELi128ELi1EsjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "12",
+      "size_bytes": 268,
+      "type": "FUNC"
+    },
+    {
+      "address": "000000000778d918",
+      "binding": "WEAK",
+      "index": 6108,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi2ELi2ELi512ELi1EN3c104HalfEjLb1ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EESA_SA_SA_SA_NS7_IS8_SA_EESA_NS7_IlSA_EESA_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d3e0",
+      "binding": "WEAK",
+      "index": 6111,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi1ELi1ELi512ELi1EdjLb0ELi32EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    },
+    {
+      "address": "000000000778d020",
+      "binding": "WEAK",
+      "index": 6112,
+      "name": "_ZN2at6native8warptopk17warpMergeSortTopKILi3ELi3ELi64ELi1EljLb0ELi64EEEvNS_4cuda6detail10TensorInfoIKT3_T4_EES8_S8_S8_S8_NS5_IS6_S8_EES8_NS5_IlS8_EES8_",
+      "section": "22",
+      "size_bytes": 8,
+      "type": "OBJECT"
+    }
+  ],
+  "mode": "offline-binary",
+  "offload_sections": [
+    {
+      "file_offset": 74391552,
+      "index": 15,
+      "name": ".hip_fatbin",
+      "size_bytes": 42919798,
+      "type": "PROGBITS"
+    }
+  ],
+  "original_source": {
+    "markers": {
+      "block_size": [],
+      "gridDim": [
+        678
+      ],
+      "mbtopk": [
+        648,
+        1275,
+        1476,
+        1553,
+        1560
+      ],
+      "multi_block": [
+        648
+      ],
+      "sbtopk": [
+        32,
+        441,
+        1496,
+        1555,
+        1562
+      ],
+      "should_use_multiblock": [
+        1478,
+        1552,
+        1559
+      ],
+      "threadIdx": [
+        115,
+        154,
+        320,
+        329,
+        330,
+        370,
+        371,
+        469,
+        511,
+        540,
+        677,
+        701,
+        767,
+        768,
+        775,
+        795,
+        819,
+        951,
+        1120,
+        1171
+      ],
+      "warptopk": [
+        444,
+        645,
+        1512,
+        1551
+      ]
+    },
+    "path": "/mnt/truenas/comet-net/.gfx803-schaka-101-work/out/pytorch-topk-gfx803-20261109/hip-audit-r3/TensorTopK.hip",
+    "sha256": "acb592c2c25db61b5048a224d64a7a022fbcda91c5cfaa156e4cfdfa1b58059d",
+    "size_bytes": 70822,
+    "source_binary_build_link_proven": false
+  },
+  "schema": 1,
+  "sha256": "dd0b4030c4034fdab10daa48dd260397f4de2348ad1cec7ef95474ebd05fa0d2",
+  "symbols_displayed": 300,
+  "symbols_total_matches": 6045,
+  "symbols_truncated_at": 300
+}

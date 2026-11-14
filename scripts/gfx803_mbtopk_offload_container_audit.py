@@ -108,8 +108,13 @@ def tool(argv:list[str])->dict:
 
 def target_lines(output:str)->list[str]:
     # Target IDs are printed one per line by clang-offload-bundler --list.
+    # HIP bundle IDs use `hip-amdgcn...`; the former character class omitted
+    # that second hyphen and silently discarded every actual HIP target.
     return [line.strip() for line in output.splitlines()
-            if re.match(r"^(hipv4?|host|openmp)-[A-Za-z0-9_+.:=-]+",line.strip())][:MAX_LIST]
+            if re.match(r"^(?:hip(?:v4)?|host|openmp)-[^\s]+$",line.strip())][:MAX_LIST]
+
+def unique_targets(targets:list[str])->list[str]:
+    return list(dict.fromkeys(targets))
 
 def audit(path:Path,tool_path:str|None, output:Path|None)->dict:
     if not path.is_file():raise ValueError("fatbin does not exist")
@@ -121,7 +126,7 @@ def audit(path:Path,tool_path:str|None, output:Path|None)->dict:
             "first_64_bytes_hex":header[:64].hex(),
             "header":classify(header,size),
             "bundler_candidates":bundlers(),"tool":None,
-            "available_targets":[],"gfx803_candidates":[],
+            "available_targets":[],"target_occurrences":{},"gfx803_candidates":[],
             "unbundled_output":None,
             "incident_executed_kernel":None,
             "source_binary_build_link_proven":False}
@@ -130,8 +135,10 @@ def audit(path:Path,tool_path:str|None, output:Path|None)->dict:
         t=tool([tool_path,"--type=o",f"--input={path}","--list"])
         result["tool"]=t
         if t.get("exit")==0:
-            targets=target_lines(t.get("stdout",""))
+            target_lines_seen=target_lines(t.get("stdout",""))
+            targets=unique_targets(target_lines_seen)
             result["available_targets"]=targets
+            result["target_occurrences"]={target:target_lines_seen.count(target) for target in targets}
             result["gfx803_candidates"]=[x for x in targets if x.endswith("--gfx803") or "--gfx803:" in x]
         if output:
             if output.exists():raise ValueError("will not overwrite output code object")

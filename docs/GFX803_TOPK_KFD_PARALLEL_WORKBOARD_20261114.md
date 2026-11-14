@@ -469,3 +469,20 @@ can answer architecture/metadata questions.
 
 T1.08 tool source implemented; host acceptance pending.
 T1.07 incident kernel dispatch and K2.05 original fence errno OPEN.
+
+## 14 November — T1.08 CCOB and gfx803 code-object inventory
+
+The matching staged ROCm 10.1 `clang-offload-bundler --list` identifies one
+unique `hip-amdgcn-amd-amdhsa--gfx803` target, occurring 219 times alongside
+219 host bundles.  The tool's HIP-target parser was corrected after it
+incorrectly excluded the `hip-` spelling; it now records unique target IDs and
+occurrence counts.
+
+Offline unbundling of that explicit target produced a local 5,246,152-byte
+AMDGPU ELF with `gfx803` header flags and SHA-256
+`3aacb81a0c571c10d842922935db1f248a59602746d0497f5aa383fad101a0c8`.
+It establishes packaged gfx803 code-object inclusion, not incident execution.
+No readable `mbtopk`, `topk`, or `gather` name appears in the static
+symbol/metadata scan, so the actual candidate kernel remains unselected.
+Only small JSON receipts are committed; the 42.9 MB fatbin and 5.25 MB code
+object stay host-local. No GPU/HIP runtime execution occurred.
