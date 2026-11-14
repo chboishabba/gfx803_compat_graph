@@ -890,3 +890,19 @@ cross-workload stability assay are reconciled in
 [docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md](GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md).
 That dated reconciliation does **not** alter Phase A–E exit criteria,
 replace original receipts, or promote a candidate to an accepted release.
+
+
+## 14 November 2026 — persistent GPU-wedge release gate
+
+The cached, *pre-review* TopK wheel's large-vocabulary benchmark
+triggered a GPU hang; the KFD/AMDGPU reset subsequently failed
+to restore usable queue/display operation until reboot.
+This supersedes any broad acceptance of that wheel. The existing
+factory A–E phase definitions remain intact; Phase B release and
+later automated stable promotion cannot claim reset safety.
+
+The parallel exact-kernel-source/debug-symbol work and first
+TopK-dispatch versus KFD-recovery attribution are tracked in
+[TopK/KFD parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md).
+No hardware rerun or causal driver patch is claimed by this
+documentation update.
