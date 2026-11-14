@@ -141,3 +141,19 @@ The contents may contain host identifiers, paths, PIDs, application details and 
 ## T4 — No automatic follow-up or retry
 
 Only the operator chooses any subsequent test, after evidence is preserved and independently recoverable hardware is available. The accepted result is an incident-matched dispatch/queue/return graph, followed later by a justified kernel/runtime correction and demonstrated usable graphics+compute after reset without reboot. Repeating case 4 without improving capture quality is not an acceptable next maximum cut.
+
+
+## T3.1 — Post-reboot machine-readable acceptance join (now implemented)
+
+The [offline postmortem analyzer](../scripts/gfx803_one_shot_postmortem.py) inspects the original `preflight.json`, durable child markers, last kernel ring/timeout lines, independently captured KFD return-probe JSONL and ROCprof CSV kernel records. It checks that a surviving child receipt still matches the **original core libtorch_hip SHA**, preserves any truncated JSONL warning, identifies the earliest return **in the newly captured stream** and keeps the first-stalled-GPU-kernel gate OPEN without fence/dispatch completion evidence.
+
+```bash
+# Only after the host has recovered, and using the literal OUT/KFD_LOG
+# paths saved before the crash; no /dev/kfd or GPU work.
+python3 -m unittest discover -s tests -p 'test_gfx803_one_shot_postmortem.py' -v
+python3 scripts/gfx803_one_shot_postmortem.py \
+  --capture "$OUT" --kfd-log "$KFD_LOG" \
+  --out "$OUT"/postmortem-gate-report.json
+```
+
+If KFD probes could not be armed, omit `--kfd-log`; the report must leave K2.05 **not captured**. If ROCprof lost its buffers, the report keeps dispatch metadata **not captured** even if the workload clearly produced a GPU hang. Do not equate the last ROCprof launch in its own time domain with the first stalled kernel; the clocks are not calibrated to kernel journal timestamps by this parser. The parser does not recursively ingest the 269 MB source archive or private core bytes. Preserve file hashes and reviewed minimal excerpts rather than committing raw memory.
