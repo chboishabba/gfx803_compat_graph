@@ -548,3 +548,20 @@ The **goal is durable GPU execution recovery**, not prettier logs, KFD reopening
 
 **Work R1/A1+A2 before promoting R3/B1+B2.** Trace the verified kernel's soft-reset → KIQ/KCQ → BACO/PCI → IP reinit → post-reset ring-test logic and isolate the earliest stage failing to make forward progress. Build a specific *hardware restoration* correction from that, rather than spending another round on reporting, cleanup or benchmark policy. In parallel, keep #7's RFC as a draft and complete safe mock/error semantics. After the hardware path is understood, run bounded physical tests on a recoverable device and promote factory Phase B only with new graphics AND compute functionality.
 
+
+
+### R1/A1–A2 source trace landed — 14 Nov 2026
+
+**New evidence:** [GFX803_R1_SOFTRESET_BACO_POSTRESET_VM_RCA_20261114.md](GFX803_R1_SOFTRESET_BACO_POSTRESET_VM_RCA_20261114.md) and the read-only `gfx803_reset_wave_chronology.py` tool/tests.
+
+The first November KIQ `-110` and `KCQ disable failed` occur **before** BACO. `gfx_v8_0_hw_fini` **discards** the KCQ-disable return; GFX8 soft reset can report success despite failed queue quiescence. After BACO, the source's normal IP-resume phase2 includes gfx/KIQ/compute ring tests, and the observed `GPU reset(2) succeeded!` follows the full-reinit path. **Within two seconds**, however, `kwin_wayland` encounters a gfx timeout and **VM fault (vmid 7, pasid 7)**. This is the strongest current post-BACO discriminator: a transient basic ring-test success need not imply durable shader/VM/graphics progress.
+
+**R1 is now SOURCE-TRACED / CAUSAL FAULT UNKNOWN**, not physically closed. The repair priority shifts to comparing the first post-reset *actual graphics GPUVM fault* against the GART/VM page-table, VRAM-loss and compositor-context recreation invariants, as well as verifying that CP/MEC/KIQ registers/firmware genuinely survive into normal workloads. Do not assert the KIQ stayed dead continuously after BACO or that a GPUVM fault proves broken kernel mappings rather than stale userspace state. The original journal cannot distinguish those cases.
+
+**Exact remaining A2 gates:**
+- **A2a** trace the GFX8 VM fault source and post-reset page-table/BO repair, including distinguishable newly-created versus pre-reset contexts
+- **A2b** produce a source-level instrumentation/diagnostic patch proving which full-reset substep and fresh ring/VM command first fails
+- **A2c** test controlled new-graphics/new-KFD execution *only* on independently recoverable hardware
+- **R4** correct the causally identified restore mechanism and reproduce recovery without reboot
+
+Existing C1b startup RFC remains **R3 containment**, not hardware recovery. The new offline analyzer tests are committed, not yet validated by CI/TrueNAS.
