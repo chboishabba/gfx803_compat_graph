@@ -270,3 +270,23 @@ and original test logs take precedence over status prose.
   fence return, or a source-to-rebuilt-module identity. The TopK dispatch and
   KFD recovery remain separate causal gates. Receipt:
   `docs/receipts/gfx803_kfd_exact_release_doorbell_queue_20261114.json`.
+
+## Cross-incident reset-order audit executed — 14 November
+
+- The cross-incident RCA is accepted as a **shared recovery-failure class**,
+  not a claim that Ollama, WhisperX, Wayland and TopK share one initiating
+  kernel bug. The first retained November timeout is a KWin gfx timeout; the
+  historic TopK process remains a temporal trigger rather than proven first
+  non-progressing kernel.
+- Six CPU-only audit contracts passed against the SHA-verified CachyOS
+  `7.3.0-2` extraction. Its source retains: reset-lock-before-KFD-preempt in
+  normal and PCI recovery, scheduler-resume-before-GPU/KFD-post-reset, and no
+  restore-during-reset `-EAGAIN` guard. The GFX8 KIQ quantum exemption is
+  already present.
+- The later 12:40:55 `qcm fence wait loop timeout expired` message maps to
+  the exact source branch returning `-ETIME`; it does **not** supply the
+  unknown internal return for the first 12:39:28 quiesce failure.
+- Receipt: `docs/receipts/gfx803_gfx8_reset_order_audit_20261114.json`.
+  No GPU/HIP execution, module replacement, dynamic trace or recovery claim
+  occurred. A causal patch still requires a non-display, independently
+  recoverable host.

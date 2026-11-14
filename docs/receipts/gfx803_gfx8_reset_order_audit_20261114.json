@@ -1,0 +1,33 @@
+{
+  "caveats": [
+    "Source-order classification cannot prove compiled module byte identity",
+    "The first November quiesce failure may be independent of reset-lock ordering",
+    "A fix requires review and safe hardware validation of recovery",
+    "No change to kernel configuration, drivers, modules or KFD"
+  ],
+  "findings": {
+    "classification": "source-only; not observed execution or patch acceptance",
+    "gfx8_kiq_quantum_exempt": true,
+    "gpu_recover_preempt_lock_order": "reset-lock-before-kfd-preempt",
+    "pci_error_preempt_lock_order": "reset-lock-before-kfd-preempt",
+    "post_reset_scheduler_order": "schedulers-before-gpu-kfd-post-reset",
+    "restore_queues_reset_guard": "no-reset-eagain-guard-seen",
+    "unmap_calls_fence_wait": true,
+    "unmap_uses_reset_domain_read_trylock": true
+  },
+  "gpu_executed": false,
+  "mode": "cpu-only-source-reset-order-audit",
+  "release_receipt": {
+    "note": "a matching root path does not prove a source-to-module rebuild",
+    "present": true,
+    "release_archive_sha256": "cb70a96c13f491230366596d72698f5192f907e6c457ef25b03d28eacc99a23a",
+    "source_root_matched": true
+  },
+  "schema": 1,
+  "source_file_sha256": {
+    "device": "d1281b916adfe2e92788125462dba3355089b7a7d35a4ec0307f1f789f6dc0b4",
+    "gfx8": "861a8fdd98745ae8b9bf4d500322b82306d4e10e98bf1d356bc8ba7e8870a37e",
+    "queue": "1f4f1a0f875461f1b2dc08b0396b1e087c816f862c6acb8ffc22573615aae996"
+  },
+  "source_root": "/mnt/truenas/comet-net/experiments/gfx803_kfd_exact_kernel_20261114/cachyos-7.3.0-2-amd-kfd-source"
+}

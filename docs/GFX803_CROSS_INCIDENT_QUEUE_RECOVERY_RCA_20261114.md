@@ -83,7 +83,9 @@ A practical **fix** should be evaluated at this recovery boundary: either restor
 
 ## 3A. Source-level results: Linux v7.3 reference and the most promising repair candidates
 
-A read of the *actual upstream v7.3 source tag*, not a generic current-kernel example, found these **specific legacy orderings**:
+A read of the SHA-verified CachyOS `7.3.0-2` release source (whose relevant
+KFD files are byte-identical to Linux v7.3), not a generic current-kernel
+example, found these **specific legacy orderings**:
 
 1. `amdgpu_device_gpu_recover` calls `amdgpu_device_recovery_get_reset_lock` **before** `amdgpu_device_halt_activities`; the latter calls `amdgpu_amdkfd_pre_reset`. Yet `unmap_queues_cpsch` uses `down_read_trylock(reset_domain->sem)` and returns `-EIO` when denied. This is the exact structural issue AMD's [8 October 2026 v2 preemption-before-lock patch](https://lore-kernel.gnuweeb.org/amd-gfx/20261008140045.1283288-1-William.Palacek@amd.com/T/) addresses. The v7.3 PCI-error branch also has lock before halt.
 2. In the same source, `amdgpu_device_gpu_recover` executes `amdgpu_device_sched_resume` **before** `amdgpu_device_gpu_resume`, which calls `amdgpu_amdkfd_post_reset`. AMD's [22 October 2026 callback-order patch](https://www.mail-archive.com/search?f=1&l=amd-gfx@lists.freedesktop.org&o=newest&q=date:20261022) proposes the opposite: finish KFD and display-audio callbacks before restarting DRM schedulers.
@@ -115,6 +117,13 @@ python3 scripts/gfx803_gfx8_reset_order_audit.py \
 ```
 
 If one of the three named C files is absent from the previously *selective* release extraction, stop and extract it from the already SHA-verified release archive. Do not silently substitute an upstream source tree or mark missing files safe. The audit classifies source ordering and records per-file SHA-256; it does **not** prove the module was compiled from those exact bytes.
+
+The CPU-only audit was run against that extracted release source: all six
+audit contracts passed.  It records all three legacy orderings above and the
+existing GFX8 KIQ quantum exemption in
+`docs/receipts/gfx803_gfx8_reset_order_audit_20261114.json`.  It remains a
+source result—not proof that the stripped, deployed module was rebuilt from
+those bytes or that either ordering caused an incident.
 
 **Repair priority after exact match:** first pre-reset queue-unmap ordering, then post-reset callback/scheduler ordering, then restore-during-reset guard. These are small source-level hypotheses to evaluate via existing AMD patches on an independently recoverable host, not authorization to patch and test the sole display GPU.
 
