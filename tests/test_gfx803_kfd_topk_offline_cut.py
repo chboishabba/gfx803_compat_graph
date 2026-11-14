@@ -120,6 +120,27 @@ class TopKStatic(unittest.TestCase):
         self.assertEqual(len(result["conditional_jumps"]),1)
         self.assertIn("no incident-time",result["warning"])
 
+    def test_source_and_binary_join_keep_incident_open(self):
+        old={"mode":"read-only","matches_receipt_hash":True,
+             "incident_journal_sha256":"sha","actual_incident_branch":None,
+             "actual_evict_return":None,"first_log_events":{}}
+        trace={"probes":[],"unresolved":[]}
+        topk={"mode":"static-only","incident":{"first_dispatched_kernel":None}}
+        attribution={"k2_06_reference_attribution":{"reference_source":
+                       {"exact_cachyos_package_match":False}},
+                     "t1_04_static_candidate":{"binary":
+                       {"sha256":"hipsha","build_id":"hipbid"}}}
+        elf={"mode":"offline-binary","sha256":"hipsha",
+             "build_id":"hipbid","offload_sections":[{"name":".hip_fatbin"}]}
+        r=join.report(old,trace,topk,{"journal_sha256":"sha"},attribution,elf)
+        self.assertEqual(r["gates"]["K2.06"]["status"],"reference-source-mapped")
+        self.assertEqual(r["gates"]["T1.04"]["candidate"],"mbtopk")
+        self.assertIsNone(r["gates"]["T1.05"]["actual_executed_hsaco"])
+        self.assertEqual(r["gates"]["release"]["status"],"blocked")
+        elf["build_id"]="unmatched"
+        with self.assertRaisesRegex(ValueError,"identity mismatch"):
+            join.report(old,trace,topk,{"journal_sha256":"sha"},attribution,elf)
+
     def test_compile_all_sources(self):
         for name in ("gfx803_kfd_incident_offline_audit",
                      "gfx803_kfd_trace_boundary",
