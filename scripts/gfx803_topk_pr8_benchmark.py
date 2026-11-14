@@ -31,6 +31,11 @@ FIELDS = ("case", "shape", "k", "dtype", "status", "median_ms",
 # process; after an unexpected failure the parent additionally uses a fresh
 # health-check process before continuing with later cases.
 ORDER = (3, 4, 5, 6, 7, 8, 1, 2, 0)
+# Confirmed historic faults (0/1 unpatched, 4 pre-review). Never run by default.
+# Process isolation is not GPU isolation: case 4 wedged the display RX 580.
+HAZARDOUS_CASES = frozenset((0, 1, 4))
+SAFE_HOST_FIELDS = ("non_display_gpu", "out_of_band_management",
+                    "durable_external_logging", "independent_power_recovery")
 
 
 def _base(index: int) -> dict[str, object]:
@@ -38,12 +43,25 @@ def _base(index: int) -> dict[str, object]:
     return {"case": index, "shape": "x".join(map(str, shape)), "k": k, "dtype": dtype}
 
 
-def planned_cases(skipped: set[int]) -> tuple[int, ...]:
-    """Return the stable execution order after validating explicit skips."""
+def planned_cases(skipped: set[int], *, allow_hazardous: bool = False) -> tuple[int, ...]:
+    """Fail closed for known GPU-wedging cases unless independently authorized."""
     unknown = skipped.difference(range(len(CASES)))
     if unknown:
         raise ValueError(f"unknown case IDs: {sorted(unknown)}")
-    return tuple(index for index in ORDER if index not in skipped)
+    excluded = skipped | (set() if allow_hazardous else HAZARDOUS_CASES)
+    return tuple(index for index in ORDER if index not in excluded)
+
+
+def validate_safe_host_receipt(path: Path) -> dict:
+    """Validate operator attestation, NOT physical proof of safe recovery."""
+    try:
+        receipt = json.loads(path.read_text())
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"unreadable safe-host receipt: {exc}") from exc
+    if (not isinstance(receipt, dict) or receipt.get("schema") != 1 or
+            not all(receipt.get(key) is True for key in SAFE_HOST_FIELDS)):
+        raise ValueError("safe-host receipt must attest all four recovery prerequisites")
+    return receipt
 
 
 def _one(index: int, warmup: int, iterations: int) -> dict[str, object]:
@@ -117,16 +135,33 @@ def main() -> int:
     parser.add_argument("--skip-case", type=int, choices=range(len(CASES)), action="append",
                         default=[], help="record a known fault without executing it")
     parser.add_argument("--recover-after-fault", action="store_true",
-                        help="continue after an unexpected child failure only if health check passes")
+                        help="DEPRECATED/REFUSED: a GPU health check cannot prove recovery")
+    parser.add_argument("--enable-known-fault-cases", action="store_true",
+                        help="opt in to cases 0/1/4 ONLY on independently recoverable hardware")
+    parser.add_argument("--safe-host-receipt", type=Path,
+                        help="operator-signed host eligibility JSON; no independent verification")
     args = parser.parse_args()
     if args.warmup < 0 or args.iterations < 1 or args.timeout < 1:
         parser.error("warmup must be nonnegative and iterations/timeout positive")
+    if args.recover_after_fault:
+        parser.error("automatic healthcheck/continuation after a GPU hang is unsafe")
+    if args.enable_known_fault_cases:
+        if args.safe_host_receipt is None:
+            parser.error("--enable-known-fault-cases requires --safe-host-receipt")
+        try:
+            validate_safe_host_receipt(args.safe_host_receipt)
+        except ValueError as exc:
+            parser.error(str(exc))
     if args.healthcheck:
+        if not args.enable_known_fault_cases:
+            parser.error("standalone HIP healthcheck requires safe-host authorization")
         if args.case is not None:
             parser.error("--healthcheck cannot be combined with --case")
         print(json.dumps(_healthcheck(), sort_keys=True), flush=True)
         return 0
     if args.case is not None:
+        if args.case in HAZARDOUS_CASES and not args.enable_known_fault_cases:
+            parser.error("known-fault case requires an independently recoverable safe host")
         print(json.dumps(_one(args.case, args.warmup, args.iterations), sort_keys=True), flush=True)
         return 0
     if args.out is None:
@@ -135,22 +170,27 @@ def main() -> int:
         parser.error(f"refuse overwriting existing CSV: {args.out}")
     rows: list[dict[str, object]] = []
     skipped = set(args.skip_case)
+    if not args.enable_known_fault_cases:
+        skipped.update(HAZARDOUS_CASES)
     try:
-        scheduled = planned_cases(skipped)
+        scheduled = planned_cases(skipped, allow_hazardous=args.enable_known_fault_cases)
     except ValueError as error:
         parser.error(str(error))
     # Write known-fault rows up front: they are evidence, not successful tests.
     for index in ORDER:
         if index in skipped:
             row = _base(index)
-            row.update(status="known-fault-skip",
-                       error="excluded from this arm: previously reproduced GPU fault")
+            row.update(status="known-fault-skip" if index in HAZARDOUS_CASES else "operator-skip",
+                       error="withheld; not an executed or passing GPU benchmark")
             rows.append(row)
     _write(args.out, rows)
     for index in scheduled:
         row = _base(index)
         command = [sys.executable, str(Path(__file__).resolve()), "--case", str(index),
                    "--warmup", str(args.warmup), "--iterations", str(args.iterations)]
+        if args.enable_known_fault_cases:
+            command.extend(["--enable-known-fault-cases", "--safe-host-receipt",
+                            str(args.safe_host_receipt)])
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=args.timeout)
             if result.returncode == 0:
@@ -166,22 +206,9 @@ def main() -> int:
         rows.append(row)
         print(f"case {index}: {row['status']}", flush=True)
         if row["status"] in ("timeout",) or str(row["status"]).startswith("exit-"):
-            if not args.recover_after_fault:
-                return 2
-            health = subprocess.run(
-                [sys.executable, str(Path(__file__).resolve()), "--healthcheck"],
-                capture_output=True, text=True, timeout=args.timeout,
-            )
-            if health.returncode != 0:
-                row["error"] = (str(row.get("error", "")) + "; fresh health check failed: " +
-                                (health.stderr.strip().splitlines() or ["unknown"])[-1])[:240]
-                _write(args.out, rows)
-                return 2
-            row["error"] = (str(row.get("error", "")) + "; fresh health check passed")[:240]
-            _write(args.out, rows)
-            print(f"case {index}: recovered; continuing", flush=True)
-    accepted = {"ok", "known-fault-skip"}
-    return 0 if all(row["status"] in accepted for row in rows) else 1
+            # A different Python process cannot repair or certify a wedged GPU.
+            return 2
+    return 0 if all(row["status"] == "ok" for row in rows) else 1
 
 
 if __name__ == "__main__":
