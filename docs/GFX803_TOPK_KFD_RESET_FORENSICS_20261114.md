@@ -285,3 +285,25 @@ Do not mark K1, K2, T1 or J1 completed until source/build proof and
 actual first-error/dispatch attribution have been ingested.
 The immutable previous-boot journal is already preserved; avoid
 creating duplicate raw captures or overwriting original evidence.
+
+
+## K1/K2 source receipt now available (14 November)
+
+The operator committed `07a52c7`, now tracked by
+[the kernel handoff JSON](receipts/gfx803_kfd_kernel_source_handoff_20261114.json).
+The installed AMDGPU module has recorded SHA-256 and Build ID;
+Polaris selects `gfx_v8_kfd2kgd`; the gfx8 SDMA doorbell callback
+is present in the module and registered in v7.3 **reference source**.
+Neither actual callback invocation nor an exact CachyOS source-package
+match is established. The installed kernel/module have no available
+DWARF debug symbols; GDB-MCP is usable on the operator host only.
+
+The first **logged** KFD recovery failure is `Failed to quiesce KFD`,
+followed by process queue restore/resume errors, KIQ timeout `-110`
+and KCQ disable failure. This advances K2 but does not prove the first
+failing **internal** function, which is the next source-level maximum
+cut. The corrected receipt marks callback invocation `null` (unknown)
+rather than `false`.
+
+See [the updated parallel workboard](GFX803_TOPK_KFD_PARALLEL_WORKBOARD_20261114.md)
+for status and exact K2.03 next deliverables. No physical rerun.
