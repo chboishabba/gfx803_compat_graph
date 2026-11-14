@@ -1,6 +1,6 @@
 # T1 — incident-time dispatch, allocation and memory provenance
 
-**14 November 2026; PR #7 single rollup.** This document is a committed, bounded first-failure join, **not a claim that code-object inclusion proves a kernel executed**. Machine-readable original-input source receipt: [`docs/receipts/gfx803_t1_t2_gate_matrix.json`](receipts/gfx803_t1_t2_gate_matrix.json). Canonical [60-source ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md).
+**14 November 2026; PR #7 single rollup.** This document is a committed, bounded first-failure join, **not a claim that code-object inclusion proves a kernel executed**. Machine-readable original-input source receipt: [`docs/receipts/gfx803_t1_t2_gate_matrix.json`](receipts/gfx803_t1_t2_gate_matrix.json). Canonical [61-source ledger](GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md).
 
 ## A1: allocator/copy provenance by affected workload
 
