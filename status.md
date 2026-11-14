@@ -290,3 +290,15 @@ and original test logs take precedence over status prose.
   No GPU/HIP execution, module replacement, dynamic trace or recovery claim
   occurred. A causal patch still requires a non-display, independently
   recoverable host.
+
+## 14 November — persistent Polaris GPU wedge: recovery critical path
+
+- **Problem definition:** RX580 GFX8 becomes unusable after a workload-triggered ring/queue stall. The host's emergency terminal remains usable; manual driver reset and Wayland restart have not restored GPU function. In November, first KFD queue-preemption failure and KIQ `-110` preceded BACO, which was followed by repeated resets (up to reported reset 62), VRAM loss, and no durable accelerated desktop.
+- **R0 evidence:** historical March and November traces + source error paths established; initiating instruction or universal single culprit **not proven**.
+- **R1 hardware reset:** OPEN and **highest priority** — source-trace GFX8 CP/MEC, KIQ/KCQ, soft-reset, BACO, GPUVM/GART and firmware reinitialization; determine earliest failed *post-reset* fence.
+- **R2 upstream applicability:** PARTIAL — v6.13/6.19/7.3 reset ordering and verified 7.3.0-2 source, existing GFX8 KIQ quantum exemption and fixed doorbell callbacks. NAK'd reset-lock reorder is not a deployable fix. Earlier Arch-era exact kernel metadata may still be missing.
+- **R3 recovery integrity:** DRAFT in [PR #7](https://github.com/chboishabba/gfx803_compat_graph/pull/7). Reset-aware `start_cpsch` RFC, CPU-only C model and patch context tests. `kgd2kfd_post_reset` failure may be ignored by AMDGPU caller and leave KFD locked; **none of this proves physical GPU recovery**.
+- **R4 actual hardware correction:** OPEN; not written, not kernel-built or reviewed. Avoid installing R3 RFC on the display GPU.
+- **R5 physical validation:** BLOCKED without an independent recoverable gfx803 host. Acceptance requires fresh KIQ/KCQ/GFX/SDMA progress, fresh `/dev/kfd` and KFD dispatch, and new accelerated DRM/Wayland rendering **without reboot**.
+- **R6 stable factory release/upstream:** BLOCKED until R4/R5; historical 120-case TopK and bounded C2 passes are scoped trigger/semantic controls, not recovery acceptance.
+- **Current source of truth:** [docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md](docs/GFX803_PHASE_DELIVERABLES_RECONCILIATION_20261114.md), section *GFX8 persistent GPU wedge: authoritative recovery roadmap (R0–R6)*. Track work under the existing draft PR #7.
