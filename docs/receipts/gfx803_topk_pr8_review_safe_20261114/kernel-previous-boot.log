@@ -1,0 +1,1307 @@
+Nov 14 12:39:05 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=35981 DF PROTO=UDP SPT=54000 DPT=32963 LEN=353 
+Nov 14 12:39:05 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=35982 DF PROTO=UDP SPT=54000 DPT=32963 LEN=353 
+Nov 14 12:39:06 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=35983 DF PROTO=UDP SPT=54000 DPT=32963 LEN=353 
+Nov 14 12:39:06 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=35984 DF PROTO=UDP SPT=54000 DPT=32963 LEN=353 
+Nov 14 12:39:06 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=11300 DF PROTO=UDP SPT=58471 DPT=32963 LEN=353 
+Nov 14 12:39:06 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=11301 DF PROTO=UDP SPT=58471 DPT=32963 LEN=353 
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707128, emitted seq=131707130
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process kwin_wayland pid 1877 thread kwin_wayla:cs0 pid 2273
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: The cp might be in an unrecoverable state due to an unsuccessful queues preemption
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu: Failed to quiesce KFD
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Failed to restore process queues
+Nov 14 12:39:28 cachy-lambo kernel: amdgpu: amdgpu_amdkfd_restore_userptr_worker: Failed to resume KFD
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm:amdgpu_ring_test_helper [amdgpu]] *ERROR* ring kiq_0.2.1.0 test failed (-110)
+Nov 14 12:39:29 cachy-lambo kernel: [drm:gfx_v8_0_hw_fini [amdgpu]] *ERROR* KCQ disable failed
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU reset begin!. Source:  4
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu: Failed to suspend process pid 2264013
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: BACO reset
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU reset succeeded, trying to resume
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] PCIE GART of 256M enabled (table at 0x000000F400380000).
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: VRAM is lost due to GPU reset!
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu: Failed to populate edc leakage registers!
+Nov 14 12:39:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] UVD and UVD ENC initialized successfully.
+Nov 14 12:39:30 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] VCE initialized successfully.
+Nov 14 12:39:30 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU reset(2) succeeded!
+Nov 14 12:39:30 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU fault detected: 147 0x0000c401
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process kwin_wayland pid 1877 thread kwin_wayla:cs0 pid 2273
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0:   VM_CONTEXT1_PROTECTION_FAULT_ADDR   0x0C000200
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0:   VM_CONTEXT1_PROTECTION_FAULT_STATUS 0x0E0C4001
+Nov 14 12:39:32 cachy-lambo kernel: amdgpu 0000:01:00.0: VM fault (0x01, vmid 7, pasid 7) at page 201327104, read from 'TC3' (0x54433300) (196)
+Nov 14 12:39:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:33 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.1 timeout, but soft recovered
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707140, emitted seq=131707143
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process kwin_wayland pid 1877 thread kwin_wayla:cs0 pid 2273
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:39:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:39:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:36 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:38 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:40 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:43 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:43 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:43 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:43 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:43 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:45 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:45 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:45 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:45 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:45 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:47 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:47 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:47 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:49 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:49 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:49 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:49 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:49 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:51 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:53 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU fault detected: 147 0x0138c408
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0:   VM_CONTEXT1_PROTECTION_FAULT_ADDR   0x00000027
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0:   VM_CONTEXT1_PROTECTION_FAULT_STATUS 0x0E0C4008
+Nov 14 12:39:55 cachy-lambo kernel: amdgpu 0000:01:00.0: VM fault (0x08, vmid 7, pasid 15) at page 39, read from 'TC3' (0x54433300) (196)
+Nov 14 12:39:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:57 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:39:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:39:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:39:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:39:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:39:59 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:01 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:03 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:05 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:05 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:05 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:05 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:05 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:07 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:07 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:07 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:07 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:07 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:09 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:09 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:09 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:09 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:09 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:11 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:11 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:11 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:11 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:11 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:13 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:13 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:13 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:13 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:13 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:15 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:15 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:15 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:15 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:15 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:16 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.2.0 timeout, but soft recovered
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:17 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.1 timeout, but soft recovered
+Nov 14 12:40:19 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:19 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:19 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:19 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:19 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:20 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:20 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:20 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:20 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:20 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.3.0 timeout, but soft recovered
+Nov 14 12:40:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:21 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:24 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:24 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:24 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:24 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:24 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:26 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:26 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:26 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:26 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:26 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.2.0 timeout, but soft recovered
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.3.0 timeout, but soft recovered
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:28 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.2.1 timeout, but soft recovered
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:30 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.3.0 timeout, but soft recovered
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.0 timeout, but soft recovered
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:32 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.3.0 timeout, but soft recovered
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:34 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.0 timeout, but soft recovered
+Nov 14 12:40:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:36 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:38 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:40 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:41 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:41 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:41 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:41 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:41 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.0 timeout, but soft recovered
+Nov 14 12:40:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:42 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:43 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:43 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:43 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:43 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:43 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.0 timeout, but soft recovered
+Nov 14 12:40:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:44 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:45 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:45 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:45 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:45 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:45 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.0.1 timeout, but soft recovered
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.1.1 timeout, but soft recovered
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:47 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.0.1 timeout, but soft recovered
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:49 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.0.1 timeout, but soft recovered
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:51 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.0.1 timeout, but soft recovered
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: ring comp_1.0.1 timeout, but soft recovered
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:53 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, but soft recovered
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: qcm fence wait loop timeout expired
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: The cp might be in an unrecoverable state due to an unsuccessful queues preemption
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Failed to evict process queues
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu: Failed to quiesce KFD
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU reset begin!. Source:  4
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: BACO reset
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU reset succeeded, trying to resume
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] PCIE GART of 256M enabled (table at 0x000000F400380000).
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: VRAM is lost due to GPU reset!
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu: Failed to populate edc leakage registers!
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] UVD and UVD ENC initialized successfully.
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] VCE initialized successfully.
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: GPU reset(62) succeeded!
+Nov 14 12:40:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707266, emitted seq=131707268
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:40:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707268, emitted seq=131707271
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:00 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707271, emitted seq=131707273
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:02 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707273, emitted seq=131707275
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:04 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707275, emitted seq=131707277
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:06 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707277, emitted seq=131707280
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707280, emitted seq=131707283
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707283, emitted seq=131707285
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707285, emitted seq=131707287
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707287, emitted seq=131707290
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:17 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707290, emitted seq=131707292
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:19 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707292, emitted seq=131707294
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707294, emitted seq=131707296
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:23 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707296, emitted seq=131707299
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707299, emitted seq=131707301
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707301, emitted seq=131707303
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707303, emitted seq=131707305
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707305, emitted seq=131707307
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:34 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707307, emitted seq=131707309
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707309, emitted seq=131707311
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707311, emitted seq=131707313
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707313, emitted seq=131707315
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707315, emitted seq=131707317
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707317, emitted seq=131707319
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707319, emitted seq=131707321
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707321, emitted seq=131707323
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:51 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707323, emitted seq=131707325
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707325, emitted seq=131707327
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707327, emitted seq=131707329
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707329, emitted seq=131707331
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:41:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707331, emitted seq=131707333
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707333, emitted seq=131707335
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707335, emitted seq=131707337
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:06 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707337, emitted seq=131707339
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707339, emitted seq=131707341
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707341, emitted seq=131707343
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707343, emitted seq=131707345
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707345, emitted seq=131707347
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707347, emitted seq=131707349
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:18 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707349, emitted seq=131707351
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:21 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707351, emitted seq=131707353
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:23 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707353, emitted seq=131707355
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707355, emitted seq=131707357
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707357, emitted seq=131707359
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707359, emitted seq=131707361
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707361, emitted seq=131707363
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707363, emitted seq=131707365
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:36 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707365, emitted seq=131707367
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:38 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707367, emitted seq=131707369
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:40 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707369, emitted seq=131707371
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=273 TOS=0x00 PREC=0x00 TTL=64 ID=34378 DF PROTO=UDP SPT=51112 DPT=47590 LEN=253 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=282 TOS=0x00 PREC=0x00 TTL=64 ID=34379 DF PROTO=UDP SPT=51112 DPT=47590 LEN=262 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=281 TOS=0x00 PREC=0x00 TTL=64 ID=34380 DF PROTO=UDP SPT=51112 DPT=47590 LEN=261 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=299 TOS=0x00 PREC=0x00 TTL=64 ID=34381 DF PROTO=UDP SPT=51112 DPT=47590 LEN=279 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=283 TOS=0x00 PREC=0x00 TTL=64 ID=1326 DF PROTO=UDP SPT=49367 DPT=47590 LEN=263 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=292 TOS=0x00 PREC=0x00 TTL=64 ID=1327 DF PROTO=UDP SPT=49367 DPT=47590 LEN=272 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=1328 DF PROTO=UDP SPT=49367 DPT=47590 LEN=353 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=373 TOS=0x00 PREC=0x00 TTL=64 ID=1329 DF PROTO=UDP SPT=49367 DPT=47590 LEN=353 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=273 TOS=0x00 PREC=0x00 TTL=64 ID=62579 DF PROTO=UDP SPT=41939 DPT=47590 LEN=253 
+Nov 14 12:42:43 cachy-lambo kernel: [UFW BLOCK] IN=enp0s31f6 OUT= MAC=4c:cc:6a:b9:92:56:64:e4:a5:54:26:b9:08:00 SRC=192.168.4.51 DST=192.168.4.53 LEN=282 TOS=0x00 PREC=0x00 TTL=64 ID=62580 DF PROTO=UDP SPT=41939 DPT=47590 LEN=262 
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707371, emitted seq=131707373
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707373, emitted seq=131707375
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707375, emitted seq=131707377
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707377, emitted seq=131707379
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:50 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707379, emitted seq=131707381
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:53 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707381, emitted seq=131707383
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:55 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707383, emitted seq=131707385
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707385, emitted seq=131707387
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:42:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707387, emitted seq=131707389
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:01 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707389, emitted seq=131707391
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:03 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707391, emitted seq=131707393
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:05 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707393, emitted seq=131707395
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:08 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707395, emitted seq=131707397
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:10 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707397, emitted seq=131707399
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:12 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707399, emitted seq=131707401
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:14 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707401, emitted seq=131707403
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:16 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707403, emitted seq=131707405
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:18 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707405, emitted seq=131707407
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:20 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707407, emitted seq=131707409
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:22 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707409, emitted seq=131707411
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:25 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707411, emitted seq=131707413
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:27 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707413, emitted seq=131707415
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:29 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707415, emitted seq=131707417
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:31 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707417, emitted seq=131707419
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:33 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707419, emitted seq=131707421
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:35 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707421, emitted seq=131707423
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:37 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707423, emitted seq=131707425
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:39 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707425, emitted seq=131707427
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:42 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707427, emitted seq=131707429
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:44 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707429, emitted seq=131707431
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:46 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707431, emitted seq=131707433
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:48 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707433, emitted seq=131707435
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:50 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707435, emitted seq=131707437
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:52 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707437, emitted seq=131707439
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:54 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707439, emitted seq=131707441
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:57 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Dumping IP State Completed
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] AMDGPU device coredump file has been created
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] Check your /sys/class/drm/card1/device/devcoredump/data
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: ring gfx timeout, signaled seq=131707441, emitted seq=131707443
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0:  Process plasmashell pid 1902 thread plasmashel:cs0 pid 2539
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Starting gfx_v8_0 IP block soft reset
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: GRBM_SOFT_RESET=0x000F0005
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: SRBM_SOFT_RESET=0x00008100
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: Successful gfx_v8_0 IP block soft reset
+Nov 14 12:43:59 cachy-lambo kernel: amdgpu 0000:01:00.0: [drm] device wedged, but no recovery needed
