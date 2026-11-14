@@ -329,3 +329,14 @@ and original test logs take precedence over status prose.
 - AMD's reviewed Nov 9 SVM fix gives pageable `hipMemcpy` >1 MiB as a candidate SVM registration route; do not assume **all** hipMalloc workloads use SVM, nor that **none** do. Concrete failing-process SVM/notifier overlap remains OPEN.
 - July/September original `lists.freedesktop.org` messages were inaccessible, not disproven by unrelated messages with same ID on other archive sites. gfx12 DCC and multi-GPU SDMA source leads remain **non-GFX8 direct patches**.
 - No host trace, kernel build or physical ROCm stress run was performed for this documentation audit.
+
+
+## 14 November — major offline T1/T2 implementation and gate receipt
+
+- **New canonical deliverables:** [T1 original dispatch/memory provenance](docs/GFX803_T1_DISPATCH_MEMORY_PROVENANCE.md), [T2 B1–B4 KFD/SVM/userptr/fence audit](docs/GFX803_T2_KFD_SVM_USERPTR_FENCE_AUDIT.md), and [8-input evidence gate receipt](docs/receipts/gfx803_t1_t2_gate_matrix.json). Retained original TopK 1,308-line journal, unpatched-safe benchmark, November incident notes, March Ollama/WhisperX notes and old source/binary receipts inspected via repository connector.
+- **Executable offline tooling:** `scripts/gfx803_incident_join.py` plus `tests/test_gfx803_incident_join.py`; `scripts/gfx803_kfd_event_correlation.py` plus `tests/test_gfx803_kfd_event_correlation.py`. No kernel symbols probed, no trace enabled, no GPU executed. **Python test suite not yet verified in current run**; source-level evidence join receipt is executed and committed.
+- **T1 accepted facts:** March Ollama recorded `comp_1.3.1` and userptr `init_user_pages -1`; March WhisperX D2H/H2D host wait and profiler effect; November first recorded gfx `kwin_wayland`, pre-hang visual corruption confirmed, source-selected TopK `mbtopk` but original HSACO/dispatch unknown. No original Nov devcoredump bytes after reboot.
+- **T2 exact statuses:** B1 XNACK-off SVM two-notifier source race/model + RFC present, actual incident activation OPEN. B2 March userptr source call known, error cause OPEN. B3 first original KFD fence return/queue OPEN, late -ETIME distinct. B4 normal TTM/PTE/GFX sync edges source present, specific broken edge unproven.
+- **New witness acceptance:** two distinct *registered* SVM ranges, matching capture/boot/mm/PASID, non-UNMAP XNACK-off invalidations, second returns before first KFD quiesce finishes; cross-boot/PASID/UNMAP/missing-registration controls fail closed. Such a witness still would not alone prove an RX580 hang cause.
+- [60-record source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) remains authoritative; retain misleading GPU-generation references as explicit negative controls.
+- **R4/R5:** SVM fix remains a source-context RFC not kernel-built or physically accepted; complete no-reboot GPU recovery remains OPEN. Continue in existing draft PR #7 only.
