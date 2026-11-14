@@ -340,3 +340,12 @@ and original test logs take precedence over status prose.
 - **New witness acceptance:** two distinct *registered* SVM ranges, matching capture/boot/mm/PASID, non-UNMAP XNACK-off invalidations, second returns before first KFD quiesce finishes; cross-boot/PASID/UNMAP/missing-registration controls fail closed. Such a witness still would not alone prove an RX580 hang cause.
 - [60-record source ledger](docs/GFX803_EXTERNAL_REFERENCE_LEDGER_20261114.md) remains authoritative; retain misleading GPU-generation references as explicit negative controls.
 - **R4/R5:** SVM fix remains a source-context RFC not kernel-built or physically accepted; complete no-reboot GPU recovery remains OPEN. Continue in existing draft PR #7 only.
+
+
+## 14 Nov — original-core-pinned destructive one-shot handoff staged
+
+- **New operator-only reproduction kit in draft PR #7:** [case4 runbook](docs/GFX803_CASE4_ONE_SHOT_TRIGGER_CAPTURE_RUNBOOK_20261114.md), `scripts/gfx803_one_shot_repro_capture.py` (dry-run default/interactive manual arming, kernel journal and child output fsync, heartbeat), `scripts/gfx803_one_shot_case4.py` (original `_one(4,10,50)` from existing benchmark, runtime binary hash pin), `scripts/gfx803_case4_kfd_returns.bt` (inert until separate authorized bpftrace command), `scripts/gfx803_durable_stream.py` (line fsync), `tests/test_gfx803_one_shot_capture.py` (10 CPU-only contracts).
+- Source evidence from [incident-time recovered Python core](docs/receipts/gfx803_topk_incident_core_provenance_20261114.json) distinguishes original `libtorch_hip` SHA `c1ad552aac76766b14ad78b993b5e3ee7a3b72c7fc48b7d72345516cf6fba7ff` and Build ID `3d27b29d191725660bbc4b8a83cb2f4753a09921` from prior offline source-candidate ELF `dd0b403...`. Do not conflate either.
+- **No run performed** and the new harness unit tests have **not been executed** in this tool session; operator-reported previous 38/38 suite pass covers earlier state only. User will decide when/if to arm on their display GPU.
+- **Risk:** case4 historically hangs the shared gfx/compute device and makes Wayland unusable until reboot. The wrapper never auto-reboots, auto-resets, attempts a GPU post-fault healthcheck or repeats. ROCprof may change timing and lose buffered traces on SIGABRT; KFD return probes can be missing or alter timing. Preserve both limits.
+- Remains OPEN: actual new-run first stalled GPU kernel/HSACO and KFD first return, SVM/userptr active-range status, physical kernel fix and recovery without reboot.
