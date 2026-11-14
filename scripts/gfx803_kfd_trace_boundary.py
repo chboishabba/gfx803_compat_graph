@@ -20,7 +20,7 @@ PROBES = (
     ("reset_mes", "reset_queues_mes"),
 )
 NAMESPACE = "gfx803k2"
-VALID = re.compile(r"^[a-zA-Z_][a-zA-Z_0-9]*$")
+VALID = re.compile(r"^[a-zA-Z_][a-zA-Z_0-9]*(?:\.[a-zA-Z_0-9]+)*$")
 def symbols(kallsyms: str) -> set[str]:
     return {match.group(1) for match in re.finditer(r"(?m)^[0-9a-fA-F]+ [tTwW] ([A-Za-z_]\w*)(?:\s.*)?$", kallsyms)}
 
@@ -81,7 +81,8 @@ def capture(root:Path, chosen:list[tuple[str,str]], seconds:int, out:Path)->dict
         start=time.monotonic()
         # No workload initiated. Trace normal host activity only, for a short window.
         time.sleep(seconds)
-        records=(root/"trace").read_text(errors="replace")
+        with (root/"trace").open("r",errors="replace") as handle:
+            records=handle.read(8_000_000)
         scoped="\n".join(line for line in records.splitlines() if NAMESPACE+"_" in line)
         return {"status":"completed","duration_s":round(time.monotonic()-start,2),
                 "events":scoped.splitlines(),"event_count":len(scoped.splitlines()),
