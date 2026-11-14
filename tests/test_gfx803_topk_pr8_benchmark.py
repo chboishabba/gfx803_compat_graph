@@ -63,7 +63,15 @@ class TopKBenchmarkSchedulingTests(unittest.TestCase):
             text=True, capture_output=True, timeout=10,
         )
         self.assertEqual(result.returncode, 2)
-        self.assertIn("independently recoverable safe host", result.stderr)
+        self.assertIn("any benchmark GPU work requires --safe-host-receipt", result.stderr)
+
+    def test_even_nonhistorical_case_refused_without_safehost(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(MODULE_PATH), "--case", "3"],
+            text=True, capture_output=True, timeout=10,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("any benchmark GPU work requires --safe-host-receipt", result.stderr)
 
     def test_auto_recovery_refused_without_gpu_work(self) -> None:
         result = subprocess.run(
