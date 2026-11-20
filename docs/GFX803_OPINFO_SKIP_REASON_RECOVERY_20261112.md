@@ -120,3 +120,39 @@ skip reasons may require real, individual, opt-in test-body replay
 (`pytest -q -rs <exact-node-id>`) on a healthy GPU with failure
 containment, preserving a separate result receipt and original discovery.
 Never remove original upstream guards to force a test into execution.
+
+
+## 20 November — replay receipt reconciliation
+
+Existing replay runner is retained. New offline join consumes original
+audit and actual replay matrix.json files, validates original audit SHA,
+source revision, node universe and mode, deduplicates repeated node IDs
+and leaves conflicting, missing-reason or incomplete attempts unresolved.
+No historical counts rewritten. 14 skips + 2 expected failures remain
+maintainer-reported until original matrices are supplied.
+
+```sh
+python3 -m unittest discover -s tests -p 'test_gfx803_opinfo*py' -v
+python3 scripts/gfx803_opinfo_replay_join.py --audit "$AUDIT" \
+  --replay /actual/batch01/matrix.json /actual/batch02/matrix.json \
+  --out /actual/new/opinfo_reconciled.json
+```
+
+Use actual existing paths (examples are placeholders). Choose the next
+unassayed contiguous range from the exact audit order and use existing
+--mode replay --execute-body --start N --limit 8 --timeout 120, only
+on an idle healthy GPU with containment. Stop on unexpected call/setup/
+teardown failure, XPASS, timeout or signal. Process termination alone
+cannot recover a wedged GPU; known fault nodes require a recoverable host.
+No new GPU passes claimed.
+
+Ordinary failures: sparse_sampled_addmm FP32 CPU comparison; topk FP32
+CPU comparison and eager variant consistency. Reconcile exact original
+samples against bounded TopK repair before marking them closed. Four
+complex64 fault candidates acos/acosh/asin/asinh remain separate and
+must not be replayed indiscriminately. Existing complex unary probe
+and fault runbook are owners. T1.06 registration inventory remains
+host-pending; no repeated CCOB scan or synthetic AdamW rerun.
+
+## 20 November host replay receipt
+25/25 offline tests reported passed at dbafe149; batch 03 nodes 16–23 completed 8/8 (7 skips, 1 xfail). Cumulative 24/183 resolved, 159 unassayed; join reports 23 skips including two XFailed bridge cases and 1 xfail. Preserve raw reasons and classification ambiguity. Original TopK failures both narrow() on scalar samples (indices 7 and 13 respectively); exact stack owner not yet established. sparse_sampled_addmm fails at hipsparseCreate(handle); underlying library/architecture/initialization cause unknown. Raw matrices and tracebacks host-local. Known complex64 fault candidates remain fenced.

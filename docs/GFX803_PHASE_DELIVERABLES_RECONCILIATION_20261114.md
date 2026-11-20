@@ -498,3 +498,14 @@ inclusion and metadata, not original incident-time selected kernel,
 benchmark-loaded wheel linkage or KFD's missing internal fence
 return. T1.06/T1.07/K2.05/J1/F1/release stay OPEN/BLOCKED
 according to original receipts. No new GPU work or KFD patch.
+
+
+## 20 November correctness addendum
+
+See [X369 physical receipt and FP32 differential assay](GFX803_X369_FP32_CORRECTNESS_20261120.md). Scoped GPU/GPU FP64 20/20 and discrete routing/recurrent acceptance are additional composed-workload evidence; strict FP32 training failed and attribution remains open. No release, broad operator, or recovery gate promoted.
+
+Physical differential addendum: CPU/GPU directed-half discrepancy reproduced at three scales; 20-step identical-byte AdamW parameter max <= 4.6566e-10 and zero reported GPU parameter repeat drift. Scoped maintainer-reported measurements, not certified or raw-log verified. Original FP32 failure attribution remains open.
+
+Exact-reference addendum (20 November): c2544a7b host 3/3 tests and CPU/gfx803 rational-reference runs reported complete; GPU FP32 original/fused errors at scale 1 are 3.0365e-6 / 1.8101e-6, direct scalar/foreach parameter parity and repeat drift zero reported. Isolated numerical diagnostic accepted, not universal native certification. T1.13/T1.14 committed 219/219 member receipt accepted; T1.06/T1.07 and KFD recovery open. Remaining OpInfo reason recovery unchanged.
+
+20 November: reported offline OpInfo 25/25, 24/183 reason recovery, 159 pending. Both historical TopK ordinary failures narrow() on 0-D samples; sparse_sampled_addmm fails at hipsparseCreate. Root causes not yet proven. Registration inventory reported 6660 symbols and 4525 relocations; static receipt scope only. Additional LeechTransformer 0f3c694 two-channel GPU/GPU FP64 20/20 reported, gradient max 4.77e-16, parameter max 1.86e-11; FP32 discrete IDs/signs match 20 steps, parameter drift ~1.16e-3, shadow control rejects native rounding discrepancy. FP32 not certified; no new general operator or recovery acceptance.
