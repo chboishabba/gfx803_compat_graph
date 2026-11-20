@@ -503,3 +503,5 @@ according to original receipts. No new GPU work or KFD patch.
 ## 20 November correctness addendum
 
 See [X369 physical receipt and FP32 differential assay](GFX803_X369_FP32_CORRECTNESS_20261120.md). Scoped GPU/GPU FP64 20/20 and discrete routing/recurrent acceptance are additional composed-workload evidence; strict FP32 training failed and attribution remains open. No release, broad operator, or recovery gate promoted.
+
+Physical differential addendum: CPU/GPU directed-half discrepancy reproduced at three scales; 20-step identical-byte AdamW parameter max <= 4.6566e-10 and zero reported GPU parameter repeat drift. Scoped maintainer-reported measurements, not certified or raw-log verified. Original FP32 failure attribution remains open.
