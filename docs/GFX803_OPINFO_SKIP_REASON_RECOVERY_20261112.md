@@ -153,3 +153,6 @@ complex64 fault candidates acos/acosh/asin/asinh remain separate and
 must not be replayed indiscriminately. Existing complex unary probe
 and fault runbook are owners. T1.06 registration inventory remains
 host-pending; no repeated CCOB scan or synthetic AdamW rerun.
+
+## 20 November host replay receipt
+25/25 offline tests reported passed at dbafe149; batch 03 nodes 16–23 completed 8/8 (7 skips, 1 xfail). Cumulative 24/183 resolved, 159 unassayed; join reports 23 skips including two XFailed bridge cases and 1 xfail. Preserve raw reasons and classification ambiguity. Original TopK failures both narrow() on scalar samples (indices 7 and 13 respectively); exact stack owner not yet established. sparse_sampled_addmm fails at hipsparseCreate(handle); underlying library/architecture/initialization cause unknown. Raw matrices and tracebacks host-local. Known complex64 fault candidates remain fenced.
