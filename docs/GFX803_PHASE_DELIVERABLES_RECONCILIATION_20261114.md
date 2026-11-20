@@ -498,3 +498,8 @@ inclusion and metadata, not original incident-time selected kernel,
 benchmark-loaded wheel linkage or KFD's missing internal fence
 return. T1.06/T1.07/K2.05/J1/F1/release stay OPEN/BLOCKED
 according to original receipts. No new GPU work or KFD patch.
+
+
+## 20 November correctness addendum
+
+See [X369 physical receipt and FP32 differential assay](GFX803_X369_FP32_CORRECTNESS_20261120.md). Scoped GPU/GPU FP64 20/20 and discrete routing/recurrent acceptance are additional composed-workload evidence; strict FP32 training failed and attribution remains open. No release, broad operator, or recovery gate promoted.
