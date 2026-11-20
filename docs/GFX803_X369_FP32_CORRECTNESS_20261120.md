@@ -67,3 +67,7 @@ but not uniquely proven. Identical-byte optimizer corruption not reproduced
 on this suite; no formal rounding budget or universal optimizer claim.
 Original full-head failing operands and native arithmetic certification open.
 Strict original FP32 matched training remains FAIL. No other gates promoted.
+
+## Exact reference extension
+
+The revised assay independently contracts the stored finite FP32 x/H/q operands using Python Fraction, per directed triad channel. Emits exact rational error at maximum-error coordinate for each original/fused path, in addition to FP64 reference. Direct scalar/foreach comparison now includes parameters and both moments at each step. This is an exact reference for the synthetic directed gradient, not an enclosure of the native full head or optimizer. New CPU unit tests source-written; rerun only as needed for new receipt fields. Original failing operands remain absent.

@@ -7,7 +7,7 @@ or model training. No large TopK, no CPU fallback for GPU mode.
 import argparse
 import hashlib
 import json
-import math
+from fractions import Fraction
 import torch
 import torch.nn.functional as F
 
@@ -37,6 +37,31 @@ def gradient(x,h,w,q,device,dtype,fused):
     if not torch.isfinite(g).all() or not torch.isfinite(y).all():
         raise RuntimeError("nonfinite score or gradient")
     return g.detach().cpu()
+
+
+def exact_gradient(x,h,q):
+    """Independent rational contraction of the exact stored IEEE operands."""
+    X,H,Q=[v.tolist() for v in (x,h,q)]
+    result=[]
+    for k in range(0,x.shape[-1],3):
+        for shift in range(3):
+            total=Fraction(0)
+            for b in range(len(X)):
+                for e in range(len(H[b])):
+                    for i in range(3):
+                        total += (Fraction(X[b][k+i]) *
+                                  Fraction(H[b][e][k+(i+shift)%3]) *
+                                  Fraction(Q[b][e]))
+            result.append(total)
+    return result
+
+
+def exact_metrics(g, reference):
+    errors=[abs(Fraction(float(v))-r) for v,r in zip(g.flatten(),reference)]
+    i=max(range(len(errors)),key=errors.__getitem__)
+    return dict(max_abs=float(errors[i]),index=i,
+                exact_error=str(errors[i]),
+                exact_reference=str(reference[i]))
 
 
 def metrics(a,b):
@@ -91,12 +116,14 @@ def main():
         q=torch.randn(3,4,generator=rng)*scale
         case=dict(scale=scale,input_hashes=[digest(v) for v in (x,h,w,q)],reductions={})
         ref=gradient(x,h,w,q,"cpu",torch.float64,False)
+        exact=exact_gradient(x,h,q)
         for dev in devices:
             for dtype in (torch.float32,torch.float64):
                 g=[gradient(x,h,w,q,dev,dtype,f) for f in (False,True)]
                 case["reductions"][dev+":"+str(dtype)]=dict(
                     pair=metrics(*g),reference=[metrics(v,ref) for v in g],
-                    hashes=[digest(v) for v in g])
+                    hashes=[digest(v) for v in g],
+                    exact_reference=[exact_metrics(v,exact) for v in g])
         # Freeze the exact CPU FP32 gradient bytes; separate optimizer from reductions.
         g=gradient(x,h,w,q,"cpu",torch.float32,False)
         # Include near-zero coordinates and sign reversals without changing input bytes
@@ -106,11 +133,19 @@ def main():
         grads=[g if i%2==0 else -g for i in range(20)]
         case["optimizer_gradient_hashes"]=[digest(v) for v in grads]
         case["optimizer"]={}
+        scalar={}
+        case["optimizer_cross_mode"]={}
         for foreach in (False,True):
             cpu=adam(w,grads,"cpu",foreach)
             for dev in devices:
                 out=adam(w,grads,dev,foreach)
                 repeat=adam(w,grads,dev,foreach)
+                if not foreach:
+                    scalar[dev]=out
+                else:
+                    case["optimizer_cross_mode"][dev]=[
+                        dict(step=i+1,parameter_m_v=[metrics(u,v) for u,v in zip(row,scalar[dev][i])])
+                        for i,row in enumerate(out)]
                 case["optimizer"][str(foreach)+":"+dev]=dict(
                     steps=[dict(step=i+1,cpu_reference=[metrics(u,v) for u,v in zip(row,cpu[i])],
                                 repeat=[metrics(u,v) for u,v in zip(row,repeat[i])])

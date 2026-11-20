@@ -571,3 +571,7 @@ inclusion and metadata, not original incident-time selected kernel,
 benchmark-loaded wheel linkage or KFD's missing internal fence
 return. T1.06/T1.07/K2.05/J1/F1/release stay OPEN/BLOCKED
 according to original receipts. No new GPU work or KFD patch.
+
+## 20 November receipt reconciliation
+
+Committed original T1.13/T1.14 JSONs inspected: 219/219 indexed and inspected-amdgpu-elf, 219 distinct ELF hashes, 29,364 summed metadata kernel entries (not necessarily distinct kernels), zero readable TopK-name matches. Complete static inventory accepted at receipt scope. Unit-test execution count for this cut not independently recovered. T1.06 build/loader linkage, T1.07 incident dispatch, K2.05 historical return and recovery remain OPEN. No repeat scan required absent identity change. Next use exact host registration symbols/relocations and build logs; never infer dispatch from static absence.
