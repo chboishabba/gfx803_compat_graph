@@ -80,7 +80,11 @@ def child_complete(child,batch,mode):
     # still valid replay evidence. Exit codes >=2 denote collection/internal
     # errors and must not masquerade as an executed result.
     if mode=="replay":
-        return child.get("pytest_returncode") in (0,1)
+        return child.get("pytest_returncode") in (0,1) and all(
+            row.get("runtime_outcome") in ("executed-passed","upstream-skipped",
+                "upstream-xfailed","unexpected-xpass","unexpected-call-failure",
+                "setup-failed","teardown-failed","execution-failed")
+            for row in child["nodes"].values())
     return child.get("pytest_returncode")==0
 
 class Capture:
@@ -106,7 +110,10 @@ class Capture:
             # Even when upstream skip policy disappears, never run the op body.
             pytest.skip(GUARD)
     def pytest_runtest_logreport(self,report):
-        if report.when in ("setup","call"):
+        if report.when=="teardown" and report.failed:
+            self.reported[report.nodeid]={"runtime_outcome":"teardown-failed",
+                "details":str(report.longrepr),"phase":"teardown"}
+        elif report.when in ("setup","call"):
             if report.skipped:
                 reason=str(report.longrepr)
                 wasxfail=getattr(report,"wasxfail",None)
@@ -122,7 +129,7 @@ class Capture:
                     report.when=="setup" else "unexpected-call-failure",
                     "details":str(report.longrepr),"phase":report.when}
             elif report.when=="call" and report.passed:
-                self.reported[report.nodeid]={"runtime_outcome":"executed-passed",
+                self.reported[report.nodeid]={"runtime_outcome":"unexpected-xpass" if getattr(report,"wasxfail",None) else "executed-passed",
                                               "phase":"call"}
     def finished(self):
         for node,row in self.rows.items():
@@ -239,6 +246,13 @@ def main(argv=None):
             row["elapsed_batch_seconds"]=round(time.monotonic()-t,3)
             report["cases"][node]=row
         persist(a.out/"matrix.json",report)
+        if complete and a.mode=="replay" and any(
+                report["cases"][node].get("runtime_outcome") in
+                ("setup-failed","teardown-failed","unexpected-call-failure","unexpected-xpass")
+                for node in batch):
+            report["status"]="halted-for-host-inspection"
+            persist(a.out/"matrix.json",report)
+            break
         if not complete:
             report["status"]=("halted-for-host-inspection" if rc is None or rc<0 or rc>=128
                               else "incomplete-collection")
