@@ -70,4 +70,36 @@ Strict original FP32 matched training remains FAIL. No other gates promoted.
 
 ## Exact reference extension
 
-The revised assay independently contracts the stored finite FP32 x/H/q operands using Python Fraction, per directed triad channel. Emits exact rational error at maximum-error coordinate for each original/fused path, in addition to FP64 reference. Direct scalar/foreach comparison now includes parameters and both moments at each step. This is an exact reference for the synthetic directed gradient, not an enclosure of the native full head or optimizer. New CPU unit tests source-written; rerun only as needed for new receipt fields. Original failing operands remain absent.
+The revised assay independently contracts the stored finite FP32 x/H/q operands using Python Fraction, per directed triad channel. Emits exact rational error at maximum-error coordinate for each original/fused path, in addition to FP64 reference. Direct scalar/foreach comparison now includes parameters and both moments at each step. This is an exact reference for the synthetic directed gradient, not an enclosure of the native full head or optimizer. New CPU unit tests and exact-reference host runs now reported complete; see receipt below. Original failing operands remain absent.
+
+
+## Exact-reference physical receipt — 20 November 2026
+
+Maintainer-reported CPU and RX580 execution at c2544a7b; 3/3 CPU
+unit tests passed in 5.514 s. Raw cpu_exact.json and gfx803_exact.json
+remain host-local and have not been independently inspected.
+
+| Scale | Device | dtype | Original max error / index | Fused max error / index |
+|---|---|---|---|---|
+| 1 | CPU | FP32 | 3.0365e-6 / 369 | 1.9438e-6 / 95 |
+| 1 | gfx803 | FP32 | 3.0365e-6 / 369 | 1.8101e-6 / 228 |
+| 1 | CPU | FP64 | 4.8347e-15 / 296 | 3.1051e-15 / 307 |
+| 1 | gfx803 | FP64 | 4.0961e-15 / 170 | 3.1051e-15 / 307 |
+| 1e-4 | gfx803 | FP32 | 1.4654e-10 / 294 | 2.0344e-10 / 182 |
+| 1e-8 | gfx803 | FP32 | 2.1817e-14 / 89 | 1.5530e-14 / 349 |
+
+GPU original/fused maxima: 3.8147e-6, 2.3283e-10, 2.8422e-14
+respectively for FP32; FP64 scale 1: 5.3291e-15.
+Reported direct scalar/foreach parameter parity and parameter repeat
+drift zero across all steps/scales; CPU/GPU parameter max 4.66e-10.
+Do not infer moment bit equality without inspecting their fields.
+
+Exact-reference diagnostic and direct cross-mode measurement accepted
+at reported execution scope. Fused error is lower at scales 1 and 1e-8
+but higher at 1e-4; no universal numerical superiority or inferred
+native reduction tree. Observed exact error maxima are not a priori
+rounding bounds. Each paired difference obeys the triangle inequality
+with its two reference errors (at reported precision). Original
+full-head replay and native arithmetic certification remain OPEN.
+General optimizer investigation deprioritized; strict original FP32
+training remains FAIL. No release, operator inventory or KFD promotion.
